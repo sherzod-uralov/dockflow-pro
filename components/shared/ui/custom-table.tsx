@@ -410,6 +410,7 @@ export function DataTable<TData, TValue = unknown>({
               Keyingi
             </Button>
             <Button
+              className="text-text"
               variant="outline"
               size="sm"
               onClick={() => {

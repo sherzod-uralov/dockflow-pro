@@ -29,3 +29,20 @@ export const useGetAllPermissions = (params?: PermissionQueryParams) => {
     keepPreviousData: true,
   });
 };
+
+        
+          
+          ,
+      
+        
+          
+          ,
+      
+        
+          
+          ,
+      
+        
+          
+          ,
+      
