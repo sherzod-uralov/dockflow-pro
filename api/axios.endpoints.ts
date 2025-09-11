@@ -1,4 +1,4 @@
-// endpoints.ts
+// endpoints.tss
 export const endpoints = {
   auth: {
     login: "/auth/login",
