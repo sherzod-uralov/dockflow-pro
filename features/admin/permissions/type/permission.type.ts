@@ -1,6 +1,7 @@
 import { DataPagination } from "@/types/global.types";
 
 export interface Permission {
+  id?: string;
   key: string;
   name: string;
   module: string;
@@ -12,7 +13,7 @@ export interface getAllPermissions extends DataPagination {
 }
 
 export interface PermissionQueryParams {
-  name?: string;
+  search?: string;
   pageSize?: number;
   pageNumber?: number;
 }

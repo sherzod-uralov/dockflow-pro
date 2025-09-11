@@ -22,7 +22,6 @@ interface HeaderProps {
 export function Header({ onMenuClick }: HeaderProps) {
   const profileData = useGetProfileQuery();
 
-  console.log(profileData);
   return (
     <header className="bg-card border-b border-border px-6 py-4">
       <div className="flex items-center justify-between">
@@ -39,7 +38,7 @@ export function Header({ onMenuClick }: HeaderProps) {
           <div className="relative w-96 max-w-sm">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
             <Input
-              placeholder="Search files..."
+              placeholder="tizimli qidiruv"
               className="pl-10 bg-input border-border rounded-xl"
             />
           </div>
@@ -86,16 +85,16 @@ export function Header({ onMenuClick }: HeaderProps) {
               <DropdownMenuSeparator />
               <DropdownMenuItem className="rounded-lg">
                 <User className="mr-2 h-4 w-4" />
-                <span>Profile</span>
+                <span>Profil</span>
               </DropdownMenuItem>
               <DropdownMenuItem className="rounded-lg">
                 <Settings className="mr-2 h-4 w-4" />
-                <span>Settings</span>
+                <span>Tizimni Sozlash</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem className="rounded-lg">
                 <LogOut className="mr-2 h-4 w-4" />
-                <span>Log out</span>
+                <span>Tizimdan Chiqish</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

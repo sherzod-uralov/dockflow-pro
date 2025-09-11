@@ -15,13 +15,12 @@ import {
   LoginFormValue,
 } from "@/features/login/scheme/login-scheme";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useLoginMutation } from "@/features/login/hook/login.hook";
 import { Input } from "@/components/ui/input";
-import Cookie from "js-cookie";
 import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
+import { toast } from "sonner";
 
 export const LoginForm = () => {
-  const loginMutation = useLoginMutation();
   const router = useRouter();
   const form = useForm<LoginFormValue>({
     resolver: zodResolver(loginScheme),
@@ -31,14 +30,19 @@ export const LoginForm = () => {
     },
   });
 
-  const onSubmit: SubmitHandler<LoginFormValue> = (values) => {
-    loginMutation.mutate(values, {
-      onSuccess(data) {
-        console.log(data);
-        Cookie.set("access_token", data.accessToken);
-        router.push("/dashboard");
-      },
+  const onSubmit: SubmitHandler<LoginFormValue> = async (values) => {
+    const res = await signIn("credentials", {
+      redirect: false,
+      username: values.username,
+      password: values.password,
     });
+
+    if (res?.ok) {
+      toast.success("Xush kelibsiz ✅");
+      router.push("/dashboard");
+    } else {
+      toast.error("Login yoki parol noto‘g‘ri ❌");
+    }
   };
 
   return (

@@ -14,13 +14,36 @@ import { Textarea } from "@/components/ui/textarea";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { ModalState } from "@/types/modal";
-import { useCreatePermission } from "../hook/permission.hook";
+import {
+  useCreatePermission,
+  useUpdatePermission,
+} from "../hook/permission.hook";
+import { useEffect } from "react";
+import { Permission } from "../type/permission.type";
 
-type PermissionType = z.infer<typeof permissionScheme>;
+type PermissionFormType = z.infer<typeof permissionScheme>;
 
-const PermissionCreateModal = ({ modal }: { modal: ModalState }) => {
+interface PermissionFormModalProps {
+  modal: ModalState;
+  mode: "create" | "update";
+  permission?: Permission;
+  onSuccess?: () => void;
+}
+
+const PermissionFormModal = ({
+  modal,
+  mode,
+  permission,
+  onSuccess,
+}: PermissionFormModalProps) => {
   const createPermissionMutation = useCreatePermission();
-  const form = useForm<PermissionType>({
+  const updatePermissionMutation = useUpdatePermission();
+
+  const isUpdate = mode === "update";
+  const isLoading =
+    createPermissionMutation.isLoading || updatePermissionMutation.isLoading;
+
+  const form = useForm<PermissionFormType>({
     resolver: zodResolver(permissionScheme),
     mode: "onChange",
     defaultValues: {
@@ -31,20 +54,55 @@ const PermissionCreateModal = ({ modal }: { modal: ModalState }) => {
     },
   });
 
-  const handleCreatePermission = (values: PermissionType) => {
-    createPermissionMutation.mutate(values, {
-      onSuccess: () => {
-        modal.closeModal();
-      },
-    });
+  useEffect(() => {
+    if (isUpdate && permission) {
+      form.reset({
+        name: permission.name || "",
+        description: permission.description || "",
+        key: permission.key || "",
+        module: permission.module || "",
+      });
+    } else if (!isUpdate) {
+      form.reset({
+        name: "",
+        description: "",
+        key: "",
+        module: "",
+      });
+    }
+  }, [permission, isUpdate, form, modal.isOpen]);
+
+  const handleSubmit = (values: PermissionFormType) => {
+    if (isUpdate && permission) {
+      updatePermissionMutation.mutate(
+        { id: permission.id || "", data: values },
+        {
+          onSuccess: () => {
+            modal.closeModal();
+            form.reset();
+            onSuccess?.();
+          },
+        },
+      );
+    } else {
+      createPermissionMutation.mutate(values, {
+        onSuccess: () => {
+          modal.closeModal();
+          form.reset();
+          onSuccess?.();
+        },
+      });
+    }
+  };
+
+  const handleCancel = () => {
+    modal.closeModal();
+    form.reset();
   };
 
   return (
     <Form {...form}>
-      <form
-        className="space-y-5"
-        onSubmit={form.handleSubmit(handleCreatePermission)}
-      >
+      <form className="space-y-5" onSubmit={form.handleSubmit(handleSubmit)}>
         <FormField
           control={form.control}
           name="name"
@@ -52,12 +110,17 @@ const PermissionCreateModal = ({ modal }: { modal: ModalState }) => {
             <FormItem>
               <FormLabel>Ruxsat nomi</FormLabel>
               <FormControl>
-                <Input placeholder="Ruxsat nomi" {...field} />
+                <Input
+                  placeholder="Ruxsat nomi"
+                  disabled={isLoading}
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="description"
@@ -65,21 +128,31 @@ const PermissionCreateModal = ({ modal }: { modal: ModalState }) => {
             <FormItem>
               <FormLabel>Ruxsat tavsifi</FormLabel>
               <FormControl>
-                <Textarea placeholder="Ruxsat tavsifi" {...field} />
+                <Textarea
+                  placeholder="Ruxsat tavsifi"
+                  disabled={isLoading}
+                  rows={3}
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        <div className="flex gap-2 justify-between items-center">
+
+        <div className="flex gap-4">
           <FormField
             control={form.control}
             name="key"
             render={({ field }) => (
-              <FormItem className="w-full">
+              <FormItem className="flex-1">
                 <FormLabel>Ruxsat kalit so'zi</FormLabel>
                 <FormControl>
-                  <Input placeholder="Ruxsat kalit so'zi" {...field} />
+                  <Input
+                    placeholder="permission.read"
+                    disabled={isLoading}
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -89,20 +162,39 @@ const PermissionCreateModal = ({ modal }: { modal: ModalState }) => {
             control={form.control}
             name="module"
             render={({ field }) => (
-              <FormItem className="w-full">
+              <FormItem className="flex-1">
                 <FormLabel>Ruxsat modul nomi</FormLabel>
                 <FormControl>
-                  <Input placeholder="Ruxsat modul nomi" {...field} />
+                  <Input placeholder="users" disabled={isLoading} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
         </div>
-        <Button type="submit">Qo'shish</Button>
+
+        <div className="flex justify-end gap-2 pt-4">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleCancel}
+            disabled={isLoading}
+          >
+            Bekor qilish
+          </Button>
+          <Button type="submit" disabled={isLoading}>
+            {isLoading
+              ? isUpdate
+                ? "Yangilanmoqda..."
+                : "Qo'shilmoqda..."
+              : isUpdate
+                ? "Yangilash"
+                : "Qo'shish"}
+          </Button>
+        </div>
       </form>
     </Form>
   );
 };
 
-export default PermissionCreateModal;
+export default PermissionFormModal;

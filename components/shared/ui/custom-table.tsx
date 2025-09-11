@@ -94,8 +94,6 @@ export function DataTable<TData, TValue = unknown>({
   const [globalFilter, setGlobalFilter] = React.useState("");
 
   const tableColumns = columns as ColumnDef<TData, TValue>[];
-
-  // For server-side pagination, we need to handle it differently
   const isServerSide = totalCount !== undefined;
 
   const table = useReactTable({
@@ -104,7 +102,6 @@ export function DataTable<TData, TValue = unknown>({
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
-    // Only use built-in pagination for client-side
     getPaginationRowModel:
       !isServerSide && enablePagination ? getPaginationRowModel() : undefined,
     getSortedRowModel: enableSorting ? getSortedRowModel() : undefined,
@@ -113,7 +110,7 @@ export function DataTable<TData, TValue = unknown>({
     onRowSelectionChange: setRowSelection,
     onGlobalFilterChange: setGlobalFilter,
     globalFilterFn: "includesString",
-    manualPagination: isServerSide, // Enable manual pagination for server-side
+    manualPagination: isServerSide,
     state: {
       sorting,
       columnFilters,
@@ -122,7 +119,7 @@ export function DataTable<TData, TValue = unknown>({
       globalFilter,
       pagination: enablePagination
         ? {
-            pageIndex: isServerSide ? currentPage - 1 : 0, // Convert to 0-based index for server-side
+            pageIndex: isServerSide ? currentPage - 1 : 0,
             pageSize: pageSize,
           }
         : undefined,
@@ -148,7 +145,6 @@ export function DataTable<TData, TValue = unknown>({
 
   const selectedRowsCount = table.getFilteredSelectedRowModel().rows.length;
 
-  // Calculate pagination info
   const startIndex = isServerSide
     ? (currentPage - 1) * pageSize + 1
     : table.getState().pagination!.pageIndex *
@@ -186,7 +182,7 @@ export function DataTable<TData, TValue = unknown>({
 
   return (
     <div className={cn("w-full space-y-4", className)}>
-      {/* Table */}
+      {" "}
       <div className="rounded-xl border border-border overflow-hidden">
         <div className="relative overflow-auto">
           <Table>
@@ -313,7 +309,6 @@ export function DataTable<TData, TValue = unknown>({
           </Table>
         </div>
       </div>
-
       {/* Pagination */}
       {enablePagination && (
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
@@ -359,6 +354,7 @@ export function DataTable<TData, TValue = unknown>({
 
           <div className="flex items-center gap-2">
             <Button
+              className="hover:text-text-on-dark"
               variant="outline"
               size="sm"
               onClick={() => {
@@ -373,6 +369,7 @@ export function DataTable<TData, TValue = unknown>({
               Birinchi
             </Button>
             <Button
+              className="hover:text-text-on-dark"
               variant="outline"
               size="sm"
               onClick={() => {
@@ -396,6 +393,7 @@ export function DataTable<TData, TValue = unknown>({
               <span className="text-sm font-medium">{totalPages}</span>
             </div>
             <Button
+              className="hover:text-text-on-dark"
               variant="outline"
               size="sm"
               onClick={() => {
@@ -410,7 +408,7 @@ export function DataTable<TData, TValue = unknown>({
               Keyingi
             </Button>
             <Button
-              className="text-text"
+              className="hover:text-text-on-dark"
               variant="outline"
               size="sm"
               onClick={() => {

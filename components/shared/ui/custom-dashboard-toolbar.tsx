@@ -50,7 +50,7 @@ export function UserToolbar({
         {onCreate && (
           <Button
             onClick={onCreate}
-            className="bg-primary hover:bg-primary-hover text-primary-foreground"
+            className="bg-primary hover:bg-primary-hover text-text-on-dark"
           >
             <PlusIcon className="mr-2 h-4 w-4" />
             {createLabel}

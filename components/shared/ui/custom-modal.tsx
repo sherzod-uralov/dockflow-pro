@@ -80,10 +80,10 @@ export function CustomModal({
           <Button
             variant="ghost"
             size="icon"
-            className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground h-6 w-6"
+            className="absolute group right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground h-6 w-6"
             onClick={onClose}
           >
-            <X className="h-4 w-4" />
+            <X className="h-4 w-4 group-hover:text-text-on-dark" />
             <span className="sr-only">Close</span>
           </Button>
         )}
@@ -142,7 +142,6 @@ export function useModal() {
   };
 }
 
-// Pre-built modal variants
 export function ConfirmationModal({
   isOpen,
   onClose,
