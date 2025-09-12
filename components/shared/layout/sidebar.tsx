@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
+import { signOut } from "next-auth/react";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -174,7 +175,10 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         </nav>
 
         {/* Logout */}
-        <div className="p-4 border-t border-sidebar-border">
+        <div
+          onClick={() => signOut()}
+          className="p-4 border-t border-sidebar-border"
+        >
           <Button
             variant="ghost"
             className="w-full justify-start text-left rounded-xl h-11 px-4 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"

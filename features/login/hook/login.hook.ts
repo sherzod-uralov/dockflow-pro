@@ -6,12 +6,12 @@ import { toast } from "sonner";
 export const useLoginMutation = () => {
   return useMutation({
     mutationFn: (payload: LoginBody) => authService.login(payload),
-    onSuccess: (data) => {
+    onSuccess: () => {
       toast.success("muvaffaqiyatli kirdingiz", {
         description: "siz tizimga kirdingiz",
       });
     },
-    onError: (error: any) => {
+    onError: () => {
       toast.error("parolyoki login noto'g'ri");
     },
   });
