@@ -18,6 +18,7 @@ import { RoleData } from "../type/role.type";
 import { usePagination } from "@/hooks/use-pagination";
 import { handleCopyToClipboard } from "@/utils/copy-text";
 import { Badge } from "@/components/ui/badge";
+import { ConfirmationModal } from "@/components/ui/custom-modal";
 
 const RolesPage = () => {
   const createModal = useModal();
@@ -147,32 +148,17 @@ const RolesPage = () => {
       >
         <RoleForm mode="create" modal={createModal} />
       </CustomModal>
-      <CustomModal
+      <ConfirmationModal
         closeOnOverlayClick={false}
         title="Rol o'chirish"
-        description="Rol o'chirilgandan so'ng, butunlay o'chiriladi."
+        description="Ro'lni ochirgandan so'ng qaytarib bo'lmaydi rozimisiz?"
         isOpen={deleteModal.isOpen}
         onClose={deleteModal.closeModal}
-      >
-        <div className="flex items-center gap-3 justify-end">
-          <Button
-            variant="destructive"
-            onClick={() => {
-              handleDelete(selectedRole?.id || "");
-              deleteModal.closeModal();
-            }}
-          >
-            O'chirish
-          </Button>
-          <Button
-            variant="secondary"
-            className="text-text-on-dark"
-            onClick={deleteModal.closeModal}
-          >
-            Bekor qilish
-          </Button>
-        </div>
-      </CustomModal>
+        onConfirm={() => {
+          handleDelete(selectedRole?.id || "");
+          deleteModal.closeModal();
+        }}
+      />
       <CustomModal
         closeOnOverlayClick={false}
         title="Rol tahrirlash"

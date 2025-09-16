@@ -9,7 +9,6 @@ import "./globals.css";
 import { Geist } from "next/font/google";
 import ReactQueryProvider from "@/context/react-query.provider";
 import { ClientToaster } from "@/components/shared/client-toast";
-import SessionAuthProvider from "@/context/next-auth.provider";
 
 const satoshi = Geist({
   subsets: ["latin"],
@@ -40,7 +39,7 @@ export default function RootLayout({
             disableTransitionOnChange
           >
             <Suspense fallback={null}>
-              <SessionAuthProvider>{children}</SessionAuthProvider>
+              {children}
               <ClientToaster />
             </Suspense>
           </ThemeProvider>

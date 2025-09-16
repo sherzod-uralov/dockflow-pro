@@ -1,7 +1,7 @@
-import NextAuth, { AuthOptions } from "next-auth";
+import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
-export const authOptions: AuthOptions = {
+export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -13,18 +13,19 @@ export const authOptions: AuthOptions = {
         try {
           const res = await fetch(`${process.env.BACKEND_API}/auth/login`, {
             method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Accept: "application/json",
-            },
-            credentials: "include", // Bu muhim
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               username: credentials?.username,
               password: credentials?.password,
             }),
           });
+
+          console.log(res);
+
           if (!res.ok) return null;
+
           const data = await res.json();
+
           return {
             id: data.user.id,
             username: data.user.username,
@@ -40,9 +41,12 @@ export const authOptions: AuthOptions = {
       },
     }),
   ],
-  session: { strategy: "jwt" },
+  session: {
+    strategy: "jwt", // 🔑 faqat JWT
+  },
   callbacks: {
     async jwt({ token, user }) {
+      // Login paytida user bor → token ichiga yozib qo'yamiz
       if (user) {
         token.user = {
           id: user.id,
@@ -56,50 +60,14 @@ export const authOptions: AuthOptions = {
       return token;
     },
     async session({ session, token }) {
-      if (token.user) {
-        session.user = token.user as any;
-        session.accessToken = token.accessToken as string;
-        session.refreshToken = token.refreshToken as string;
-      }
+      session.user = token.user as any;
+      session.accessToken = token.accessToken as string;
+      session.refreshToken = token.refreshToken as string;
       return session;
     },
   },
   pages: {
     signIn: "/login",
-  },
-  // HTTPS ngrok uchun cookie sozlamalari
-  cookies: {
-    sessionToken: {
-      name: "next-auth.session-token",
-      options: {
-        httpOnly: true,
-        sameSite: "none",
-        path: "/",
-        secure: process.env.NODE_ENV === "production", // ngrokda true bo'lishi kerak
-        maxAge: 30 * 24 * 60 * 60,
-        domain: process.env.NODE_ENV === "production" ? ".ngrok.io" : undefined, // ngrok domainida ishlashi uchun
-      },
-    },
-    callbackUrl: {
-      name: "next-auth.callback-url",
-      options: {
-        httpOnly: true,
-        sameSite: "none",
-        path: "/",
-        secure: process.env.NODE_ENV === "production",
-        domain: process.env.NODE_ENV === "production" ? ".ngrok.io" : undefined,
-      },
-    },
-    csrfToken: {
-      name: "next-auth.csrf-token",
-      options: {
-        httpOnly: true,
-        sameSite: "none",
-        path: "/",
-        secure: process.env.NODE_ENV === "production",
-        domain: process.env.NODE_ENV === "production" ? ".ngrok.io" : undefined,
-      },
-    },
   },
 };
 

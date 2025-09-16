@@ -29,6 +29,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
+import { TransitionGroup, CSSTransition } from "react-transition-group";
 
 interface ColumnMeta {
   width?: number | string;
@@ -182,7 +183,6 @@ export function DataTable<TData, TValue = unknown>({
 
   return (
     <div className={cn("w-full space-y-4", className)}>
-      {" "}
       <div className="rounded-xl border border-border overflow-hidden">
         <div className="relative overflow-auto">
           <Table>
@@ -255,60 +255,84 @@ export function DataTable<TData, TValue = unknown>({
                     </div>
                   </TableCell>
                 </TableRow>
-              ) : table.getRowModel().rows?.length ? (
-                table.getRowModel().rows.map((row: Row<TData>) => (
-                  <TableRow
-                    key={row.id}
-                    data-state={row.getIsSelected() && "selected"}
-                    className="hover:bg-muted/30 transition-colors"
-                  >
-                    {row.getVisibleCells().map((cell) => {
-                      const columnMeta = cell.column.columnDef.meta as
-                        | ColumnMeta
-                        | undefined;
-
-                      return (
-                        <TableCell
-                          key={cell.id}
-                          className={cn(
-                            "px-4 py-3 text-sm text-foreground",
-                            columnMeta?.sticky === "left" &&
-                              "sticky left-0 bg-background z-10",
-                            columnMeta?.sticky === "right" &&
-                              "sticky right-0 bg-background z-10",
-                          )}
-                          style={{
-                            width: columnMeta?.width,
-                            minWidth: columnMeta?.minWidth,
-                            maxWidth: columnMeta?.maxWidth,
-                          }}
-                        >
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext(),
-                          )}
-                        </TableCell>
-                      );
-                    })}
-                  </TableRow>
-                ))
               ) : (
-                <TableRow>
-                  <TableCell
-                    colSpan={columns.length}
-                    className="h-24 text-center text-muted-foreground"
-                  >
-                    <div className="flex flex-col items-center justify-center space-y-2">
-                      <EyeOff className="h-8 w-8 text-muted-foreground/50" />
-                      <p>{emptyMessage}</p>
-                    </div>
-                  </TableCell>
-                </TableRow>
+                <TransitionGroup component={null}>
+                  {table.getRowModel().rows?.length
+                    ? table.getRowModel().rows.map((row: Row<TData>) => {
+                        const nodeRef = React.createRef<HTMLTableRowElement>(); // 🔑 har row uchun alohida ref
+                        return (
+                          <CSSTransition
+                            key={row.id}
+                            timeout={300}
+                            classNames="fade-row"
+                            nodeRef={nodeRef}
+                          >
+                            <TableRow
+                              ref={nodeRef}
+                              data-state={row.getIsSelected() && "selected"}
+                              className="hover:bg-muted/30 transition-colors"
+                            >
+                              {row.getVisibleCells().map((cell) => {
+                                const columnMeta = cell.column.columnDef
+                                  .meta as ColumnMeta | undefined;
+
+                                return (
+                                  <TableCell
+                                    key={cell.id}
+                                    className={cn(
+                                      "px-4 py-3 text-sm text-foreground",
+                                      columnMeta?.sticky === "left" &&
+                                        "sticky left-0 bg-background z-10",
+                                      columnMeta?.sticky === "right" &&
+                                        "sticky right-0 bg-background z-10",
+                                    )}
+                                    style={{
+                                      width: columnMeta?.width,
+                                      minWidth: columnMeta?.minWidth,
+                                      maxWidth: columnMeta?.maxWidth,
+                                    }}
+                                  >
+                                    {flexRender(
+                                      cell.column.columnDef.cell,
+                                      cell.getContext(),
+                                    )}
+                                  </TableCell>
+                                );
+                              })}
+                            </TableRow>
+                          </CSSTransition>
+                        );
+                      })
+                    : (() => {
+                        const emptyRef = React.createRef<HTMLTableRowElement>(); // 🔑 bo‘sh row uchun ham alohida ref
+                        return (
+                          <CSSTransition
+                            key="empty"
+                            timeout={300}
+                            classNames="fade-row"
+                            nodeRef={emptyRef}
+                          >
+                            <TableRow ref={emptyRef}>
+                              <TableCell
+                                colSpan={columns.length}
+                                className="h-24 text-center text-muted-foreground"
+                              >
+                                <div className="flex flex-col items-center justify-center space-y-2">
+                                  <EyeOff className="h-8 w-8 text-muted-foreground/50" />
+                                  <p>{emptyMessage}</p>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          </CSSTransition>
+                        );
+                      })()}
+                </TransitionGroup>
               )}
             </TableBody>
           </Table>
         </div>
       </div>
+
       {/* Pagination */}
       {enablePagination && (
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
@@ -429,6 +453,7 @@ export function DataTable<TData, TValue = unknown>({
   );
 }
 
+// Helper to create sortable headers
 export function createSortableHeader(title: string) {
   return ({ column }: { column: Column<any> }) => (
     <Button
@@ -442,6 +467,7 @@ export function createSortableHeader(title: string) {
   );
 }
 
+// Helper to create select column
 export function createSelectColumn<TData>(): DataTableColumn<TData> {
   return {
     id: "select",

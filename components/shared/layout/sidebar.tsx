@@ -52,7 +52,7 @@ const menuItems: MenuItem[] = [
 
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const router = useRouter();
-  const pathname = usePathname();
+  const pathname: any = usePathname();
 
   const [openMenus, setOpenMenus] = useState<string[]>([]);
 

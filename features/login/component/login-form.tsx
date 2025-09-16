@@ -17,10 +17,11 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
-import { toast } from "sonner";
+import { useLoginMutation } from "../hook/login.hook";
+import Cookie from "js-cookie";
 
 export const LoginForm = () => {
+  const authMutation = useLoginMutation();
   const router = useRouter();
   const form = useForm<LoginFormValue>({
     resolver: zodResolver(loginScheme),
@@ -31,18 +32,13 @@ export const LoginForm = () => {
   });
 
   const onSubmit: SubmitHandler<LoginFormValue> = async (values) => {
-    const res = await signIn("credentials", {
-      redirect: false,
-      username: values.username,
-      password: values.password,
+    authMutation.mutate(values, {
+      onSuccess: (data) => {
+        router.push("/dashboard");
+        Cookie.set("accessToken", data.accessToken);
+        Cookie.set("refreshToken", data.refreshToken);
+      },
     });
-
-    if (res?.ok) {
-      toast.success("Xush kelibsiz ✅");
-      router.push("/dashboard");
-    } else {
-      toast.error("Login yoki parol noto‘g‘ri ❌");
-    }
   };
 
   return (

@@ -1,18 +1,15 @@
 "use client";
 
 import { CustomModal, useModal } from "@/components/shared/ui/custom-modal";
-import PermissionCreateModal from "../component/permission.create.modal";
 import { UserToolbar } from "@/components/shared/ui/custom-dashboard-toolbar";
 import { ModalState } from "@/types/modal";
 import {
   useDeletePermission,
   useGetAllPermissions,
-  useGetPermissionById,
 } from "../hook/permission.hook";
 import { DataTable } from "@/components/shared/ui/custom-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
 import { Copy } from "lucide-react";
 import { useState } from "react";
 import {
@@ -26,20 +23,21 @@ import {
 import { Permission } from "../type/permission.type";
 import PermissionFormModal from "../component/permission.create.modal";
 import PermissionView from "../component/permission.view";
+import { useDebounce } from "@/hooks/use-debaunce";
+import { handleCopyToClipboard } from "@/utils/copy-text";
+import { usePagination } from "@/hooks/use-pagination";
 
 const PermissionPage = () => {
   const createModal: ModalState = useModal();
   const editModal: ModalState = useModal();
   const viewModal: ModalState = useModal();
-
-  const [searchQuery, setSearchQuery] = useState("");
-  const [pageNumber, setPageNumber] = useState(1);
-  const [pageSize, setPageSize] = useState(7);
+  const { handlePageChange, handlePageSizeChange, pageNumber, pageSize } =
+    usePagination();
   const [selectedPermission, setSelectedPermission] =
     useState<Permission | null>(null);
-
+  const [searchQuery, debouncedSearch, setSearchQuery] = useDebounce("", 500);
   const { data, isLoading } = useGetAllPermissions({
-    search: searchQuery || undefined,
+    search: debouncedSearch || undefined,
     pageSize: pageSize,
     pageNumber: pageNumber,
   });
@@ -61,31 +59,8 @@ const PermissionPage = () => {
     }
   };
 
-  const handleCopyKey = (key: string) => {
-    navigator.clipboard.writeText(key);
-    toast.success("Kalit nusxalandi!");
-  };
-
-  const handleCopyId = async (id: string) => {
-    try {
-      toast.success("ID nusxalandi!");
-    } catch (err) {
-      toast.error("ID nusxalanmadi 😔");
-    }
-  };
-
   const handleSearch = (query: string) => {
     setSearchQuery(query);
-    setPageNumber(1);
-  };
-
-  const handlePageChange = (newPage: number) => {
-    setPageNumber(newPage);
-  };
-
-  const handlePageSizeChange = (newSize: number) => {
-    setPageSize(newSize);
-    setPageNumber(1);
   };
 
   const handleCreateSuccess = () => {};
@@ -122,21 +97,12 @@ const PermissionPage = () => {
             accessorKey: "id",
             cell: ({ row }) => {
               const id = row.original.id;
-              const handleCopy = async () => {
-                try {
-                  await navigator.clipboard.writeText(id);
-                  toast.success("ID nusxalandi!");
-                } catch (err) {
-                  console.error("Clipboard xatolik:", err);
-                  toast.error("ID nusxalanmadi 😔");
-                }
-              };
               return (
                 <div className="flex w-full items-center gap-2">
                   <Badge
                     variant="outline"
                     className="font-mono cursor-pointer hover:bg-muted"
-                    onClick={() => handleCopyId(id)}
+                    onClick={() => handleCopyToClipboard(id, "ID")}
                   >
                     {id.slice(0, 8)}...
                   </Badge>
@@ -144,7 +110,7 @@ const PermissionPage = () => {
                     variant="ghost"
                     size="icon"
                     className="h-6 w-6 group"
-                    onClick={() => handleCopyId(id)}
+                    onClick={() => handleCopyToClipboard(id, "ID")}
                   >
                     <Copy className="h-3 w-3 group-hover:text-text-on-dark" />
                   </Button>
@@ -175,7 +141,7 @@ const PermissionPage = () => {
               <Badge
                 variant="outline"
                 className="bg-blue-100 text-blue-700 cursor-pointer hover:bg-blue-200"
-                onClick={() => handleCopyKey(row.original.key)}
+                onClick={() => handleCopyToClipboard(row.original.key, "KEY")}
                 title="Nusxalash uchun bosing"
               >
                 {row.original.key}
@@ -203,7 +169,9 @@ const PermissionPage = () => {
               const actions: ActionItem[] = [
                 createViewAction(() => handleView(permission)),
                 createEditAction(() => handleEdit(permission)),
-                createCopyAction(() => handleCopyKey(permission.key)),
+                createCopyAction(() =>
+                  handleCopyToClipboard(permission.key, "KEY"),
+                ),
                 createDeleteAction(() => handleDelete(permission.id)),
               ];
 

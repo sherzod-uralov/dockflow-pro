@@ -140,7 +140,7 @@ const PermissionFormModal = ({
           )}
         />
 
-        <div className="flex gap-4">
+        <div className="flex items-start gap-4">
           <FormField
             control={form.control}
             name="key"
@@ -175,6 +175,7 @@ const PermissionFormModal = ({
 
         <div className="flex justify-end gap-2 pt-4">
           <Button
+            className="hover:text-text-on-dark"
             type="button"
             variant="outline"
             onClick={handleCancel}

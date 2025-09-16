@@ -30,7 +30,7 @@ export const useDeleteRole = () => {
 
   return useMutation({
     mutationFn: async (id: string) => rolesService.deleteRole(id),
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["roles"] });
       toast.success("Rol muvaffaqiyatli o'chirildi");
     },
