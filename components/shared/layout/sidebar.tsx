@@ -15,6 +15,7 @@ import {
   X,
   ChevronDown,
   Home,
+  NotepadText,
 } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -39,6 +40,7 @@ const menuItems: MenuItem[] = [
   { icon: Trash2, label: "Chiqindi qutisi", href: "/dashboard/trash" },
   { icon: BarChart3, label: "Tahlillar", href: "/dashboard/analytics" },
   { icon: Users, label: "Ulashilgan", href: "/dashboard/shared" },
+  { icon: NotepadText, label: "Jurnallar", href: "/dashboard/journal" },
   {
     icon: Settings,
     label: "Boshqaruv",

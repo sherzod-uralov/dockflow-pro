@@ -29,6 +29,13 @@ export const endpoints = {
     update: (id: string | number) => `/permission/${id}`,
     delete: (id: string | number) => `/permission/${id}`,
   },
+  journal: {
+    list: "/journal",
+    create: "/journal",
+    detail: (id: string | number) => `/journal/${id}`,
+    update: (id: string | number) => `/journal/${id}`,
+    delete: (id: string | number) => `/journal/${id}`,
+  },
 } as const;
 
 export type Endpoints = typeof endpoints;
