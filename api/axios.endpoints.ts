@@ -1,8 +1,30 @@
 // endpoints.tss
 export const endpoints = {
+  document: {
+    list: "/document",
+    create: "/document",
+    detail: (id: string | number) => `/document/${id}`,
+    update: (id: string | number) => `/document/${id}`,
+    delete: (id: string | number) => `/document/${id}`,
+  },
+  deportament: {
+    list: "/department",
+    create: "/department",
+    detail: (id: string | number) => `/department/${id}`,
+    update: (id: string | number) => `/department/${id}`,
+    delete: (id: string | number) => `/department/${id}`,
+  },
+  documentType: {
+    list: "/document-type",
+    create: "/document-type",
+    detail: (id: string | number) => `/document-type/${id}`,
+    update: (id: string | number) => `/document-type/${id}`,
+    delete: (id: string | number) => `/document-type/${id}`,
+  },
   auth: {
     login: "/auth/login",
     refreshToken: "/auth/refresh-token",
+    logout: "/auth/logout",
     profile: {
       list: "/auth/profile",
       update: "/auth/profile",

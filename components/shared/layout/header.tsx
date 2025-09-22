@@ -13,15 +13,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Menu, Search, Bell, Settings, User, LogOut } from "lucide-react";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
-import { useGetProfileQuery } from "@/features/login/hook/login.hook";
 
 interface HeaderProps {
   onMenuClick: () => void;
 }
 
 export function Header({ onMenuClick }: HeaderProps) {
-  const profileData = useGetProfileQuery();
-
   return (
     <header className="bg-card border-b border-border px-6 py-4">
       <div className="flex items-center justify-between">
