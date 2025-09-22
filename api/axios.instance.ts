@@ -3,9 +3,6 @@ import Cookies from "js-cookie";
 
 export const axiosInstance = axios.create({
   baseURL: process.env.NEXT_PUBLIC_SERVER_URL,
-  headers: {
-    "ngrok-skip-browser-warning": "69420",
-  },
 });
 
 axiosInstance.interceptors.request.use((config) => {
@@ -37,5 +34,5 @@ if (typeof window !== "undefined") {
     },
   );
 }
-
+//testss
 export default axiosInstance;
