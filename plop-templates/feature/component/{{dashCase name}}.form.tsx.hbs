@@ -1,0 +1,139 @@
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { {{camelCase name}}Scheme } from "../scheme/{{dashCase name}}.scheme";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { z } from "zod";
+import { Button } from "@/components/ui/button";
+import { ModalState } from "@/types/modal";
+import {
+  useCreate{{properCase name}},
+  useUpdate{{properCase name}},
+} from "../hook/{{dashCase name}}.hook";
+import { useEffect } from "react";
+import { {{properCase name}} } from "../type/{{dashCase name}}.type";
+
+type {{properCase name}}FormType = z.infer<typeof {{camelCase name}}Scheme>;
+
+interface {{properCase name}}FormModalProps {
+  modal: ModalState;
+  mode: "create" | "update";
+  {{camelCase name}}?: {{properCase name}};
+  onSuccess?: () => void;
+}
+
+const {{properCase name}}FormModal = ({
+  modal,
+  mode,
+  {{camelCase name}},
+  onSuccess,
+}: {{properCase name}}FormModalProps) => {
+  const create{{properCase name}}Mutation = useCreate{{properCase name}}();
+  const update{{properCase name}}Mutation = useUpdate{{properCase name}}();
+
+  const isUpdate = mode === "update";
+  const isLoading =
+    create{{properCase name}}Mutation.isLoading || update{{properCase name}}Mutation.isLoading;
+
+  const form = useForm<{{properCase name}}FormType>({
+    resolver: zodResolver({{camelCase name}}Scheme),
+    mode: "onChange",
+    defaultValues: {
+      name: "",
+    },
+  });
+
+  useEffect(() => {
+    if (isUpdate && {{camelCase name}}) {
+      form.reset({
+        name: {{camelCase name}}.name || "",
+      });
+    } else if (!isUpdate) {
+      form.reset({
+        name: "",
+      });
+    }
+  }, [{{camelCase name}}, isUpdate, form, modal.isOpen]);
+
+  const handleSubmit = (values: {{properCase name}}FormType) => {
+    if (isUpdate && {{camelCase name}}) {
+      update{{properCase name}}Mutation.mutate(
+        { id: {{camelCase name}}.id || "", data: values },
+        {
+          onSuccess: () => {
+            modal.closeModal();
+            form.reset();
+            onSuccess?.();
+          },
+        },
+      );
+    } else {
+      create{{properCase name}}Mutation.mutate(values, {
+        onSuccess: () => {
+          modal.closeModal();
+          form.reset();
+          onSuccess?.();
+        },
+      });
+    }
+  };
+
+  const handleCancel = () => {
+    modal.closeModal();
+    form.reset();
+  };
+
+  return (
+    <Form {...form}>
+      <form className="space-y-5" onSubmit={form.handleSubmit(handleSubmit)}>
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{{properCase resourceName}} nomi</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="{{properCase resourceName}} nomini kiriting"
+                  disabled={isLoading}
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <div className="flex justify-end gap-2 pt-4">
+          <Button
+            className="hover:text-text-on-dark"
+            type="button"
+            variant="outline"
+            onClick={handleCancel}
+            disabled={isLoading}
+          >
+            Bekor qilish
+          </Button>
+          <Button type="submit" disabled={isLoading}>
+            {isLoading
+              ? isUpdate
+                ? "Yangilanmoqda..."
+                : "Qo'shilmoqda..."
+              : isUpdate
+                ? "Yangilash"
+                : "Qo'shish"}
+          </Button>
+        </div>
+      </form>
+    </Form>
+  );
+};
+
+export default {{properCase name}}FormModal;

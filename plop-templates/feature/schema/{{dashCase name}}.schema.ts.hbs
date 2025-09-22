@@ -1,0 +1,7 @@
+import { z } from "zod";
+
+export const {{camelCase name}}Scheme = z.object({
+  name: z
+    .string()
+    .min(2, "{{properCase name}} nomi kamida 2 ta belgidan iborat bo'lishi kerak"),
+});

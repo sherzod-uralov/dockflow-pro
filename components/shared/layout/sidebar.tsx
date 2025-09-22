@@ -15,12 +15,12 @@ import {
   X,
   ChevronDown,
   Home,
-  NotepadText,
+  DockIcon,
 } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
-import { signOut } from "next-auth/react";
-
+import Cookie from "js-cookie";
+import { useLogoutMutation } from "@/features/login/hook/login.hook";
 interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
@@ -34,13 +34,8 @@ interface MenuItem {
 }
 const menuItems: MenuItem[] = [
   { icon: Home, label: "Statistika", href: "/dashboard" },
-  { icon: FolderOpen, label: "Jildlar", href: "/dashboard/folders" },
-  { icon: Upload, label: "Yuklashlar", href: "/dashboard/uploads" },
-  { icon: Download, label: "Yuklab olinganlar", href: "/dashboard/downloads" },
-  { icon: Trash2, label: "Chiqindi qutisi", href: "/dashboard/trash" },
-  { icon: BarChart3, label: "Tahlillar", href: "/dashboard/analytics" },
-  { icon: Users, label: "Ulashilgan", href: "/dashboard/shared" },
-  { icon: NotepadText, label: "Jurnallar", href: "/dashboard/journal" },
+  { icon: DockIcon, label: "Xujjat turini", href: "/dashboard/document-type" },
+  { icon: Home, label: "Bo'limlar", href: "/dashboard/deportament" },
   {
     icon: Settings,
     label: "Boshqaruv",
@@ -55,6 +50,7 @@ const menuItems: MenuItem[] = [
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const router = useRouter();
   const pathname: any = usePathname();
+  const logOutMutation = useLogoutMutation();
 
   const [openMenus, setOpenMenus] = useState<string[]>([]);
 
@@ -72,6 +68,12 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
     setOpenMenus((prev) =>
       prev.includes(label) ? prev.filter((l) => l !== label) : [...prev, label],
     );
+  };
+
+  const handleLogout = () => {
+    logOutMutation.mutate();
+    Cookie.remove("accessToken");
+    router.push("/login");
   };
 
   return (
@@ -175,10 +177,8 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             </div>
           ))}
         </nav>
-
-        {/* Logout */}
         <div
-          onClick={() => signOut()}
+          onClick={handleLogout}
           className="p-4 border-t border-sidebar-border"
         >
           <Button

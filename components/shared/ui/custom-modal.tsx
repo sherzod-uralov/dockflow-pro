@@ -183,9 +183,7 @@ export function ConfirmationModal({
       }
       {...props}
     >
-      <div className="py-4">
-        <p className="text-sm text-muted-foreground">{description}</p>
-      </div>
+      <div className="py-4"></div>
     </CustomModal>
   );
 }

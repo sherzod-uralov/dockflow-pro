@@ -1,0 +1,40 @@
+import axiosInstance from "@/api/axios.instance";
+import { {{properCase name}}, {{properCase name}}QueryParams } from "../type/{{dashCase name}}.type";
+import { errorHandlers } from "@/utils/http-error-handler";
+import { endpoints } from "@/api/axios.endpoints";
+
+const {{camelCase name}}Handler = errorHandlers.{{camelCase name}};
+
+export const {{camelCase name}}Service = {
+  getAll{{properCase name}}s: async (params?: {{properCase name}}QueryParams) => {
+    return await {{camelCase name}}Handler.executeList(() =>
+      axiosInstance.get(endpoints.{{camelCase name}}.list, {
+        params: {
+          search: params?.search,
+          pageSize: params?.pageSize,
+          pageNumber: params?.pageNumber,
+        },
+      }),
+    );
+  },
+  create{{properCase name}}: async (data: {{properCase name}}) => {
+    return await {{camelCase name}}Handler.executeCreate(() =>
+      axiosInstance.post(endpoints.{{camelCase name}}.create, data),
+    );
+  },
+  update{{properCase name}}: async (id: string, data: Partial<{{properCase name}}>) => {
+    return await {{camelCase name}}Handler.executeUpdate(() =>
+      axiosInstance.patch(endpoints.{{camelCase name}}.update(id), data),
+    );
+  },
+  delete{{properCase name}}: async (id: string) => {
+    return await {{camelCase name}}Handler.executeDelete(() =>
+      axiosInstance.delete(endpoints.{{camelCase name}}.delete(id)),
+    );
+  },
+  get{{properCase name}}ById: async (id: string) => {
+    return await {{camelCase name}}Handler.executeGet(() =>
+      axiosInstance.get(endpoints.{{camelCase name}}.detail(id)),
+    );
+  },
+};

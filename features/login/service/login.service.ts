@@ -2,6 +2,7 @@ import { LoginBody } from "@/features/login/type/login.type";
 import { endpoints } from "@/api/axios.endpoints";
 import axiosInstance from "@/api/axios.instance";
 import { AxiosResponse } from "axios";
+import { handleAuthError } from "@/utils/http-error-handler";
 
 interface LoginResponse {
   accessToken: string;
@@ -34,5 +35,10 @@ export const authService = {
     } catch (error) {
       throw error;
     }
+  },
+  logout: async () => {
+    return await handleAuthError.executeCreate(() =>
+      axiosInstance.post(endpoints.auth.logout),
+    );
   },
 };

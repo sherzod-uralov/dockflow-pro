@@ -1,0 +1,16 @@
+import { DataPagination } from "@/types/global.types";
+
+export interface {{properCase name}} {
+  id?: string;
+  name: string;
+}
+
+export interface GetAll{{properCase name}}s extends DataPagination {
+  data: {{properCase name}}[];
+}
+
+export interface {{properCase name}}QueryParams {
+  search?: string;
+  pageSize?: number;
+  pageNumber?: number;
+}

@@ -24,3 +24,15 @@ export const useGetProfileQuery = () => {
     keepPreviousData: true,
   });
 };
+
+export const useLogoutMutation = () => {
+  return useMutation({
+    mutationFn: () => authService.logout(),
+    onSuccess: () => {
+      toast.success("Tizimdan muvaffaqiyatli chiqdingiz");
+    },
+    onError: () => {
+      toast.error("Chiqishda xatolik");
+    },
+  });
+};

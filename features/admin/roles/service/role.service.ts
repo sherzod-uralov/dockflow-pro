@@ -8,15 +8,18 @@ export const rolesService = {
   getAllRoles: async ({
     pageSize,
     pageNumber,
+    search,
   }: {
     pageSize?: number;
     pageNumber?: number;
+    search?: string;
   }): Promise<RoleResponse> => {
     return await handleRoleError.executeList(() =>
       axiosInstance.get<RoleResponse>(endpoints.role.list, {
         params: {
           pageSize,
           pageNumber,
+          search,
         },
       }),
     );
