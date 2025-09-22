@@ -12,13 +12,13 @@ import {
   createViewAction,
   CustomAction,
 } from "@/components/shared/ui/custom-action";
-import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { RoleData } from "../type/role.type";
 import { usePagination } from "@/hooks/use-pagination";
 import { handleCopyToClipboard } from "@/utils/copy-text";
 import { Badge } from "@/components/ui/badge";
 import { ConfirmationModal } from "@/components/ui/custom-modal";
+import { useDebounce } from "@/hooks/use-debaunce";
 
 const RolesPage = () => {
   const createModal = useModal();
@@ -26,10 +26,12 @@ const RolesPage = () => {
   const editModal = useModal();
   const { pageNumber, handlePageSizeChange, pageSize, handlePageChange } =
     usePagination();
+  const [searchQuery, debouncedSearch, setSearchQuery] = useDebounce("", 500);
 
   const { data } = useGetRoles({
     pageSize: pageSize,
     pageNumber: pageNumber,
+    search: debouncedSearch,
   });
   const [selectedRole, setSelectedRole] = useState<RoleData | null>(null);
   const deleteMutation = useDeleteRole();
@@ -49,9 +51,9 @@ const RolesPage = () => {
         createLabel="Ro'l qo'shish"
         onCreate={() => createModal.openModal()}
         filterLabel="Filtrlash"
-        searchQuery=""
+        searchQuery={searchQuery}
         searchPlaceholder="Ro'llarni qidirish"
-        onSearch={() => console.log("search")}
+        onSearch={setSearchQuery}
       />
 
       <DataTable

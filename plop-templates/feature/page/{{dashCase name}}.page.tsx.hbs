@@ -8,9 +8,9 @@ import {
 import { UserToolbar } from "@/components/shared/ui/custom-dashboard-toolbar";
 import { ModalState } from "@/types/modal";
 import {
-  useDeletePermission,
-  useGetAllPermissions,
-} from "../hook/permission.hook";
+  useDelete{{properCase name}},
+  useGetAll{{properCase name}}s,
+} from "../hook/{{dashCase name}}.hook";
 import { DataTable } from "@/components/shared/ui/custom-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -24,43 +24,38 @@ import {
   createDeleteAction,
   createCopyAction,
 } from "@/components/shared/ui/custom-action";
-import { Permission } from "../type/permission.type";
-import PermissionFormModal from "../component/permission.create.modal";
-import PermissionView from "../component/permission.view";
+import { {{properCase name}} } from "../type/{{dashCase name}}.type";
+import {{properCase name}}FormModal from "../component/{{dashCase name}}.form";
 import { useDebounce } from "@/hooks/use-debaunce";
 import { handleCopyToClipboard } from "@/utils/copy-text";
 import { usePagination } from "@/hooks/use-pagination";
 
-const PermissionPage = () => {
+const {{properCase name}}Page = () => {
   const createModal: ModalState = useModal();
   const editModal: ModalState = useModal();
-  const viewModal: ModalState = useModal();
   const deleteModal: ModalState = useModal();
 
   const { handlePageChange, handlePageSizeChange, pageNumber, pageSize } =
     usePagination();
-  const [selectedPermission, setSelectedPermission] =
-    useState<Permission | null>(null);
+  const [selected{{properCase name}}, setSelected{{properCase name}}] =
+    useState<{{properCase name}} | null>(null);
   const [searchQuery, debouncedSearch, setSearchQuery] = useDebounce("", 500);
-  const { data, isLoading } = useGetAllPermissions({
+
+  const { data, isLoading } = useGetAll{{properCase name}}s({
     search: debouncedSearch || undefined,
     pageSize: pageSize,
     pageNumber: pageNumber,
   });
-  const deletePermissionMutation = useDeletePermission();
+  const delete{{properCase name}}Mutation = useDelete{{properCase name}}();
 
-  const handleView = (permission: Permission) => {
-    setSelectedPermission(permission);
-    viewModal.openModal();
-  };
-
-  const handleEdit = (permission: Permission) => {
-    setSelectedPermission(permission);
+  const handleEdit = (item: {{properCase name}}) => {
+    setSelected{{properCase name}}(item);
     editModal.openModal();
   };
 
   const handleDelete = (id: string) => {
-    deletePermissionMutation.mutate(id);
+    delete{{properCase name}}Mutation.mutate(id);
+    deleteModal.closeModal();
   };
 
   const handleSearch = (query: string) => {
@@ -68,11 +63,11 @@ const PermissionPage = () => {
   };
 
   const handleEditSuccess = () => {
-    setSelectedPermission(null);
+    setSelected{{properCase name}}(null);
   };
 
   const handleEditModalClose = () => {
-    setSelectedPermission(null);
+    setSelected{{properCase name}}(null);
     editModal.closeModal();
   };
 
@@ -80,9 +75,9 @@ const PermissionPage = () => {
     <>
       <UserToolbar
         searchQuery={searchQuery}
-        searchPlaceholder="Ruxsatlarni qidirish..."
+        searchPlaceholder="{{properCase resourceName}}larni qidirish..."
         onSearch={handleSearch}
-        createLabel="Ruxsat qo'shish"
+        createLabel="{{properCase name}} qo'shish"
         onCreate={createModal.openModal}
       />
 
@@ -106,7 +101,7 @@ const PermissionPage = () => {
                     className="font-mono cursor-pointer hover:bg-muted"
                     onClick={() => handleCopyToClipboard(id, "ID")}
                   >
-                    {id.slice(0, 8)}...
+                    {id?.slice(0, 8)}...
                   </Badge>
                   <Button
                     variant="ghost"
@@ -125,57 +120,18 @@ const PermissionPage = () => {
             accessorKey: "name",
           },
           {
-            header: "Tavsif",
-            accessorKey: "description",
-            cell: ({ row }) => (
-              <div
-                className="max-w-xs truncate"
-                title={row.original.description}
-              >
-                {row.original.description}
-              </div>
-            ),
-          },
-          {
-            header: "Kalit",
-            accessorKey: "key",
-            cell: ({ row }) => (
-              <Badge
-                variant="outline"
-                className="bg-blue-100 text-blue-700 cursor-pointer hover:bg-blue-200"
-                onClick={() => handleCopyToClipboard(row.original.key, "KEY")}
-                title="Nusxalash uchun bosing"
-              >
-                {row.original.key}
-              </Badge>
-            ),
-          },
-          {
-            header: "Modul",
-            accessorKey: "module",
-            cell: ({ row }) => (
-              <Badge
-                variant="outline"
-                className="bg-green-100 text-green-700 capitalize"
-              >
-                {row.original.module}
-              </Badge>
-            ),
-          },
-          {
             header: "Harakatlar",
             accessorKey: "actions",
             cell: ({ row }) => {
-              const permission = row.original;
+              const item = row.original;
 
               const actions: ActionItem[] = [
-                createViewAction(() => handleView(permission)),
-                createEditAction(() => handleEdit(permission)),
+                createEditAction(() => handleEdit(item)),
                 createCopyAction(() =>
-                  handleCopyToClipboard(permission.key, "KEY"),
+                  handleCopyToClipboard(item.id || "", "ID"),
                 ),
                 createDeleteAction(() => {
-                  setSelectedPermission(permission);
+                  setSelected{{properCase name}}(item);
                   deleteModal.openModal();
                 }),
               ];
@@ -184,66 +140,46 @@ const PermissionPage = () => {
             },
           },
         ]}
-        data={
-          data?.data
-            ? data?.data.flatMap((item: any) =>
-                item.permissions.map((perm: any) => ({
-                  ...perm,
-                  module: item.module,
-                })),
-              )
-            : []
-        }
+        data={data?.data || []}
       />
+
       <CustomModal
         closeOnOverlayClick={false}
-        title="Ruxsat qo'shish"
-        description="Ruxsat qo'shish uchun maydonlar to'ldirilishi kerak"
+        title="{{properCase resourceName}} qo'shish"
+        description="{{properCase resourceName}} qo'shish uchun maydonlar to'ldirilishi kerak"
         isOpen={createModal.isOpen}
         onClose={createModal.closeModal}
       >
-        <PermissionFormModal modal={createModal} mode="create" />
+        <{{properCase name}}FormModal modal={createModal} mode="create" />
       </CustomModal>
+
       <CustomModal
         closeOnOverlayClick={false}
-        title={`${selectedPermission?.name} haqida to'liq ma'lumotlar`}
-        description="Ruxsat haqida to'liq ma'lumotlar"
-        isOpen={viewModal.isOpen}
-        onClose={viewModal.closeModal}
-      >
-        {selectedPermission && (
-          <PermissionView
-            permission={selectedPermission}
-            onClose={viewModal.closeModal}
-          />
-        )}
-      </CustomModal>
-      <CustomModal
-        closeOnOverlayClick={false}
-        title="Ruxsatni yangilash"
-        description="Ruxsat ma'lumotlarini yangilang"
+        title="{{properCase resourceName}}ni yangilash"
+        description="{{properCase name}} ma'lumotlarini yangilang"
         isOpen={editModal.isOpen}
         onClose={handleEditModalClose}
       >
-        <PermissionFormModal
+        <{{properCase name}}FormModal
           modal={editModal}
           mode="update"
-          permission={selectedPermission as any}
+          {{camelCase name}}={selected{{properCase resourceName}} as any}
           onSuccess={handleEditSuccess}
         />
       </CustomModal>
+
       <ConfirmationModal
         closeOnOverlayClick={false}
-        title="Ruxsatlarni o'chirish"
-        description="Ushbu ruxsatni o'chirgandan so'ng qaytarib bo'lmaydi rozimisiz?"
+        title="{{properCase resourceName}}ni o'chirish"
+        description="Ushbu ma'lumotni o'chirgandan so'ng qaytarib bo'lmaydi. Rozimisiz?"
         onClose={deleteModal.closeModal}
         isOpen={deleteModal.isOpen}
         onConfirm={() => {
-          handleDelete(selectedPermission?.id as string);
+          handleDelete(selected{{properCase name}}?.id as string);
         }}
       />
     </>
   );
 };
 
-export default PermissionPage;
+export default {{properCase name}}Page;

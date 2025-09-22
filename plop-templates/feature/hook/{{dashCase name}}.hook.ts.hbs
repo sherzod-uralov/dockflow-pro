@@ -1,0 +1,79 @@
+import { useMutation, useQuery, useQueryClient } from "react-query";
+import { {{camelCase name}}Service } from "../service/{{dashCase name}}.service";
+import {
+  GetAll{{properCase name}}s,
+  {{properCase name}},
+  {{properCase name}}QueryParams,
+} from "../type/{{dashCase name}}.type";
+import { toast } from "sonner";
+
+export const useCreate{{properCase name}} = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: {{properCase name}}) =>
+      {{camelCase name}}Service.create{{properCase name}}(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["{{camelCase name}}s"]);
+      toast.success("{{properCase name}} muvaffaqiyatli yaratildi");
+    },
+    onError: (error: any) => {
+      toast.error(error.message);
+    },
+  });
+};
+
+export const useGetAll{{properCase name}}s = (params?: {{properCase name}}QueryParams) => {
+  return useQuery<GetAll{{properCase name}}s>({
+    queryKey: ["{{camelCase name}}s", params],
+    queryFn: () => {{camelCase name}}Service.getAll{{properCase name}}s(params),
+    keepPreviousData: true,
+  });
+};
+
+export const useUpdate{{properCase name}} = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: Partial<{{properCase name}}> }) =>
+      {{camelCase name}}Service.update{{properCase name}}(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["{{camelCase name}}s"]);
+      toast.success("{{properCase name}} muvaffaqiyatli yangilandi");
+    },
+    onError: (error: any) => {
+      toast.error(error.message);
+    },
+  });
+};
+
+export const useDelete{{properCase name}} = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => {{camelCase name}}Service.delete{{properCase name}}(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["{{camelCase name}}s"]);
+      toast.success("{{properCase name}} muvaffaqiyatli o'chirildi");
+    },
+    onError: (error: any) => {
+      toast.error(
+        error?.response?.data?.message ||
+          error.message ||
+          "O'chirishda xatolik yuz berdi",
+      );
+    },
+  });
+};
+
+export const useGet{{properCase name}}ById = (id: string) => {
+  return useQuery({
+    queryKey: ["{{camelCase name}}", id],
+    queryFn: () => {{camelCase name}}Service.get{{properCase name}}ById(id),
+    enabled: !!id,
+    onError: (error: any) => {
+      toast.error(
+        error?.response?.data?.message ||
+          error.message ||
+          "Ma'lumotni olishda xatolik",
+      );
+    },
+  });
+};

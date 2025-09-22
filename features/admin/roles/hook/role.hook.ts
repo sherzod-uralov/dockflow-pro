@@ -18,10 +18,11 @@ export const useRoleCreateMutation = () => {
   });
 };
 
-export const useGetRoles = ({ pageSize = 7, pageNumber = 1 }) => {
+export const useGetRoles = ({ pageSize = 7, pageNumber = 1, search = "" }) => {
   return useQuery({
-    queryKey: ["roles", pageNumber, pageSize],
-    queryFn: async () => rolesService.getAllRoles({ pageSize, pageNumber }),
+    queryKey: ["roles", pageNumber, pageSize, search],
+    queryFn: async () =>
+      rolesService.getAllRoles({ pageSize, pageNumber, search }),
   });
 };
 

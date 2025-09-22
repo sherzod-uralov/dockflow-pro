@@ -242,7 +242,7 @@ export function DataTable<TData, TValue = unknown>({
                 </TableRow>
               ))}
             </TableHeader>
-            <TableBody>
+            <TableBody className="table-body-fixed relative">
               {loading ? (
                 <TableRow>
                   <TableCell
@@ -256,10 +256,11 @@ export function DataTable<TData, TValue = unknown>({
                   </TableCell>
                 </TableRow>
               ) : (
-                <TransitionGroup component={null}>
-                  {table.getRowModel().rows?.length
-                    ? table.getRowModel().rows.map((row: Row<TData>) => {
-                        const nodeRef = React.createRef<HTMLTableRowElement>(); // 🔑 har row uchun alohida ref
+                <>
+                  <TransitionGroup component={null}>
+                    {table.getRowModel().rows?.length > 0 &&
+                      table.getRowModel().rows.map((row: Row<TData>) => {
+                        const nodeRef = React.createRef<HTMLTableRowElement>();
                         return (
                           <CSSTransition
                             key={row.id}
@@ -275,7 +276,6 @@ export function DataTable<TData, TValue = unknown>({
                               {row.getVisibleCells().map((cell) => {
                                 const columnMeta = cell.column.columnDef
                                   .meta as ColumnMeta | undefined;
-
                                 return (
                                   <TableCell
                                     key={cell.id}
@@ -302,31 +302,29 @@ export function DataTable<TData, TValue = unknown>({
                             </TableRow>
                           </CSSTransition>
                         );
-                      })
-                    : (() => {
-                        const emptyRef = React.createRef<HTMLTableRowElement>(); // 🔑 bo‘sh row uchun ham alohida ref
-                        return (
-                          <CSSTransition
-                            key="empty"
-                            timeout={300}
-                            classNames="fade-row"
-                            nodeRef={emptyRef}
-                          >
-                            <TableRow ref={emptyRef}>
-                              <TableCell
-                                colSpan={columns.length}
-                                className="h-24 text-center text-muted-foreground"
-                              >
-                                <div className="flex flex-col items-center justify-center space-y-2">
-                                  <EyeOff className="h-8 w-8 text-muted-foreground/50" />
-                                  <p>{emptyMessage}</p>
-                                </div>
-                              </TableCell>
-                            </TableRow>
-                          </CSSTransition>
-                        );
-                      })()}
-                </TransitionGroup>
+                      })}
+                  </TransitionGroup>
+
+                  {/* 🔑 Empty state doimiy joy egallaydi */}
+                  <tr
+                    className={cn(
+                      "absolute left-0 top-0 w-full h-24 transition-opacity duration-500 flex items-center justify-center",
+                      table.getRowModel().rows?.length === 0
+                        ? "opacity-100"
+                        : "opacity-0 pointer-events-none",
+                    )}
+                  >
+                    <td
+                      colSpan={columns.length}
+                      className="text-center text-muted-foreground"
+                    >
+                      <div className="flex flex-col items-center justify-center space-y-2">
+                        <EyeOff className="h-8 w-8 text-muted-foreground/50" />
+                        <p>{emptyMessage}</p>
+                      </div>
+                    </td>
+                  </tr>
+                </>
               )}
             </TableBody>
           </Table>

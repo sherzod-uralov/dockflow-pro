@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import {
   DataTable,
   DataTableColumn,
-  createSortableHeader,
   createSelectColumn,
 } from "@/components/shared/ui/custom-table";
 import {
@@ -21,12 +20,12 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { UserToolbar } from "@/components/shared/ui/custom-dashboard-toolbar";
 import { useGetUserQuery } from "@/features/admin/admin-users/hook/user.hook";
 import { User } from "@/features/admin/admin-users/type/user.types";
+import { CustomModal, useModal } from "@/components/shared/ui/custom-modal";
+import UserForm from "../component/user.form";
 
 const UserPage = () => {
-  const [searchQuery, setSearchQuery] = React.useState("");
-  const [selectedUsers, setSelectedUsers] = React.useState<User[]>([]);
-  const [loading, setLoading] = React.useState(false);
-  const { data } = useGetUserQuery();
+  const { data, isLoading } = useGetUserQuery();
+  const createModal = useModal();
 
   const columns: DataTableColumn<User>[] = [
     createSelectColumn<User>(),
@@ -35,7 +34,7 @@ const UserPage = () => {
     },
     {
       accessorKey: "username",
-      header: createSortableHeader("Foydalanuvchi"),
+      header: "header",
       cell: ({ row }) => {
         const user = row.original;
         return (
@@ -63,7 +62,7 @@ const UserPage = () => {
     },
     {
       accessorKey: "createdAt",
-      header: createSortableHeader("Qo'shilgan sana"),
+      header: "Qo'shilgan sana",
       cell: ({ row }) => {
         const date = new Date(row.original.createdAt);
         return (
@@ -78,7 +77,7 @@ const UserPage = () => {
     },
     {
       accessorKey: "lastLogin",
-      header: createSortableHeader("Oxirgi kirish"),
+      header: "Oxirgi kirish",
       cell: ({ row }) => {
         const lastLogin = row.original.lastLogin;
         return (
@@ -175,19 +174,12 @@ const UserPage = () => {
     console.log("Holatni o'zgartirish:", user);
   };
 
-  const handleRefresh = () => {
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-    }, 1000);
-  };
-
   return (
     <div className="space-y-6">
       <UserToolbar
         searchQuery="Foydalanuvchi qidirish"
         createLabel="Foydalanuvchi qo'shish"
-        onCreate={() => console.log("create")}
+        onCreate={() => createModal.openModal()}
         filterLabel="Filtr"
         onFilter={() => console.log("filter")}
         onSearch={() => console.log("Search user")}
@@ -195,17 +187,21 @@ const UserPage = () => {
       <DataTable
         columns={columns}
         data={data?.data ?? []}
-        loading={loading}
-        onRefresh={handleRefresh}
-        onRowSelect={setSelectedUsers}
-        enableColumnVisibility
-        enablePagination
+        loading={isLoading}
         pageSize={10}
         pageSizeOptions={[5, 10, 20, 50]}
         emptyMessage="Hech qanday foydalanuvchi topilmadi"
-        showSelectedCount
         className="bg-transparent"
       />
+      <CustomModal
+        closeOnOverlayClick
+        onClose={createModal.closeModal}
+        isOpen={createModal.isOpen}
+        title="Foydalanuvchi qo'shish"
+        description="Foydalanuvchi ma'lumotlarini kiriting"
+      >
+        <UserForm mode="create" modal={createModal} />
+      </CustomModal>
     </div>
   );
 };
