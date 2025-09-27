@@ -1,127 +1,105 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+"use client";
+
+import React, { useMemo } from "react";
+
 import { documentScheme } from "../schema/document.schema";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { z } from "zod";
-import { Button } from "@/components/ui/button";
-import { ModalState } from "@/types/modal";
 import { useCreateDocument, useUpdateDocument } from "../hook/document.hook";
-import { useEffect } from "react";
-import { Document } from "../type/document.type";
 import { useGetAllDeportaments } from "@/features/deportament";
+import { Button } from "@/components/ui/button";
+import type { ModalState } from "@/types/modal";
+import SimpleFormGenerator, {
+  Field,
+} from "@/components/shared/ui/custom-form-generator";
 
 type DocumentFormType = z.infer<typeof documentScheme>;
 
-interface DocumentFormModalProps {
+interface Props {
   modal: ModalState;
   mode: "create" | "update";
-  document?: Document;
+  document?: Partial<DocumentFormType> & { id?: string };
   onSuccess?: () => void;
 }
 
-const DocumentFormModal = ({
+export default function DocumentFormModal({
   modal,
   mode,
   document,
   onSuccess,
-}: DocumentFormModalProps) => {
-  const createDocumentMutation = useCreateDocument();
-  const updateDocumentMutation = useUpdateDocument();
-  const { data } = useGetAllDeportaments();
+}: Props) {
+  const createDoc = useCreateDocument();
+  const updateDoc = useUpdateDocument();
+  const { data: deportaments } = useGetAllDeportaments();
 
   const isUpdate = mode === "update";
-  const isLoading =
-    createDocumentMutation.isLoading || updateDocumentMutation.isLoading;
+  const isLoading = createDoc.isLoading || updateDoc.isLoading;
 
-  const form = useForm<DocumentFormType>({
-    resolver: zodResolver(documentScheme),
-    mode: "onChange",
-    defaultValues: {
-      name: "",
-    },
-  });
+  const defaultValues: Partial<DocumentFormType> = {
+    name: document?.name ?? "",
+    deportamentId: document?.deportamentId ?? "",
+  };
 
-  useEffect(() => {
-    if (isUpdate && document) {
-      form.reset({
-        name: document.name || "",
-      });
-    } else if (!isUpdate) {
-      form.reset({
-        name: "",
-      });
-    }
-  }, [document, isUpdate, form, modal.isOpen]);
+  const fields: Field[] = useMemo(
+    () => [
+      {
+        type: "text",
+        name: "name",
+        label: "Document nomi",
+        placeholder: "Document nomini kiriting",
+      },
+      {
+        type: "select",
+        name: "deportamentId",
+        label: "Deportament",
+        placeholder: "Deportament tanlang",
+        options: (deportaments?.data ?? []).map((d: any) => ({
+          label: d.name,
+          value: d.id,
+        })),
+      },
+    ],
+    [deportaments],
+  );
 
   const handleSubmit = (values: DocumentFormType) => {
-    if (isUpdate && document) {
-      updateDocumentMutation.mutate(
-        { id: document.id || "", data: values },
+    if (isUpdate && document?.id) {
+      updateDoc.mutate(
+        { id: document.id, data: values },
         {
           onSuccess: () => {
             modal.closeModal();
-            form.reset();
             onSuccess?.();
           },
         },
       );
     } else {
-      createDocumentMutation.mutate(values, {
+      createDoc.mutate(values, {
         onSuccess: () => {
           modal.closeModal();
-          form.reset();
           onSuccess?.();
         },
       });
     }
   };
 
-  const handleCancel = () => {
-    modal.closeModal();
-    form.reset();
-  };
-
   return (
-    <Form {...form}>
-      <form className="space-y-5" onSubmit={form.handleSubmit(handleSubmit)}>
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Document nomi</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Document nomini kiriting"
-                  disabled={isLoading}
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <div className="flex justify-end gap-2 pt-4">
+    <SimpleFormGenerator
+      schema={documentScheme}
+      fields={fields}
+      defaultValues={defaultValues}
+      onSubmit={handleSubmit}
+      submitLabel={isUpdate ? "Yangilash" : "Qo'shish"}
+      renderActions={({ isSubmitting }) => (
+        <div className="flex gap-2">
           <Button
-            className="hover:text-text-on-dark"
-            type="button"
             variant="outline"
-            onClick={handleCancel}
+            onClick={() => modal.closeModal()}
             disabled={isLoading}
           >
             Bekor qilish
           </Button>
-          <Button type="submit" disabled={isLoading}>
-            {isLoading
+          <Button type="submit" disabled={isSubmitting || isLoading}>
+            {isSubmitting || isLoading
               ? isUpdate
                 ? "Yangilanmoqda..."
                 : "Qo'shilmoqda..."
@@ -130,9 +108,7 @@ const DocumentFormModal = ({
                 : "Qo'shish"}
           </Button>
         </div>
-      </form>
-    </Form>
+      )}
+    />
   );
-};
-
-export default DocumentFormModal;
+}

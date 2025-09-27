@@ -19,16 +19,16 @@ import { useState } from "react";
 import {
   CustomAction,
   ActionItem,
-  createViewAction,
   createEditAction,
   createDeleteAction,
   createCopyAction,
 } from "@/components/shared/ui/custom-action";
-import { Deportament } from "../type/deportament.type";
+import { DepartmentResponse, Deportament } from "../type/deportament.type";
 import DeportamentFormModal from "../component/deportament.form";
 import { useDebounce } from "@/hooks/use-debaunce";
 import { handleCopyToClipboard } from "@/utils/copy-text";
 import { usePagination } from "@/hooks/use-pagination";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const DeportamentPage = () => {
   const createModal: ModalState = useModal();
@@ -38,7 +38,7 @@ const DeportamentPage = () => {
   const { handlePageChange, handlePageSizeChange, pageNumber, pageSize } =
     usePagination();
   const [selectedDeportament, setSelectedDeportament] =
-    useState<Deportament | null>(null);
+    useState<DepartmentResponse | null>(null);
   const [searchQuery, debouncedSearch, setSearchQuery] = useDebounce("", 500);
 
   const { data, isLoading } = useGetAllDeportaments({
@@ -46,9 +46,10 @@ const DeportamentPage = () => {
     pageSize: pageSize,
     pageNumber: pageNumber,
   });
+
   const deleteDeportamentMutation = useDeleteDeportament();
 
-  const handleEdit = (item: Deportament) => {
+  const handleEdit = (item: DepartmentResponse) => {
     setSelectedDeportament(item);
     editModal.openModal();
   };
@@ -116,8 +117,46 @@ const DeportamentPage = () => {
             },
           },
           {
-            header: "Nom",
+            header: "Nomi",
             accessorKey: "name",
+          },
+          {
+            header: "Tavsif",
+            accessorKey: "description",
+          },
+
+          {
+            header: "Kod",
+            accessorKey: "code",
+          },
+          {
+            header: "Joylashuv",
+            accessorKey: "location",
+          },
+          {
+            header: "Bo'lim boshligi",
+            accessorKey: "director",
+            cell: ({ row }) => (
+              <div className="flex items-center space-x-3">
+                <Avatar className="h-8 w-8">
+                  <AvatarImage
+                    src={row.original.director?.avatarUrl}
+                    alt={row.original.director?.username}
+                  />
+                  <AvatarFallback className="bg-primary/20 text-primary text-xs font-medium">
+                    {row.original.director?.fullname
+                      .split(" ")
+                      .map((n) => n[0])
+                      .join("")}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col">
+                  <span className="font-medium text-foreground">
+                    {row.original.director?.fullname}
+                  </span>
+                </div>
+              </div>
+            ),
           },
           {
             header: "Harakatlar",

@@ -1,180 +1,140 @@
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { UserSchema, UserSchemaZodType } from "../schema/user.schema";
-import { Input } from "@/components/ui/input";
-import { useCreateUserMutation } from "../hook/user.hook";
+"use client";
+
+import React, { useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import { UserFormProps } from "../type/user.types";
-import { useEffect } from "react";
+import { UserSchema } from "../schema/user.schema";
+import { useCreateUserMutation } from "../hook/user.hook";
 import { useGetRoles } from "../../roles/hook/role.hook";
-import { CustomSelect } from "@/components/shared/ui/custom-select";
 import { useGetAllDeportaments } from "@/features/deportament";
+import SimpleFormGenerator, {
+  Field,
+} from "@/components/shared/ui/custom-form-generator";
+import type { UserFormProps } from "../type/user.types";
 
-const UserForm = ({ mode, modal, userData }: UserFormProps) => {
-  const form = useForm<UserSchemaZodType>({
-    resolver: zodResolver(UserSchema),
-    defaultValues: {
-      fullname: "",
-      username: "",
-      password: "",
-      roleId: "",
-      departmentId: "",
-      avatarUrl: "",
-      isActive: true,
-    },
-  });
+export default function UserForm({ mode, modal, userData }: UserFormProps) {
+  const createUser = useCreateUserMutation();
 
-  const usercreateMutation = useCreateUserMutation(form as any);
   const { data: roles } = useGetRoles({
     pageNumber: 1,
     pageSize: 10,
     search: "",
   });
+
   const { data: departments } = useGetAllDeportaments({
     pageNumber: 1,
     pageSize: 10,
     search: "",
   });
 
-  useEffect(() => {
-    if (mode === "edit" && userData) {
-      form.reset(userData);
-    }
-  }, [mode, userData]);
+  const isUpdate = mode === "edit";
+  const isLoading = createUser.isLoading;
 
-  const handleSubmit = async (values: UserSchemaZodType) => {
-    if (mode === "create") {
-      usercreateMutation.mutate(values);
+  const defaultValues = {
+    fullname: userData?.fullname ?? "",
+    username: userData?.username ?? "",
+    password: "",
+    roleId: userData?.role?.id ?? "",
+    departmentId: userData?.department?.id ?? "",
+    avatarUrl: userData?.avatarUrl ?? "",
+    isActive: userData?.isActive ?? true,
+  };
+
+  const fields: Field[] = useMemo(
+    () => [
+      {
+        type: "text",
+        name: "fullname",
+        label: "To'liq ismi",
+        placeholder: "Ismni kiriting (F.I.O)",
+      },
+      {
+        type: "text",
+        name: "username",
+        label: "Foydalanuvchi nomi (kirish uchun)",
+        placeholder: "Username",
+      },
+      {
+        type: "password",
+        name: "password",
+        label: "Parol (kirish uchun)",
+        placeholder: "Password",
+      },
+      {
+        type: "select",
+        name: "roleId",
+        label: "Ro'l",
+        placeholder: "Ro'lni tanlang",
+        options:
+          roles?.data?.map((role) => ({
+            label: role.name,
+            value: role.id,
+          })) ?? [],
+      },
+      {
+        type: "select",
+        name: "departmentId",
+        label: "Bo'lim",
+        placeholder: "Bo'limni tanlang",
+        options:
+          departments?.data?.map((dep) => ({
+            label: dep.name,
+            value: dep.id,
+          })) ?? [],
+      },
+      {
+        type: "text",
+        name: "avatarUrl",
+        label: "Profil uchun rasm",
+        placeholder: "Avatar URL",
+      },
+      {
+        type: "checkbox",
+        name: "isActive",
+        label: "Aktivmi?",
+      },
+    ],
+    [roles, departments],
+  );
+
+  const handleSubmit = (values: any) => {
+    if (isUpdate && userData?.id) {
+      console.log("Update user:", { id: userData.id, ...values });
     } else {
+      createUser.mutate(values, {
+        onSuccess: () => {
+          modal.closeModal();
+        },
+      });
     }
   };
 
   return (
-    <Form {...form}>
-      <form className="space-y-3" onSubmit={form.handleSubmit(handleSubmit)}>
-        <FormField
-          control={form.control}
-          name="fullname"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="required">To'liq ismi</FormLabel>
-              <FormControl>
-                <Input placeholder="Ismni kiriting (F.I.O)" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="username"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="required">
-                Foydalanuvchi nomi (kirish uchun)
-              </FormLabel>
-              <FormControl>
-                <Input placeholder="Username" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="password"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="required">Parol (kirish uchun)</FormLabel>
-              <FormControl>
-                <Input placeholder="Password" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="roleId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="required">Ro'l</FormLabel>
-              <FormControl>
-                <CustomSelect
-                  selectPlaceholder="Ro'lni tanlang"
-                  options={
-                    roles?.data?.map((role) => ({
-                      value: role.id,
-                      label: role.name,
-                    })) || []
-                  }
-                  onChange={(val) => field.onChange(val)}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="departmentId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="required">Bo'lim</FormLabel>
-              <FormControl>
-                <CustomSelect
-                  selectPlaceholder="Bo'limni tanlang"
-                  options={
-                    departments?.data?.map((department) => ({
-                      value: department.id,
-                      label: department.name,
-                    })) || []
-                  }
-                  onChange={(val) => field.onChange(val)}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="avatarUrl"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Profil uchun rasm</FormLabel>
-              <FormControl>
-                <Input placeholder="Avatar URL" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="isActive"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Aktivmi?</FormLabel>
-              <FormControl>//</FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <div className="flex items-end justify-end">
-          <Button type="submit">Qo'shish</Button>
+    <SimpleFormGenerator
+      schema={UserSchema}
+      fields={fields}
+      defaultValues={defaultValues}
+      onSubmit={handleSubmit}
+      submitLabel={isUpdate ? "Yangilash" : "Qo'shish"}
+      renderActions={({ isSubmitting }) => (
+        <div className="flex gap-2 justify-end">
+          <Button
+            variant="outline"
+            onClick={() => modal.closeModal()}
+            disabled={isLoading}
+          >
+            Bekor qilish
+          </Button>
+          <Button type="submit" disabled={isSubmitting || isLoading}>
+            {isSubmitting || isLoading
+              ? isUpdate
+                ? "Yangilanmoqda..."
+                : "Qo'shilmoqda..."
+              : isUpdate
+                ? "Yangilash"
+                : "Qo'shish"}
+          </Button>
         </div>
-      </form>
-    </Form>
+      )}
+    />
   );
-};
-
-export default UserForm;
+}

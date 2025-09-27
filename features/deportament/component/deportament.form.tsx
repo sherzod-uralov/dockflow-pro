@@ -1,9 +1,8 @@
+"use client";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import {
-  DeportamentInferType,
-  deportamentScheme,
-} from "../schema/deportament.schema";
+import { deportamentScheme } from "../schema/deportament.schema";
 import {
   Form,
   FormControl,
@@ -25,13 +24,14 @@ import { useEffect } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { CustomSelect } from "@/components/shared/ui/custom-select";
 import { useGetUserQuery } from "@/features/admin/admin-users/hook/user.hook";
+import { DepartmentResponse } from "../type/deportament.type";
 
 type DeportamentFormType = z.infer<typeof deportamentScheme>;
 
 interface DeportamentFormModalProps {
   modal: ModalState;
   mode: "create" | "update";
-  deportament?: DeportamentInferType & { id: string };
+  deportament?: DepartmentResponse;
   onSuccess?: () => void;
 }
 
@@ -43,22 +43,23 @@ const DeportamentFormModal = ({
 }: DeportamentFormModalProps) => {
   const createDeportamentMutation = useCreateDeportament();
   const updateDeportamentMutation = useUpdateDeportament();
-  const { data } = useGetAllDeportaments();
+  const { data: departments } = useGetAllDeportaments();
   const { data: users } = useGetUserQuery();
 
   const isUpdate = mode === "update";
   const isLoading =
     createDeportamentMutation.isLoading || updateDeportamentMutation.isLoading;
 
+  console.log(deportament);
   const form = useForm<DeportamentFormType>({
     resolver: zodResolver(deportamentScheme),
     defaultValues: {
       name: "",
       description: "",
-      directorId: null,
+      directorId: "",
       code: "",
       location: "",
-      parentId: null,
+      parentId: "",
     },
   });
 
@@ -67,20 +68,22 @@ const DeportamentFormModal = ({
       form.reset({
         name: deportament.name || "",
         description: deportament.description || "",
-        directorId: deportament.directorId || "",
+        directorId: deportament.director?.id,
         code: deportament.code || "",
         location: deportament.location || "",
-        parentId: deportament.parentId || "",
+        parentId: deportament.parent?.id,
       });
     } else if (!isUpdate) {
       form.reset({
         name: "",
         description: "",
+        directorId: "",
         code: "",
         location: "",
+        parentId: "",
       });
     }
-  }, [deportament, isUpdate, form, modal.isOpen]);
+  }, [departments, deportament, users, isUpdate, form, modal.isOpen]);
 
   const handleSubmit = (values: DeportamentFormType) => {
     if (isUpdate && deportament) {
@@ -119,6 +122,7 @@ const DeportamentFormModal = ({
   return (
     <Form {...form}>
       <form className="space-y-5" onSubmit={form.handleSubmit(handleSubmit)}>
+        {/* Name */}
         <FormField
           control={form.control}
           name="name"
@@ -137,6 +141,7 @@ const DeportamentFormModal = ({
           )}
         />
 
+        {/* Description */}
         <FormField
           control={form.control}
           name="description"
@@ -155,6 +160,7 @@ const DeportamentFormModal = ({
           )}
         />
 
+        {/* Code */}
         <FormField
           control={form.control}
           name="code"
@@ -190,7 +196,6 @@ const DeportamentFormModal = ({
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="directorId"
@@ -199,7 +204,8 @@ const DeportamentFormModal = ({
               <FormLabel>Deportament direktori</FormLabel>
               <FormControl>
                 <CustomSelect
-                  onChange={field.onChange}
+                  value={field.value}
+                  onChange={(val) => field.onChange(val)}
                   selectPlaceholder="Deportament direktorini tanlang"
                   options={
                     users?.data?.map((item) => ({
@@ -222,10 +228,11 @@ const DeportamentFormModal = ({
               <FormLabel>Deportament biriktirish</FormLabel>
               <FormControl>
                 <CustomSelect
-                  onChange={field.onChange}
-                  selectPlaceholder="Deportamentni tanlang"
+                  value={field.value}
+                  onChange={(val) => field.onChange(val)}
+                  selectPlaceholder="Deportament tanlang"
                   options={
-                    data?.data?.map((item) => ({
+                    departments?.data?.map((item) => ({
                       value: item.id,
                       label: item.name,
                     })) || []
@@ -237,6 +244,7 @@ const DeportamentFormModal = ({
           )}
         />
 
+        {/* Actions */}
         <div className="flex justify-end gap-2 pt-4">
           <Button
             className="hover:text-text-on-dark"
