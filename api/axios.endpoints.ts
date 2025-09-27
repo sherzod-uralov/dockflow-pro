@@ -1,5 +1,12 @@
 // endpoints.tss
 export const endpoints = {
+  jonim: {
+    list: "/jonim",
+    create: "/jonim",
+    detail: (id: string | number) => `/jonim/${id}`,
+    update: (id: string | number) => `/jonim/${id}`,
+    delete: (id: string | number) => `/jonim/${id}`,
+  },
   document: {
     list: "/document",
     create: "/document",

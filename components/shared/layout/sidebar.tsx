@@ -16,6 +16,7 @@ import {
   ChevronDown,
   Home,
   DockIcon,
+  Book,
 } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -36,6 +37,7 @@ const menuItems: MenuItem[] = [
   { icon: Home, label: "Statistika", href: "/dashboard" },
   { icon: DockIcon, label: "Xujjat turini", href: "/dashboard/document-type" },
   { icon: Home, label: "Bo'limlar", href: "/dashboard/deportament" },
+  { icon: Book, label: "Jurnal", href: "/dashboard/journal" },
   {
     icon: Settings,
     label: "Boshqaruv",

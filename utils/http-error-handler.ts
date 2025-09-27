@@ -403,6 +403,7 @@ export const errorHandlers = {
   documentType: createErrorHandler("HujjatTuri"),
   deportament: createErrorHandler("BoLim"),
   document: createErrorHandler("Hujjat"),
+  journal: createErrorHandler("Jurnal"),
 };
 
 export const {
@@ -413,4 +414,5 @@ export const {
   documentType: handleHujjatTuriError,
   deportament: handleBoLimError,
   document: handleHujjatError,
+  journal: handleJurnalError,
 } = errorHandlers;
