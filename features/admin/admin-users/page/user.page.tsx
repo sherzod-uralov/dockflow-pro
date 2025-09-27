@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Eye, Pencil, Trash2, MoreHorizontal, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -8,24 +8,27 @@ import {
   DataTableColumn,
   createSelectColumn,
 } from "@/components/shared/ui/custom-table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { UserToolbar } from "@/components/shared/ui/custom-dashboard-toolbar";
 import { useGetUserQuery } from "@/features/admin/admin-users/hook/user.hook";
 import { User } from "@/features/admin/admin-users/type/user.types";
 import { CustomModal, useModal } from "@/components/shared/ui/custom-modal";
 import UserForm from "../component/user.form";
+import {
+  ActionItem,
+  createDeleteAction,
+  createEditAction,
+  createViewAction,
+  CustomAction,
+} from "@/components/shared/ui/custom-action";
+import { ModalState } from "@/types/modal";
 
 const UserPage = () => {
   const { data, isLoading } = useGetUserQuery();
   const createModal = useModal();
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const editModal: ModalState = useModal();
 
   const columns: DataTableColumn<User>[] = [
     createSelectColumn<User>(),
@@ -97,55 +100,17 @@ const UserPage = () => {
       header: "Amallar",
       cell: ({ row }) => {
         const user = row.original;
-        return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                className="h-8 w-8 p-0 hover:bg-transparent"
-              >
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuLabel>Amallar</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={() => handleViewUser(user)}
-                className="cursor-pointer"
-              >
-                <Eye className="mr-2 h-4 w-4" />
-                Ko'rish
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => handleEditUser(user)}
-                className="cursor-pointer"
-              >
-                <Pencil className="mr-2 h-4 w-4" />
-                Tahrirlash
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => handleSendEmail(user)}
-                className="cursor-pointer"
-              >
-                <Mail className="mr-2 h-4 w-4" />
-                Email yuborish
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={() => handleToggleStatus(user)}
-                className="cursor-pointer"
-              ></DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => handleDeleteUser(user)}
-                className="cursor-pointer text-destructive focus:text-destructive"
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                O'chirish
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        );
+
+        const actions: ActionItem[] = [
+          createViewAction(() => handleViewUser(user)),
+          createEditAction(() => handleEditUser(user)),
+          createDeleteAction(() => {
+            setSelectedUser(user);
+            editModal.openModal();
+          }),
+        ];
+
+        return <CustomAction actions={actions} />;
       },
       meta: {
         width: 80,
@@ -159,19 +124,8 @@ const UserPage = () => {
   };
 
   const handleEditUser = (user: User) => {
-    console.log("Tahrirlash:", user);
-  };
-
-  const handleDeleteUser = (user: User) => {
-    console.log("O'chirish:", user);
-  };
-
-  const handleSendEmail = (user: User) => {
-    console.log("Email yuborish:", user);
-  };
-
-  const handleToggleStatus = (user: User) => {
-    console.log("Holatni o'zgartirish:", user);
+    editModal.openModal();
+    setSelectedUser(user);
   };
 
   return (
@@ -186,7 +140,7 @@ const UserPage = () => {
       />
       <DataTable
         columns={columns}
-        data={data?.data ?? []}
+        data={(data?.data as any) ?? []}
         loading={isLoading}
         pageSize={10}
         pageSizeOptions={[5, 10, 20, 50]}
@@ -201,6 +155,19 @@ const UserPage = () => {
         description="Foydalanuvchi ma'lumotlarini kiriting"
       >
         <UserForm mode="create" modal={createModal} />
+      </CustomModal>
+      <CustomModal
+        closeOnOverlayClick
+        onClose={editModal.closeModal}
+        isOpen={editModal.isOpen}
+        title="Foydalanuvchi tahrirlash"
+        description="Foydalanuvchi ma'lumotlarini tahrirlang"
+      >
+        <UserForm
+          mode="edit"
+          userData={selectedUser as any}
+          modal={editModal}
+        />
       </CustomModal>
     </div>
   );

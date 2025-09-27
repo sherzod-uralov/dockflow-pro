@@ -18,17 +18,19 @@ interface Option {
 interface CustomSelectProps {
   options: Option[];
   selectPlaceholder?: string;
+  value?: string | null; // <-- Update the type to accept null
   onChange?: (value: string) => void;
 }
 
 export function CustomSelect({
   options,
   onChange,
+  value,
   selectPlaceholder,
 }: CustomSelectProps) {
   return (
     <div className="w-full">
-      <Select onValueChange={onChange}>
+      <Select value={value ?? ""} onValueChange={onChange}>
         <SelectTrigger className="w-full">
           <SelectValue placeholder={selectPlaceholder} />
         </SelectTrigger>

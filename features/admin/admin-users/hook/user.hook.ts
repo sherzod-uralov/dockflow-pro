@@ -22,15 +22,7 @@ export const useCreateUserMutation = (form?: ReturnType<typeof useForm>) => {
       toast.success("Foydalanuvchi muvaffaqiyatli yaratildi");
     },
     onError: (error: any) => {
-      if (error?.response?.data?.message === "Username already exists") {
-        form?.setError("username", {
-          type: "manual",
-          message: "Bu Fpydalanuvchi allaqachon mavjud",
-        });
-        form?.setFocus("username");
-      } else {
-        toast.error("Foydalanuvchi yaratishda xatolik yuz berdi");
-      }
+      toast.error(error.message);
     },
   });
 };

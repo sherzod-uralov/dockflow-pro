@@ -401,7 +401,7 @@ export const errorHandlers = {
   rol: createErrorHandler("Rol"),
   auth: createErrorHandler("Kirish"),
   documentType: createErrorHandler("HujjatTuri"),
-  deportament: createErrorHandler("BoLim"),
+  deportament: createErrorHandler("Bo'lim"),
   document: createErrorHandler("Hujjat"),
 };
 
