@@ -1,6 +1,7 @@
 import { DataPagination } from "@/types/global.types";
 import { UserSchemaZodType } from "../schema/user.schema";
 import { ModalState } from "@/types/modal";
+import { projectOnExit } from "next/dist/build/swc/generated-native";
 
 export interface UserGetRequest extends DataPagination {
   data: {
@@ -66,4 +67,29 @@ export interface UserFormProps {
   mode: "create" | "edit";
   modal: ModalState;
   userData?: userResponse;
+}
+
+export interface userDetails {
+  id: string;
+  fullname: string;
+  username: string;
+  avatarUrl: string;
+  isActive: boolean;
+  role: {
+    id: string;
+    name: string;
+  };
+  department: {
+    id: string;
+    name: string;
+  };
+  lastLogin: null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface UserHookProps {
+  pageNumber: number;
+  pageSize: number;
+  search: string;
 }

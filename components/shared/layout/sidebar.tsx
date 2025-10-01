@@ -85,15 +85,12 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
           onClick={onClose}
         />
       )}
-
-      {/* Sidebar */}
       <div
         className={cn(
           "fixed lg:static inset-y-0 left-0 z-50 w-64 bg-sidebar border-r border-sidebar-border transform transition-transform duration-200 ease-in-out lg:translate-x-0 flex flex-col",
           isOpen ? "translate-x-0" : "-translate-x-full",
         )}
       >
-        {/* Header */}
         <div className="flex items-center justify-between p-6 border-sidebar-border">
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 bg-primary rounded-xl flex items-center justify-center">
