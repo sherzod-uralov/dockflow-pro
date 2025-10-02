@@ -4,3 +4,9 @@ export interface DataPagination {
   pageSize: number;
   pageCount: number;
 }
+
+export interface GlobalGetAllPaginationProps {
+  search?: string;
+  pageSize?: number;
+  pageNumber?: number;
+}

@@ -26,20 +26,26 @@ import { handleCopyToClipboard } from "@/utils/copy-text";
 import { SingleJournalApiResponse } from "@/features/journal/types/journal.types";
 import { ColumnDef } from "@tanstack/react-table";
 import JournalView from "@/features/journal/component/journal-view";
-import { useGetUserQuery } from "@/features/admin/admin-users/hook/user.hook";
-import { useGetAllDeportaments } from "@/features/deportament";
+import { usePagination } from "@/hooks/use-pagination";
 
 const JournalPage = () => {
   const createModal: ModalState = useModal();
   const editModal: ModalState = useModal();
   const viewModal: ModalState = useModal();
   const deleteModal: ModalState = useModal();
-
+  const { pageNumber, pageSize, handlePageSizeChange, handlePageChange } =
+    usePagination();
   const [selectedJournal, setSelectedJournal] =
     React.useState<SingleJournalApiResponse | null>(null);
 
   const [search, debouncedSearch, setSearch] = useDebounce("", 500);
-  const { data, isLoading } = useGetAllJournals();
+
+  const { data } = useGetAllJournals({
+    search: debouncedSearch,
+    pageSize: pageSize,
+    pageNumber: pageNumber,
+  });
+  console.log(data);
   const deleteMutation = useDeleteJournal();
   const confirmDelete = () => {
     if (selectedJournal) {
@@ -70,7 +76,6 @@ const JournalPage = () => {
       cell: ({ row }) => {
         const journal = row.original;
         const actions: ActionItem[] = [
-          // Активируем кнопку просмотра
           createViewAction(() => {
             setSelectedJournal(journal);
             viewModal.openModal();
@@ -101,10 +106,6 @@ const JournalPage = () => {
         searchQuery={search}
         onSearch={setSearch}
       />
-
-      {/* --- ВСЕ МОДАЛЬНЫЕ ОКНА НАХОДЯТСЯ ЗДЕСЬ, НА ВЕРХНЕМ УРОВНЕ --- */}
-
-      {/* Модальное окно для СОЗДАНИЯ */}
       <CustomModal
         closeOnOverlayClick={false}
         title="Jurnal qo'shish"
@@ -115,10 +116,8 @@ const JournalPage = () => {
         <JournalForm modal={createModal} mode={"create"} />
       </CustomModal>
 
-      {/* Модальные окна для РЕДАКТИРОВАНИЯ и ПРОСМОТРА */}
       {selectedJournal && (
         <>
-          {/* Модальное окно для РЕДАКТИРОВАНИЯ */}
           <CustomModal
             closeOnOverlayClick={false}
             title="Jurnalni tahrirlash"
@@ -132,8 +131,6 @@ const JournalPage = () => {
               journal={selectedJournal}
             />
           </CustomModal>
-
-          {/* ИСПРАВЛЕНО: Модальное окно для ПРОСМОТРА вынесено сюда */}
           <CustomModal
             title="Jurnal haqida ma'lumot"
             description="Jurnalning to'liq ma'lumotlarini ko'rish"
@@ -147,17 +144,20 @@ const JournalPage = () => {
           </CustomModal>
         </>
       )}
-
-      {/* Модальное окно для ПОДТВЕРЖДЕНИЯ УДАЛЕНИЯ */}
       <ConfirmationModal
         isOpen={deleteModal.isOpen}
         onClose={deleteModal.closeModal}
         onConfirm={confirmDelete}
       />
-
-      {/* --- КОНЕЦ СЕКЦИИ МОДАЛЬНЫХ ОКОН --- */}
-
-      <DataTable columns={columns} data={data ? data.data : []} />
+      <DataTable
+        pageSize={pageSize}
+        onPageChange={handlePageChange}
+        onPageSizeChange={handlePageSizeChange}
+        totalCount={data?.count || 0}
+        currentPage={pageNumber}
+        columns={columns}
+        data={data ? data.data : []}
+      />
     </>
   );
 };

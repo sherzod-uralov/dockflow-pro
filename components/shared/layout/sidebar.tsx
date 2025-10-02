@@ -37,7 +37,8 @@ const menuItems: MenuItem[] = [
   { icon: Home, label: "Statistika", href: "/dashboard" },
   { icon: DockIcon, label: "Xujjat turini", href: "/dashboard/document-type" },
   { icon: Home, label: "Bo'limlar", href: "/dashboard/deportament" },
-  { icon: Book, label: "Jurnal", href: "/dashboard/journal" },
+  { icon: Book, label: "Jurnallar", href: "/dashboard/journal" },
+  { icon: DockIcon, label: "Hujjatlar", href: "/dashboard/document" },
   {
     icon: Settings,
     label: "Boshqaruv",

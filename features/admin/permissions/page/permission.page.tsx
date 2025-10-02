@@ -47,6 +47,7 @@ const PermissionPage = () => {
     pageSize: pageSize,
     pageNumber: pageNumber,
   });
+  console.log(data);
   const deletePermissionMutation = useDeletePermission();
 
   const handleView = (permission: Permission) => {

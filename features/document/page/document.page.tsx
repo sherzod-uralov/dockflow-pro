@@ -7,10 +7,7 @@ import {
 } from "@/components/shared/ui/custom-modal";
 import { UserToolbar } from "@/components/shared/ui/custom-dashboard-toolbar";
 import { ModalState } from "@/types/modal";
-import {
-  useDeleteDocument,
-  useGetAllDocuments,
-} from "../hook/document.hook";
+import { useDeleteDocument, useGetAllDocuments } from "../hook/document.hook";
 import { DataTable } from "@/components/shared/ui/custom-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -37,8 +34,9 @@ const DocumentPage = () => {
 
   const { handlePageChange, handlePageSizeChange, pageNumber, pageSize } =
     usePagination();
-  const [selectedDocument, setSelectedDocument] =
-    useState<Document | null>(null);
+  const [selectedDocument, setSelectedDocument] = useState<Document | null>(
+    null,
+  );
   const [searchQuery, debouncedSearch, setSearchQuery] = useDebounce("", 500);
 
   const { data, isLoading } = useGetAllDocuments({
@@ -47,7 +45,7 @@ const DocumentPage = () => {
     pageNumber: pageNumber,
   });
   const deleteDocumentMutation = useDeleteDocument();
-
+  console.log(data);
   const handleEdit = (item: Document) => {
     setSelectedDocument(item);
     editModal.openModal();
@@ -91,7 +89,7 @@ const DocumentPage = () => {
         columns={[
           {
             header: "ID",
-            accessorKey: "id",
+            accessorKey: "message",
             cell: ({ row }) => {
               const id = row.original.id;
               return (

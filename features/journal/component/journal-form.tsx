@@ -41,7 +41,7 @@ const JournalForm = ({ modal, mode, journal }: JournalFormProps) => {
   const { data: departmentsData, isLoading: isLoadingDepartments } =
     useGetAllDeportaments();
   const { data: usersData, isLoading: isLoadingUsers } = useGetUserQuery();
-  console.log("im journal", journal);
+
   const journalCreateMutation = useJournalCreateMutation();
   const journalUpdateMutation = useUpdateJournal();
   const areListsLoading = isLoadingDepartments || isLoadingUsers;
@@ -66,16 +66,8 @@ const JournalForm = ({ modal, mode, journal }: JournalFormProps) => {
         responsibleUserId: journal.responsibleUser.id,
       });
     }
-  }, [mode, journal, form.reset]);
-  // Вы можете использовать areListsLoading, чтобы показать спиннер на всей форме
-  if (mode === "edit" && (isLoadingDepartments || isLoadingUsers)) {
-    return (
-      <div className="flex items-center justify-center h-40">
-        {/* Здесь может быть ваш красивый компонент-загрузчик */}
-        <p>Ma'lumotlar yuklanmoqda...</p>
-      </div>
-    );
-  }
+  }, [mode, journal, form.reset, usersData, departmentsData]);
+
   const onSubmitHandler = (values: JournalCreateType) => {
     if (mode === "edit" && journal) {
       journalUpdateMutation.mutate(

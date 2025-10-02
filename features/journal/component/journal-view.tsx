@@ -124,22 +124,6 @@ const JournalView = ({ journal, onClose }: JournalViewProps) => {
           <Separator />
 
           {/* --- 7. Даты создания и обновления --- */}
-          <div>
-            <div className="flex items-center gap-2 mb-3">
-              <Calendar className="h-4 w-4 text-muted-foreground" />
-              <span className="font-medium">Sana ma'lumotlari</span>
-            </div>
-            <div className="p-4 bg-muted/30 rounded-lg border space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Yaratilgan vaqti:</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">
-                  Yangilangan vaqti:
-                </span>
-              </div>
-            </div>
-          </div>
         </CardContent>
       </Card>
 

@@ -3,11 +3,16 @@ import axiosInstance from "@/api/axios.instance";
 import { endpoints } from "@/api/axios.endpoints";
 import { handleJurnalError } from "@/utils/http-error-handler";
 import { JournalListResponse } from "@/features/journal/types/journal.types";
+import { GlobalGetAllPaginationProps } from "@/types/global.types";
 
 export const journalService = {
-  getAllJournals: async () => {
+  getAllJournals: async (params: GlobalGetAllPaginationProps) => {
     return await handleJurnalError.executeList(() =>
-      axiosInstance.get<JournalListResponse>(endpoints.journal.list),
+      axiosInstance.get<JournalListResponse>(endpoints.journal.list, {
+        params: {
+          ...params,
+        },
+      }),
     );
   },
 

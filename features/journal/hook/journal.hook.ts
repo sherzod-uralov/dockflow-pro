@@ -2,12 +2,25 @@ import { useMutation, useQuery, useQueryClient } from "react-query";
 import { JournalCreateType } from "@/features/journal/scheme/journal-create";
 import { journalService } from "@/features/journal/service/journal.service";
 import { toast } from "sonner";
-import { JournalResponse } from "@/features/journal/types/journal.types";
+import {
+  JournalListResponse,
+  SingleJournalApiResponse,
+} from "@/features/journal/types/journal.types";
+import { GlobalGetAllPaginationProps } from "@/types/global.types";
 
-export const useGetAllJournals = () => {
-  return useQuery<JournalResponse>({
-    queryFn: journalService.getAllJournals,
-    queryKey: ["journals"],
+export const useGetAllJournals = ({
+  search,
+  pageSize,
+  pageNumber,
+}: GlobalGetAllPaginationProps) => {
+  return useQuery<JournalListResponse>({
+    queryFn: () =>
+      journalService.getAllJournals({
+        search: search,
+        pageSize: pageSize,
+        pageNumber: pageNumber,
+      }),
+    queryKey: ["journals", search, pageNumber, pageSize],
     keepPreviousData: true,
   });
 };

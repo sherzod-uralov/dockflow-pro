@@ -18,8 +18,6 @@ export type SingleJournalApiResponse = {
     fullname: string;
     username: string;
   };
-  createdAt: string;
-  updatedAt: string;
 };
 
 // 2. Тип для ВСЕГО ответа API (список + пагинация)
