@@ -21,36 +21,10 @@ import {
   Info,
   Hash,
   MapPin,
-  LucidePartyPopper,
   LucideRadioTower,
 } from "lucide-react";
+import { DeportamentViewProps } from "@/features/deportament";
 
-// 2. Определяем точный тип данных для одного департамента
-interface DeportamentViewPropsData {
-  id: string;
-  name: string;
-  description: string | null;
-  parent: {
-    id: string;
-    name: string;
-  } | null; // Родительский отдел может отсутствовать
-  director: {
-    id: string;
-    fullname: string;
-    username: string;
-    avatarUrl: string | null;
-  } | null; // Директор может быть не назначен
-  code: string | null;
-  location: string | null;
-}
-
-// 3. Обновляем интерфейс пропсов
-interface DeportamentViewProps {
-  departament: DeportamentViewPropsData;
-  onClose?: () => void;
-}
-
-// Переименовываем компонент для ясности
 const DeportamentView = ({ departament, onClose }: DeportamentViewProps) => {
   return (
     <div className="space-y-6">
