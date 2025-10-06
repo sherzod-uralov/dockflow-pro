@@ -19,7 +19,7 @@ const Page = () => {
             href: "/dashboard/admin",
           },
           {
-            label: "HujjatTuri",
+            label: "Hujjat turi",
             href: "/dashboard/admin/document-type",
           },
         ]}

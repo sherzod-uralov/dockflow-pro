@@ -75,9 +75,9 @@ const DocumentTypePage = () => {
     <>
       <UserToolbar
         searchQuery={searchQuery}
-        searchPlaceholder="DocumentTypelarni qidirish..."
+        searchPlaceholder="Hujjat turini qidirish..."
         onSearch={handleSearch}
-        createLabel="DocumentType qo'shish"
+        createLabel="Hujjat turini qo'shish"
         onCreate={createModal.openModal}
       />
 
@@ -120,7 +120,7 @@ const DocumentTypePage = () => {
             header: "Nom",
             accessorKey: "name",
           },
-          // Добавлено новое поле description
+
           {
             header: "Tavsif",
             accessorKey: "description",
@@ -152,7 +152,7 @@ const DocumentTypePage = () => {
       <CustomModal
         closeOnOverlayClick={false}
         title="Hujjat turini qo'shish"
-        description="DocumentType qo'shish uchun maydonlar to'ldirilishi kerak"
+        description="Hujjat turini qo'shish uchun maydonlar to'ldirilishi kerak"
         isOpen={createModal.isOpen}
         onClose={createModal.closeModal}
       >
@@ -161,8 +161,8 @@ const DocumentTypePage = () => {
 
       <CustomModal
         closeOnOverlayClick={false}
-        title="DocumentTypeni yangilash"
-        description="DocumentType ma'lumotlarini yangilang"
+        title="Hujjat turini yangilash"
+        description="Hujjat turini ma'lumotlarini yangilang"
         isOpen={editModal.isOpen}
         onClose={handleEditModalClose}
       >
@@ -176,7 +176,7 @@ const DocumentTypePage = () => {
 
       <ConfirmationModal
         closeOnOverlayClick={false}
-        title="DocumentTypeni o'chirish"
+        title="Hujjat turini o'chirish"
         description="Ushbu ma'lumotni o'chirgandan so'ng qaytarib bo'lmaydi. Rozimisiz?"
         onClose={deleteModal.closeModal}
         isOpen={deleteModal.isOpen}

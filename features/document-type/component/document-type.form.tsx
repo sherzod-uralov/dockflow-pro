@@ -121,7 +121,7 @@ const DocumentTypeFormModal = ({
               <FormLabel>Hujjat tavsifi</FormLabel>
               <FormControl>
                 <Input
-                  placeholder="Hujjat tavsifi nomini kiriting"
+                  placeholder="Hujjat tavsifini nomini kiriting"
                   disabled={isLoading}
                   {...field}
                 />

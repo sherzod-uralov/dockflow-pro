@@ -22,6 +22,7 @@ import {
   createEditAction,
   createDeleteAction,
   createCopyAction,
+  createViewAction,
 } from "@/components/shared/ui/custom-action";
 import { DepartmentResponse, Deportament } from "../type/deportament.type";
 import DeportamentFormModal from "../component/deportament.form";
@@ -29,12 +30,13 @@ import { useDebounce } from "@/hooks/use-debaunce";
 import { handleCopyToClipboard } from "@/utils/copy-text";
 import { usePagination } from "@/hooks/use-pagination";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import DeportamentView from "@/features/deportament/component/deportament.view";
 
 const DeportamentPage = () => {
   const createModal: ModalState = useModal();
   const editModal: ModalState = useModal();
   const deleteModal: ModalState = useModal();
-
+  const viewModal: ModalState = useModal();
   const { handlePageChange, handlePageSizeChange, pageNumber, pageSize } =
     usePagination();
   const [selectedDeportament, setSelectedDeportament] =
@@ -70,6 +72,14 @@ const DeportamentPage = () => {
   const handleEditModalClose = () => {
     setSelectedDeportament(null);
     editModal.closeModal();
+  };
+  const handleView = (item: DepartmentResponse) => {
+    setSelectedDeportament(item);
+    viewModal.openModal();
+  };
+  const handleViewModalClose = () => {
+    setSelectedDeportament(null);
+    viewModal.closeModal();
   };
 
   return (
@@ -166,6 +176,7 @@ const DeportamentPage = () => {
 
               const actions: ActionItem[] = [
                 createEditAction(() => handleEdit(item)),
+                createViewAction(() => handleView(item)),
                 createCopyAction(() =>
                   handleCopyToClipboard(item.id || "", "ID"),
                 ),
@@ -205,6 +216,19 @@ const DeportamentPage = () => {
           deportament={selectedDeportament as any}
           onSuccess={handleEditSuccess}
         />
+      </CustomModal>
+      <CustomModal
+        isOpen={viewModal.isOpen}
+        onClose={handleViewModalClose}
+        title="Departament ma'lumotlari"
+        description="Departament haqida to'liq ma'lumot"
+      >
+        {selectedDeportament && (
+          <DeportamentView
+            departament={selectedDeportament}
+            onClose={handleViewModalClose}
+          />
+        )}
       </CustomModal>
 
       <ConfirmationModal
