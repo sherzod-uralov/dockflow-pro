@@ -45,6 +45,7 @@ export type Field = {
     | "url";
   placeholder?: string;
   options?: FieldOption[];
+  colSpan?: number;
 };
 
 interface Props {
@@ -79,125 +80,131 @@ export default function SimpleFormGenerator({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className={className + " space-y-4"}
+        className={className + " grid grid-cols-2 gap-4"}
       >
         {fields.map((f) => (
-          <FormField
+          <div
             key={f.name}
-            control={form.control}
-            name={f.name}
-            render={({ field }) => (
-              <FormItem>
-                {f.label && <FormLabel>{f.label}</FormLabel>}
-                <FormControl>
-                  {(() => {
-                    switch (f.type) {
-                      case "textarea":
-                        return (
-                          <Textarea placeholder={f.placeholder} {...field} />
-                        );
+            className={f.colSpan ? `col-span-${f.colSpan}` : "col-span-1"}
+          >
+            <FormField
+              control={form.control}
+              name={f.name}
+              render={({ field }) => (
+                <FormItem>
+                  {f.label && <FormLabel>{f.label}</FormLabel>}
+                  <FormControl>
+                    {(() => {
+                      switch (f.type) {
+                        case "textarea":
+                          return (
+                            <Textarea placeholder={f.placeholder} {...field} />
+                          );
 
-                      case "select":
-                        return (
-                          <Select
-                            value={field.value ?? ""}
-                            onValueChange={field.onChange}
-                          >
-                            <SelectTrigger className="w-full">
-                              <SelectValue
-                                placeholder={f.placeholder ?? "Tanlang"}
-                              />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {f.options?.map((opt) => (
-                                <SelectItem
-                                  key={String(opt.value)}
-                                  value={String(opt.value)}
-                                >
-                                  {opt.label}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        );
-
-                      case "checkbox":
-                        return (
-                          <Checkbox
-                            checked={!!field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        );
-
-                      case "radio":
-                        return (
-                          <RadioGroup
-                            value={field.value}
-                            onValueChange={field.onChange}
-                          >
-                            {f.options?.map((opt) => (
-                              <div
-                                key={String(opt.value)}
-                                className="flex items-center space-x-2"
-                              >
-                                <RadioGroupItem
-                                  value={String(opt.value)}
-                                  id={`${f.name}-${opt.value}`}
+                        case "select":
+                          return (
+                            <Select
+                              value={field.value ?? ""}
+                              onValueChange={field.onChange}
+                            >
+                              <SelectTrigger className="w-full">
+                                <SelectValue
+                                  placeholder={f.placeholder ?? "Tanlang"}
                                 />
-                                <FormLabel htmlFor={`${f.name}-${opt.value}`}>
-                                  {opt.label}
-                                </FormLabel>
-                              </div>
-                            ))}
-                          </RadioGroup>
-                        );
+                              </SelectTrigger>
+                              <SelectContent>
+                                {f.options?.map((opt) => (
+                                  <SelectItem
+                                    key={String(opt.value)}
+                                    value={String(opt.value)}
+                                  >
+                                    {opt.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          );
 
-                      case "number":
-                        return (
-                          <Input
-                            type="number"
-                            placeholder={f.placeholder}
-                            value={field.value ?? ""}
-                            onChange={(e) =>
-                              field.onChange(
-                                e.target.value
-                                  ? Number(e.target.value)
-                                  : undefined,
-                              )
-                            }
-                          />
-                        );
+                        case "checkbox":
+                          return (
+                            <Checkbox
+                              checked={!!field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          );
 
-                      case "file":
-                        return (
-                          <Input
-                            type="file"
-                            onChange={(e) =>
-                              field.onChange(
-                                e.target.files ? e.target.files[0] : undefined,
-                              )
-                            }
-                          />
-                        );
+                        case "radio":
+                          return (
+                            <RadioGroup
+                              value={field.value}
+                              onValueChange={field.onChange}
+                            >
+                              {f.options?.map((opt) => (
+                                <div
+                                  key={String(opt.value)}
+                                  className="flex items-center space-x-2"
+                                >
+                                  <RadioGroupItem
+                                    value={String(opt.value)}
+                                    id={`${f.name}-${opt.value}`}
+                                  />
+                                  <FormLabel htmlFor={`${f.name}-${opt.value}`}>
+                                    {opt.label}
+                                  </FormLabel>
+                                </div>
+                              ))}
+                            </RadioGroup>
+                          );
 
-                      default:
-                        return (
-                          <Input
-                            type={f.type ?? "text"}
-                            placeholder={f.placeholder}
-                            {...field}
-                          />
-                        );
-                    }
-                  })()}
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+                        case "number":
+                          return (
+                            <Input
+                              type="number"
+                              placeholder={f.placeholder}
+                              value={field.value ?? ""}
+                              onChange={(e) =>
+                                field.onChange(
+                                  e.target.value
+                                    ? Number(e.target.value)
+                                    : undefined,
+                                )
+                              }
+                            />
+                          );
+
+                        case "file":
+                          return (
+                            <Input
+                              type="file"
+                              onChange={(e) =>
+                                field.onChange(
+                                  e.target.files
+                                    ? e.target.files[0]
+                                    : undefined,
+                                )
+                              }
+                            />
+                          );
+
+                        default:
+                          return (
+                            <Input
+                              type={f.type ?? "text"}
+                              placeholder={f.placeholder}
+                              {...field}
+                            />
+                          );
+                      }
+                    })()}
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
         ))}
 
-        <div className="flex justify-end gap-2">
+        <div className="flex justify-end col-span-2 gap-2">
           {renderActions ? (
             renderActions({
               isSubmitting: form.formState.isSubmitting,

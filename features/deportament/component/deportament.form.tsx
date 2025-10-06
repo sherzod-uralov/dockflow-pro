@@ -1,30 +1,20 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
 import { deportamentScheme } from "../schema/deportament.schema";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { z } from "zod";
-import { Button } from "@/components/ui/button";
 import { ModalState } from "@/types/modal";
 import {
   useCreateDeportament,
   useGetAllDeportaments,
   useUpdateDeportament,
 } from "../hook/deportament.hook";
-import { useEffect } from "react";
-import { Textarea } from "@/components/ui/textarea";
-import { CustomSelect } from "@/components/shared/ui/custom-select";
 import { useGetUserQuery } from "@/features/admin/admin-users/hook/user.hook";
 import { DepartmentResponse } from "../type/deportament.type";
+
+import { Button } from "@/components/ui/button";
+import SimpleFormGenerator, {
+  Field,
+} from "@/components/shared/ui/custom-form-generator";
 
 type DeportamentFormType = z.infer<typeof deportamentScheme>;
 
@@ -50,40 +40,75 @@ const DeportamentFormModal = ({
   const isLoading =
     createDeportamentMutation.isLoading || updateDeportamentMutation.isLoading;
 
-  console.log(deportament);
-  const form = useForm<DeportamentFormType>({
-    resolver: zodResolver(deportamentScheme),
-    defaultValues: {
-      name: "",
-      description: "",
-      directorId: "",
-      code: "",
-      location: "",
-      parentId: "",
+  const fields: Field[] = [
+    {
+      name: "name",
+      label: "Deportament nomi",
+      type: "text",
+      placeholder: "Deportament nomini kiriting",
+      colSpan: 2,
     },
-  });
+    {
+      name: "description",
+      label: "Deportament tavsifi",
+      type: "textarea",
+      placeholder: "Deportament tavsifini kiriting",
+      colSpan: 2,
+    },
+    {
+      name: "code",
+      label: "Deportament kodi",
+      type: "text",
+      placeholder: "ITD",
+    },
+    {
+      name: "location",
+      label: "Deportament joylashuvi",
+      type: "text",
+      placeholder: "Joyni kiriting",
+    },
+    {
+      name: "directorId",
+      label: "Deportament direktori",
+      type: "select",
+      placeholder: "Direktorni tanlang",
+      options:
+        users?.data?.map((u) => ({
+          value: u.id,
+          label: u.fullname,
+        })) || [],
+    },
+    {
+      name: "parentId",
+      label: "Deportament biriktirish",
+      type: "select",
+      placeholder: "Deportamentni tanlang",
+      options:
+        departments?.data?.map((d) => ({
+          value: d.id,
+          label: d.name,
+        })) || [],
+    },
+  ];
 
-  useEffect(() => {
-    if (isUpdate && deportament) {
-      form.reset({
-        name: deportament.name || "",
-        description: deportament.description || "",
-        directorId: deportament.director?.id,
-        code: deportament.code || "",
-        location: deportament.location || "",
-        parentId: deportament.parent?.id,
-      });
-    } else if (!isUpdate) {
-      form.reset({
+  // 🔹 defaultValues
+  const defaultValues: DeportamentFormType = isUpdate
+    ? {
+        name: deportament?.name ?? "",
+        description: deportament?.description ?? "",
+        code: deportament?.code ?? "",
+        location: deportament?.location ?? "",
+        directorId: deportament?.director?.id ?? "",
+        parentId: deportament?.parent?.id ?? "",
+      }
+    : {
         name: "",
         description: "",
-        directorId: "",
         code: "",
         location: "",
+        directorId: "",
         parentId: "",
-      });
-    }
-  }, [departments, deportament, users, isUpdate, form, modal.isOpen]);
+      };
 
   const handleSubmit = (values: DeportamentFormType) => {
     if (isUpdate && deportament) {
@@ -92,11 +117,7 @@ const DeportamentFormModal = ({
         {
           onSuccess: () => {
             modal.closeModal();
-            form.reset();
             onSuccess?.();
-          },
-          onError: (error) => {
-            console.error("Update error:", error);
           },
         },
       );
@@ -104,159 +125,31 @@ const DeportamentFormModal = ({
       createDeportamentMutation.mutate(values, {
         onSuccess: () => {
           modal.closeModal();
-          form.reset();
           onSuccess?.();
-        },
-        onError: (error) => {
-          console.error("Create error:", error);
         },
       });
     }
   };
 
-  const handleCancel = () => {
-    modal.closeModal();
-    form.reset();
-  };
-
   return (
-    <Form {...form}>
-      <form className="space-y-5" onSubmit={form.handleSubmit(handleSubmit)}>
-        {/* Name */}
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Deportament nomi</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Deportament nomini kiriting"
-                  disabled={isLoading}
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Description */}
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Deportament tavsifi</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Deportament tavsifini kiriting"
-                  disabled={isLoading}
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Code */}
-        <FormField
-          control={form.control}
-          name="code"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Deportament uchun kod kiriting (ITD)</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Deportament kodini kiriting"
-                  disabled={isLoading}
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="location"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Deportament joylashuvi</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Deportament joyini kiriting"
-                  disabled={isLoading}
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="directorId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Deportament direktori</FormLabel>
-              <FormControl>
-                <CustomSelect
-                  value={field.value}
-                  onChange={(val) => field.onChange(val)}
-                  selectPlaceholder="Deportament direktorini tanlang"
-                  options={
-                    users?.data?.map((item) => ({
-                      value: item.id,
-                      label: item.fullname,
-                    })) || []
-                  }
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="parentId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Deportament biriktirish</FormLabel>
-              <FormControl>
-                <CustomSelect
-                  value={field.value}
-                  onChange={(val) => field.onChange(val)}
-                  selectPlaceholder="Deportament tanlang"
-                  options={
-                    departments?.data?.map((item) => ({
-                      value: item.id,
-                      label: item.name,
-                    })) || []
-                  }
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Actions */}
+    <SimpleFormGenerator
+      schema={deportamentScheme}
+      fields={fields}
+      defaultValues={defaultValues}
+      onSubmit={handleSubmit}
+      submitLabel={isUpdate ? "Yangilash" : "Qo'shish"}
+      renderActions={({ isSubmitting }) => (
         <div className="flex justify-end gap-2 pt-4">
           <Button
-            className="hover:text-text-on-dark"
             type="button"
             variant="outline"
-            onClick={handleCancel}
-            disabled={isLoading}
+            onClick={modal.closeModal}
+            disabled={isSubmitting || isLoading}
           >
             Bekor qilish
           </Button>
-          <Button type="submit" disabled={isLoading}>
-            {isLoading
+          <Button type="submit" disabled={isSubmitting || isLoading}>
+            {isSubmitting || isLoading
               ? isUpdate
                 ? "Yangilanmoqda..."
                 : "Qo'shilmoqda..."
@@ -265,8 +158,8 @@ const DeportamentFormModal = ({
                 : "Qo'shish"}
           </Button>
         </div>
-      </form>
-    </Form>
+      )}
+    />
   );
 };
 

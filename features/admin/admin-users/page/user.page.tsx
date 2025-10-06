@@ -1,8 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import { Eye, Pencil, Trash2, MoreHorizontal, Mail } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import {
   DataTable,
   DataTableColumn,
@@ -11,9 +9,16 @@ import {
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { UserToolbar } from "@/components/shared/ui/custom-dashboard-toolbar";
-import { useGetUserQuery } from "@/features/admin/admin-users/hook/user.hook";
+import {
+  useDeleteUserMutation,
+  useGetUserQuery,
+} from "@/features/admin/admin-users/hook/user.hook";
 import { User } from "@/features/admin/admin-users/type/user.types";
-import { CustomModal, useModal } from "@/components/shared/ui/custom-modal";
+import {
+  ConfirmationModal,
+  CustomModal,
+  useModal,
+} from "@/components/shared/ui/custom-modal";
 import UserForm from "../component/user.form";
 import {
   ActionItem,
@@ -23,12 +28,23 @@ import {
   CustomAction,
 } from "@/components/shared/ui/custom-action";
 import { ModalState } from "@/types/modal";
+import { useRouter } from "next/navigation";
+import UserView from "../component/user.view";
+import { usePagination } from "@/hooks/use-pagination";
+import { useDebounce } from "@/hooks/use-debaunce";
 
 const UserPage = () => {
-  const { data, isLoading } = useGetUserQuery();
+  const { pageNumber, pageSize, handlePageChange, handlePageSizeChange } =
+    usePagination();
+  const [search, debaunce, setSearch] = useDebounce("", 500);
+  const { data, isLoading } = useGetUserQuery({ pageNumber, pageSize, search });
   const createModal = useModal();
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const editModal: ModalState = useModal();
+  const deleteModal: ModalState = useModal();
+  const viewModal: ModalState = useModal();
+  const router = useRouter();
+  const deleteUserMutation = useDeleteUserMutation();
 
   const columns: DataTableColumn<User>[] = [
     createSelectColumn<User>(),
@@ -106,7 +122,7 @@ const UserPage = () => {
           createEditAction(() => handleEditUser(user)),
           createDeleteAction(() => {
             setSelectedUser(user);
-            editModal.openModal();
+            deleteModal.openModal();
           }),
         ];
 
@@ -120,7 +136,8 @@ const UserPage = () => {
   ];
 
   const handleViewUser = (user: User) => {
-    console.log("Ko'rish:", user);
+    viewModal.openModal();
+    router.push(`?userId=${user.id}`, { scroll: false });
   };
 
   const handleEditUser = (user: User) => {
@@ -131,16 +148,15 @@ const UserPage = () => {
   return (
     <div className="space-y-6">
       <UserToolbar
-        searchQuery="Foydalanuvchi qidirish"
+        searchQuery={search}
+        searchPlaceholder="Foydalanuvchi qidirish"
         createLabel="Foydalanuvchi qo'shish"
         onCreate={() => createModal.openModal()}
-        filterLabel="Filtr"
-        onFilter={() => console.log("filter")}
-        onSearch={() => console.log("Search user")}
+        onSearch={setSearch}
       />
       <DataTable
         columns={columns}
-        data={(data?.data as any) ?? []}
+        data={(data?.data as any[]) ?? []}
         loading={isLoading}
         pageSize={10}
         pageSizeOptions={[5, 10, 20, 50]}
@@ -149,6 +165,7 @@ const UserPage = () => {
       />
       <CustomModal
         closeOnOverlayClick
+        size="full"
         onClose={createModal.closeModal}
         isOpen={createModal.isOpen}
         title="Foydalanuvchi qo'shish"
@@ -168,6 +185,24 @@ const UserPage = () => {
           userData={selectedUser as any}
           modal={editModal}
         />
+      </CustomModal>
+      <ConfirmationModal
+        title="Foydalanuvchini o'chirish"
+        description="Foydalanuvchini o'chirgandan so'ng qaytarib bo'lmaydi rozimisiz?"
+        isOpen={deleteModal.isOpen}
+        onConfirm={() => deleteUserMutation.mutate(selectedUser?.id || "")}
+        onClose={deleteModal.closeModal}
+      />
+      <CustomModal
+        closeOnOverlayClick
+        isOpen={viewModal.isOpen}
+        onClose={() => {
+          viewModal.closeModal();
+          router.push("?", { scroll: false });
+        }}
+        title="Foydalanuvchi malumotlari"
+      >
+        <UserView />
       </CustomModal>
     </div>
   );

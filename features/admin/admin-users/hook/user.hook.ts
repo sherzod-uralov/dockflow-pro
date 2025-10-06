@@ -1,14 +1,23 @@
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { userService } from "@/features/admin/admin-users/service/user.service";
-import { UserGetRequest } from "@/features/admin/admin-users/type/user.types";
+import {
+  User,
+  userDetails,
+  UserGetRequest,
+  UserHookProps,
+} from "@/features/admin/admin-users/type/user.types";
 import { toast } from "sonner";
 import { UserSchemaZodType } from "../schema/user.schema";
 import { useForm } from "react-hook-form";
 
-export const useGetUserQuery = () => {
+export const useGetUserQuery = ({
+  pageNumber,
+  pageSize,
+  search,
+}: UserHookProps) => {
   return useQuery<UserGetRequest>({
-    queryKey: "user",
-    queryFn: userService.getAllUsers,
+    queryKey: ["user", pageNumber, pageSize, search],
+    queryFn: () => userService.getAllUsers({ pageNumber, pageSize, search }),
     keepPreviousData: true,
   });
 };
@@ -38,5 +47,30 @@ export const useDeleteUserMutation = () => {
     onError: () => {
       toast.error("Foydalanuvchi o'chirishda xatolik yuz berdi");
     },
+  });
+};
+
+export const useUpdateUserMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: User }) =>
+      userService.updateUser(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries("user");
+      toast.success("Foydalanuvchi muvaffaqiyatli yangilandi");
+    },
+    onError: (error: any) => {
+      const msg =
+        error?.response?.data?.message ?? error?.message ?? "Xatolik yuz berdi";
+      toast.error(msg);
+    },
+  });
+};
+
+export const useGetUserByIdQuery = (id: string) => {
+  return useQuery<userDetails>({
+    queryKey: ["user", id],
+    queryFn: () => userService.getUserById(id),
+    keepPreviousData: true,
   });
 };
