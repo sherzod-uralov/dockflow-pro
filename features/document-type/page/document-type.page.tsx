@@ -94,12 +94,13 @@ const DocumentTypePage = () => {
             accessorKey: "id",
             cell: ({ row }) => {
               const id = row.original.id;
+
               return (
                 <div className="flex w-full items-center gap-2">
                   <Badge
                     variant="outline"
                     className="font-mono cursor-pointer hover:bg-muted"
-                    onClick={() => handleCopyToClipboard(id, "ID")}
+                    onClick={() => handleCopyToClipboard(id ?? "", "ID")}
                   >
                     {id?.slice(0, 8)}...
                   </Badge>
@@ -107,7 +108,7 @@ const DocumentTypePage = () => {
                     variant="ghost"
                     size="icon"
                     className="h-6 w-6 group"
-                    onClick={() => handleCopyToClipboard(id, "ID")}
+                    onClick={() => handleCopyToClipboard(id ?? "", "ID")}
                   >
                     <Copy className="h-3 w-3 group-hover:text-text-on-dark" />
                   </Button>
@@ -118,6 +119,11 @@ const DocumentTypePage = () => {
           {
             header: "Nom",
             accessorKey: "name",
+          },
+          // Добавлено новое поле description
+          {
+            header: "Tavsif",
+            accessorKey: "description",
           },
           {
             header: "Harakatlar",
@@ -145,7 +151,7 @@ const DocumentTypePage = () => {
 
       <CustomModal
         closeOnOverlayClick={false}
-        title="DocumentType qo'shish"
+        title="Hujjat turini qo'shish"
         description="DocumentType qo'shish uchun maydonlar to'ldirilishi kerak"
         isOpen={createModal.isOpen}
         onClose={createModal.closeModal}

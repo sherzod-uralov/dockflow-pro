@@ -1,6 +1,7 @@
 import { DataPagination } from "@/types/global.types";
 
 export interface DocumentType {
+  description: string;
   id?: string;
   name: string;
 }

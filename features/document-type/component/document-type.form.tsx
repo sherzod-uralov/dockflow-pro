@@ -48,6 +48,7 @@ const DocumentTypeFormModal = ({
     mode: "onChange",
     defaultValues: {
       name: "",
+      description: "",
     },
   });
 
@@ -55,6 +56,7 @@ const DocumentTypeFormModal = ({
     if (isUpdate && documentType) {
       form.reset({
         name: documentType.name || "",
+        description: documentType.description || "",
       });
     } else if (!isUpdate) {
       form.reset({
@@ -99,10 +101,10 @@ const DocumentTypeFormModal = ({
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>DocumentType nomi</FormLabel>
+              <FormLabel>Hujjat turi nomi</FormLabel>
               <FormControl>
                 <Input
-                  placeholder="DocumentType nomini kiriting"
+                  placeholder="Hujjat turini nomini kiriting"
                   disabled={isLoading}
                   {...field}
                 />
@@ -111,7 +113,23 @@ const DocumentTypeFormModal = ({
             </FormItem>
           )}
         />
-
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Hujjat tavsifi</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="Hujjat tavsifi nomini kiriting"
+                  disabled={isLoading}
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <div className="flex justify-end gap-2 pt-4">
           <Button
             className="hover:text-text-on-dark"
