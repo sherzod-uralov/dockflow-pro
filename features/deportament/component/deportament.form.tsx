@@ -3,18 +3,21 @@
 import { deportamentScheme } from "../schema/deportament.schema";
 import { z } from "zod";
 import { ModalState } from "@/types/modal";
-import {
-  useCreateDeportament,
-  useGetAllDeportaments,
-  useUpdateDeportament,
-} from "../hook/deportament.hook";
+
 import { useGetUserQuery } from "@/features/admin/admin-users/hook/user.hook";
-import { DepartmentResponse } from "../type/deportament.type";
 
 import { Button } from "@/components/ui/button";
 import SimpleFormGenerator, {
   Field,
 } from "@/components/shared/ui/custom-form-generator";
+import { usePagination } from "@/hooks/use-pagination";
+import { useDebounce } from "@/hooks/use-debaunce";
+import {
+  DepartmentResponse,
+  useCreateDeportament,
+  useGetAllDeportaments,
+  useUpdateDeportament,
+} from "@/features/deportament";
 
 type DeportamentFormType = z.infer<typeof deportamentScheme>;
 
@@ -33,8 +36,12 @@ const DeportamentFormModal = ({
 }: DeportamentFormModalProps) => {
   const createDeportamentMutation = useCreateDeportament();
   const updateDeportamentMutation = useUpdateDeportament();
+
   const { data: departments } = useGetAllDeportaments();
-  const { data: users } = useGetUserQuery();
+  const { data: users } = useGetUserQuery({
+    pageNumber: 1,
+    pageSize: 1000,
+  });
 
   const isUpdate = mode === "update";
   const isLoading =

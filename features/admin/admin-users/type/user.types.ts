@@ -91,5 +91,5 @@ export interface userDetails {
 export interface UserHookProps {
   pageNumber: number;
   pageSize: number;
-  search: string;
+  search?: string;
 }

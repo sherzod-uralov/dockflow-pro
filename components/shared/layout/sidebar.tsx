@@ -16,6 +16,7 @@ import {
   ChevronDown,
   Home,
   DockIcon,
+  UserCog,
   Book,
 } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
@@ -47,6 +48,11 @@ const menuItems: MenuItem[] = [
       { label: "Rollar", href: "/dashboard/admin/roles" },
       { label: "Ruxsatlar", href: "/dashboard/admin/permissions" },
     ],
+  },
+  {
+    icon: Settings,
+    label: "Sozlamalar",
+    subItems: [{ label: "Profil", href: "/dashboard/setting/profile" }],
   },
 ];
 
