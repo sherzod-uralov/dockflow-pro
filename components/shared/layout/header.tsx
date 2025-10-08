@@ -13,12 +13,35 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Menu, Search, Bell, Settings, User, LogOut } from "lucide-react";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
+import { useGetProfileQuery } from "@/features/login/hook/login.hook";
+import { useRouter } from "next/navigation";
 
 interface HeaderProps {
   onMenuClick: () => void;
 }
 
 export function Header({ onMenuClick }: HeaderProps) {
+  const { data, isLoading } = useGetProfileQuery();
+  const router = useRouter();
+
+  if (isLoading || !data) {
+    return (
+      <header className="bg-card border-b border-border px-6 py-4">
+        <div className="flex items-center justify-between">
+          <div>Loading...</div>
+        </div>
+      </header>
+    );
+  }
+
+  const fullName = data.fullname;
+  const email = `username: ${data.username}`;
+  const initials = "AD";
+
+  const handleProfileClick = () => {
+    router.push("/setting/profile");
+  };
+
   return (
     <header className="bg-card border-b border-border px-6 py-4">
       <div className="flex items-center justify-between">
@@ -59,39 +82,44 @@ export function Header({ onMenuClick }: HeaderProps) {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-10 w-10 rounded-xl">
                 <Avatar className="h-9 w-9">
-                  <AvatarImage src="/diverse-user-avatars.png" alt="User" />
+                  {data.avatarUrl && (
+                    <AvatarImage src={data.avatarUrl} alt="User" />
+                  )}
                   <AvatarFallback className="bg-primary text-primary-foreground">
-                    JD
+                    {initials}
                   </AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent
-              className="w-56 rounded-xl"
+              className="w-56 rounded-xl bg-background"
               align="end"
               forceMount
             >
               <DropdownMenuLabel className="font-normal">
                 <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">John Doe</p>
+                  <p className="text-sm font-medium leading-none">{fullName}</p>
                   <p className="text-xs leading-none text-muted-foreground">
-                    john@example.com
+                    {email}
                   </p>
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="rounded-lg">
-                <User className="mr-2 h-4 w-4" />
-                <span>Profil</span>
+              <DropdownMenuItem
+                className="rounded-lg  group hover:bg-accent cursor-pointer"
+                onClick={handleProfileClick}
+              >
+                <User className="mr-2 group-hover:text-white h-4 w-4" />
+                <span className="group-hover:text-white">Profil</span>
               </DropdownMenuItem>
-              <DropdownMenuItem className="rounded-lg">
-                <Settings className="mr-2 h-4 w-4" />
-                <span>Tizimni Sozlash</span>
+              <DropdownMenuItem className="rounded-lg  group hover:bg-accent cursor-pointer">
+                <Settings className="mr-2 group-hover:text-white h-4 w-4" />
+                <span className="group-hover:text-white">Tizimni Sozlash</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="rounded-lg">
-                <LogOut className="mr-2 h-4 w-4" />
-                <span>Tizimdan Chiqish</span>
+              <DropdownMenuItem className="rounded-lg  group hover:bg-accent cursor-pointer">
+                <LogOut className="mr-2 group-hover:text-white h-4 w-4" />
+                <span className="group-hover:text-white">Tizimdan Chiqish</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

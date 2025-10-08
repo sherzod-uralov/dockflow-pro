@@ -36,3 +36,15 @@ export const useLogoutMutation = () => {
     },
   });
 };
+
+export const useProfileUpdateMutation = () => {
+  return useMutation({
+    mutationFn: (payload: any) => authService.updateProfile(payload),
+    onSuccess: () => {
+      toast.success("Profil muvaffaqiyatli yangilandi");
+    },
+    onError: (error: any) => {
+      throw new Error(error.message);
+    },
+  });
+};
