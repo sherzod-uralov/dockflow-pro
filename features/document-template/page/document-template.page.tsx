@@ -8,9 +8,9 @@ import {
 import { UserToolbar } from "@/components/shared/ui/custom-dashboard-toolbar";
 import { ModalState } from "@/types/modal";
 import {
-  useDelete{{properCase name}},
-  useGetAll{{properCase name}}s,
-} from "../hook/{{dashCase name}}.hook";
+  useDeleteDocumentTemplate,
+  useGetAllDocumentTemplates,
+} from "../hook/document-template.hook";
 import { DataTable } from "@/components/shared/ui/custom-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -24,37 +24,37 @@ import {
   createDeleteAction,
   createCopyAction,
 } from "@/components/shared/ui/custom-action";
-import { {{properCase name}} } from "../type/{{dashCase name}}.type";
-import {{properCase name}}FormModal from "../component/{{dashCase name}}.form";
+import { DocumentTemplate } from "../type/document-template.type";
+import DocumentTemplateFormModal from "../component/document-template.form";
 import { useDebounce } from "@/hooks/use-debaunce";
 import { handleCopyToClipboard } from "@/utils/copy-text";
 import { usePagination } from "@/hooks/use-pagination";
 
-const {{properCase name}}Page = () => {
+const DocumentTemplatePage = () => {
   const createModal: ModalState = useModal();
   const editModal: ModalState = useModal();
   const deleteModal: ModalState = useModal();
 
   const { handlePageChange, handlePageSizeChange, pageNumber, pageSize } =
     usePagination();
-  const [selected{{properCase name}}, setSelected{{properCase name}}] =
-    useState<{{properCase name}} | null>(null);
+  const [selectedDocumentTemplate, setSelectedDocumentTemplate] =
+    useState<DocumentTemplate | null>(null);
   const [searchQuery, debouncedSearch, setSearchQuery] = useDebounce("", 500);
 
-  const { data, isLoading } = useGetAll{{properCase name}}s({
+  const { data, isLoading } = useGetAllDocumentTemplates({
     search: debouncedSearch || undefined,
     pageSize: pageSize,
     pageNumber: pageNumber,
   });
-  const delete{{properCase name}}Mutation = useDelete{{properCase name}}();
+  const deleteDocumentTemplateMutation = useDeleteDocumentTemplate();
 
-  const handleEdit = (item: {{properCase name}}) => {
-    setSelected{{properCase name}}(item);
+  const handleEdit = (item: DocumentTemplate) => {
+    setSelectedDocumentTemplate(item);
     editModal.openModal();
   };
 
   const handleDelete = (id: string) => {
-    delete{{properCase name}}Mutation.mutate(id);
+    deleteDocumentTemplateMutation.mutate(id);
     deleteModal.closeModal();
   };
 
@@ -63,11 +63,11 @@ const {{properCase name}}Page = () => {
   };
 
   const handleEditSuccess = () => {
-    setSelected{{properCase name}}(null);
+    setSelectedDocumentTemplate(null);
   };
 
   const handleEditModalClose = () => {
-    setSelected{{properCase name}}(null);
+    setSelectedDocumentTemplate(null);
     editModal.closeModal();
   };
 
@@ -75,9 +75,9 @@ const {{properCase name}}Page = () => {
     <>
       <UserToolbar
         searchQuery={searchQuery}
-        searchPlaceholder="{{properCase resourceName}}larni qidirish..."
+        searchPlaceholder="Templatelarni qidirish..."
         onSearch={handleSearch}
-        createLabel="{{properCase name}} qo'shish"
+        createLabel="DocumentTemplate qo'shish"
         onCreate={createModal.openModal}
       />
 
@@ -99,7 +99,7 @@ const {{properCase name}}Page = () => {
                   <Badge
                     variant="outline"
                     className="font-mono cursor-pointer hover:bg-muted"
-                    onClick={() => handleCopyToClipboard(id, "ID")}
+                    onClick={() => handleCopyToClipboard(id as string, "ID")}
                   >
                     {id?.slice(0, 8)}...
                   </Badge>
@@ -107,7 +107,7 @@ const {{properCase name}}Page = () => {
                     variant="ghost"
                     size="icon"
                     className="h-6 w-6 group"
-                    onClick={() => handleCopyToClipboard(id, "ID")}
+                    onClick={() => handleCopyToClipboard(id as string, "ID")}
                   >
                     <Copy className="h-3 w-3 group-hover:text-text-on-dark" />
                   </Button>
@@ -131,7 +131,7 @@ const {{properCase name}}Page = () => {
                   handleCopyToClipboard(item.id || "", "ID"),
                 ),
                 createDeleteAction(() => {
-                  setSelected{{properCase name}}(item);
+                  setSelectedDocumentTemplate(item);
                   deleteModal.openModal();
                 }),
               ];
@@ -145,41 +145,41 @@ const {{properCase name}}Page = () => {
 
       <CustomModal
         closeOnOverlayClick={false}
-        title="{{properCase resourceName}} qo'shish"
-        description="{{properCase resourceName}} qo'shish uchun maydonlar to'ldirilishi kerak"
+        title="Template qo'shish"
+        description="Template qo'shish uchun maydonlar to'ldirilishi kerak"
         isOpen={createModal.isOpen}
         onClose={createModal.closeModal}
       >
-        <{{properCase name}}FormModal modal={createModal} mode="create" />
+        <DocumentTemplateFormModal modal={createModal} mode="create" />
       </CustomModal>
 
       <CustomModal
         closeOnOverlayClick={false}
-        title="{{properCase resourceName}}ni yangilash"
-        description="{{properCase resourceName}} ma'lumotlarini yangilang"
+        title="Templateni yangilash"
+        description="Template ma'lumotlarini yangilang"
         isOpen={editModal.isOpen}
         onClose={handleEditModalClose}
       >
-        <{{properCase name}}FormModal
+        <DocumentTemplateFormModal
           modal={editModal}
           mode="update"
-          {{camelCase name}}={selected{{properCase name}} as any}
+          documentTemplate={selectedDocumentTemplate as any}
           onSuccess={handleEditSuccess}
         />
       </CustomModal>
 
       <ConfirmationModal
         closeOnOverlayClick={false}
-        title="{{properCase resourceName}}ni o'chirish"
+        title="Templateni o'chirish"
         description="Ushbu ma'lumotni o'chirgandan so'ng qaytarib bo'lmaydi. Rozimisiz?"
         onClose={deleteModal.closeModal}
         isOpen={deleteModal.isOpen}
         onConfirm={() => {
-          handleDelete(selected{{properCase name}}?.id as string);
+          handleDelete(selectedDocumentTemplate?.id as string);
         }}
       />
     </>
   );
 };
 
-export default {{properCase name}}Page;
+export default DocumentTemplatePage;

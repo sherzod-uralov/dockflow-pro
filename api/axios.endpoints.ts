@@ -1,5 +1,33 @@
 // endpoints.tss
 export const endpoints = {
+  documentTemplate: {
+    list: "/document-template",
+    create: "/document-template",
+    detail: (id: string | number) => `/document-template/${id}`,
+    update: (id: string | number) => `/document-template/${id}`,
+    delete: (id: string | number) => `/document-template/${id}`,
+  },
+  documentTemplate: {
+    list: "document-template",
+    create: "document-template",
+    detail: (id: string | number) => `document-template/${id}`,
+    update: (id: string | number) => `document-template/${id}`,
+    delete: (id: string | number) => `document-template/${id}`,
+  },
+  documentTemplate: {
+    list: "/document-template",
+    create: "/document-template",
+    detail: (id: string | number) => `/document-template/${id}`,
+    update: (id: string | number) => `/document-template/${id}`,
+    delete: (id: string | number) => `/document-template/${id}`,
+  },
+  documentPattern: {
+    list: "s",
+    create: "s",
+    detail: (id: string | number) => `s/${id}`,
+    update: (id: string | number) => `s/${id}`,
+    delete: (id: string | number) => `s/${id}`,
+  },
   jonim: {
     list: "/jonim",
     create: "/jonim",

@@ -50,13 +50,13 @@ export default function (plop) {
         type: "modify",
         path: "utils/http-error-handler.ts",
         pattern: /(export const errorHandlers = {[\s\S]*?)(};)/,
-        template: `$1  {{camelCase name}}: createErrorHandler("{{properCase resourceName}}"),\n$2`,
+        template: `$1  {{camelCase name}}: createErrorHandler("{{properCase name}}"),\n$2`,
       },
       {
         type: "modify",
         path: "utils/http-error-handler.ts",
         pattern: /(export const {[\s\S]*?)(} = errorHandlers;)/,
-        template: `$1  {{camelCase name}}: handle{{properCase resourceName}}Error,\n$2`,
+        template: `$1  {{camelCase name}}: handle{{properCase name}}Error,\n$2`,
       },
 
       // 4) app/dashboard/admin ichida sahifa yaratish
