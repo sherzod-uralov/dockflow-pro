@@ -40,6 +40,11 @@ const menuItems: MenuItem[] = [
   { icon: Book, label: "Jurnallar", href: "/dashboard/journal" },
   { icon: DockIcon, label: "Hujjatlar", href: "/dashboard/document" },
   {
+    icon: DockIcon,
+    label: "Hujjat Andozalari ",
+    href: "/dashboard/document-template",
+  },
+  {
     icon: Settings,
     label: "Boshqaruv",
     subItems: [
