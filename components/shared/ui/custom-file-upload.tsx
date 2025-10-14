@@ -4,12 +4,7 @@ import React, { useCallback, useMemo, useState } from "react";
 import { useDropzone, Accept } from "react-dropzone";
 import { cn } from "@/lib/utils";
 import { FormControl, FormItem, FormMessage } from "@/components/ui/form";
-import {
-  Upload,
-  Image as ImageIcon,
-  FileText,
-  File as FileIcon,
-} from "lucide-react";
+import { Upload, FileText, File as FileIcon } from "lucide-react";
 import { toast } from "sonner";
 
 interface FileUploadProps {
