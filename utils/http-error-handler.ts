@@ -414,7 +414,7 @@ export const errorHandlers = {
 };
 
 export const {
-  ruxsat: handlePermissionError,
+  permission: handlePermissionError,
   user: handleUserError,
   rol: handleRoleError,
   auth: handleAuthError,
