@@ -1,26 +1,9 @@
 import { DataPagination } from "@/types/global.types";
 import { UserSchemaZodType } from "../schema/user.schema";
 import { ModalState } from "@/types/modal";
-import { projectOnExit } from "next/dist/build/swc/generated-native";
 
 export interface UserGetRequest extends DataPagination {
-  data: {
-    id: string;
-    fullname: string;
-    username: string;
-    avatarUrl: string;
-    isActive: boolean;
-    role: {
-      id: string;
-      name: string;
-    };
-    department: {
-      id: string;
-      fullname: string;
-      username: string;
-    };
-    lastLogin: null;
-  }[];
+  data: User[];
 }
 
 export interface userResponse {
@@ -47,10 +30,17 @@ export interface User {
   username: string;
   avatarUrl: string;
   isActive: boolean;
-  role: string;
-  department: null;
-  lastLogin: null;
-  createdAt: string;
+  role: {
+    id: string;
+    name: string;
+  };
+  department: {
+    id: string;
+    fullname: string;
+    username: string;
+  } | null;
+  lastLogin: null | string;
+  createdAt?: string; // optional qilish
 }
 
 export interface userCreateBody {

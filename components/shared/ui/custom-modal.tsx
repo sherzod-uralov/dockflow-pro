@@ -20,7 +20,7 @@ export interface CustomModalProps {
   title?: string;
   description?: string;
   children: React.ReactNode;
-  size?: "sm" | "md" | "lg" | "xl" | "full";
+  size?: "sm" | "md" | "lg" | "xl" | "full" | "2xl" | "3xl";
   showCloseButton?: boolean;
   closeOnOverlayClick?: boolean;
   className?: string;
@@ -32,11 +32,13 @@ export interface CustomModalProps {
 }
 
 const sizeClasses = {
-  sm: "max-w-sm",
-  md: "max-w-md",
-  lg: "max-w-lg",
-  xl: "max-w-xl",
-  full: "max-w-[95vw] max-h-[95vh]",
+  sm: "sm:max-w-sm",
+  md: "sm:max-w-md",
+  lg: "sm:max-w-lg",
+  xl: "sm:max-w-xl",
+  "2xl": "sm:max-w-2xl",
+  "3xl": "sm:max-w-3xl",
+  full: "sm:max-w-[95vw] max-h-[95vh]",
 };
 
 export function CustomModal({
@@ -71,7 +73,11 @@ export function CustomModal({
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent
-        className={cn(sizeClasses[size], className)}
+        className={cn(
+          "sm:max-w-[425px]", // Default max-width for Shadcn DialogContent
+          sizeClasses[size], // Apply size-specific class
+          className,
+        )}
         showCloseButton={false}
         onClick={handleOverlayClick}
       >
@@ -105,7 +111,9 @@ export function CustomModal({
         )}
 
         {/* Content */}
-        <div className={cn("flex-1", contentClassName)}>{children}</div>
+        <div className={cn("flex-1 overflow-auto", contentClassName)}>
+          {children}
+        </div>
 
         {/* Footer */}
         {footer && (

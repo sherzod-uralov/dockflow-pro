@@ -7,25 +7,24 @@ import {
 } from "@/components/shared/ui/custom-modal";
 import { UserToolbar } from "@/components/shared/ui/custom-dashboard-toolbar";
 import { ModalState } from "@/types/modal";
-import { useDeleteDocument, useGetAllDocuments } from "../hook/document.hook";
 import { DataTable } from "@/components/shared/ui/custom-table";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Copy } from "lucide-react";
 import { useState } from "react";
 import {
   CustomAction,
   ActionItem,
-  createViewAction,
   createEditAction,
   createDeleteAction,
   createCopyAction,
 } from "@/components/shared/ui/custom-action";
-import { Document } from "../type/document.type";
+import { DocumentGetResponse } from "@/features/document/type/document.type";
 import DocumentFormModal from "../component/document.form";
 import { useDebounce } from "@/hooks/use-debaunce";
 import { handleCopyToClipboard } from "@/utils/copy-text";
 import { usePagination } from "@/hooks/use-pagination";
+import { useDeleteDocument, useGetAllDocuments } from "@/features/document";
+import { Badge } from "@/components/ui/badge";
 
 const DocumentPage = () => {
   const createModal: ModalState = useModal();
@@ -34,9 +33,8 @@ const DocumentPage = () => {
 
   const { handlePageChange, handlePageSizeChange, pageNumber, pageSize } =
     usePagination();
-  const [selectedDocument, setSelectedDocument] = useState<Document | null>(
-    null,
-  );
+  const [selectedDocument, setSelectedDocument] =
+    useState<DocumentGetResponse | null>(null);
   const [searchQuery, debouncedSearch, setSearchQuery] = useDebounce("", 500);
 
   const { data, isLoading } = useGetAllDocuments({
@@ -45,11 +43,13 @@ const DocumentPage = () => {
     pageNumber: pageNumber,
   });
   const deleteDocumentMutation = useDeleteDocument();
-  console.log(data);
-  const handleEdit = (item: Document) => {
+
+  const handleEdit = (item: DocumentGetResponse) => {
     setSelectedDocument(item);
     editModal.openModal();
   };
+
+  console.log(data);
 
   const handleDelete = (id: string) => {
     deleteDocumentMutation.mutate(id);
@@ -89,23 +89,23 @@ const DocumentPage = () => {
         columns={[
           {
             header: "ID",
-            accessorKey: "message",
+            accessorKey: "id",
             cell: ({ row }) => {
               const id = row.original.id;
               return (
-                <div className="flex w-full items-center gap-2">
+                <div className="flex items-center gap-2">
                   <Badge
                     variant="outline"
                     className="font-mono cursor-pointer hover:bg-muted"
-                    onClick={() => handleCopyToClipboard(id, "ID")}
+                    onClick={() => handleCopyToClipboard(id as string, "ID")}
                   >
-                    {id?.slice(0, 8)}...
+                    {id?.slice(0, 8)}
                   </Badge>
                   <Button
                     variant="ghost"
                     size="icon"
                     className="h-6 w-6 group"
-                    onClick={() => handleCopyToClipboard(id, "ID")}
+                    onClick={() => handleCopyToClipboard(id as string, "ID")}
                   >
                     <Copy className="h-3 w-3 group-hover:text-text-on-dark" />
                   </Button>
@@ -114,8 +114,50 @@ const DocumentPage = () => {
             },
           },
           {
-            header: "Nom",
-            accessorKey: "name",
+            header: "Sarlavha",
+            accessorKey: "title",
+          },
+          {
+            header: "Holati",
+            accessorKey: "status",
+            cell: ({ row }) => {
+              const status = row.original.status;
+              return (
+                <Badge
+                  //@ts-ignore
+                  variant={
+                    status === "PUBLISHED"
+                      ? "success"
+                      : status === "DRAFT"
+                        ? "warning"
+                        : "secondary"
+                  }
+                >
+                  {status}
+                </Badge>
+              );
+            },
+          },
+          {
+            header: "Muhimlik",
+            accessorKey: "priority",
+            cell: ({ row }) => {
+              const priority = row.original.priority;
+              return (
+                <Badge
+                  //@ts-ignore
+                  variant={
+                    priority === "HIGH"
+                      ? "destructive"
+                      : priority === "MEDIUM"
+                        ? "warning"
+                        : "default"
+                  }
+                >
+                  {priority}
+                </Badge>
+              );
+            },
           },
           {
             header: "Harakatlar",
@@ -142,6 +184,7 @@ const DocumentPage = () => {
       />
 
       <CustomModal
+        size="3xl"
         closeOnOverlayClick={false}
         title="Document qo'shish"
         description="Document qo'shish uchun maydonlar to'ldirilishi kerak"

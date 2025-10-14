@@ -8,6 +8,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import type { ReactNode } from "react";
+import React from "react";
 
 type BreadcrumbItemType = {
   label: string;
@@ -48,30 +49,32 @@ export function PageHeader({
             {items.map((item, index) => {
               const isLast = index === items.length - 1;
               return (
-                <BreadcrumbItem key={index} className="flex gap-2 items-center">
-                  {item.icon && (
-                    <span className="mr-1 text-primary/70">{item.icon}</span>
-                  )}
+                <React.Fragment key={index}>
+                  <BreadcrumbItem>
+                    {item.icon && (
+                      <span className="mr-1 text-primary/70">{item.icon}</span>
+                    )}
 
-                  {!isLast && item.href ? (
-                    <BreadcrumbLink
-                      href={item.href}
-                      className="hover:text-primary transition-colors duration-200"
-                    >
-                      {item.label}
-                    </BreadcrumbLink>
-                  ) : (
-                    <span className="text-muted-foreground font-medium">
-                      {item.label}
-                    </span>
-                  )}
+                    {!isLast && item.href ? (
+                      <BreadcrumbLink
+                        href={item.href}
+                        className="hover:text-primary transition-colors duration-200"
+                      >
+                        {item.label}
+                      </BreadcrumbLink>
+                    ) : (
+                      <span className="text-muted-foreground font-medium">
+                        {item.label}
+                      </span>
+                    )}
+                  </BreadcrumbItem>
 
                   {!isLast && (
                     <BreadcrumbSeparator>
                       <span className="text-primary/50">/</span>
                     </BreadcrumbSeparator>
                   )}
-                </BreadcrumbItem>
+                </React.Fragment>
               );
             })}
           </BreadcrumbList>

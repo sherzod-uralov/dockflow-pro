@@ -1,12 +1,40 @@
 import { DataPagination } from "@/types/global.types";
 
-export interface Document {
+export interface DocumentGetResponse {
   id?: string;
-  name: string;
+  title: string;
+  description: string;
+  documentNumber: string;
+  versions: number;
+  status: "PUBLISHED" | "DRAFT" | "ARCHIVED";
+  priority: "LOW" | "MEDIUM" | "HIGH";
+  documentType: {
+    id: string;
+    name: string;
+  };
+  journal: {
+    id: string;
+    name: string;
+  };
+  createdBy: {
+    id: string;
+    fullname: string;
+  };
+  updatedAtBy: {
+    id: string;
+    fullname: string;
+  };
+  attachments: {
+    id: string;
+    fileName: string;
+    fileUrl: string;
+  }[];
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface GetAllDocuments extends DataPagination {
-  data: Document[];
+  data: DocumentGetResponse[];
 }
 
 export interface DocumentQueryParams {

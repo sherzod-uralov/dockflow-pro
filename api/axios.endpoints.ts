@@ -7,34 +7,6 @@ export const endpoints = {
     update: (id: string | number) => `/document-template/${id}`,
     delete: (id: string | number) => `/document-template/${id}`,
   },
-  documentTemplate: {
-    list: "document-template",
-    create: "document-template",
-    detail: (id: string | number) => `document-template/${id}`,
-    update: (id: string | number) => `document-template/${id}`,
-    delete: (id: string | number) => `document-template/${id}`,
-  },
-  documentTemplate: {
-    list: "/document-template",
-    create: "/document-template",
-    detail: (id: string | number) => `/document-template/${id}`,
-    update: (id: string | number) => `/document-template/${id}`,
-    delete: (id: string | number) => `/document-template/${id}`,
-  },
-  documentPattern: {
-    list: "s",
-    create: "s",
-    detail: (id: string | number) => `s/${id}`,
-    update: (id: string | number) => `s/${id}`,
-    delete: (id: string | number) => `s/${id}`,
-  },
-  jonim: {
-    list: "/jonim",
-    create: "/jonim",
-    detail: (id: string | number) => `/jonim/${id}`,
-    update: (id: string | number) => `/jonim/${id}`,
-    delete: (id: string | number) => `/jonim/${id}`,
-  },
   document: {
     list: "/document",
     create: "/document",
@@ -92,6 +64,13 @@ export const endpoints = {
     detail: (id: string | number) => `/journal/${id}`,
     update: (id: string | number) => `/journal/${id}`,
     delete: (id: string | number) => `/journal/${id}`,
+  },
+  attachment: {
+    list: "/attachment",
+    create: "/attachment",
+    update: (id: string) => `/attachment/${id}`,
+    delete: (id: string) => `/attachment/${id}`,
+    detail: (id: string) => `/attachment/${id}`,
   },
 } as const;
 

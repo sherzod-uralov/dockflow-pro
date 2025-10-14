@@ -11,10 +11,10 @@ import { UserSchemaZodType } from "../schema/user.schema";
 import { useForm } from "react-hook-form";
 
 export const useGetUserQuery = ({
-  pageNumber,
-  pageSize,
-  search,
-}: UserHookProps) => {
+  pageNumber = 1,
+  pageSize = 10,
+  search = "",
+}: Partial<UserHookProps> = {}) => {
   return useQuery<UserGetRequest>({
     queryKey: ["user", pageNumber, pageSize, search],
     queryFn: () => userService.getAllUsers({ pageNumber, pageSize, search }),

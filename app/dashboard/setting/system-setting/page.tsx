@@ -1,14 +1,14 @@
 import React from "react";
 import { PageHeader } from "@/components/shared/ui/custom-breadcrumb";
 import { Home } from "lucide-react";
-import ProfilePage from "@/features/setting/profile/page/profile.page";
+import SystemSettingPage from "@/features/setting/system-setting/page/system-setting.page";
 
 const Page = () => {
   return (
     <>
       <PageHeader
-        title="Profil"
-        description="Profil sozlamasi"
+        title="Tizim sozlamalari"
+        description="Tizim sozlamalarini boshqarish"
         items={[
           {
             label: "Bosh sahifa",
@@ -16,12 +16,12 @@ const Page = () => {
             icon: <Home size={16} />,
           },
           {
-            label: "Profil",
-            href: "/dashboard/profile",
+            label: "Tizim sozlamalari",
+            href: "/dashboard/system-setting",
           },
         ]}
       ></PageHeader>
-      <ProfilePage />
+      <SystemSettingPage />
     </>
   );
 };

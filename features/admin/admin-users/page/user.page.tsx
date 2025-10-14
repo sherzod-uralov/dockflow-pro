@@ -36,8 +36,12 @@ import { useDebounce } from "@/hooks/use-debaunce";
 const UserPage = () => {
   const { pageNumber, pageSize, handlePageChange, handlePageSizeChange } =
     usePagination();
-  const [search, debaunce, setSearch] = useDebounce("", 500);
-  const { data, isLoading } = useGetUserQuery({ pageNumber, pageSize, search });
+  const [search, debounce, setSearch] = useDebounce("", 500);
+  const { data, isLoading } = useGetUserQuery({
+    pageNumber,
+    pageSize,
+    search: debounce,
+  });
   const createModal = useModal();
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const editModal: ModalState = useModal();
@@ -50,6 +54,9 @@ const UserPage = () => {
     createSelectColumn<User>(),
     {
       accessorKey: "id",
+      meta: {
+        width: 10,
+      },
     },
     {
       accessorKey: "username",
@@ -83,7 +90,7 @@ const UserPage = () => {
       accessorKey: "createdAt",
       header: "Qo'shilgan sana",
       cell: ({ row }) => {
-        const date = new Date(row.original.createdAt);
+        const date = new Date(row.original.createdAt || "");
         return (
           <span className="text-sm text-muted-foreground">
             {date.toLocaleDateString("uz-UZ")}
@@ -156,7 +163,7 @@ const UserPage = () => {
       />
       <DataTable
         columns={columns}
-        data={(data?.data as any[]) ?? []}
+        data={data?.data ?? []}
         loading={isLoading}
         pageSize={10}
         pageSizeOptions={[5, 10, 20, 50]}
@@ -165,7 +172,7 @@ const UserPage = () => {
       />
       <CustomModal
         closeOnOverlayClick
-        size="full"
+        size="3xl"
         onClose={createModal.closeModal}
         isOpen={createModal.isOpen}
         title="Foydalanuvchi qo'shish"

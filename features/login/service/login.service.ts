@@ -41,11 +41,6 @@ export const authService = {
       axiosInstance.post(endpoints.auth.logout),
     );
   },
-  updateProfile: async (data: any) => {
-    return await handleAuthError.executeUpdate(() =>
-      axiosInstance.patch(endpoints.auth.profile.update, data),
-    );
-  },
 };
 
 export interface ProfileBody {}

@@ -255,76 +255,66 @@ export function DataTable<TData, TValue = unknown>({
                     </div>
                   </TableCell>
                 </TableRow>
+              ) : table.getRowModel().rows?.length > 0 ? (
+                <TransitionGroup component={null}>
+                  {table.getRowModel().rows.map((row: Row<TData>) => {
+                    const nodeRef = React.createRef<HTMLTableRowElement>();
+                    return (
+                      <CSSTransition
+                        key={row.id}
+                        timeout={300}
+                        classNames="fade-row"
+                        nodeRef={nodeRef}
+                      >
+                        <TableRow
+                          ref={nodeRef}
+                          data-state={row.getIsSelected() && "selected"}
+                          className="hover:bg-muted/30 transition-colors"
+                        >
+                          {row.getVisibleCells().map((cell) => {
+                            const columnMeta = cell.column.columnDef.meta as
+                              | ColumnMeta
+                              | undefined;
+                            return (
+                              <TableCell
+                                key={cell.id}
+                                className={cn(
+                                  "px-4 py-3 text-sm text-foreground",
+                                  columnMeta?.sticky === "left" &&
+                                    "sticky left-0 bg-background z-10",
+                                  columnMeta?.sticky === "right" &&
+                                    "sticky right-0 bg-background z-10",
+                                )}
+                                style={{
+                                  width: columnMeta?.width,
+                                  minWidth: columnMeta?.minWidth,
+                                  maxWidth: columnMeta?.maxWidth,
+                                }}
+                              >
+                                {flexRender(
+                                  cell.column.columnDef.cell,
+                                  cell.getContext(),
+                                )}
+                              </TableCell>
+                            );
+                          })}
+                        </TableRow>
+                      </CSSTransition>
+                    );
+                  })}
+                </TransitionGroup>
               ) : (
-                <>
-                  <TransitionGroup component={null}>
-                    {table.getRowModel().rows?.length > 0 &&
-                      table.getRowModel().rows.map((row: Row<TData>) => {
-                        const nodeRef = React.createRef<HTMLTableRowElement>();
-                        return (
-                          <CSSTransition
-                            key={row.id}
-                            timeout={300}
-                            classNames="fade-row"
-                            nodeRef={nodeRef}
-                          >
-                            <TableRow
-                              ref={nodeRef}
-                              data-state={row.getIsSelected() && "selected"}
-                              className="hover:bg-muted/30 transition-colors"
-                            >
-                              {row.getVisibleCells().map((cell) => {
-                                const columnMeta = cell.column.columnDef
-                                  .meta as ColumnMeta | undefined;
-                                return (
-                                  <TableCell
-                                    key={cell.id}
-                                    className={cn(
-                                      "px-4 py-3 text-sm text-foreground",
-                                      columnMeta?.sticky === "left" &&
-                                        "sticky left-0 bg-background z-10",
-                                      columnMeta?.sticky === "right" &&
-                                        "sticky right-0 bg-background z-10",
-                                    )}
-                                    style={{
-                                      width: columnMeta?.width,
-                                      minWidth: columnMeta?.minWidth,
-                                      maxWidth: columnMeta?.maxWidth,
-                                    }}
-                                  >
-                                    {flexRender(
-                                      cell.column.columnDef.cell,
-                                      cell.getContext(),
-                                    )}
-                                  </TableCell>
-                                );
-                              })}
-                            </TableRow>
-                          </CSSTransition>
-                        );
-                      })}
-                  </TransitionGroup>
-
-                  {/* 🔑 Empty state doimiy joy egallaydi */}
-                  <tr
-                    className={cn(
-                      "absolute left-0 top-0 w-full h-24 transition-opacity duration-500 flex items-center justify-center",
-                      table.getRowModel().rows?.length === 0
-                        ? "opacity-100"
-                        : "opacity-0 pointer-events-none",
-                    )}
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-24 text-center"
                   >
-                    <td
-                      colSpan={columns.length}
-                      className="text-center text-muted-foreground"
-                    >
-                      <div className="flex flex-col items-center justify-center space-y-2">
-                        <EyeOff className="h-8 w-8 text-muted-foreground/50" />
-                        <p>{emptyMessage}</p>
-                      </div>
-                    </td>
-                  </tr>
-                </>
+                    <div className="flex flex-col items-center justify-center space-y-2">
+                      <EyeOff className="h-8 w-8 text-muted-foreground/50" />
+                      <p className="text-muted-foreground">{emptyMessage}</p>
+                    </div>
+                  </TableCell>
+                </TableRow>
               )}
             </TableBody>
           </Table>

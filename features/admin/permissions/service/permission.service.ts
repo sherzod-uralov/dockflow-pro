@@ -2,9 +2,9 @@ import axiosInstance from "@/api/axios.instance";
 import { endpoints } from "@/api/axios.endpoints";
 import { Permission } from "../type/permission.type";
 import { PermissionQueryParams } from "../type/permission.type";
-import { errorHandlers } from "@/utils/http-error-handler";
+import { handlePermissionError } from "@/utils/http-error-handler";
 
-const permissionHandler = errorHandlers.ruxsat;
+const permissionHandler = handlePermissionError;
 
 export const permissionService = {
   getAllPermissions: async (params?: PermissionQueryParams) => {
