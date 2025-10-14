@@ -17,7 +17,21 @@ export const UserSchema = z.object({
       message: "Foydalanuvchi nomi 100 ta belgidan oshmasligi kerak",
     }),
 
-  password: z.string().optional(),
+  password: z
+    .string()
+    .optional()
+    .refine(
+      (val) =>
+        !val ||
+        (val.length >= 8 &&
+          /[A-Z]/.test(val) &&
+          /[a-z]/.test(val) &&
+          /[0-9]/.test(val)),
+      {
+        message:
+          "Parol kamida 8 belgi uzunlikda bo'lishi va kamida bitta bosh harf, kichik harf va raqam o'z ichiga olishi kerak",
+      },
+    ),
 
   roleId: z.string().uuid({ message: "Rol identifikatori noto‘g‘ri formatda" }),
 

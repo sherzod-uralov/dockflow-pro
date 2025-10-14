@@ -1,10 +1,9 @@
 import axiosInstance from "@/api/axios.instance";
-import { DocumentType, DocumentTypeQueryParams } from "../type/document-type.type";
-import { errorHandlers } from "@/utils/http-error-handler";
+import { handleDocumentTypeError } from "@/utils/http-error-handler";
 import { endpoints } from "@/api/axios.endpoints";
+import { DocumentTypeQueryParams } from "@/features/document-type";
 
-const documentTypeHandler = errorHandlers.documentType;
-
+const documentTypeHandler = handleDocumentTypeError;
 export const documentTypeService = {
   getAllDocumentTypes: async (params?: DocumentTypeQueryParams) => {
     return await documentTypeHandler.executeList(() =>

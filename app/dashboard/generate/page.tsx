@@ -1,4 +1,4 @@
-import DocumentTemplatePage from "@/features/document-template/page/document-template.page";
+import GeneratePage from "@/features/generate/page/generate.page";
 import { Home } from "lucide-react";
 import { PageHeader } from "@/components/shared/ui/custom-breadcrumb";
 
@@ -6,8 +6,8 @@ const Page = () => {
   return (
     <>
       <PageHeader
-        title="DocumentTemplate"
-        description="DocumentTemplatelarni boshqarish"
+        title="Hujjat"
+        description="Hujjatlarni boshqarish"
         items={[
           {
             label: "Bosh sahifa",
@@ -19,12 +19,12 @@ const Page = () => {
             href: "/dashboard/admin",
           },
           {
-            label: "DocumentTemplate",
-            href: "/dashboard/admin/document-template",
+            label: "Hujjat",
+            href: "/dashboard/admin/generate",
           },
         ]}
       />
-      <DocumentTemplatePage />
+      <GeneratePage />
     </>
   );
 };

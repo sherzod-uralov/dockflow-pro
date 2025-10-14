@@ -1,19 +1,19 @@
 import { useMutation, useQuery, useQueryClient } from "react-query";
-import { documentService } from "../service/document.service";
-import {
-  GetAllDocuments,
-  Document,
-  DocumentQueryParams,
-} from "../type/document.type";
 import { toast } from "sonner";
+import {
+  DocumentQueryParams,
+  documentService,
+  GetAllDocuments,
+} from "@/features/document";
+import { DocumentFormType } from "@/features/document/schema/document.schema";
 
 export const useCreateDocument = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (payload: Document) =>
+    mutationFn: (payload: DocumentFormType) =>
       documentService.createDocument(payload),
     onSuccess: () => {
-      queryClient.invalidateQueries(["documents"]);
+      queryClient?.invalidateQueries(["documents"]);
       toast.success("Document muvaffaqiyatli yaratildi");
     },
     onError: (error: any) => {
@@ -33,10 +33,15 @@ export const useGetAllDocuments = (params?: DocumentQueryParams) => {
 export const useUpdateDocument = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<Document> }) =>
-      documentService.updateDocument(id, data),
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: Partial<DocumentFormType>;
+    }) => documentService.updateDocument(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries(["documents"]);
+      queryClient?.invalidateQueries(["documents"]);
       toast.success("Document muvaffaqiyatli yangilandi");
     },
     onError: (error: any) => {
@@ -50,7 +55,7 @@ export const useDeleteDocument = () => {
   return useMutation({
     mutationFn: (id: string) => documentService.deleteDocument(id),
     onSuccess: () => {
-      queryClient.invalidateQueries(["documents"]);
+      queryClient?.invalidateQueries(["documents"]);
       toast.success("Document muvaffaqiyatli o'chirildi");
     },
     onError: (error: any) => {

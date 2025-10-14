@@ -1,70 +1,149 @@
 "use client";
 
-import React, { useMemo } from "react";
-
-import { documentScheme } from "../schema/document.schema";
-import { z } from "zod";
-import { useCreateDocument, useUpdateDocument } from "../hook/document.hook";
-import { useGetAllDeportaments } from "@/features/deportament";
+import { ModalState } from "@/types/modal";
 import { Button } from "@/components/ui/button";
-import type { ModalState } from "@/types/modal";
+import {
+  DocumentFormType,
+  documentScheme,
+} from "@/features/document/schema/document.schema";
+import {
+  DocumentGetResponse,
+  useCreateDocument,
+  useUpdateDocument,
+} from "@/features/document";
 import SimpleFormGenerator, {
   Field,
 } from "@/components/shared/ui/custom-form-generator";
+import { useGetAllDocumentTypes } from "@/features/document-type";
+import { useGetAllJournals } from "@/features/journal/hook/journal.hook";
+import { useFormContext } from "react-hook-form";
 
-type DocumentFormType = z.infer<typeof documentScheme>;
-
-interface Props {
+interface DocumentFormModalProps {
   modal: ModalState;
   mode: "create" | "update";
-  document?: Partial<DocumentFormType> & { id?: string };
+  document?: DocumentGetResponse;
   onSuccess?: () => void;
 }
 
-export default function DocumentFormModal({
+const DocumentFormModal = ({
   modal,
   mode,
   document,
   onSuccess,
-}: Props) {
-  const createDoc = useCreateDocument();
-  const updateDoc = useUpdateDocument();
-  const { data: deportaments } = useGetAllDeportaments();
+}: DocumentFormModalProps) => {
+  const createDocumentMutation = useCreateDocument();
+  const updateDocumentMutation = useUpdateDocument();
+  const { data: documentTypes } = useGetAllDocumentTypes();
+  const { data: journals } = useGetAllJournals({
+    pageNumber: 1,
+    pageSize: 1000,
+  });
 
   const isUpdate = mode === "update";
-  const isLoading = createDoc.isLoading || updateDoc.isLoading;
+  const isLoading =
+    createDocumentMutation.isLoading || updateDocumentMutation.isLoading;
 
-  const defaultValues: Partial<DocumentFormType> = {
-    name: document?.name ?? "",
-    deportamentId: document?.deportamentId ?? "",
-  };
+  const fields: Field[] = [
+    {
+      name: "title",
+      label: "Hujjat nomi",
+      type: "text",
+      placeholder: "Hujjat nomini kiriting",
+      colSpan: 2,
+    },
+    {
+      name: "description",
+      label: "Hujjat tavsifi",
+      type: "textarea",
+      placeholder: "Hujjat tavsifini kiriting",
+      colSpan: 2,
+    },
+    {
+      name: "documentNumber",
+      label: "Hujjat raqami",
+      type: "text",
+      placeholder: "DOC-001",
+    },
+    {
+      name: "priority",
+      label: "Muhimlik darajasi",
+      type: "select",
+      placeholder: "Muhimlikni tanlang",
+      options: [
+        { value: "LOW", label: "Past" },
+        { value: "MEDIUM", label: "O'rta" },
+        { value: "HIGH", label: "Yuqori" },
+      ],
+    },
+    {
+      name: "status",
+      label: "Holati",
+      type: "select",
+      placeholder: "Holatni tanlang",
+      options: [
+        { value: "DRAFT", label: "Qoralama" },
+        { value: "PUBLISHED", label: "E'lon qilingan" },
+        { value: "ARCHIVED", label: "Arxivlangan" },
+      ],
+    },
+    {
+      name: "documentTypeId",
+      label: "Hujjat turi",
+      type: "select",
+      placeholder: "Hujjat turini tanlang",
+      options:
+        documentTypes?.data?.map((type) => ({
+          value: type.id as string,
+          label: type.name as string,
+        })) || [],
+    },
+    {
+      name: "journalId",
+      label: "Jurnal",
+      type: "select",
+      placeholder: "Jurnalni tanlang",
+      options:
+        journals?.data?.map((journal) => ({
+          value: journal.id,
+          label: journal.name,
+        })) || [],
+      colSpan: 2,
+    },
+    {
+      name: "attachments",
+      label: "Fayl",
+      type: "file",
+      placeholder: "Faylni tanlang",
+      colSpan: 2,
+    },
+  ];
 
-  const fields: Field[] = useMemo(
-    () => [
-      {
-        type: "text",
-        name: "name",
-        label: "Document nomi",
-        placeholder: "Document nomini kiriting",
-      },
-      {
-        type: "select",
-        name: "deportamentId",
-        label: "Deportament",
-        placeholder: "Deportament tanlang",
-        options: (deportaments?.data ?? []).map((d: any) => ({
-          label: d.name,
-          value: d.id,
-        })),
-      },
-    ],
-    [deportaments],
-  );
+  const defaultValues: DocumentFormType = isUpdate
+    ? {
+        title: document?.title ?? "",
+        description: document?.description ?? "",
+        documentNumber: document?.documentNumber ?? "",
+        priority: document?.priority ?? "LOW",
+        status: document?.status ?? "DRAFT",
+        documentTypeId: document?.documentType?.id ?? "",
+        journalId: document?.journal?.id ?? "",
+        attachments: document?.attachments?.map((att) => att.id) ?? [],
+      }
+    : {
+        title: "",
+        description: "",
+        documentNumber: "",
+        priority: "LOW",
+        status: "DRAFT",
+        documentTypeId: "",
+        journalId: "",
+        attachments: [],
+      };
 
   const handleSubmit = (values: DocumentFormType) => {
-    if (isUpdate && document?.id) {
-      updateDoc.mutate(
-        { id: document.id, data: values },
+    if (isUpdate && document) {
+      updateDocumentMutation.mutate(
+        { id: document.id || "", data: values },
         {
           onSuccess: () => {
             modal.closeModal();
@@ -73,7 +152,7 @@ export default function DocumentFormModal({
         },
       );
     } else {
-      createDoc.mutate(values, {
+      createDocumentMutation.mutate(values, {
         onSuccess: () => {
           modal.closeModal();
           onSuccess?.();
@@ -90,11 +169,12 @@ export default function DocumentFormModal({
       onSubmit={handleSubmit}
       submitLabel={isUpdate ? "Yangilash" : "Qo'shish"}
       renderActions={({ isSubmitting }) => (
-        <div className="flex gap-2">
+        <div className="flex justify-end gap-2 pt-4">
           <Button
+            type="button"
             variant="outline"
-            onClick={() => modal.closeModal()}
-            disabled={isLoading}
+            onClick={modal.closeModal}
+            disabled={isSubmitting || isLoading}
           >
             Bekor qilish
           </Button>
@@ -111,4 +191,6 @@ export default function DocumentFormModal({
       )}
     />
   );
-}
+};
+
+export default DocumentFormModal;

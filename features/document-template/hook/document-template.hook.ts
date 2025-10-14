@@ -1,28 +1,16 @@
 import { useMutation, useQuery, useQueryClient } from "react-query";
+import { toast } from "sonner";
 import { documentTemplateService } from "../service/document-template.service";
 import {
-  GetAllDocumentTemplates,
-  DocumentTemplate,
   DocumentTemplateQueryParams,
+  GetAllDocumentTemplates,
+  DocumentTemplateCreatePayload,
+  DocumentTemplateUpdatePayload,
 } from "../type/document-template.type";
-import { toast } from "sonner";
 
-export const useCreateDocumentTemplate = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (payload: DocumentTemplate) =>
-      documentTemplateService.createDocumentTemplate(payload),
-    onSuccess: () => {
-      queryClient.invalidateQueries(["documentTemplates"]);
-      toast.success("DocumentTemplate muvaffaqiyatli yaratildi");
-    },
-    onError: (error: any) => {
-      toast.error(error.message);
-    },
-  });
-};
-
-export const useGetAllDocumentTemplates = (params?: DocumentTemplateQueryParams) => {
+export const useGetAllDocumentTemplates = (
+  params?: DocumentTemplateQueryParams,
+) => {
   return useQuery<GetAllDocumentTemplates>({
     queryKey: ["documentTemplates", params],
     queryFn: () => documentTemplateService.getAllDocumentTemplates(params),
@@ -30,14 +18,34 @@ export const useGetAllDocumentTemplates = (params?: DocumentTemplateQueryParams)
   });
 };
 
+export const useCreateDocumentTemplate = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: DocumentTemplateCreatePayload) =>
+      documentTemplateService.createDocumentTemplate(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["documentTemplates"]);
+      toast.success("Shablon muvaffaqiyatli yaratildi");
+    },
+    onError: (error: any) => {
+      toast.error(error.message);
+    },
+  });
+};
+
 export const useUpdateDocumentTemplate = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<DocumentTemplate> }) =>
-      documentTemplateService.updateDocumentTemplate(id, data),
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: DocumentTemplateUpdatePayload;
+    }) => documentTemplateService.updateDocumentTemplate(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries(["documentTemplates"]);
-      toast.success("DocumentTemplate muvaffaqiyatli yangilandi");
+      toast.success("Shablon muvaffaqiyatli yangilandi");
     },
     onError: (error: any) => {
       toast.error(error.message);
@@ -48,10 +56,11 @@ export const useUpdateDocumentTemplate = () => {
 export const useDeleteDocumentTemplate = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => documentTemplateService.deleteDocumentTemplate(id),
+    mutationFn: (id: string) =>
+      documentTemplateService.deleteDocumentTemplate(id),
     onSuccess: () => {
       queryClient.invalidateQueries(["documentTemplates"]);
-      toast.success("DocumentTemplate muvaffaqiyatli o'chirildi");
+      toast.success("Shablon muvaffaqiyatli o'chirildi");
     },
     onError: (error: any) => {
       toast.error(

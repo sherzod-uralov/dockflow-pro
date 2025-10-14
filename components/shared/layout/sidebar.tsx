@@ -18,6 +18,7 @@ import {
   DockIcon,
   UserCog,
   Book,
+  BookTemplateIcon,
 } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -57,7 +58,11 @@ const menuItems: MenuItem[] = [
   {
     icon: Settings,
     label: "Sozlamalar",
-    subItems: [{ label: "Profil", href: "/dashboard/setting/profile" }],
+    subItems: [
+      { label: "Profil", href: "/dashboard/setting/profile" },
+      { label: "Shablonlar", href: "/dashboard/document-template" },
+      { label: "Tizim sozalamari", href: "/dashboard/setting/system-setting" },
+    ],
   },
 ];
 

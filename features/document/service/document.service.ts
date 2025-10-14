@@ -1,14 +1,15 @@
 import axiosInstance from "@/api/axios.instance";
-import { Document, DocumentQueryParams } from "../type/document.type";
 import { errorHandlers } from "@/utils/http-error-handler";
 import { endpoints } from "@/api/axios.endpoints";
+import { DocumentQueryParams, GetAllDocuments } from "@/features/document";
+import { DocumentFormType } from "@/features/document/component/document.form";
 
 const documentHandler = errorHandlers.document;
 
 export const documentService = {
   getAllDocuments: async (params?: DocumentQueryParams) => {
     return await documentHandler.executeList(() =>
-      axiosInstance.get(endpoints.document.list, {
+      axiosInstance.get<GetAllDocuments>(endpoints.document.list, {
         params: {
           search: params?.search,
           pageSize: params?.pageSize,
@@ -17,12 +18,12 @@ export const documentService = {
       }),
     );
   },
-  createDocument: async (data: Document) => {
+  createDocument: async (data: DocumentFormType) => {
     return await documentHandler.executeCreate(() =>
       axiosInstance.post(endpoints.document.create, data),
     );
   },
-  updateDocument: async (id: string, data: Partial<Document>) => {
+  updateDocument: async (id: string, data: Partial<DocumentFormType>) => {
     return await documentHandler.executeUpdate(() =>
       axiosInstance.patch(endpoints.document.update(id), data),
     );

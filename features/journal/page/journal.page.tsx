@@ -45,7 +45,7 @@ const JournalPage = () => {
     pageSize: pageSize,
     pageNumber: pageNumber,
   });
-  console.log(data);
+
   const deleteMutation = useDeleteJournal();
   const confirmDelete = () => {
     if (selectedJournal) {
@@ -107,6 +107,7 @@ const JournalPage = () => {
         onSearch={setSearch}
       />
       <CustomModal
+        size="3xl"
         closeOnOverlayClick={false}
         title="Jurnal qo'shish"
         description="Jurnal qo'shish uchun maydonlar to'ldirilishi kerak"
@@ -132,6 +133,7 @@ const JournalPage = () => {
             />
           </CustomModal>
           <CustomModal
+            size="3xl"
             title="Jurnal haqida ma'lumot"
             description="Jurnalning to'liq ma'lumotlarini ko'rish"
             isOpen={viewModal.isOpen}

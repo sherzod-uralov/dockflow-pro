@@ -1,33 +1,29 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { documentTemplateScheme } from "../schema/document-template.schema";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { z } from "zod";
-import { Button } from "@/components/ui/button";
+"use client";
+
 import { ModalState } from "@/types/modal";
+import { Button } from "@/components/ui/button";
 import {
+  DocumentTemplateFormType,
+  documentTemplateSchema,
+} from "@/features/document-template/schema/document-template.schema";
+import {
+  DocumentTemplateResponse,
   useCreateDocumentTemplate,
   useUpdateDocumentTemplate,
-} from "../hook/document-template.hook";
-import { useEffect } from "react";
-import { DocumentTemplate } from "../type/document-template.type";
-
-type DocumentTemplateFormType = z.infer<typeof documentTemplateScheme>;
+} from "@/features/document-template";
+import SimpleFormGenerator, {
+  Field,
+} from "@/components/shared/ui/custom-form-generator";
+import { useGetAllDocumentTypes } from "@/features/document-type";
 
 interface DocumentTemplateFormModalProps {
   modal: ModalState;
   mode: "create" | "update";
-  documentTemplate?: DocumentTemplate;
+  documentTemplate?: DocumentTemplateResponse;
   onSuccess?: () => void;
 }
+
+//dev-a
 
 const DocumentTemplateFormModal = ({
   modal,
@@ -35,95 +31,127 @@ const DocumentTemplateFormModal = ({
   documentTemplate,
   onSuccess,
 }: DocumentTemplateFormModalProps) => {
-  const createDocumentTemplateMutation = useCreateDocumentTemplate();
-  const updateDocumentTemplateMutation = useUpdateDocumentTemplate();
+  const createMutation = useCreateDocumentTemplate();
+  const updateMutation = useUpdateDocumentTemplate();
+  const { data: documentTypes } = useGetAllDocumentTypes();
 
   const isUpdate = mode === "update";
-  const isLoading =
-    createDocumentTemplateMutation.isLoading ||
-    updateDocumentTemplateMutation.isLoading;
+  const isLoading = createMutation.isLoading || updateMutation.isLoading;
 
-  const form = useForm<DocumentTemplateFormType>({
-    resolver: zodResolver(documentTemplateScheme),
-    mode: "onChange",
-    defaultValues: {
-      name: "",
+  const fields: Field[] = [
+    {
+      name: "name",
+      label: "Shablon nomi",
+      type: "text",
+      placeholder: "Shablon nomini kiriting",
+      colSpan: 2,
     },
-  });
+    {
+      name: "description",
+      label: "Tavsif",
+      type: "textarea",
+      placeholder: "Shablon tavsifini kiriting",
+      colSpan: 2,
+    },
+    {
+      name: "documentTypeId",
+      label: "Hujjat turi",
+      type: "select",
+      placeholder: "Hujjat turini tanlang",
+      options:
+        documentTypes?.data?.map((type) => ({
+          value: type.id as string,
+          label: type.name as string,
+        })) || [],
+      colSpan: 2,
+    },
+    {
+      name: "templateFileId",
+      label: "Shablon fayli",
+      type: "file",
+      placeholder: "Faylni yuklang",
+      multiple: false,
+      fileReturnShape: "id",
+      accept: {
+        "application/pdf": [".pdf"],
+        "application/msword": [".doc"],
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+          [".docx"],
+      },
+      maxSize: 10 * 1024 * 1024,
+      helperText: "PDF, DOC, DOCX (max 10MB)",
+      colSpan: 2,
+    },
+    {
+      name: "isActive",
+      label: "Faol",
+      type: "checkbox",
+    },
+    {
+      name: "isPublic",
+      label: "Ommaviy",
+      type: "checkbox",
+    },
+  ];
 
-  useEffect(() => {
-    if (isUpdate && documentTemplate) {
-      form.reset({
-        name: documentTemplate.name || "",
-      });
-    } else if (!isUpdate) {
-      form.reset({
+  const defaultValues: DocumentTemplateFormType = isUpdate
+    ? {
+        name: documentTemplate?.name ?? "",
+        description: documentTemplate?.description ?? "",
+        documentTypeId: documentTemplate?.documentType?.id ?? "",
+        templateFileId: "",
+        isActive: documentTemplate?.isActive ?? true,
+        isPublic: documentTemplate?.isPublic ?? true,
+      }
+    : {
         name: "",
-      });
-    }
-  }, [documentTemplate, isUpdate, form, modal.isOpen]);
+        description: "",
+        documentTypeId: "",
+        templateFileId: "",
+        isActive: true,
+        isPublic: true,
+      };
 
   const handleSubmit = (values: DocumentTemplateFormType) => {
     if (isUpdate && documentTemplate) {
-      updateDocumentTemplateMutation.mutate(
-        { id: documentTemplate.id || "", data: values },
+      updateMutation.mutate(
+        { id: documentTemplate.id, data: values },
         {
           onSuccess: () => {
             modal.closeModal();
-            form.reset();
             onSuccess?.();
           },
         },
       );
     } else {
-      createDocumentTemplateMutation.mutate(values, {
+      createMutation.mutate(values, {
         onSuccess: () => {
           modal.closeModal();
-          form.reset();
           onSuccess?.();
         },
       });
     }
   };
 
-  const handleCancel = () => {
-    modal.closeModal();
-    form.reset();
-  };
-
   return (
-    <Form {...form}>
-      <form className="space-y-5" onSubmit={form.handleSubmit(handleSubmit)}>
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Template nomi</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Template nomini kiriting"
-                  disabled={isLoading}
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
+    <SimpleFormGenerator
+      schema={documentTemplateSchema}
+      fields={fields}
+      defaultValues={defaultValues}
+      onSubmit={handleSubmit}
+      submitLabel={isUpdate ? "Yangilash" : "Qo'shish"}
+      renderActions={({ isSubmitting }) => (
         <div className="flex justify-end gap-2 pt-4">
           <Button
-            className="hover:text-text-on-dark"
             type="button"
             variant="outline"
-            onClick={handleCancel}
-            disabled={isLoading}
+            onClick={modal.closeModal}
+            disabled={isSubmitting || isLoading}
           >
             Bekor qilish
           </Button>
-          <Button type="submit" disabled={isLoading}>
-            {isLoading
+          <Button type="submit" disabled={isSubmitting || isLoading}>
+            {isSubmitting || isLoading
               ? isUpdate
                 ? "Yangilanmoqda..."
                 : "Qo'shilmoqda..."
@@ -132,8 +160,8 @@ const DocumentTemplateFormModal = ({
                 : "Qo'shish"}
           </Button>
         </div>
-      </form>
-    </Form>
+      )}
+    />
   );
 };
 

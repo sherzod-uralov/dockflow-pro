@@ -34,6 +34,7 @@ interface ApiError extends Error {
   status?: number;
   code?: string;
   config?: any;
+  request?: any;
 }
 
 interface ApiResponse<T = any> {
@@ -153,10 +154,14 @@ export class HttpErrorHandler {
       operation,
       customMessages = {},
       showNotification = true,
-      context,
     } = options;
 
-    const statusCode = error.response?.status || error.status || 500;
+    let statusCode = error.response?.status || error.status || 500;
+    if (error.code === "ERR_NETWORK" && error.request) {
+      if (!error.response && error.message.includes("Network Error")) {
+        statusCode = 413;
+      }
+    }
 
     this.logError(error, options);
 
@@ -396,25 +401,26 @@ export const createErrorHandler = (
 });
 
 export const errorHandlers = {
-  ruxsat: createErrorHandler("Ruxsat"),
+  permission: createErrorHandler("Ruxsat"),
   user: createErrorHandler("Foydalanuvchi"),
   rol: createErrorHandler("Rol"),
   auth: createErrorHandler("Kirish"),
   documentType: createErrorHandler("HujjatTuri"),
-  deportament: createErrorHandler("Bo'lim"),
-  document: createErrorHandler("Hujjat"),
+  department: createErrorHandler("Bo'lim"),
   journal: createErrorHandler("Jurnal"),
+  document: createErrorHandler("Hujjat"),
+  attachment: createErrorHandler("Fayl"),
   documentTemplate: createErrorHandler("DocumentTemplate"),
 };
 
 export const {
-  ruxsat: handlePermissionError,
+  permission: handlePermissionError,
   user: handleUserError,
   rol: handleRoleError,
   auth: handleAuthError,
-  documentType: handleHujjatTuriError,
-  deportament: handleBoLimError,
-  document: handleHujjatError,
-  journal: handleJurnalError,
+  documentType: handleDocumentTypeError,
+  department: handleDepartmentError,
+  journal: handleJournalError,
+  attachment: handleAttachmentError,
   documentTemplate: handleDocumentTemplateError,
 } = errorHandlers;

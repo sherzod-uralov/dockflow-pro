@@ -1,29 +1,29 @@
 import { useMutation, useQuery, useQueryClient } from "react-query";
-import { documentTypeService } from "../service/document-type.service";
-import {
-  GetAllDocumentTypes,
-  DocumentType,
-  DocumentTypeQueryParams,
-} from "../type/document-type.type";
 import { toast } from "sonner";
+import {
+  DocumentTypeQueryParams,
+  documentTypeService,
+  GetAllDocumentTypes,
+} from "@/features/document-type";
+import { ApiError, getErrorMessage } from "@/types/global.types";
 
 export const useCreateDocumentType = () => {
   const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (payload: DocumentType) =>
-      documentTypeService.createDocumentType(payload),
+
+  return useMutation<DocumentType, ApiError, DocumentType>({
+    mutationFn: (payload) => documentTypeService.createDocumentType(payload),
     onSuccess: () => {
-      queryClient.invalidateQueries(["documentTypes"]);
+      queryClient?.invalidateQueries(["documentTypes"]);
       toast.success("DocumentType muvaffaqiyatli yaratildi");
     },
-    onError: (error: any) => {
+    onError: (error) => {
       toast.error(error.message);
     },
   });
 };
 
 export const useGetAllDocumentTypes = (params?: DocumentTypeQueryParams) => {
-  return useQuery<GetAllDocumentTypes>({
+  return useQuery<GetAllDocumentTypes, ApiError>({
     queryKey: ["documentTypes", params],
     queryFn: () => documentTypeService.getAllDocumentTypes(params),
     keepPreviousData: true,
@@ -32,48 +32,43 @@ export const useGetAllDocumentTypes = (params?: DocumentTypeQueryParams) => {
 
 export const useUpdateDocumentType = () => {
   const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<DocumentType> }) =>
+
+  return useMutation<
+    DocumentType,
+    ApiError,
+    { id: string; data: Partial<DocumentType> }
+  >({
+    mutationFn: ({ id, data }) =>
       documentTypeService.updateDocumentType(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries(["documentTypes"]);
+      queryClient?.invalidateQueries(["documentTypes"]);
       toast.success("DocumentType muvaffaqiyatli yangilandi");
     },
-    onError: (error: any) => {
-      toast.error(error.message);
+    onError: (error) => {
+      toast.error(getErrorMessage(error));
     },
   });
 };
 
 export const useDeleteDocumentType = () => {
   const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (id: string) => documentTypeService.deleteDocumentType(id),
+
+  return useMutation<void, ApiError, string>({
+    mutationFn: (id) => documentTypeService.deleteDocumentType(id),
     onSuccess: () => {
-      queryClient.invalidateQueries(["documentTypes"]);
+      queryClient?.invalidateQueries(["documentTypes"]);
       toast.success("DocumentType muvaffaqiyatli o'chirildi");
     },
-    onError: (error: any) => {
-      toast.error(
-        error?.response?.data?.message ||
-          error.message ||
-          "O'chirishda xatolik yuz berdi",
-      );
+    onError: (error) => {
+      toast.error(getErrorMessage(error));
     },
   });
 };
 
 export const useGetDocumentTypeById = (id: string) => {
-  return useQuery({
+  return useQuery<DocumentType, ApiError>({
     queryKey: ["documentType", id],
     queryFn: () => documentTypeService.getDocumentTypeById(id),
     enabled: !!id,
-    onError: (error: any) => {
-      toast.error(
-        error?.response?.data?.message ||
-          error.message ||
-          "Ma'lumotni olishda xatolik",
-      );
-    },
   });
 };

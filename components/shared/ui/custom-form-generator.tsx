@@ -4,7 +4,6 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ZodTypeAny } from "zod";
-
 import {
   Form,
   FormControl,
@@ -25,6 +24,10 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { FileUpload } from "@/components/shared/ui/custom-file-upload";
+import { useCreateAttachment } from "@/features/attachment/hook/attachment.hook";
+import { Accept } from "react-dropzone";
 
 export type FieldOption = { label: string; value: string | number };
 export type Field = {
@@ -46,6 +49,14 @@ export type Field = {
   placeholder?: string;
   options?: FieldOption[];
   colSpan?: number;
+
+  fileReturnShape?: "id" | "object" | "array:id" | "array:object";
+  multiple?: boolean;
+  fileUrlTarget?: string;
+  accept?: Accept;
+  maxFiles?: number;
+  maxSize?: number;
+  helperText?: string;
 };
 
 interface Props {
@@ -61,7 +72,7 @@ interface Props {
   }) => React.ReactNode;
 }
 
-export default function SimpleFormGenerator({
+export default ({
   schema,
   fields,
   defaultValues = {},
@@ -69,12 +80,73 @@ export default function SimpleFormGenerator({
   submitLabel = "Saqlash",
   className = "",
   renderActions,
-}: Props) {
+}: Props) => {
   const form = useForm({
     resolver: zodResolver(schema),
     defaultValues,
     mode: "onChange",
   });
+
+  const { mutateAsync: uploadFile, isLoading: isUploading } =
+    useCreateAttachment();
+
+  const handleFileUpload = async (
+    file: File | undefined,
+    fieldName: string,
+    fileReturnShape: Field["fileReturnShape"] = "array:id",
+    multiple: boolean = true,
+    fileUrlTarget?: string,
+  ) => {
+    if (!file) return;
+
+    try {
+      const response = await uploadFile(file);
+      const shape = fileReturnShape ?? "array:id";
+      const prev = form.getValues(fieldName);
+
+      const pickValue = (() => {
+        switch (shape) {
+          case "id":
+          case "array:id":
+            return response.id;
+          case "object":
+          case "array:object":
+            return response;
+          default:
+            return response.id;
+        }
+      })();
+
+      const shouldBeArray = shape.startsWith("array:");
+      const nextValue = shouldBeArray
+        ? [...(Array.isArray(prev) ? prev : []), pickValue]
+        : pickValue;
+
+      form.setValue(fieldName, nextValue, { shouldValidate: true });
+
+      if (fileUrlTarget) {
+        const prevUrls = form.getValues(fileUrlTarget);
+        const urlValue = response.fileUrl;
+
+        if (multiple) {
+          const urls = Array.isArray(prevUrls)
+            ? prevUrls
+            : prevUrls
+              ? [prevUrls]
+              : [];
+          form.setValue(fileUrlTarget, [...urls, urlValue], {
+            shouldValidate: true,
+          });
+        } else {
+          form.setValue(fileUrlTarget, urlValue, { shouldValidate: true });
+        }
+      }
+
+      toast.success("Fayl muvaffaqiyatli yuklandi");
+    } catch (error: any) {
+      toast.error(error.message);
+    }
+  };
 
   return (
     <Form {...form}>
@@ -174,15 +246,36 @@ export default function SimpleFormGenerator({
 
                         case "file":
                           return (
-                            <Input
-                              type="file"
-                              onChange={(e) =>
-                                field.onChange(
-                                  e.target.files
-                                    ? e.target.files[0]
-                                    : undefined,
-                                )
-                              }
+                            <FileUpload
+                              name={f.name}
+                              label={f.label}
+                              multiple={!!f.multiple}
+                              maxFiles={f.maxFiles}
+                              maxSize={f.maxSize}
+                              accept={f.accept}
+                              helperText={f.helperText}
+                              onChange={async (files) => {
+                                if (!files) return;
+                                if (Array.isArray(files)) {
+                                  files.forEach((file) =>
+                                    handleFileUpload(
+                                      file,
+                                      f.name,
+                                      f.fileReturnShape,
+                                      !!f.multiple,
+                                      f.fileUrlTarget,
+                                    ),
+                                  );
+                                } else {
+                                  await handleFileUpload(
+                                    files,
+                                    f.name,
+                                    f.fileReturnShape,
+                                    !!f.multiple,
+                                    f.fileUrlTarget,
+                                  );
+                                }
+                              }}
                             />
                           );
 
@@ -207,16 +300,21 @@ export default function SimpleFormGenerator({
         <div className="flex justify-end col-span-2 gap-2">
           {renderActions ? (
             renderActions({
-              isSubmitting: form.formState.isSubmitting,
+              isSubmitting: form.formState.isSubmitting || isUploading,
               isValid: form.formState.isValid,
             })
           ) : (
-            <Button type="submit" disabled={form.formState.isSubmitting}>
-              {form.formState.isSubmitting ? "Saqlanmoqda..." : submitLabel}
+            <Button
+              type="submit"
+              disabled={form.formState.isSubmitting || isUploading}
+            >
+              {form.formState.isSubmitting || isUploading
+                ? "Saqlanmoqda..."
+                : submitLabel}
             </Button>
           )}
         </div>
       </form>
     </Form>
   );
-}
+};
