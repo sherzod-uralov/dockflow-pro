@@ -15,6 +15,8 @@ import { Menu, Search, Bell, Settings, User, LogOut } from "lucide-react";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { useGetProfileQuery } from "@/features/login/hook/login.hook";
 import { useRouter } from "next/navigation";
+import { Global } from "recharts";
+import { GlobalSearch } from "@/components/shared/layout/global-search";
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -55,13 +57,7 @@ export function Header({ onMenuClick }: HeaderProps) {
             <Menu className="w-5 h-5" />
           </Button>
 
-          <div className="relative w-96 max-w-sm">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-            <Input
-              placeholder="tizimli qidiruv"
-              className="pl-10 bg-input border-border rounded-xl"
-            />
-          </div>
+          <GlobalSearch />
         </div>
 
         <div className="flex items-center space-x-4">

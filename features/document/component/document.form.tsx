@@ -171,6 +171,7 @@ const DocumentFormModal = ({
       renderActions={({ isSubmitting }) => (
         <div className="flex justify-end gap-2 pt-4">
           <Button
+            className="btn-outline-destructive"
             type="button"
             variant="outline"
             onClick={modal.closeModal}

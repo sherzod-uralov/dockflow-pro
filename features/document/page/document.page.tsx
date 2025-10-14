@@ -49,8 +49,6 @@ const DocumentPage = () => {
     editModal.openModal();
   };
 
-  console.log(data);
-
   const handleDelete = (id: string) => {
     deleteDocumentMutation.mutate(id);
     deleteModal.closeModal();

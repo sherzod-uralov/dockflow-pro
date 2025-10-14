@@ -4,21 +4,13 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Files,
-  FolderOpen,
-  Upload,
-  Download,
-  Trash2,
   Settings,
-  Users,
-  BarChart3,
   LogOut,
   X,
   ChevronDown,
   Home,
   DockIcon,
-  UserCog,
   Book,
-  BookTemplateIcon,
 } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -170,7 +162,6 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                 </Button>
               )}
 
-              {/* Subitems */}
               {item.subItems && openMenus.includes(item.label) && (
                 <div className="ml-6 mt-1 space-y-1">
                   {item.subItems.map((sub) => (

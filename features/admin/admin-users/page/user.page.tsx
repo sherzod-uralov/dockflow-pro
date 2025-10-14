@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   DataTable,
   DataTableColumn,
@@ -28,7 +28,7 @@ import {
   CustomAction,
 } from "@/components/shared/ui/custom-action";
 import { ModalState } from "@/types/modal";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import UserView from "../component/user.view";
 import { usePagination } from "@/hooks/use-pagination";
 import { useDebounce } from "@/hooks/use-debaunce";
@@ -48,7 +48,28 @@ const UserPage = () => {
   const deleteModal: ModalState = useModal();
   const viewModal: ModalState = useModal();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const deleteUserMutation = useDeleteUserMutation();
+
+  // URL dan userId ni olish va modalni ochish
+  useEffect(() => {
+    const userId = searchParams.get("userId");
+
+    if (userId) {
+      // Agar data mavjud bo'lsa va userId topilsa
+      const user = data?.data?.find((u: User) => u.id === userId);
+
+      if (user) {
+        setSelectedUser(user);
+        viewModal.openModal();
+      }
+    } else {
+      // userId yo'q bo'lsa modalni yopish
+      if (viewModal.isOpen) {
+        viewModal.closeModal();
+      }
+    }
+  }, [searchParams, data]);
 
   const columns: DataTableColumn<User>[] = [
     createSelectColumn<User>(),
@@ -143,6 +164,7 @@ const UserPage = () => {
   ];
 
   const handleViewUser = (user: User) => {
+    setSelectedUser(user);
     viewModal.openModal();
     router.push(`?userId=${user.id}`, { scroll: false });
   };
@@ -150,6 +172,12 @@ const UserPage = () => {
   const handleEditUser = (user: User) => {
     editModal.openModal();
     setSelectedUser(user);
+  };
+
+  const handleCloseViewModal = () => {
+    viewModal.closeModal();
+    setSelectedUser(null);
+    router.push("/dashboard/admin/users", { scroll: false });
   };
 
   return (
@@ -166,6 +194,8 @@ const UserPage = () => {
         data={data?.data ?? []}
         loading={isLoading}
         pageSize={10}
+        onPageChange={handlePageChange}
+        onPageSizeChange={handlePageSizeChange}
         pageSizeOptions={[5, 10, 20, 50]}
         emptyMessage="Hech qanday foydalanuvchi topilmadi"
         className="bg-transparent"
@@ -203,10 +233,7 @@ const UserPage = () => {
       <CustomModal
         closeOnOverlayClick
         isOpen={viewModal.isOpen}
-        onClose={() => {
-          viewModal.closeModal();
-          router.push("?", { scroll: false });
-        }}
+        onClose={handleCloseViewModal}
         title="Foydalanuvchi malumotlari"
       >
         <UserView />
