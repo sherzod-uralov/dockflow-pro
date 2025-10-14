@@ -26,11 +26,11 @@ interface DocumentTemplateFormModalProps {
 //dev-a
 
 const DocumentTemplateFormModal = ({
-  modal,
-  mode,
-  documentTemplate,
-  onSuccess,
-}: DocumentTemplateFormModalProps) => {
+                                     modal,
+                                     mode,
+                                     documentTemplate,
+                                     onSuccess,
+                                   }: DocumentTemplateFormModalProps) => {
   const createMutation = useCreateDocumentTemplate();
   const updateMutation = useUpdateDocumentTemplate();
   const { data: documentTypes } = useGetAllDocumentTypes();
@@ -96,21 +96,21 @@ const DocumentTemplateFormModal = ({
 
   const defaultValues: DocumentTemplateFormType = isUpdate
     ? {
-        name: documentTemplate?.name ?? "",
-        description: documentTemplate?.description ?? "",
-        documentTypeId: documentTemplate?.documentType?.id ?? "",
-        templateFileId: "",
-        isActive: documentTemplate?.isActive ?? true,
-        isPublic: documentTemplate?.isPublic ?? true,
-      }
+      name: documentTemplate?.name ?? "",
+      description: documentTemplate?.description ?? "",
+      documentTypeId: documentTemplate?.documentType?.id ?? "",
+      templateFileId: "",
+      isActive: documentTemplate?.isActive ?? true,
+      isPublic: documentTemplate?.isPublic ?? true,
+    }
     : {
-        name: "",
-        description: "",
-        documentTypeId: "",
-        templateFileId: "",
-        isActive: true,
-        isPublic: true,
-      };
+      name: "",
+      description: "",
+      documentTypeId: "",
+      templateFileId: "",
+      isActive: true,
+      isPublic: true,
+    };
 
   const handleSubmit = (values: DocumentTemplateFormType) => {
     if (isUpdate && documentTemplate) {
