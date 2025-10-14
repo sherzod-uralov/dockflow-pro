@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   ConfirmationModal,
   CustomModal,
@@ -10,21 +11,19 @@ import { ModalState } from "@/types/modal";
 import {
   useDeleteDocumentTemplate,
   useGetAllDocumentTemplates,
-} from "../hook/document-template.hook";
+  DocumentTemplateResponse,
+} from "@/features/document-template";
 import { DataTable } from "@/components/shared/ui/custom-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Copy } from "lucide-react";
-import { useState } from "react";
 import {
   CustomAction,
   ActionItem,
-  createViewAction,
   createEditAction,
   createDeleteAction,
   createCopyAction,
 } from "@/components/shared/ui/custom-action";
-import { DocumentTemplate } from "../type/document-template.type";
 import DocumentTemplateFormModal from "../component/document-template.form";
 import { useDebounce } from "@/hooks/use-debaunce";
 import { handleCopyToClipboard } from "@/utils/copy-text";
@@ -34,27 +33,27 @@ const DocumentTemplatePage = () => {
   const createModal: ModalState = useModal();
   const editModal: ModalState = useModal();
   const deleteModal: ModalState = useModal();
-
   const { handlePageChange, handlePageSizeChange, pageNumber, pageSize } =
     usePagination();
-  const [selectedDocumentTemplate, setSelectedDocumentTemplate] =
-    useState<DocumentTemplate | null>(null);
+  const [selectedTemplate, setSelectedTemplate] =
+    useState<DocumentTemplateResponse | null>(null);
   const [searchQuery, debouncedSearch, setSearchQuery] = useDebounce("", 500);
 
   const { data, isLoading } = useGetAllDocumentTemplates({
-    search: debouncedSearch || undefined,
+    search: debouncedSearch,
     pageSize: pageSize,
     pageNumber: pageNumber,
   });
-  const deleteDocumentTemplateMutation = useDeleteDocumentTemplate();
 
-  const handleEdit = (item: DocumentTemplate) => {
-    setSelectedDocumentTemplate(item);
+  const deleteMutation = useDeleteDocumentTemplate();
+
+  const handleEdit = (item: DocumentTemplateResponse) => {
+    setSelectedTemplate(item);
     editModal.openModal();
   };
 
   const handleDelete = (id: string) => {
-    deleteDocumentTemplateMutation.mutate(id);
+    deleteMutation.mutate(id);
     deleteModal.closeModal();
   };
 
@@ -63,11 +62,11 @@ const DocumentTemplatePage = () => {
   };
 
   const handleEditSuccess = () => {
-    setSelectedDocumentTemplate(null);
+    setSelectedTemplate(null);
   };
 
   const handleEditModalClose = () => {
-    setSelectedDocumentTemplate(null);
+    setSelectedTemplate(null);
     editModal.closeModal();
   };
 
@@ -75,9 +74,9 @@ const DocumentTemplatePage = () => {
     <>
       <UserToolbar
         searchQuery={searchQuery}
-        searchPlaceholder="Templatelarni qidirish..."
+        searchPlaceholder="Shablonlarni qidirish..."
         onSearch={handleSearch}
-        createLabel="DocumentTemplate qo'shish"
+        createLabel="Shablon qo'shish"
         onCreate={createModal.openModal}
       />
 
@@ -99,15 +98,15 @@ const DocumentTemplatePage = () => {
                   <Badge
                     variant="outline"
                     className="font-mono cursor-pointer hover:bg-muted"
-                    onClick={() => handleCopyToClipboard(id as string, "ID")}
+                    onClick={() => handleCopyToClipboard(id, "ID")}
                   >
-                    {id?.slice(0, 8)}...
+                    {id.slice(0, 8)}...
                   </Badge>
                   <Button
                     variant="ghost"
                     size="icon"
                     className="h-6 w-6 group"
-                    onClick={() => handleCopyToClipboard(id as string, "ID")}
+                    onClick={() => handleCopyToClipboard(id, "ID")}
                   >
                     <Copy className="h-3 w-3 group-hover:text-text-on-dark" />
                   </Button>
@@ -116,8 +115,35 @@ const DocumentTemplatePage = () => {
             },
           },
           {
-            header: "Nom",
+            header: "Nomi",
             accessorKey: "name",
+          },
+          {
+            header: "Tavsif",
+            accessorKey: "description",
+          },
+          {
+            header: "Hujjat turi",
+            accessorKey: "documentType",
+            cell: ({ row }) => row.original.documentType.name,
+          },
+          {
+            header: "Holati",
+            accessorKey: "isActive",
+            cell: ({ row }) => (
+              <Badge variant={row.original.isActive ? "default" : "secondary"}>
+                {row.original.isActive ? "Faol" : "Nofaol"}
+              </Badge>
+            ),
+          },
+          {
+            header: "Ommaviy",
+            accessorKey: "isPublic",
+            cell: ({ row }) => (
+              <Badge variant={row.original.isPublic ? "default" : "outline"}>
+                {row.original.isPublic ? "Ha" : "Yo'q"}
+              </Badge>
+            ),
           },
           {
             header: "Harakatlar",
@@ -127,11 +153,9 @@ const DocumentTemplatePage = () => {
 
               const actions: ActionItem[] = [
                 createEditAction(() => handleEdit(item)),
-                createCopyAction(() =>
-                  handleCopyToClipboard(item.id || "", "ID"),
-                ),
+                createCopyAction(() => handleCopyToClipboard(item.id, "ID")),
                 createDeleteAction(() => {
-                  setSelectedDocumentTemplate(item);
+                  setSelectedTemplate(item);
                   deleteModal.openModal();
                 }),
               ];
@@ -144,9 +168,10 @@ const DocumentTemplatePage = () => {
       />
 
       <CustomModal
+        size="3xl"
         closeOnOverlayClick={false}
-        title="Template qo'shish"
-        description="Template qo'shish uchun maydonlar to'ldirilishi kerak"
+        title="Shablon qo'shish"
+        description="Yangi hujjat shablonini yarating"
         isOpen={createModal.isOpen}
         onClose={createModal.closeModal}
       >
@@ -155,27 +180,27 @@ const DocumentTemplatePage = () => {
 
       <CustomModal
         closeOnOverlayClick={false}
-        title="Templateni yangilash"
-        description="Template ma'lumotlarini yangilang"
+        title="Shablonni yangilash"
+        description="Shablon ma'lumotlarini tahrirlang"
         isOpen={editModal.isOpen}
         onClose={handleEditModalClose}
       >
         <DocumentTemplateFormModal
           modal={editModal}
           mode="update"
-          documentTemplate={selectedDocumentTemplate as any}
+          documentTemplate={selectedTemplate as any}
           onSuccess={handleEditSuccess}
         />
       </CustomModal>
 
       <ConfirmationModal
         closeOnOverlayClick={false}
-        title="Templateni o'chirish"
-        description="Ushbu ma'lumotni o'chirgandan so'ng qaytarib bo'lmaydi. Rozimisiz?"
+        title="Shablonni o'chirish"
+        description="Ushbu shablonni o'chirgandan so'ng qaytarib bo'lmaydi. Rozimisiz?"
         onClose={deleteModal.closeModal}
         isOpen={deleteModal.isOpen}
         onConfirm={() => {
-          handleDelete(selectedDocumentTemplate?.id as string);
+          handleDelete(selectedTemplate?.id as string);
         }}
       />
     </>
