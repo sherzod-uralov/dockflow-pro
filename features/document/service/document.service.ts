@@ -2,7 +2,7 @@ import axiosInstance from "@/api/axios.instance";
 import { errorHandlers } from "@/utils/http-error-handler";
 import { endpoints } from "@/api/axios.endpoints";
 import { DocumentQueryParams, GetAllDocuments } from "@/features/document";
-import { DocumentFormType } from "@/features/document/component/document.form";
+import { DocumentFormType } from "@/features/document/schema/document.schema";
 
 const documentHandler = errorHandlers.document;
 

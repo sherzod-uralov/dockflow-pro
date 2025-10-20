@@ -51,12 +51,10 @@ const UserPage = () => {
   const searchParams = useSearchParams();
   const deleteUserMutation = useDeleteUserMutation();
 
-  // URL dan userId ni olish va modalni ochish
   useEffect(() => {
     const userId = searchParams.get("userId");
 
     if (userId) {
-      // Agar data mavjud bo'lsa va userId topilsa
       const user = data?.data?.find((u: User) => u.id === userId);
 
       if (user) {
@@ -64,7 +62,6 @@ const UserPage = () => {
         viewModal.openModal();
       }
     } else {
-      // userId yo'q bo'lsa modalni yopish
       if (viewModal.isOpen) {
         viewModal.closeModal();
       }

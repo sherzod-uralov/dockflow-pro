@@ -1,12 +1,19 @@
-// middleware.ts
+// middleware.ts (root of project)
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export function middleware(req: NextRequest) {
-  const token =
-    req.cookies.get("accessToken")?.value || req.headers.get("Authorization");
+  // Your token logic here (unchanged)
+  let token = req.cookies.get("accessToken")?.value;
+  const authHeader = req.headers.get("Authorization");
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    token = authHeader.substring(7);
+  }
 
-  console.log(req.cookies.get("accessToken"));
+  if (process.env.NODE_ENV === "development") {
+    console.log("Access Token (dev only):", token ? "Present" : "Missing");
+  }
+
   const isAuth = !!token;
   const isLoginPage = req.nextUrl.pathname.startsWith("/login");
   const isDashboard = req.nextUrl.pathname.startsWith("/dashboard");
@@ -23,5 +30,11 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/login"],
+  matcher: [
+    // Exclude API, static files, and images to avoid 404/blocks
+    "/((?!api|_next/static|_next/image|favicon.ico).*)",
+    // Your protected paths
+    "/dashboard/:path*",
+    "/login",
+  ],
 };

@@ -52,7 +52,6 @@ const menuItems: MenuItem[] = [
     label: "Sozlamalar",
     subItems: [
       { label: "Profil", href: "/dashboard/setting/profile" },
-      { label: "Shablonlar", href: "/dashboard/document-template" },
       { label: "Tizim sozalamari", href: "/dashboard/setting/system-setting" },
     ],
   },

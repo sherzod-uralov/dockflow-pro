@@ -56,3 +56,11 @@ export const useUpdateRole = () => {
     },
   });
 };
+
+export const useGetRoleByIdQuery = (id: string) => {
+  return useQuery({
+    queryKey: ["role", id],
+    queryFn: () => rolesService.getRoleById(id),
+    enabled: !!id,
+  });
+};

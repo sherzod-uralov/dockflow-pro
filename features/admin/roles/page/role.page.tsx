@@ -12,29 +12,51 @@ import {
   createViewAction,
   CustomAction,
 } from "@/components/shared/ui/custom-action";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { RoleData } from "../type/role.type";
 import { usePagination } from "@/hooks/use-pagination";
 import { handleCopyToClipboard } from "@/utils/copy-text";
 import { Badge } from "@/components/ui/badge";
 import { ConfirmationModal } from "@/components/ui/custom-modal";
 import { useDebounce } from "@/hooks/use-debaunce";
+import { useRouter, useSearchParams } from "next/navigation";
+import RoleView from "../component/role-view";
 
 const RolesPage = () => {
   const createModal = useModal();
   const deleteModal = useModal();
   const editModal = useModal();
+  const viewModal = useModal();
   const { pageNumber, handlePageSizeChange, pageSize, handlePageChange } =
     usePagination();
   const [searchQuery, debouncedSearch, setSearchQuery] = useDebounce("", 500);
+  const [selectedRole, setSelectedRole] = useState<RoleData | null>(null);
 
   const { data } = useGetRoles({
     pageSize: pageSize,
     pageNumber: pageNumber,
     search: debouncedSearch,
   });
-  const [selectedRole, setSelectedRole] = useState<RoleData | null>(null);
   const deleteMutation = useDeleteRole();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const roleId = searchParams.get("roleId");
+
+    if (roleId) {
+      const role = data?.data?.find((r: RoleData) => r.id === roleId);
+
+      if (role) {
+        setSelectedRole(role);
+        viewModal.openModal();
+      }
+    } else {
+      if (viewModal.isOpen) {
+        viewModal.closeModal();
+      }
+    }
+  }, [searchParams, data]);
 
   const handleDelete = (id: string) => {
     deleteMutation.mutate(id);
@@ -45,8 +67,20 @@ const RolesPage = () => {
     editModal.openModal();
   };
 
+  const handleViewRole = (role: RoleData) => {
+    setSelectedRole(role);
+    viewModal.openModal();
+    router.push(`?roleId=${role.id}`, { scroll: false });
+  };
+
+  const handleCloseViewModal = () => {
+    viewModal.closeModal();
+    setSelectedRole(null);
+    router.push("/dashboard/admin/roles", { scroll: false });
+  };
+
   return (
-    <>
+    <div className="space-y-6">
       <UserToolbar
         createLabel="Ro'l qo'shish"
         onCreate={() => createModal.openModal()}
@@ -121,7 +155,7 @@ const RolesPage = () => {
               const role = row.original;
 
               const actions: ActionItem[] = [
-                createViewAction(() => console.log("view", role.id)),
+                createViewAction(() => handleViewRole(role)),
                 createEditAction(() => handleUpdate(role)),
                 createCopyAction(() => console.log("copy", role.id)),
                 createDeleteAction(() => {
@@ -170,7 +204,15 @@ const RolesPage = () => {
       >
         <RoleForm mode="edit" role={selectedRole} modal={editModal} />
       </CustomModal>
-    </>
+      <CustomModal
+        closeOnOverlayClick
+        isOpen={viewModal.isOpen}
+        onClose={handleCloseViewModal}
+        title="Rol ma'lumotlari"
+      >
+        <RoleView />
+      </CustomModal>
+    </div>
   );
 };
 
