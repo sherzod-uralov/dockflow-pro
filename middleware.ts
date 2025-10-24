@@ -1,9 +1,7 @@
-// middleware.ts (root of project)
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export function middleware(req: NextRequest) {
-  // Your token logic here (unchanged)
   let token = req.cookies.get("accessToken")?.value;
   const authHeader = req.headers.get("Authorization");
   if (authHeader && authHeader.startsWith("Bearer ")) {

@@ -23,12 +23,8 @@ if (typeof window !== "undefined") {
       const is401 = error.response?.status === 401;
 
       if (is401) {
-        console.log("401 detected, redirecting to signin");
-
         Cookies.remove("accessToken");
         Cookies.remove("refreshToken");
-
-        window.location.replace("/login");
 
         return Promise.reject(error);
       }
