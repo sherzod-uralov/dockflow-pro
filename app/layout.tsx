@@ -9,6 +9,7 @@ import "./globals.css";
 import { Geist } from "next/font/google";
 import ReactQueryProvider from "@/context/react-query.provider";
 import { ClientToaster } from "@/components/shared/client-toast";
+import Script from "next/script";
 
 const satoshi = Geist({
   subsets: ["latin"],
@@ -28,6 +29,13 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <Script
+          src="https://cdn.cloud.pspdfkit.com/pspdfkit-web@1.7.0/nutrient-viewer.js"
+          // Load before the page becomes interactive to reference `window.NutrientViewer` in the client.
+          strategy="beforeInteractive"
+        />
+      </head>
       <body
         className={`font-sans ${GeistSans.variable} ${GeistMono.variable} ${satoshi.variable}`}
       >

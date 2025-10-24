@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   ConfirmationModal,
   CustomModal,
@@ -16,7 +17,7 @@ import {
 import { DataTable } from "@/components/shared/ui/custom-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Copy } from "lucide-react";
+import { Copy, FileEdit } from "lucide-react";
 import {
   CustomAction,
   ActionItem,
@@ -28,8 +29,12 @@ import DocumentTemplateFormModal from "../component/document-template.form";
 import { useDebounce } from "@/hooks/use-debaunce";
 import { handleCopyToClipboard } from "@/utils/copy-text";
 import { usePagination } from "@/hooks/use-pagination";
+import { createDocumentEditUrl } from "@/utils/url-helper";
+import { toast } from "sonner";
+import Cookies from "js-cookie";
 
 const DocumentTemplatePage = () => {
+  const router = useRouter();
   const createModal: ModalState = useModal();
   const editModal: ModalState = useModal();
   const deleteModal: ModalState = useModal();
@@ -68,6 +73,21 @@ const DocumentTemplatePage = () => {
   const handleEditModalClose = () => {
     setSelectedTemplate(null);
     editModal.closeModal();
+  };
+
+  const handleEditDocument = (item: DocumentTemplateResponse) => {
+    if (!item.templateFile?.fileUrl) {
+      toast.error("Hujjat fayli topilmadi");
+      return;
+    }
+
+    const editUrl = createDocumentEditUrl(
+      item.templateFile.fileUrl,
+      item.id,
+      Cookies.get("accessToken") || "",
+    );
+
+    router.push(editUrl);
   };
 
   return (
@@ -128,6 +148,23 @@ const DocumentTemplatePage = () => {
             cell: ({ row }) => row.original.documentType.name,
           },
           {
+            header: "Fayl",
+            accessorKey: "templateFile",
+            cell: ({ row }) => {
+              const file = row.original.templateFile;
+              return file ? (
+                <div className="flex flex-col gap-1">
+                  <span className="text-sm font-medium">{file.fileName}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {file.fileSize}
+                  </span>
+                </div>
+              ) : (
+                <Badge variant="secondary">Fayl yo'q</Badge>
+              );
+            },
+          },
+          {
             header: "Holati",
             accessorKey: "isActive",
             cell: ({ row }) => (
@@ -152,6 +189,14 @@ const DocumentTemplatePage = () => {
               const item = row.original;
 
               const actions: ActionItem[] = [
+                {
+                  label: "Hujjatni tahrirlash",
+                  icon: FileEdit,
+                  onClick: () => handleEditDocument(item),
+                  variant: "default",
+                  disabled: !item.templateFile?.fileUrl,
+                  id: "",
+                },
                 createEditAction(() => handleEdit(item)),
                 createCopyAction(() => handleCopyToClipboard(item.id, "ID")),
                 createDeleteAction(() => {

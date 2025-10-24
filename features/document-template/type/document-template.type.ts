@@ -1,5 +1,13 @@
 import { DataPagination } from "@/types/global.types";
 
+export interface TemplateFile {
+  id: string;
+  fileName: string;
+  fileSize: string;
+  fileUrl: string;
+  mimeType: string;
+}
+
 export interface DocumentTemplateResponse {
   id: string;
   name: string;
@@ -14,6 +22,7 @@ export interface DocumentTemplateResponse {
     id: string;
     name: string;
   };
+  templateFile?: TemplateFile;
   isActive: boolean;
   isPublic: boolean;
   createdAt: string;
@@ -53,6 +62,7 @@ export interface DocumentTemplateUpdatePayload {
     }>;
   };
   documentTypeId?: string;
+  templateFileId?: string;
   isActive?: boolean;
   isPublic?: boolean;
 }

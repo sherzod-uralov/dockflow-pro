@@ -15,7 +15,7 @@ import { DataTable } from "@/components/shared/ui/custom-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Copy } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   CustomAction,
   ActionItem,
@@ -30,6 +30,7 @@ import PermissionView from "../component/permission.view";
 import { useDebounce } from "@/hooks/use-debaunce";
 import { handleCopyToClipboard } from "@/utils/copy-text";
 import { usePagination } from "@/hooks/use-pagination";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const PermissionPage = () => {
   const createModal: ModalState = useModal();
@@ -47,12 +48,39 @@ const PermissionPage = () => {
     pageSize: pageSize,
     pageNumber: pageNumber,
   });
-  console.log(data);
+
   const deletePermissionMutation = useDeletePermission();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const permissionId = searchParams.get("permissionId");
+
+    if (permissionId) {
+      const permission = data?.data
+        ?.flatMap((item: any) =>
+          item.permissions.map((perm: any) => ({
+            ...perm,
+            module: item.module,
+          })),
+        )
+        .find((p: Permission) => p.id === permissionId);
+
+      if (permission) {
+        setSelectedPermission(permission);
+        viewModal.openModal();
+      }
+    } else {
+      if (viewModal.isOpen) {
+        viewModal.closeModal();
+      }
+    }
+  }, [searchParams, data]);
 
   const handleView = (permission: Permission) => {
     setSelectedPermission(permission);
     viewModal.openModal();
+    router.push(`?permissionId=${permission.id}`, { scroll: false });
   };
 
   const handleEdit = (permission: Permission) => {
@@ -75,6 +103,12 @@ const PermissionPage = () => {
   const handleEditModalClose = () => {
     setSelectedPermission(null);
     editModal.closeModal();
+  };
+
+  const handleCloseViewModal = () => {
+    viewModal.closeModal();
+    setSelectedPermission(null);
+    router.push("/dashboard/admin/permissions", { scroll: false });
   };
 
   return (
@@ -206,18 +240,13 @@ const PermissionPage = () => {
         <PermissionFormModal modal={createModal} mode="create" />
       </CustomModal>
       <CustomModal
-        closeOnOverlayClick={false}
-        title={`${selectedPermission?.name} haqida to'liq ma'lumotlar`}
-        description="Ruxsat haqida to'liq ma'lumotlar"
+        size="3xl"
+        closeOnOverlayClick
+        title="Ruxsat haqida to'liq ma'lumotlar"
         isOpen={viewModal.isOpen}
-        onClose={viewModal.closeModal}
+        onClose={handleCloseViewModal}
       >
-        {selectedPermission && (
-          <PermissionView
-            permission={selectedPermission}
-            onClose={viewModal.closeModal}
-          />
-        )}
+        <PermissionView />
       </CustomModal>
       <CustomModal
         closeOnOverlayClick={false}

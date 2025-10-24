@@ -19,7 +19,10 @@ import { RoleFormProps } from "../type/role.type";
 import { useEffect } from "react";
 
 const RoleForm = ({ modal, mode, role }: RoleFormProps) => {
-  const { data: permissions, isLoading } = useGetAllPermissions();
+  const { data: permissions, isLoading } = useGetAllPermissions({
+    pageNumber: 1,
+    pageSize: 1000,
+  });
   const roleCreateMutation = useRoleCreateMutation();
   const roleUpdateMutation = useUpdateRole();
 

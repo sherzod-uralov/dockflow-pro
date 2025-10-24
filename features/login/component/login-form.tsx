@@ -34,9 +34,9 @@ export const LoginForm = () => {
   const onSubmit: SubmitHandler<LoginFormValue> = async (values) => {
     authMutation.mutate(values, {
       onSuccess: (data) => {
-        router.push("/dashboard");
         Cookie.set("accessToken", data.accessToken);
         Cookie.set("refreshToken", data.refreshToken);
+        router.push("/dashboard");
       },
     });
   };

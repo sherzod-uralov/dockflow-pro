@@ -1,29 +1,23 @@
-import React from "react";
-import { PageHeader } from "@/components/shared/ui/custom-breadcrumb";
-import { Home } from "lucide-react";
-import SystemSettingPage from "@/features/setting/system-setting/page/system-setting.page";
+"use client";
 
-const Page = () => {
+import { useState } from "react";
+import { FileUpload } from "@/app/dashboard/setting/system-setting/file-upload";
+import { WordEditor } from "@/app/dashboard/setting/system-setting/word-editor";
+
+export default function Home() {
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+
+  const handleFileUpload = (file: File) => {
+    setUploadedFile(file);
+  };
+
   return (
-    <>
-      <PageHeader
-        title="Tizim sozlamalari"
-        description="Tizim sozlamalarini boshqarish"
-        items={[
-          {
-            label: "Bosh sahifa",
-            href: "/dashboard",
-            icon: <Home size={16} />,
-          },
-          {
-            label: "Tizim sozlamalari",
-            href: "/dashboard/system-setting",
-          },
-        ]}
-      ></PageHeader>
-      <SystemSettingPage />
-    </>
+    <main className="min-h-screen bg-background">
+      {!uploadedFile ? (
+        <FileUpload onFileUpload={handleFileUpload} />
+      ) : (
+        <WordEditor file={uploadedFile} />
+      )}
+    </main>
   );
-};
-
-export default Page;
+}

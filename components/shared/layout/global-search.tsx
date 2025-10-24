@@ -1,9 +1,20 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Search, FileText, User, ArrowRight, Loader2, X } from "lucide-react";
+import {
+  Search,
+  FileText,
+  User,
+  Users,
+  Key,
+  ArrowRight,
+  Loader2,
+  X,
+} from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
 import { useGetUserQuery } from "@/features/admin/admin-users/hook/user.hook";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useGetRoles } from "@/features/admin/roles/hook/role.hook";
+import { useGetAllPermissions } from "@/features/admin/permissions/hook/permission.hook";
 
 // Static pages data
 const staticPages = [
@@ -64,31 +75,54 @@ export function GlobalSearch() {
   }, [searchQuery]);
 
   // Fetch users when searching
-  const { data: usersData, isLoading } = useGetUserQuery({
+  const { data: usersData, isLoading: usersLoading } = useGetUserQuery({
     pageNumber: 1,
     pageSize: 5,
     search: debouncedQuery,
   });
 
-  // Filter static pages
+  // Fetch roles when searching
+  const { data: rolesData, isLoading: rolesLoading } = useGetRoles({
+    pageSize: 5,
+    pageNumber: 1,
+    search: debouncedQuery,
+  });
+
+  // Fetch permissions when searching
+  const { data: permissionsData, isLoading: permissionsLoading } =
+    useGetAllPermissions({
+      pageSize: 5,
+      pageNumber: 1,
+      search: debouncedQuery,
+    });
+
   const filteredPages = staticPages.filter((page) =>
     page.title.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const users = usersData?.data || [];
-  const totalResults = filteredPages.length + users.length;
+  const roles = rolesData?.data || [];
+  const permissions = permissionsData?.data
+    ? permissionsData.data.flatMap((item: any) =>
+        item.permissions.map((perm: any) => ({
+          ...perm,
+          module: item.module,
+        })),
+      )
+    : [];
+  const totalResults =
+    filteredPages.length + roles.length + permissions.length + users.length;
 
-  // Handle keyboard shortcuts
+  const anyLoading = usersLoading || rolesLoading || permissionsLoading;
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Ctrl+K or Cmd+K to open search
       if ((e.ctrlKey || e.metaKey) && e.key === "k") {
         e.preventDefault();
         setIsOpen(true);
         setTimeout(() => inputRef.current?.focus(), 100);
       }
 
-      // Escape to close
       if (e.key === "Escape") {
         setIsOpen(false);
         setSearchQuery("");
@@ -138,10 +172,28 @@ export function GlobalSearch() {
       const page = filteredPages[index];
       router.push(page.path);
     } else {
-      // Navigate to user
-      const userIndex = index - filteredPages.length;
-      const user = users[userIndex];
-      router.push(`/dashboard/admin/users?userId=${user.id}`);
+      const pagesOffset = filteredPages.length;
+      const rolesOffset = pagesOffset + roles.length;
+      const permissionsOffset = rolesOffset + permissions.length;
+
+      if (index < rolesOffset) {
+        // Navigate to role
+        const roleIndex = index - pagesOffset;
+        const role = roles[roleIndex];
+        router.push(`/dashboard/admin/roles?roleId=${role.id}`);
+      } else if (index < permissionsOffset) {
+        // Navigate to permission
+        const permissionIndex = index - rolesOffset;
+        const permission = permissions[permissionIndex];
+        router.push(
+          `/dashboard/admin/permissions?permissionId=${permission.id}`,
+        );
+      } else {
+        // Navigate to user
+        const userIndex = index - permissionsOffset;
+        const user = users[userIndex];
+        router.push(`/dashboard/admin/users?userId=${user.id}`);
+      }
     }
     setIsOpen(false);
     setSearchQuery("");
@@ -197,7 +249,7 @@ export function GlobalSearch() {
           ) : (
             <div className="overflow-y-auto">
               {/* Loading State */}
-              {isLoading && debouncedQuery !== searchQuery && (
+              {anyLoading && debouncedQuery === searchQuery && (
                 <div className="p-4 flex items-center justify-center gap-2 text-muted-foreground">
                   <Loader2 className="w-4 h-4 animate-spin" />
                   <span className="text-sm">Qidirilmoqda...</span>
@@ -255,6 +307,114 @@ export function GlobalSearch() {
                 </div>
               )}
 
+              {/* Roles Section */}
+              {roles.length > 0 && (
+                <div className="p-2 border-t border-border">
+                  <div className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                    Rollar
+                  </div>
+                  {roles.map((role, idx) => {
+                    const globalIdx = filteredPages.length + idx;
+                    return (
+                      <button
+                        key={role.id}
+                        onClick={() => handleSelect(globalIdx)}
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors ${
+                          activeIndex === globalIdx
+                            ? "bg-primary text-primary-foreground"
+                            : "hover:bg-muted"
+                        }`}
+                      >
+                        <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center">
+                          <Users className="w-4 h-4 text-muted-foreground" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p
+                            className={`text-sm font-medium truncate ${
+                              activeIndex === globalIdx
+                                ? "text-primary-foreground"
+                                : "text-foreground"
+                            }`}
+                          >
+                            {role.name}
+                          </p>
+                          <p
+                            className={`text-xs truncate ${
+                              activeIndex === globalIdx
+                                ? "text-primary-foreground/70"
+                                : "text-muted-foreground"
+                            }`}
+                          >
+                            {role.description || "Tavsif yo'q"}
+                          </p>
+                        </div>
+                        <ArrowRight
+                          className={`w-4 h-4 flex-shrink-0 ${
+                            activeIndex === globalIdx
+                              ? "text-primary-foreground"
+                              : "text-muted-foreground"
+                          }`}
+                        />
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Permissions Section */}
+              {permissions.length > 0 && (
+                <div className="p-2 border-t border-border">
+                  <div className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                    Ruxsatlar
+                  </div>
+                  {permissions.map((permission, idx) => {
+                    const globalIdx = filteredPages.length + roles.length + idx;
+                    return (
+                      <button
+                        key={permission.id}
+                        onClick={() => handleSelect(globalIdx)}
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors ${
+                          activeIndex === globalIdx
+                            ? "bg-primary text-primary-foreground"
+                            : "hover:bg-muted"
+                        }`}
+                      >
+                        <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center">
+                          <Key className="w-4 h-4 text-muted-foreground" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p
+                            className={`text-sm font-medium truncate ${
+                              activeIndex === globalIdx
+                                ? "text-primary-foreground"
+                                : "text-foreground"
+                            }`}
+                          >
+                            {permission.name}
+                          </p>
+                          <p
+                            className={`text-xs truncate ${
+                              activeIndex === globalIdx
+                                ? "text-primary-foreground/70"
+                                : "text-muted-foreground"
+                            }`}
+                          >
+                            {permission.module}
+                          </p>
+                        </div>
+                        <ArrowRight
+                          className={`w-4 h-4 flex-shrink-0 ${
+                            activeIndex === globalIdx
+                              ? "text-primary-foreground"
+                              : "text-muted-foreground"
+                          }`}
+                        />
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
               {/* Users Section */}
               {users.length > 0 && (
                 <div className="p-2 border-t border-border">
@@ -262,7 +422,11 @@ export function GlobalSearch() {
                     Foydalanuvchilar
                   </div>
                   {users.map((user, idx) => {
-                    const globalIdx = filteredPages.length + idx;
+                    const globalIdx =
+                      filteredPages.length +
+                      roles.length +
+                      permissions.length +
+                      idx;
                     return (
                       <button
                         key={user.id}
@@ -319,8 +483,11 @@ export function GlobalSearch() {
               )}
 
               {/* No Results */}
-              {!isLoading &&
+              {!anyLoading &&
+                debouncedQuery === searchQuery &&
                 filteredPages.length === 0 &&
+                roles.length === 0 &&
+                permissions.length === 0 &&
                 users.length === 0 && (
                   <div className="p-8 text-center">
                     <Search className="w-12 h-12 mx-auto text-muted-foreground/50 mb-3" />
