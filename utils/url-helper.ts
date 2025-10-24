@@ -13,5 +13,5 @@ export function createDocumentEditUrl(
     qr: "true",
   });
 
-  return `http://localhost:5173/document-editor?${params.toString()}`;
+  return ` http://192.168.31.213:5173/document-editor?${params.toString()}`;
 }
