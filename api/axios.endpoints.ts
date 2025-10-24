@@ -1,5 +1,19 @@
-// endpoints.tss
+// endpoints.ts
 export const endpoints = {
+  workflow: {
+    list: "workflow",
+    create: "workflow",
+    detail: (id: string | number) => `/workflow/${id}`,
+    update: (id: string | number) => `/workflow/${id}`,
+    delete: (id: string | number) => `/workflow/${id}`,
+  },
+  workflowStep: {
+    update: (id: string | number) => `/workflow-step/${id}`,
+    detail: (id: string | number) => `/workflow-step/${id}`,
+    complete: (id: string | number) => `/workflow-step/${id}/complete`,
+    reject: (id: string | number) => `/workflow-step/${id}/reject`,
+  },
+
   documentTemplate: {
     list: "/document-template",
     create: "/document-template",

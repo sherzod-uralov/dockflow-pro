@@ -411,6 +411,7 @@ export const errorHandlers = {
   document: createErrorHandler("Hujjat"),
   attachment: createErrorHandler("Fayl"),
   documentTemplate: createErrorHandler("DocumentTemplate"),
+  workflow: createErrorHandler("Workflow"),
 };
 
 export const {
@@ -423,4 +424,5 @@ export const {
   journal: handleJournalError,
   attachment: handleAttachmentError,
   documentTemplate: handleDocumentTemplateError,
+  workflow: handleWorkflowError,
 } = errorHandlers;

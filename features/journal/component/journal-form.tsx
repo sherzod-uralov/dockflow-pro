@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
 import { JournalCreateType, journalCreate } from "../scheme/journal-create";
 
-// UI компоненты
+
 import {
   Form,
   FormControl,
@@ -24,7 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-// Хуки для журналов, департаментов и пользователей
+
 import {
   useJournalCreateMutation,
   useUpdateJournal,

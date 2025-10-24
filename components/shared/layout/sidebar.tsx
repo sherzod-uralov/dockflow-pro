@@ -11,6 +11,8 @@ import {
   Home,
   DockIcon,
   Book,
+  Layers,
+  ClipboardCheck,
 } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -33,6 +35,12 @@ const menuItems: MenuItem[] = [
   { icon: Home, label: "Bo'limlar", href: "/dashboard/deportament" },
   { icon: Book, label: "Jurnallar", href: "/dashboard/journal" },
   { icon: DockIcon, label: "Hujjatlar", href: "/dashboard/document" },
+  { icon: Layers, label: "Hujjatlar Aylanmasi", href: "/dashboard/workflow" },
+  {
+    icon: ClipboardCheck,
+    label: "Mening Vazifalarim",
+    href: "/dashboard/my-tasks",
+  },
   {
     icon: DockIcon,
     label: "Hujjat Andozalari ",
