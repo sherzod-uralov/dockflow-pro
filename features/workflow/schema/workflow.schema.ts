@@ -55,6 +55,11 @@ export const workflowCreateSchema = z
       invalid_type_error: "Noto'g'ri amal turi",
     }),
 
+    workflowType: z.enum(["Ketma-ket", "Parallel"], {
+      required_error: "Workflow turini tanlang",
+      invalid_type_error: "Noto'g'ri workflow turi",
+    }),
+
     steps: z
       .array(workflowStepSchema)
       .min(1, "Kamida bitta bosqich talab qilinadi")
@@ -98,6 +103,11 @@ export const workflowUpdateSchema = z
     actionType: z.enum(["APPROVAL", "REVIEW", "SIGN", "NOTIFY"], {
       required_error: "Amal turini tanlang",
       invalid_type_error: "Noto'g'ri amal turi",
+    }),
+
+    workflowType: z.enum(["Ketma-ket", "Parallel"], {
+      required_error: "Workflow turini tanlang",
+      invalid_type_error: "Noto'g'ri workflow turi",
     }),
 
     steps: z
