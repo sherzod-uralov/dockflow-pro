@@ -7,7 +7,7 @@
     "dev": "next dev",
     "generate": "plop",
     "lint": "next lint",
-    "start": "next start"
+    "start": "next start -p 5065 "
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
