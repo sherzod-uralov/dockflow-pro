@@ -5,6 +5,11 @@ import { ModalState } from "@/types/modal";
 // ENUMS & CONSTANTS
 // ============================================
 
+export enum WorkflowType {
+  CONSECUTIVE = "Ketma-ket",
+  PARALLEL = "Parallel",
+}
+
 export type WorkflowStatus = "ACTIVE" | "COMPLETED" | "CANCELLED" | "DRAFT";
 export type WorkflowStepStatus =
   | "NOT_STARTED"
@@ -59,6 +64,7 @@ export type WorkflowApiResponse = {
   documentId: string;
   currentStepOrder: number;
   status: WorkflowStatus;
+  workflowType?: WorkflowType; // ⚠️ Опциональное - backend пока не поддерживает это поле
   document: DocumentInfo;
   workflowSteps: WorkflowStepApiResponse[];
   createdAt: string;
@@ -125,6 +131,7 @@ export interface MyTasksQueryParams {
 export type WorkflowFormData = {
   documentId: string;
   actionType: WorkflowActionType; // Общий для всех steps
+  workflowType: WorkflowType; // Тип выполнения workflow
   steps: WorkflowStepFormData[];
 };
 
