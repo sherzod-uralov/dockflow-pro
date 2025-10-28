@@ -148,9 +148,13 @@ const RoleForm = ({ modal, mode, role }: RoleFormProps) => {
 
           <div className="flex justify-end gap-2 pt-3 border-t">
             <Button
+              className="hover:text-text-on-dark"
               type="button"
-              variant="outline"
-              onClick={() => form.reset()}
+              variant="destructive"
+              onClick={() => {
+                form.reset();
+                modal.closeModal();
+              }}
               size="sm"
             >
               Bekor qilish

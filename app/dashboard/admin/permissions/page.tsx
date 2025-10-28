@@ -16,7 +16,6 @@ const Page = () => {
           },
           {
             label: "admin",
-            href: "/dashboard/admin",
           },
           {
             label: "Ruxsatlar",
