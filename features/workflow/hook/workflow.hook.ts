@@ -211,11 +211,11 @@ export const useRejectWorkflowStep = () => {
 };
 
 /**
- * Получить мои задачи (workflows текущего пользователя)
+ * Получить мои задачи (workflow steps текущего пользователя)
  * Backend автоматически фильтрует по accessToken
  */
 export const useGetMyTasks = (params?: MyTasksQueryParams) => {
-  return useQuery<WorkflowListResponse>({
+  return useQuery<MyTasksResponse>({
     queryKey: ["my-tasks", params],
     queryFn: () => workflowService.getMyTasks(params),
     keepPreviousData: true,

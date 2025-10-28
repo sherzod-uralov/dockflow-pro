@@ -15,12 +15,12 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Trash2, GripVertical } from "lucide-react";
-import { WorkflowCreateType } from "../schema/workflow.schema";
+import { WorkflowFormType } from "../schema/workflow.schema";
 import { Card, CardContent } from "@/components/ui/card";
 
 interface WorkflowStepItemProps {
   index: number;
-  control: Control<WorkflowCreateType>;
+  control: Control<WorkflowFormType>;
   onRemove: () => void;
   usersData?: {
     data: Array<{ id: string; fullname: string; username: string }>;

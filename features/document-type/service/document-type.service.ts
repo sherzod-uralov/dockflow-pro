@@ -1,7 +1,7 @@
 import axiosInstance from "@/api/axios.instance";
 import { handleDocumentTypeError } from "@/utils/http-error-handler";
 import { endpoints } from "@/api/axios.endpoints";
-import { DocumentTypeQueryParams } from "@/features/document-type";
+import { DocumentTypeQueryParams, DocumentType as DocumentTypeModel } from "@/features/document-type";
 
 const documentTypeHandler = handleDocumentTypeError;
 export const documentTypeService = {
@@ -16,12 +16,12 @@ export const documentTypeService = {
       }),
     );
   },
-  createDocumentType: async (data: DocumentType) => {
+  createDocumentType: async (data: DocumentTypeModel) => {
     return await documentTypeHandler.executeCreate(() =>
       axiosInstance.post(endpoints.documentType.create, data),
     );
   },
-  updateDocumentType: async (id: string, data: Partial<DocumentType>) => {
+  updateDocumentType: async (id: string, data: Partial<DocumentTypeModel>) => {
     return await documentTypeHandler.executeUpdate(() =>
       axiosInstance.patch(endpoints.documentType.update(id), data),
     );

@@ -40,7 +40,7 @@ export const formToApiPayload = (
 ) => {
   const payload: any = {
     steps: formData.steps.map((step, index) => ({
-      order: index + 1,
+      order: index,
       actionType: formData.actionType,
       assignedToUserId: step.assignedToUserId,
       dueDate: step.dueDate ? `${step.dueDate}T23:59:59.000Z` : null,
