@@ -73,15 +73,10 @@ export function CustomModal({
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent
-        className={cn(
-          "sm:max-w-[425px]", // Default max-width for Shadcn DialogContent
-          sizeClasses[size], // Apply size-specific class
-          className,
-        )}
+        className={cn("sm:max-w-[425px]", sizeClasses[size], className)}
         showCloseButton={false}
         onClick={handleOverlayClick}
       >
-        {/* Custom Close Button */}
         {showCloseButton && (
           <Button
             variant="ghost"
@@ -93,8 +88,6 @@ export function CustomModal({
             <span className="sr-only">Close</span>
           </Button>
         )}
-
-        {/* Header */}
         {(title || description) && (
           <DialogHeader className={cn("text-left", headerClassName)}>
             {title && (
@@ -109,13 +102,9 @@ export function CustomModal({
             )}
           </DialogHeader>
         )}
-
-        {/* Content */}
         <div className={cn("flex-1 overflow-auto", contentClassName)}>
           {children}
         </div>
-
-        {/* Footer */}
         {footer && (
           <DialogFooter className={cn("gap-2", footerClassName)}>
             {footer}
@@ -126,7 +115,6 @@ export function CustomModal({
   );
 }
 
-// Utility hooks for modal state management
 export function useModal() {
   const [isOpen, setIsOpen] = React.useState(false);
 

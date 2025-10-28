@@ -80,21 +80,6 @@ const PermissionView = () => {
                     </div>
                   </div>
                 </div>
-
-                <div className="space-y-4">
-                  <div>
-                    <div className="flex items-center gap-2 mb-2">
-                      <Package className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium text-sm">Modul</span>
-                    </div>
-                    <Badge
-                      variant="outline"
-                      className="bg-green-50 text-green-700 border-green-200 px-3 py-1 capitalize"
-                    >
-                      {data.module}
-                    </Badge>
-                  </div>
-                </div>
               </div>
               <Separator />
               <div>
@@ -114,7 +99,11 @@ const PermissionView = () => {
           </Card>
 
           <div className="flex justify-end gap-3 pt-4">
-            <Button variant="outline" onClick={() => window.history.back()}>
+            <Button
+              className="hover:text-text-on-dark"
+              variant="outline"
+              onClick={() => window.history.back()}
+            >
               Yopish
             </Button>
           </div>
