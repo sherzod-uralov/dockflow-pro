@@ -42,7 +42,7 @@ export type WorkflowStepApiResponse = {
   actionType: WorkflowActionType;
   workflowId: string;
   assignedToUserId: string;
-  assignedToUser: AssignedUser;
+  assignedToUser?: AssignedUser; // ✨ Опциональное (если API не возвращает expanded данные)
   startedAt: string | null;
   completedAt: string | null;
   dueDate: string | null; // ✨ Опциональное
@@ -97,17 +97,25 @@ export type WorkflowStepRejectPayload = {
   reason?: string; // Причина отклонения (опционально)
 };
 
-// Список задач пользователя
+// Список задач пользователя (workflow steps)
 export interface MyTasksResponse extends DataPagination {
-  data: WorkflowStepApiResponse[];
+  data: Array<
+    WorkflowStepApiResponse & {
+      workflow?: {
+        id: string;
+        document: DocumentInfo;
+      };
+    }
+  >;
   totalPages?: number;
   hasNext?: boolean;
   hasPrevious?: boolean;
 }
 
-// Параметры запроса для моих задач (workflows текущего пользователя)
+// Параметры запроса для моих задач (workflow steps текущего пользователя)
 export interface MyTasksQueryParams {
-  status?: WorkflowStatus; // Фильтр по статусу workflow
+  status?: WorkflowStepStatus; // Фильтр по статусу step
+  actionType?: WorkflowActionType; // Фильтр по типу действия
   page?: number;
   limit?: number;
 }

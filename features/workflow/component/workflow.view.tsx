@@ -259,20 +259,20 @@ const WorkflowView = ({ workflow, onClose }: WorkflowViewProps) => {
             </div>
             <div className="flex items-center space-x-3">
               <Avatar className="h-8 w-8">
-                <AvatarImage src="" alt={step.assignedToUser.username} />
+                <AvatarImage src="" alt={step.assignedToUser?.username || ""} />
                 <AvatarFallback>
-                  {step.assignedToUser.fullname
-                    .split(" ")
+                  {step.assignedToUser?.fullname
+                    ?.split(" ")
                     .map((n) => n[0])
-                    .join("")}
+                    .join("") || "??"}
                 </AvatarFallback>
               </Avatar>
               <div>
                 <p className="font-medium text-sm">
-                  {step.assignedToUser.fullname}
+                  {step.assignedToUser?.fullname || "N/A"}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  @{step.assignedToUser.username}
+                  @{step.assignedToUser?.username || "N/A"}
                 </p>
               </div>
             </div>

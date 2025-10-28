@@ -16,18 +16,25 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { WorkflowStatus } from "../type/workflow.type";
+import {
+  WorkflowStepStatus,
+  WorkflowActionType,
+} from "@/features/workflow";
 
 const MyTasks = () => {
   const { pageNumber, pageSize, handlePageSizeChange, handlePageChange } =
     usePagination();
 
-  const [statusFilter, setStatusFilter] = useState<WorkflowStatus | undefined>(
-    undefined,
-  );
+  const [statusFilter, setStatusFilter] = useState<
+    WorkflowStepStatus | undefined
+  >(undefined);
+  const [actionTypeFilter, setActionTypeFilter] = useState<
+    WorkflowActionType | undefined
+  >(undefined);
 
   const { data, isLoading, refetch } = useGetMyTasks({
     status: statusFilter,
+    actionType: actionTypeFilter,
     page: pageNumber,
     limit: pageSize,
   });
@@ -61,7 +68,7 @@ const MyTasks = () => {
         <Inbox className="h-16 w-16 text-muted-foreground mb-4" />
         <h3 className="text-lg font-semibold mb-2">Vazifalar topilmadi</h3>
         <p className="text-muted-foreground text-center max-w-md">
-          {statusFilter
+          {statusFilter || actionTypeFilter
             ? "Tanlangan filtrlarga mos vazifalar mavjud emas."
             : "Sizga hozircha hech qanday vazifa tayinlanmagan."}
         </p>
@@ -83,14 +90,16 @@ const MyTasks = () => {
       {/* Filters */}
       <Card>
         <CardContent className="p-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
             <div className="space-y-2">
               <Label>Holat</Label>
               <Select
                 value={statusFilter}
                 onValueChange={(value) =>
                   setStatusFilter(
-                    value === "all" ? undefined : (value as WorkflowStatus),
+                    value === "all"
+                      ? undefined
+                      : (value as WorkflowStepStatus),
                   )
                 }
               >
@@ -99,10 +108,36 @@ const MyTasks = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Barchasi</SelectItem>
-                  <SelectItem value="ACTIVE">Faol</SelectItem>
+                  <SelectItem value="NOT_STARTED">Boshlanmagan</SelectItem>
+                  <SelectItem value="PENDING">Kutilmoqda</SelectItem>
+                  <SelectItem value="IN_PROGRESS">Jarayonda</SelectItem>
                   <SelectItem value="COMPLETED">Tugallangan</SelectItem>
-                  <SelectItem value="CANCELLED">Bekor qilingan</SelectItem>
-                  <SelectItem value="DRAFT">Qoralama</SelectItem>
+                  <SelectItem value="REJECTED">Rad etilgan</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Amal turi</Label>
+              <Select
+                value={actionTypeFilter}
+                onValueChange={(value) =>
+                  setActionTypeFilter(
+                    value === "all"
+                      ? undefined
+                      : (value as WorkflowActionType),
+                  )
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Barchasi" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Barchasi</SelectItem>
+                  <SelectItem value="APPROVAL">Tasdiqlash</SelectItem>
+                  <SelectItem value="REVIEW">Ko'rib chiqish</SelectItem>
+                  <SelectItem value="SIGN">Imzolash</SelectItem>
+                  <SelectItem value="NOTIFY">Xabarnoma</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -122,31 +157,49 @@ const MyTasks = () => {
       ) : (
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {data.data.map((workflow) => {
-              // Если currentStepOrder = 0, workflow еще не начался, берем первый шаг
-              // Иначе берем текущий активный шаг
-              const currentStep =
-                workflow.currentStepOrder === 0
-                  ? workflow.workflowSteps.find((step) => step.order === 1)
-                  : workflow.workflowSteps.find(
-                      (step) => step.order === workflow.currentStepOrder,
-                    );
-
-              // Отображаем только если есть текущий шаг
-              // Backend уже фильтрует workflows по текущему пользователю через accessToken
-              if (!currentStep) return null;
-
-              // Создаем объект для TaskCard
+            {data.data.map((step) => {
+              // Backend уже возвращает только workflow steps текущего пользователя
+              // Создаем объект для TaskCard с правильной структурой
               const taskData = {
-                ...currentStep,
-                workflow: {
-                  document: workflow.document,
-                },
+                ...step,
+                workflow: step.workflow
+                  ? {
+                      id: step.workflow.id,
+                      documentId: step.workflow.document?.id || "",
+                      currentStepOrder: 0,
+                      status: "ACTIVE",
+                      document: step.workflow.document
+                        ? {
+                            id: step.workflow.document.id,
+                            title: step.workflow.document.title,
+                            documentNumber:
+                              step.workflow.document.documentNumber,
+                            description:
+                              step.workflow.document.description || "",
+                            status: "ACTIVE",
+                            priority: "MEDIUM",
+                          }
+                        : undefined,
+                    }
+                  : {
+                      id: "",
+                      documentId: "",
+                      currentStepOrder: 0,
+                      status: "ACTIVE",
+                      document: {
+                        id: "",
+                        title: "Неизвестный документ",
+                        documentNumber: "",
+                        description: "",
+                        status: "ACTIVE",
+                        priority: "MEDIUM",
+                      },
+                    },
               };
 
               return (
                 <TaskCard
-                  key={workflow.id}
+                  key={step.id}
                   task={taskData}
                   onActionComplete={refetch}
                 />

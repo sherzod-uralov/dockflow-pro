@@ -4,13 +4,14 @@ import {
   DocumentTypeQueryParams,
   documentTypeService,
   GetAllDocumentTypes,
+  DocumentType as DocumentTypeModel,
 } from "@/features/document-type";
 import { ApiError, getErrorMessage } from "@/types/global.types";
 
 export const useCreateDocumentType = () => {
   const queryClient = useQueryClient();
 
-  return useMutation<DocumentType, ApiError, DocumentType>({
+  return useMutation<DocumentTypeModel, ApiError, DocumentTypeModel>({
     mutationFn: (payload) => documentTypeService.createDocumentType(payload),
     onSuccess: () => {
       queryClient?.invalidateQueries(["documentTypes"]);
@@ -34,9 +35,9 @@ export const useUpdateDocumentType = () => {
   const queryClient = useQueryClient();
 
   return useMutation<
-    DocumentType,
+    DocumentTypeModel,
     ApiError,
-    { id: string; data: Partial<DocumentType> }
+    { id: string; data: Partial<DocumentTypeModel> }
   >({
     mutationFn: ({ id, data }) =>
       documentTypeService.updateDocumentType(id, data),
@@ -66,7 +67,7 @@ export const useDeleteDocumentType = () => {
 };
 
 export const useGetDocumentTypeById = (id: string) => {
-  return useQuery<DocumentType, ApiError>({
+  return useQuery<DocumentTypeModel, ApiError>({
     queryKey: ["documentType", id],
     queryFn: () => documentTypeService.getDocumentTypeById(id),
     enabled: !!id,

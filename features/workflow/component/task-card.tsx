@@ -13,11 +13,11 @@ import {
   User,
   FileText,
 } from "lucide-react";
-import { WorkflowStepApiResponse } from "../type/workflow.type";
+import { WorkflowStepApiResponse } from "@/features/workflow";
 import {
   useCompleteWorkflowStep,
   useRejectWorkflowStep,
-} from "../hook/workflow.hook";
+} from "@/features/workflow";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,13 +31,23 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { formatDate } from "@/lib/date-utils";
+import { useGetUserByIdQuery } from "@/features/admin/admin-users/hook/user.hook";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface TaskCardProps {
   task: WorkflowStepApiResponse & {
     workflow?: {
+      id: string;
+      documentId: string;
+      currentStepOrder: number;
+      status: string;
       document?: {
+        id: string;
         title: string;
         documentNumber: string;
+        description?: string;
+        status: string;
+        priority?: string;
       };
     };
   };
@@ -52,7 +62,13 @@ const TaskCard = ({ task, onActionComplete }: TaskCardProps) => {
   const completeMutation = useCompleteWorkflowStep();
   const rejectMutation = useRejectWorkflowStep();
 
-  const isLoading = completeMutation.isLoading || rejectMutation.isLoading;
+  // Получаем данные пользователя по ID
+  const { data: userData, isLoading: isUserLoading } = useGetUserByIdQuery(
+    task.assignedToUserId,
+  );
+
+  const isLoading =
+    completeMutation.isLoading || rejectMutation.isLoading || isUserLoading;
 
   const handleComplete = () => {
     completeMutation.mutate(task.id, {
@@ -141,21 +157,26 @@ const TaskCard = ({ task, onActionComplete }: TaskCardProps) => {
     task.status === "PENDING" ||
     task.status === "IN_PROGRESS";
 
+  // Данные документа из workflow
+  const document = task.workflow?.document;
+
   return (
     <>
       <Card className="hover:shadow-lg transition-shadow">
         <CardHeader>
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <FileText className="h-5 w-5 text-muted-foreground" />
-                {task.workflow?.document?.title || "Hujjat nomi"}
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1 min-w-0">
+              <CardTitle className="text-lg flex items-center gap-2 mb-1">
+                <FileText className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                <span className="truncate">
+                  {document?.title || "Hujjat topilmadi"}
+                </span>
               </CardTitle>
-              <p className="text-sm text-muted-foreground mt-1">
-                {task.workflow?.document?.documentNumber || "—"}
+              <p className="text-sm text-muted-foreground">
+                {document?.documentNumber || "—"}
               </p>
             </div>
-            {getStatusBadge()}
+            <div className="flex-shrink-0">{getStatusBadge()}</div>
           </div>
         </CardHeader>
 
@@ -187,10 +208,27 @@ const TaskCard = ({ task, onActionComplete }: TaskCardProps) => {
           <div className="flex items-center gap-2 text-sm">
             <User className="h-4 w-4 text-muted-foreground" />
             <span className="text-muted-foreground">Mas'ul:</span>
-            <span className="font-medium">
-              {task.assignedToUser.fullname} (@{task.assignedToUser.username})
-            </span>
+            {isUserLoading ? (
+              <Skeleton className="h-4 w-32" />
+            ) : (
+              <span className="font-medium">
+                {userData?.fullname ||
+                  userData?.username ||
+                  "Foydalanuvchi topilmadi"}
+              </span>
+            )}
           </div>
+
+          {/* Completed Date */}
+          {task.completedAt && (
+            <div className="flex items-center gap-2 text-sm">
+              <CheckCircle2 className="h-4 w-4 text-green-600" />
+              <span className="text-muted-foreground">Tugallangan:</span>
+              <span className="font-medium">
+                {formatDate(task.completedAt)}
+              </span>
+            </div>
+          )}
 
           {/* Rejection Reason (if rejected) */}
           {task.isRejected && task.rejectionReason && (
@@ -239,8 +277,8 @@ const TaskCard = ({ task, onActionComplete }: TaskCardProps) => {
           <AlertDialogHeader>
             <AlertDialogTitle>Vazifani tasdiqlash</AlertDialogTitle>
             <AlertDialogDescription>
-              Siz haqiqatan ham bu vazifani tasdiqlashni xohlaysizmi? Bu
-              amaldan keyin workflow keyingi bosqichga o'tadi.
+              Siz haqiqatan ham bu vazifani tasdiqlashni xohlaysizmi? Bu amaldan
+              keyin workflow keyingi bosqichga o'tadi.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

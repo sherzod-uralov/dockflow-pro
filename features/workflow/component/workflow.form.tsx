@@ -124,7 +124,7 @@ const WorkflowForm = ({
 
       stepsToUpdate.forEach((step, index) => {
         const payload = {
-          order: index + 1,
+          order: index,
           actionType: values.actionType,
           assignedToUserId: step.assignedToUserId,
           dueDate: step.dueDate ? `${step.dueDate}T23:59:59.000Z` : null,

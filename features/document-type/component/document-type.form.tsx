@@ -18,14 +18,14 @@ import {
   useUpdateDocumentType,
 } from "../hook/document-type.hook";
 import { useEffect } from "react";
-import { DocumentType } from "../type/document-type.type";
+import { DocumentType as DocumentTypeModel } from "../type/document-type.type";
 
 type DocumentTypeFormType = z.infer<typeof documentTypeScheme>;
 
 interface DocumentTypeFormModalProps {
   modal: ModalState;
   mode: "create" | "update";
-  documentType?: DocumentType;
+  documentType?: DocumentTypeModel;
   onSuccess?: () => void;
 }
 

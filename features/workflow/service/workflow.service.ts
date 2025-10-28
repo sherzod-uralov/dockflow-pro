@@ -108,10 +108,7 @@ export const workflowService = {
   /**
    * Отклонить workflow step
    */
-  rejectWorkflowStep: async (
-    id: string,
-    data?: WorkflowStepRejectPayload,
-  ) => {
+  rejectWorkflowStep: async (id: string, data?: WorkflowStepRejectPayload) => {
     return await workflowHandler.executeUpdate(() =>
       axiosInstance.patch<WorkflowStepApiResponse>(
         endpoints.workflowStep.reject(id),
@@ -121,17 +118,27 @@ export const workflowService = {
   },
 
   /**
-   * Получить мои задачи (workflows, назначенные текущему пользователю)
+   * Получить мои задачи (workflow steps, назначенные текущему пользователю)
    * Backend автоматически фильтрует по accessToken
+   *
+   * ВАЖНО: Для корректного отображения данных на карточке, backend должен возвращать:
+   * - assignedToUser (expanded) - объект с fullname, username
+   * - workflow.document (expanded) - объект с title, documentNumber
+   *
+   * Если backend не поддерживает expand, добавьте параметр: expand=assignedToUser,workflow.document
    */
   getMyTasks: async (params?: MyTasksQueryParams) => {
+    const queryParams: Record<string, any> = {
+      pageNumber: params?.page ?? 1,
+      pageSize: params?.limit ?? 9,
+    };
+
+    if (params?.status) queryParams.status = params.status;
+    if (params?.actionType) queryParams.actionType = params.actionType;
+
     return await workflowHandler.executeList(() =>
-      axiosInstance.get<WorkflowListResponse>(endpoints.workflow.list, {
-        params: {
-          status: params?.status,
-          page: params?.page,
-          limit: params?.limit,
-        },
+      axiosInstance.get<MyTasksResponse>(endpoints.workflowStep.list, {
+        params: queryParams,
       }),
     );
   },

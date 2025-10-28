@@ -8,6 +8,7 @@ export const endpoints = {
     delete: (id: string | number) => `/workflow/${id}`,
   },
   workflowStep: {
+    list: "/workflow-step",
     update: (id: string | number) => `/workflow-step/${id}`,
     detail: (id: string | number) => `/workflow-step/${id}`,
     complete: (id: string | number) => `/workflow-step/${id}/complete`,

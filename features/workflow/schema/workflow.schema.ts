@@ -148,13 +148,5 @@ export type WorkflowCreateType = z.infer<typeof workflowCreateSchema>;
 export type WorkflowUpdateType = z.infer<typeof workflowUpdateSchema>;
 export type WorkflowStepFormType = z.infer<typeof workflowStepSchema>;
 
-// ✅ ОБНОВЛЕНО: добавили id для существующих steps
-export type WorkflowFormType = {
-  documentId?: string;
-  actionType: "APPROVAL" | "REVIEW" | "SIGN" | "NOTIFY";
-  steps: Array<{
-    id?: string; // ✨ ID существующего step (только для edit режима)
-    assignedToUserId: string;
-    dueDate?: string | null;
-  }>;
-};
+// ✅ ОБНОВЛЕНО: используем union type для создания и редактирования
+export type WorkflowFormType = WorkflowCreateType | WorkflowUpdateType;
