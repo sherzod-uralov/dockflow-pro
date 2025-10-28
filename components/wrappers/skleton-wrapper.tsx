@@ -28,7 +28,7 @@ const SkeletonWrapper = ({
 
         {/* grid ma’lumotlar */}
         <div className="grid grid-cols-2 gap-4 mt-4">
-          {Array.from({ length: 6 }).map((_, i) => (
+          {Array.from({ length: 15 }).map((_, i) => (
             <div key={i} className="space-y-2">
               <div className="h-3 w-24 bg-muted rounded" />
               <div className="h-4 w-36 bg-muted rounded" />

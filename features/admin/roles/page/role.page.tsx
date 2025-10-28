@@ -92,19 +92,6 @@ const RolesPage = () => {
 
       <DataTable
         columns={[
-          {
-            header: "ID",
-            accessorKey: "id",
-            cell: ({ row }) => (
-              <Badge
-                variant="outline"
-                onClick={() => handleCopyToClipboard(row.original.id, "ID")}
-                className="truncate cursor-pointer"
-              >
-                {row.original.id.slice(0, 20)}...
-              </Badge>
-            ),
-          },
           { header: "Nomi", accessorKey: "name" },
           { header: "Tavsifi", accessorKey: "description" },
           {
@@ -115,8 +102,8 @@ const RolesPage = () => {
               return (
                 <div className="max-w-[200px]">
                   {permissions.length > 0 ? (
-                    <div className="flex flex-wrap gap-1">
-                      {permissions.slice(0, 3).map((permission) => (
+                    <div className="flex items-center gap-1">
+                      {permissions.slice(0, 1).map((permission) => (
                         <span
                           key={permission.id}
                           className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800"
@@ -176,6 +163,7 @@ const RolesPage = () => {
         currentPage={pageNumber}
       />
       <CustomModal
+        size="2xl"
         closeOnOverlayClick={false}
         title="Rol qo'shish"
         description="Rol qo'shish uchun maydonlarni to'ldiring"
@@ -196,6 +184,7 @@ const RolesPage = () => {
         }}
       />
       <CustomModal
+        size="2xl"
         closeOnOverlayClick={false}
         title="Rol tahrirlash"
         description="Rol tahrirlash uchun maydonlarni to'ldiring"

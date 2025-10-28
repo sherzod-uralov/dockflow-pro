@@ -1,7 +1,6 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -11,12 +10,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Menu, Search, Bell, Settings, User, LogOut } from "lucide-react";
+import { Menu, Settings, User, LogOut } from "lucide-react";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { useGetProfileQuery } from "@/features/login/hook/login.hook";
 import { useRouter } from "next/navigation";
-import { Global } from "recharts";
 import { GlobalSearch } from "@/components/shared/layout/global-search";
+import { NotificationDropdown } from "@/components/shared/ui/custom-notification-dropdown";
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -61,16 +60,8 @@ export function Header({ onMenuClick }: HeaderProps) {
         </div>
 
         <div className="flex items-center space-x-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="relative text-foreground hover:bg-accent rounded-xl"
-          >
-            <Bell className="w-5 h-5" />
-            <span className="absolute -top-1 -right-1 w-3 h-3 bg-primary rounded-full flex items-center justify-center">
-              <span className="w-1.5 h-1.5 bg-primary-foreground rounded-full"></span>
-            </span>
-          </Button>
+          {/* Notification Dropdown */}
+          <NotificationDropdown />
 
           <ThemeToggle />
 
@@ -102,18 +93,18 @@ export function Header({ onMenuClick }: HeaderProps) {
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem
-                className="rounded-lg  group hover:bg-accent cursor-pointer"
+                className="rounded-lg group hover:bg-accent cursor-pointer"
                 onClick={handleProfileClick}
               >
                 <User className="mr-2 group-hover:text-white h-4 w-4" />
                 <span className="group-hover:text-white">Profil</span>
               </DropdownMenuItem>
-              <DropdownMenuItem className="rounded-lg  group hover:bg-accent cursor-pointer">
+              <DropdownMenuItem className="rounded-lg group hover:bg-accent cursor-pointer">
                 <Settings className="mr-2 group-hover:text-white h-4 w-4" />
                 <span className="group-hover:text-white">Tizimni Sozlash</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="rounded-lg  group hover:bg-accent cursor-pointer">
+              <DropdownMenuItem className="rounded-lg group hover:bg-accent cursor-pointer">
                 <LogOut className="mr-2 group-hover:text-white h-4 w-4" />
                 <span className="group-hover:text-white">Tizimdan Chiqish</span>
               </DropdownMenuItem>

@@ -11,7 +11,7 @@ const RoleView = () => {
   const { data, isLoading, isFetching } = useGetRoleByIdQuery(roleId);
 
   return (
-    <SkeletonWrapper isLoading={isLoading || isFetching}>
+    <SkeletonWrapper isLoading={isFetching}>
       {data && (
         <div className="space-y-4">
           <div>
@@ -24,7 +24,7 @@ const RoleView = () => {
               <p className="text-sm text-muted-foreground">
                 Foydalanuvchilar soni
               </p>
-              <p className="font-medium">{data.users}</p>
+              <p className="font-medium">{data.users || 0}</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Ruxsatlar soni</p>

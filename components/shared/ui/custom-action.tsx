@@ -88,11 +88,11 @@ export const CustomAction = ({
       <DropdownMenuTrigger asChild>
         <Button
           variant={triggerVariant}
-          className={triggerClassName}
+          className={`group ${triggerClassName}`}
           disabled={disabled}
         >
           <span className="sr-only">Amallar menyusini ochish</span>
-          <EllipsisVertical className="h-4 w-4" />
+          <EllipsisVertical className="h-4 w-4 group-hover:text-white transition-colors" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align={contentAlign}>

@@ -708,7 +708,7 @@
 }
 
 .table-body-wrapper.entered {
-  max-height: 1000px; /* katta yetarli qiymat */
+  max-height: 1000px;
   opacity: 1;
 }
 
@@ -725,4 +725,10 @@ label.required::after {
 
 [data-radix-popper-content-wrapper] [role="option"][data-highlighted] {
   @apply bg-primary text-text-on-dark;
+}
+
+
+form{
+    padding-left: 4px;
+    padding-right:4px;
 }

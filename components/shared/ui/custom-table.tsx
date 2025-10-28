@@ -61,7 +61,6 @@ interface DataTableProps<TData, TValue = unknown> {
   emptyMessage?: string;
   showSelectedCount?: boolean;
   onRowSelect?: (rows: TData[]) => void;
-  // New props for server-side pagination
   totalCount?: number;
   currentPage?: number;
   onPageChange?: (page: number) => void;
@@ -321,7 +320,6 @@ export function DataTable<TData, TValue = unknown>({
         </div>
       </div>
 
-      {/* Pagination */}
       {enablePagination && (
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-4">
@@ -345,7 +343,6 @@ export function DataTable<TData, TValue = unknown>({
               )}
             </div>
 
-            {/* Page Size Selector */}
             {isServerSide && onPageSizeChange && (
               <div className="flex items-center gap-2">
                 <span className="text-sm text-muted-foreground">Sahifada:</span>
@@ -441,7 +438,6 @@ export function DataTable<TData, TValue = unknown>({
   );
 }
 
-// Helper to create sortable headers
 export function createSortableHeader(title: string) {
   return ({ column }: { column: Column<any> }) => (
     <Button
@@ -455,7 +451,6 @@ export function createSortableHeader(title: string) {
   );
 }
 
-// Helper to create select column
 export function createSelectColumn<TData>(): DataTableColumn<TData> {
   return {
     id: "select",

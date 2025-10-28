@@ -69,16 +69,9 @@ const UserPage = () => {
   }, [searchParams, data]);
 
   const columns: DataTableColumn<User>[] = [
-    createSelectColumn<User>(),
-    {
-      accessorKey: "id",
-      meta: {
-        width: 10,
-      },
-    },
     {
       accessorKey: "username",
-      header: "header",
+      header: "FIO",
       cell: ({ row }) => {
         const user = row.original;
         return (
