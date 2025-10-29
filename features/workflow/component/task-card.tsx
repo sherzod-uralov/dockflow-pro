@@ -83,7 +83,7 @@ const TaskCard = ({ task, onActionComplete }: TaskCardProps) => {
     rejectMutation.mutate(
       {
         id: task.id,
-        data: rejectReason ? { reason: rejectReason } : undefined,
+        data: rejectReason ? { comment: rejectReason } : undefined,
       },
       {
         onSuccess: () => {

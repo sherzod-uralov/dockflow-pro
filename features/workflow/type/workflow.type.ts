@@ -39,6 +39,19 @@ export type AssignedUser = {
   username: string;
 };
 
+// Действие, выполненное над WorkflowStep
+export type WorkflowStepAction = {
+  id: string;
+  workflowStepId: string;
+  actionType: "APPROVED" | "REJECTED" | "REVIEWED" | "SIGNED" | "NOTIFIED";
+  performedByUserId: string;
+  performedBy?: AssignedUser;
+  comment: string | null;
+  metadata: Record<string, any>;
+  createdAt: string;
+  updatedAt: string;
+};
+
 // WorkflowStep с полными данными (как приходит из API)
 export type WorkflowStepApiResponse = {
   id: string;
@@ -54,6 +67,7 @@ export type WorkflowStepApiResponse = {
   isRejected: boolean;
   rejectionReason: string | null;
   rejectedAt: string | null;
+  actions?: WorkflowStepAction[]; // ✨ История действий
   createdAt: string;
   updatedAt: string;
 };
@@ -100,7 +114,7 @@ export type WorkflowStepUpdateType = {
 
 // Данные для отклонения workflow step
 export type WorkflowStepRejectPayload = {
-  reason?: string; // Причина отклонения (опционально)
+  comment?: string; // Причина отклонения (опционально)
 };
 
 // Список задач пользователя (workflow steps)
