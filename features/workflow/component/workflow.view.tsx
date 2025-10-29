@@ -97,7 +97,9 @@ const WorkflowView = ({ workflow, onClose }: WorkflowViewProps) => {
     rejectMutation.mutate(
       {
         id: selectedStep.id,
-        data: rejectionReason.trim() ? { reason: rejectionReason.trim() } : undefined,
+        data: rejectionReason.trim()
+          ? { comment: rejectionReason.trim() }
+          : undefined,
       },
       {
         onSuccess: () => {
@@ -402,7 +404,8 @@ const WorkflowView = ({ workflow, onClose }: WorkflowViewProps) => {
             step.status !== "COMPLETED" &&
             step.status !== "REJECTED" && (
               <div className="flex gap-2 pt-2 border-t">
-                {(step.status === "NOT_STARTED" || step.status === "PENDING") && (
+                {(step.status === "NOT_STARTED" ||
+                  step.status === "PENDING") && (
                   <Button
                     size="sm"
                     onClick={() => handleStartStep(step.id)}
