@@ -4,20 +4,33 @@ import type { NextRequest } from "next/server";
 export function middleware(req: NextRequest) {
   let token = req.cookies.get("accessToken")?.value;
   const authHeader = req.headers.get("Authorization");
-  if (authHeader && authHeader.startsWith("Bearer ")) {
+
+  if (!token && authHeader && authHeader.startsWith("Bearer ")) {
     token = authHeader.substring(7);
   }
 
   if (process.env.NODE_ENV === "development") {
-    console.log("Access Token (dev only):", token ? "Present" : "Missing");
+    console.log("Middleware - Path:", req.nextUrl.pathname);
+    console.log("Middleware - Token:", token ? "Present" : "Missing");
   }
 
   const isAuth = !!token;
   const isLoginPage = req.nextUrl.pathname.startsWith("/login");
+  const isRootPage = req.nextUrl.pathname === "/";
   const isDashboard = req.nextUrl.pathname.startsWith("/dashboard");
 
-  if (!isAuth && isDashboard) {
+  if (isRootPage) {
+    if (isAuth) {
+      return NextResponse.redirect(new URL("/dashboard", req.url));
+    }
     return NextResponse.redirect(new URL("/login", req.url));
+  }
+
+  if (!isAuth && isDashboard) {
+    const response = NextResponse.redirect(new URL("/login", req.url));
+    response.cookies.delete("accessToken");
+    response.cookies.delete("refreshToken");
+    return response;
   }
 
   if (isAuth && isLoginPage) {
@@ -29,9 +42,8 @@ export function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
-    // Exclude API, static files, and images to avoid 404/blocks
-    "/((?!api|_next/static|_next/image|favicon.ico).*)",
-    // Your protected paths
+    "/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/",
     "/dashboard/:path*",
     "/login",
   ],

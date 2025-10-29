@@ -2,11 +2,7 @@ import React from "react";
 import LoginPage from "@/features/login/page/login.page";
 
 const Page = () => {
-  return (
-    <div>
-      <LoginPage />
-    </div>
-  );
+  return <LoginPage />;
 };
 
 export default Page;

@@ -18,8 +18,32 @@ import {
   AccessorFnColumnDef,
   DisplayColumnDef,
 } from "@tanstack/react-table";
-import { ArrowUpDown, EyeOff, RefreshCw } from "lucide-react";
+import {
+  ArrowUpDown,
+  EyeOff,
+  RefreshCw,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationPrevious,
+  PaginationNext,
+  PaginationEllipsis,
+} from "@/components/ui/pagination";
 import {
   Table,
   TableBody,
@@ -118,19 +142,12 @@ export function DataTable<TData, TValue = unknown>({
       rowSelection,
       globalFilter,
       pagination: enablePagination
-        ? {
-            pageIndex: isServerSide ? currentPage - 1 : 0,
-            pageSize: pageSize,
-          }
+        ? { pageIndex: isServerSide ? currentPage - 1 : 0, pageSize: pageSize }
         : undefined,
     },
     pageCount: isServerSide ? Math.ceil(totalCount / pageSize) : -1,
     initialState: {
-      pagination: enablePagination
-        ? {
-            pageSize: pageSize,
-          }
-        : undefined,
+      pagination: enablePagination ? { pageSize: pageSize } : undefined,
     },
   });
 
@@ -162,16 +179,9 @@ export function DataTable<TData, TValue = unknown>({
   const totalPages = isServerSide
     ? Math.ceil(totalCount / pageSize)
     : table.getPageCount();
-
   const totalRecords = isServerSide
     ? totalCount
     : table.getFilteredRowModel().rows.length;
-
-  const handlePageSizeChange = (newPageSize: number) => {
-    if (onPageSizeChange) {
-      onPageSizeChange(newPageSize);
-    }
-  };
 
   const canPreviousPage = isServerSide
     ? currentPage > 1
@@ -179,6 +189,44 @@ export function DataTable<TData, TValue = unknown>({
   const canNextPage = isServerSide
     ? currentPage < totalPages
     : table.getCanNextPage();
+
+  const getPageNumbers = () => {
+    const pages: (number | "ellipsis")[] = [];
+    const activePage = isServerSide
+      ? currentPage
+      : table.getState().pagination!.pageIndex + 1;
+
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      if (activePage <= 3) {
+        pages.push(1, 2, 3, 4, "ellipsis", totalPages);
+      } else if (activePage >= totalPages - 2) {
+        pages.push(
+          1,
+          "ellipsis",
+          totalPages - 3,
+          totalPages - 2,
+          totalPages - 1,
+          totalPages,
+        );
+      } else {
+        pages.push(
+          1,
+          "ellipsis",
+          activePage - 1,
+          activePage,
+          activePage + 1,
+          "ellipsis",
+          totalPages,
+        );
+      }
+    }
+
+    return pages;
+  };
 
   return (
     <div className={cn("w-full space-y-4", className)}>
@@ -192,7 +240,6 @@ export function DataTable<TData, TValue = unknown>({
                     const columnMeta = header.column.columnDef.meta as
                       | ColumnMeta
                       | undefined;
-
                     return (
                       <TableHead
                         key={header.id}
@@ -320,117 +367,145 @@ export function DataTable<TData, TValue = unknown>({
         </div>
       </div>
 
-      {enablePagination && (
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="flex items-center gap-4">
-            <div className="text-sm text-muted-foreground">
-              {totalRecords > 0 ? (
-                <>
-                  <span>{startIndex}</span>
-                  {" - "}
-                  <span>{endIndex}</span>
-                  {" / "}
-                  <span>{totalRecords}</span>
-                  <span> yozuv</span>
-                  {selectedRowsCount > 0 && (
-                    <span className="ml-2">
-                      ({selectedRowsCount} ta tanlangan)
-                    </span>
-                  )}
-                </>
-              ) : (
-                "Ma'lumot yo'q"
-              )}
+      {enablePagination && totalRecords > 0 && (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-2">
+          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+            <div className="flex items-center gap-1">
+              <span className="font-medium text-foreground">{startIndex}</span>
+              <span>-</span>
+              <span className="font-medium text-foreground">{endIndex}</span>
+              <span>dan</span>
+              <span className="font-medium text-foreground">
+                {totalRecords}
+              </span>
+              <span>ta</span>
             </div>
-
-            {isServerSide && onPageSizeChange && (
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">Sahifada:</span>
-                <select
-                  value={pageSize}
-                  onChange={(e) => handlePageSizeChange(Number(e.target.value))}
-                  className="h-8 px-2 text-sm border border-input rounded bg-background"
-                >
-                  {pageSizeOptions.map((size) => (
-                    <option key={size} value={size}>
-                      {size}
-                    </option>
-                  ))}
-                </select>
+            {selectedRowsCount > 0 && (
+              <div className="text-primary font-medium">
+                {selectedRowsCount} ta tanlangan
               </div>
             )}
           </div>
 
-          <div className="flex items-center gap-2">
-            <Button
-              className="hover:text-text-on-dark"
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                if (isServerSide && onPageChange) {
-                  onPageChange(1);
-                } else {
-                  table.setPageIndex(0);
-                }
-              }}
-              disabled={!canPreviousPage}
-            >
-              Birinchi
-            </Button>
-            <Button
-              className="hover:text-text-on-dark"
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                if (isServerSide && onPageChange) {
-                  onPageChange(currentPage - 1);
-                } else {
-                  table.previousPage();
-                }
-              }}
-              disabled={!canPreviousPage}
-            >
-              Oldingi
-            </Button>
-            <div className="flex items-center gap-1 px-2">
-              <span className="text-sm font-medium">
-                {isServerSide
-                  ? currentPage
-                  : table.getState().pagination!.pageIndex + 1}
-              </span>
-              <span className="text-sm text-muted-foreground">/</span>
-              <span className="text-sm font-medium">{totalPages}</span>
-            </div>
-            <Button
-              className="hover:text-text-on-dark"
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                if (isServerSide && onPageChange) {
-                  onPageChange(currentPage + 1);
-                } else {
-                  table.nextPage();
-                }
-              }}
-              disabled={!canNextPage}
-            >
-              Keyingi
-            </Button>
-            <Button
-              className="hover:text-text-on-dark"
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                if (isServerSide && onPageChange) {
-                  onPageChange(totalPages);
-                } else {
-                  table.setPageIndex(table.getPageCount() - 1);
-                }
-              }}
-              disabled={!canNextPage}
-            >
-              Oxirgi
-            </Button>
+          <div className="flex items-center gap-6">
+            {isServerSide && onPageSizeChange && (
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground whitespace-nowrap">
+                  Sahifada:
+                </span>
+                <Select
+                  value={pageSize.toString()}
+                  onValueChange={(value) => onPageSizeChange(Number(value))}
+                >
+                  <SelectTrigger className="h-9 w-[70px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent side="top">
+                    {pageSizeOptions.map((size) => (
+                      <SelectItem key={size} value={size.toString()}>
+                        {size}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-9 w-9"
+                    onClick={() => {
+                      if (isServerSide && onPageChange) {
+                        onPageChange(1);
+                      } else {
+                        table.setPageIndex(0);
+                      }
+                    }}
+                    disabled={!canPreviousPage}
+                  >
+                    <ChevronsLeft className="h-4 w-4" />
+                  </Button>
+                </PaginationItem>
+
+                <PaginationItem>
+                  <PaginationPrevious
+                    onClick={() => {
+                      if (isServerSide && onPageChange) {
+                        onPageChange(currentPage - 1);
+                      } else {
+                        table.previousPage();
+                      }
+                    }}
+                    className={cn(
+                      !canPreviousPage && "pointer-events-none opacity-50",
+                    )}
+                  />
+                </PaginationItem>
+
+                {getPageNumbers().map((page, index) => (
+                  <PaginationItem key={index}>
+                    {page === "ellipsis" ? (
+                      <PaginationEllipsis />
+                    ) : (
+                      <PaginationLink
+                        onClick={() => {
+                          if (isServerSide && onPageChange) {
+                            onPageChange(page);
+                          } else {
+                            table.setPageIndex(page - 1);
+                          }
+                        }}
+                        isActive={
+                          page ===
+                          (isServerSide
+                            ? currentPage
+                            : table.getState().pagination!.pageIndex + 1)
+                        }
+                      >
+                        {page}
+                      </PaginationLink>
+                    )}
+                  </PaginationItem>
+                ))}
+
+                <PaginationItem>
+                  <PaginationNext
+                    onClick={() => {
+                      if (isServerSide && onPageChange) {
+                        onPageChange(currentPage + 1);
+                      } else {
+                        table.nextPage();
+                      }
+                    }}
+                    className={cn(
+                      !canNextPage && "pointer-events-none opacity-50",
+                    )}
+                  />
+                </PaginationItem>
+
+                <PaginationItem>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-9 w-9"
+                    onClick={() => {
+                      if (isServerSide && onPageChange) {
+                        onPageChange(totalPages);
+                      } else {
+                        table.setPageIndex(table.getPageCount() - 1);
+                      }
+                    }}
+                    disabled={!canNextPage}
+                  >
+                    <ChevronsRight className="h-4 w-4" />
+                  </Button>
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
           </div>
         </div>
       )}

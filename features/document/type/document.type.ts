@@ -28,6 +28,7 @@ export interface DocumentGetResponse {
     id: string;
     fileName: string;
     fileUrl: string;
+    fileSize: number;
   }[];
   createdAt: string;
   updatedAt: string;

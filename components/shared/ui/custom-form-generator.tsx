@@ -49,7 +49,6 @@ export type Field = {
   placeholder?: string;
   options?: FieldOption[];
   colSpan?: number;
-
   fileReturnShape?: "id" | "object" | "array:id" | "array:object";
   multiple?: boolean;
   fileUrlTarget?: string;
@@ -57,6 +56,13 @@ export type Field = {
   maxFiles?: number;
   maxSize?: number;
   helperText?: string;
+  existingFiles?: Array<{
+    id: string;
+    fileName: string;
+    fileSize?: number;
+    fileUrl: string;
+  }>;
+  onDeleteExisting?: (fileId: string) => void;
 };
 
 interface Props {
@@ -70,9 +76,10 @@ interface Props {
     isSubmitting: boolean;
     isValid: boolean;
   }) => React.ReactNode;
+  onFormReady?: (form: any) => void;
 }
 
-export default ({
+export default function SimpleFormGenerator({
   schema,
   fields,
   defaultValues = {},
@@ -80,12 +87,17 @@ export default ({
   submitLabel = "Saqlash",
   className = "",
   renderActions,
-}: Props) => {
+  onFormReady,
+}: Props) {
   const form = useForm({
     resolver: zodResolver(schema),
     defaultValues,
     mode: "onChange",
   });
+
+  React.useEffect(() => {
+    onFormReady?.(form);
+  }, [form, onFormReady]);
 
   const { mutateAsync: uploadFile, isLoading: isUploading } =
     useCreateAttachment();
@@ -141,8 +153,6 @@ export default ({
           form.setValue(fileUrlTarget, urlValue, { shouldValidate: true });
         }
       }
-
-      toast.success("Fayl muvaffaqiyatli yuklandi");
     } catch (error: any) {
       toast.error(error.message);
     }
@@ -254,6 +264,8 @@ export default ({
                               maxSize={f.maxSize}
                               accept={f.accept}
                               helperText={f.helperText}
+                              existingFiles={f.existingFiles}
+                              onDeleteExisting={f.onDeleteExisting}
                               onChange={async (files) => {
                                 if (!files) return;
                                 if (Array.isArray(files)) {
@@ -317,4 +329,4 @@ export default ({
       </form>
     </Form>
   );
-};
+}

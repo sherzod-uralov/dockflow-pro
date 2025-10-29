@@ -193,6 +193,7 @@ const DocumentPage = () => {
       </CustomModal>
 
       <CustomModal
+        size="3xl"
         closeOnOverlayClick={false}
         title="Documentni yangilash"
         description="Document ma'lumotlarini yangilang"

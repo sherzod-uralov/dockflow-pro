@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { ModalState } from "@/types/modal";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,7 +17,7 @@ import SimpleFormGenerator, {
 } from "@/components/shared/ui/custom-form-generator";
 import { useGetAllDocumentTypes } from "@/features/document-type";
 import { useGetAllJournals } from "@/features/journal/hook/journal.hook";
-import { useFormContext } from "react-hook-form";
+import { toast } from "sonner";
 
 interface DocumentFormModalProps {
   modal: ModalState;
@@ -31,17 +32,33 @@ const DocumentFormModal = ({
   document,
   onSuccess,
 }: DocumentFormModalProps) => {
-  const createDocumentMutation = useCreateDocument();
-  const updateDocumentMutation = useUpdateDocument();
+  const createMutation = useCreateDocument();
+  const updateMutation = useUpdateDocument();
   const { data: documentTypes } = useGetAllDocumentTypes();
   const { data: journals } = useGetAllJournals({
     pageNumber: 1,
     pageSize: 1000,
   });
 
+  const [existingFiles, setExistingFiles] = useState(
+    document?.attachments || [],
+  );
+  const [formInstance, setFormInstance] = useState<any>(null);
+
   const isUpdate = mode === "update";
-  const isLoading =
-    createDocumentMutation.isLoading || updateDocumentMutation.isLoading;
+
+  const handleDeleteFile = (fileId: string) => {
+    setExistingFiles((prev) => prev.filter((f) => f.id !== fileId));
+    if (formInstance) {
+      const current = formInstance.getValues("attachments") || [];
+      formInstance.setValue(
+        "attachments",
+        current.filter((id: string) => id !== fileId),
+        { shouldValidate: true },
+      );
+    }
+    toast.success("Fayl o'chirildi");
+  };
 
   const fields: Field[] = [
     {
@@ -68,7 +85,6 @@ const DocumentFormModal = ({
       name: "priority",
       label: "Muhimlik darajasi",
       type: "select",
-      placeholder: "Muhimlikni tanlang",
       options: [
         { value: "LOW", label: "Past" },
         { value: "MEDIUM", label: "O'rta" },
@@ -79,7 +95,6 @@ const DocumentFormModal = ({
       name: "status",
       label: "Holati",
       type: "select",
-      placeholder: "Holatni tanlang",
       options: [
         { value: "DRAFT", label: "Qoralama" },
         { value: "PUBLISHED", label: "E'lon qilingan" },
@@ -90,31 +105,29 @@ const DocumentFormModal = ({
       name: "documentTypeId",
       label: "Hujjat turi",
       type: "select",
-      placeholder: "Hujjat turini tanlang",
       options:
-        documentTypes?.data?.map((type) => ({
-          value: type.id as string,
-          label: type.name as string,
-        })) || [],
+        documentTypes?.data?.map((t) => ({ value: t.id, label: t.name })) || [],
     },
     {
       name: "journalId",
       label: "Jurnal",
       type: "select",
-      placeholder: "Jurnalni tanlang",
       options:
-        journals?.data?.map((journal) => ({
-          value: journal.id,
-          label: journal.name,
-        })) || [],
+        journals?.data?.map((j) => ({ value: j.id, label: j.name })) || [],
       colSpan: 2,
     },
     {
       name: "attachments",
       label: "Fayl",
       type: "file",
-      placeholder: "Faylni tanlang",
       colSpan: 2,
+      multiple: true,
+      fileReturnShape: "array:id",
+      existingFiles: existingFiles.map((f) => ({
+        ...f,
+        fileSize: f.fileSize || 0,
+      })),
+      onDeleteExisting: handleDeleteFile,
     },
   ];
 
@@ -127,7 +140,7 @@ const DocumentFormModal = ({
         status: document?.status ?? "DRAFT",
         documentTypeId: document?.documentType?.id ?? "",
         journalId: document?.journal?.id ?? "",
-        attachments: document?.attachments?.map((att) => att.id) ?? [],
+        attachments: document?.attachments?.map((a) => a.id) ?? [],
       }
     : {
         title: "",
@@ -141,9 +154,17 @@ const DocumentFormModal = ({
       };
 
   const handleSubmit = (values: DocumentFormType) => {
+    const data = {
+      ...values,
+      attachments: [
+        ...existingFiles.map((f) => f.id),
+        ...(values.attachments || []),
+      ],
+    };
+
     if (isUpdate && document) {
-      updateDocumentMutation.mutate(
-        { id: document.id || "", data: values },
+      updateMutation.mutate(
+        { id: document.id || "", data },
         {
           onSuccess: () => {
             modal.closeModal();
@@ -152,7 +173,7 @@ const DocumentFormModal = ({
         },
       );
     } else {
-      createDocumentMutation.mutate(values, {
+      createMutation.mutate(data, {
         onSuccess: () => {
           modal.closeModal();
           onSuccess?.();
@@ -167,20 +188,18 @@ const DocumentFormModal = ({
       fields={fields}
       defaultValues={defaultValues}
       onSubmit={handleSubmit}
-      submitLabel={isUpdate ? "Yangilash" : "Qo'shish"}
+      onFormReady={setFormInstance}
       renderActions={({ isSubmitting }) => (
         <div className="flex justify-end gap-2 pt-4">
           <Button
             className="btn-outline-destructive"
-            type="button"
             variant="outline"
             onClick={modal.closeModal}
-            disabled={isSubmitting || isLoading}
           >
             Bekor qilish
           </Button>
-          <Button type="submit" disabled={isSubmitting || isLoading}>
-            {isSubmitting || isLoading
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting
               ? isUpdate
                 ? "Yangilanmoqda..."
                 : "Qo'shilmoqda..."
