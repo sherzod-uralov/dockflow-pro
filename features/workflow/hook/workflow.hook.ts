@@ -42,7 +42,6 @@ export const useGetAllWorkflows = (params?: WorkflowQueryParams) => {
     keepPreviousData: true,
   });
 };
-
 /**
  * Обновить workflow и его steps
  */
@@ -127,13 +126,8 @@ export const useUpdateWorkflowStep = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({
-      id,
-      data,
-    }: {
-      id: string;
-      data: WorkflowStepUpdateType;
-    }) => workflowService.updateWorkflowStep(id, data),
+    mutationFn: ({ id, data }: { id: string; data: WorkflowStepUpdateType }) =>
+      workflowService.updateWorkflowStep(id, data),
     onSuccess: (response, variables) => {
       // Инвалидировать список workflows и workflow steps
       queryClient.invalidateQueries(["workflows"]);

@@ -5,6 +5,11 @@ import { ModalState } from "@/types/modal";
 // ENUMS & CONSTANTS
 // ============================================
 
+export enum WorkflowType {
+  CONSECUTIVE = "Ketma-ket",
+  PARALLEL = "Parallel",
+}
+
 export type WorkflowStatus = "ACTIVE" | "COMPLETED" | "CANCELLED" | "DRAFT";
 export type WorkflowStepStatus =
   | "NOT_STARTED"
@@ -34,6 +39,19 @@ export type AssignedUser = {
   username: string;
 };
 
+// Действие, выполненное над WorkflowStep
+export type WorkflowStepAction = {
+  id: string;
+  workflowStepId: string;
+  actionType: "APPROVED" | "REJECTED" | "REVIEWED" | "SIGNED" | "NOTIFIED";
+  performedByUserId: string;
+  performedBy?: AssignedUser;
+  comment: string | null;
+  metadata: Record<string, any>;
+  createdAt: string;
+  updatedAt: string;
+};
+
 // WorkflowStep с полными данными (как приходит из API)
 export type WorkflowStepApiResponse = {
   id: string;
@@ -49,6 +67,7 @@ export type WorkflowStepApiResponse = {
   isRejected: boolean;
   rejectionReason: string | null;
   rejectedAt: string | null;
+  actions?: WorkflowStepAction[]; // ✨ История действий
   createdAt: string;
   updatedAt: string;
 };
@@ -59,6 +78,7 @@ export type WorkflowApiResponse = {
   documentId: string;
   currentStepOrder: number;
   status: WorkflowStatus;
+  workflowType?: WorkflowType; // ⚠️ Опциональное - backend пока не поддерживает это поле
   document: DocumentInfo;
   workflowSteps: WorkflowStepApiResponse[];
   createdAt: string;
@@ -94,7 +114,7 @@ export type WorkflowStepUpdateType = {
 
 // Данные для отклонения workflow step
 export type WorkflowStepRejectPayload = {
-  reason?: string; // Причина отклонения (опционально)
+  comment?: string; // Причина отклонения (опционально)
 };
 
 // Список задач пользователя (workflow steps)
@@ -125,6 +145,7 @@ export interface MyTasksQueryParams {
 export type WorkflowFormData = {
   documentId: string;
   actionType: WorkflowActionType; // Общий для всех steps
+  workflowType: WorkflowType; // Тип выполнения workflow
   steps: WorkflowStepFormData[];
 };
 

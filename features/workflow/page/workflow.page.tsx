@@ -51,7 +51,7 @@ const WorkflowPage = () => {
     page: pageNumber, // pageNumber → page
     limit: pageSize, // pageSize → limit
   });
-
+  console.log(data);
   const deleteMutation = useDeleteWorkflow();
 
   const confirmDelete = () => {

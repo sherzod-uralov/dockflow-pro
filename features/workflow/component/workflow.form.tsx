@@ -59,6 +59,20 @@ const ACTION_TYPE_OPTIONS = [
   },
 ] as const;
 
+const WORKFLOW_TYPE_OPTIONS = [
+  {
+    value: "Ketma-ket",
+    label: "Ketma-ket",
+    description:
+      "Har bir bosqich oldingi bosqich tugaganidan keyin boshlanadi",
+  },
+  {
+    value: "Parallel",
+    label: "Parallel",
+    description: "Barcha bosqichlar bir vaqtning o'zida bajariladi",
+  },
+] as const;
+
 const WorkflowForm = ({
   modal,
   mode,
@@ -88,6 +102,7 @@ const WorkflowForm = ({
     defaultValues: {
       documentId: "",
       actionType: "APPROVAL",
+      workflowType: "Ketma-ket",
       steps: [createEmptyStep()],
     },
   });
@@ -106,6 +121,7 @@ const WorkflowForm = ({
       form.reset({
         documentId: "",
         actionType: "APPROVAL",
+        workflowType: "Ketma-ket",
         steps: [createEmptyStep()],
       });
     }
@@ -197,6 +213,42 @@ const WorkflowForm = ({
                   ))}
                 </SelectContent>
               </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Workflow Type */}
+        <FormField
+          control={form.control}
+          name="workflowType"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Workflow turi *</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Workflow turini tanlang" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {WORKFLOW_TYPE_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      <div className="flex flex-col">
+                        <span className="font-medium">{option.label}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {option.description}
+                        </span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormDescription>
+                Ketma-ket: har bir bosqich oldingi bosqich tugaganidan keyin
+                boshlanadi. Parallel: barcha bosqichlar bir vaqtning o'zida
+                bajariladi.
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}

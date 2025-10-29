@@ -26,6 +26,7 @@ import {
   Play,
   CheckCircle,
   XCircle,
+  MessageSquare,
 } from "lucide-react";
 import {
   WorkflowApiResponse,
@@ -96,7 +97,9 @@ const WorkflowView = ({ workflow, onClose }: WorkflowViewProps) => {
     rejectMutation.mutate(
       {
         id: selectedStep.id,
-        data: rejectionReason.trim() ? { reason: rejectionReason.trim() } : undefined,
+        data: rejectionReason.trim()
+          ? { comment: rejectionReason.trim() }
+          : undefined,
       },
       {
         onSuccess: () => {
@@ -324,12 +327,85 @@ const WorkflowView = ({ workflow, onClose }: WorkflowViewProps) => {
             </div>
           )}
 
+          {/* Actions History */}
+          {step.actions && step.actions.length > 0 && (
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <MessageSquare className="h-4 w-4 text-muted-foreground" />
+                <span className="font-medium text-sm">Amallar tarixi</span>
+              </div>
+              <div className="space-y-2">
+                {step.actions.map((action) => (
+                  <div
+                    key={action.id}
+                    className={`border rounded-md p-3 ${
+                      action.actionType === "REJECTED"
+                        ? "bg-red-50 border-red-200"
+                        : action.actionType === "APPROVED"
+                          ? "bg-green-50 border-green-200"
+                          : "bg-blue-50 border-blue-200"
+                    }`}
+                  >
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <Avatar className="h-6 w-6">
+                          <AvatarImage
+                            src=""
+                            alt={action.performedBy?.username || ""}
+                          />
+                          <AvatarFallback className="text-xs">
+                            {action.performedBy?.fullname
+                              ?.split(" ")
+                              .map((n) => n[0])
+                              .join("") || "??"}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="text-xs font-medium">
+                            {action.performedBy?.fullname || "N/A"}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {formatDateTime(action.createdAt)}
+                          </p>
+                        </div>
+                      </div>
+                      <Badge
+                        variant="outline"
+                        className={`text-xs ${
+                          action.actionType === "REJECTED"
+                            ? "bg-red-100 text-red-800 border-red-300"
+                            : action.actionType === "APPROVED"
+                              ? "bg-green-100 text-green-800 border-green-300"
+                              : "bg-blue-100 text-blue-800 border-blue-300"
+                        }`}
+                      >
+                        {action.actionType === "REJECTED"
+                          ? "Rad etildi"
+                          : action.actionType === "APPROVED"
+                            ? "Tasdiqlandi"
+                            : action.actionType === "REVIEWED"
+                              ? "Ko'rildi"
+                              : action.actionType === "SIGNED"
+                                ? "Imzolandi"
+                                : "Xabarnoma"}
+                      </Badge>
+                    </div>
+                    {action.comment && (
+                      <p className="text-sm mt-2">{action.comment}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Action Buttons */}
           {isCurrentStep &&
             step.status !== "COMPLETED" &&
             step.status !== "REJECTED" && (
               <div className="flex gap-2 pt-2 border-t">
-                {(step.status === "NOT_STARTED" || step.status === "PENDING") && (
+                {(step.status === "NOT_STARTED" ||
+                  step.status === "PENDING") && (
                   <Button
                     size="sm"
                     onClick={() => handleStartStep(step.id)}

@@ -3,6 +3,7 @@ import {
   WorkflowFormData,
   WorkflowStepFormData,
   WorkflowActionType,
+  WorkflowType,
 } from "@/features/workflow";
 import {
   WorkflowCreateType,
@@ -20,6 +21,7 @@ export const apiToFormData = (
   return {
     documentId: apiData.documentId,
     actionType: actionType,
+    workflowType: apiData.workflowType || WorkflowType.CONSECUTIVE,
     steps: apiData.workflowSteps
       .sort((a, b) => a.order - b.order)
       .map((step) => ({
@@ -33,6 +35,7 @@ export const apiToFormData = (
 /**
  * Трансформация Form data → API payload
  * ✅ КРИТИЧНО: Добавляет ВСЕ обязательные поля для Backend
+ * ⚠️ workflowType не отправляется на backend (поле используется только на frontend)
  */
 export const formToApiPayload = (
   formData: WorkflowFormType,
@@ -72,6 +75,7 @@ export const hasFormChanged = (
   const originalForm = apiToFormData(original);
 
   if (originalForm.actionType !== current.actionType) return true;
+  if (originalForm.workflowType !== current.workflowType) return true;
   if (originalForm.steps.length !== current.steps.length) return true;
 
   return originalForm.steps.some((originalStep, index) => {
@@ -97,6 +101,7 @@ export const duplicateWorkflow = (
   return {
     documentId: newDocumentId || workflow.documentId,
     actionType: actionType,
+    workflowType: workflow.workflowType || WorkflowType.CONSECUTIVE,
     steps: workflow.workflowSteps
       .sort((a, b) => a.order - b.order)
       .map((step) => ({
