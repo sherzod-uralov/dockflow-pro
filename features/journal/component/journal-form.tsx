@@ -1,77 +1,102 @@
-// src/components/journals/journal-form.tsx
+"use client";
 
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
-import { JournalCreateType, journalCreate } from "../scheme/journal-create";
-
-
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import React, { useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-
-
+import { journalCreate } from "../scheme/journal-create";
 import {
   useJournalCreateMutation,
   useUpdateJournal,
 } from "../hook/journal.hook";
 import { useGetAllDeportaments } from "@/features/deportament/hook/deportament.hook";
 import { useGetUserQuery } from "../../admin/admin-users/hook/user.hook";
-
-// Тип для пропсов
+import SimpleFormGenerator, {
+  Field,
+} from "@/components/shared/ui/custom-form-generator";
 import { JournalFormProps } from "../types/journal.types";
 
 const journalSchema = journalCreate();
 
 const JournalForm = ({ modal, mode, journal }: JournalFormProps) => {
-  const { data: departmentsData, isLoading: isLoadingDepartments } =
-    useGetAllDeportaments();
-  const { data: usersData, isLoading: isLoadingUsers } = useGetUserQuery();
+  const { data: departmentsData } = useGetAllDeportaments({
+    pageNumber: 1,
+    pageSize: 100,
+    search: "",
+  });
+  const { data: usersData } = useGetUserQuery({
+    pageNumber: 1,
+    pageSize: 100,
+    search: "",
+  });
 
   const journalCreateMutation = useJournalCreateMutation();
   const journalUpdateMutation = useUpdateJournal();
-  const areListsLoading = isLoadingDepartments || isLoadingUsers;
-  const form = useForm<JournalCreateType>({
-    resolver: zodResolver(journalSchema),
-    defaultValues: {
-      name: "",
-      prefix: "",
-      format: "YYYY-MM-DD/{prefix}-{number}",
-      departmentId: "",
-      responsibleUserId: "",
-    },
-  });
 
-  useEffect(() => {
-    if (mode === "edit" && journal) {
-      form.reset({
-        name: journal.name,
-        prefix: journal.prefix,
-        format: journal.format,
-        departmentId: journal.department.id,
-        responsibleUserId: journal.responsibleUser.id,
-      });
-    }
-  }, [mode, journal, form.reset, usersData, departmentsData]);
+  const isUpdate = mode === "edit";
+  const isLoading =
+    journalCreateMutation.isLoading || journalUpdateMutation.isLoading;
 
-  const onSubmitHandler = (values: JournalCreateType) => {
-    if (mode === "edit" && journal) {
+  const defaultValues = useMemo(() => {
+    return {
+      name: journal?.name ?? "",
+      prefix: journal?.prefix ?? "",
+      format: journal?.format ?? "",
+      departmentId: journal?.department?.id ?? "",
+      responsibleUserId: journal?.responsibleUser?.id ?? "",
+    };
+  }, [journal]);
+
+  const fields: Field[] = useMemo(() => {
+    return [
+      {
+        type: "text",
+        name: "name",
+        label: "Jurnal nomi",
+        placeholder: "Jurnal nomini kiriting...",
+        colSpan: 2,
+      },
+      {
+        type: "text",
+        name: "prefix",
+        label: "Prefiks",
+        placeholder: "Masalan, KHM",
+      },
+      {
+        type: "text",
+        name: "format",
+        label: "Format",
+        placeholder: "Format kiriting...",
+      },
+      {
+        type: "select",
+        name: "departmentId",
+        label: "Departament",
+        placeholder: "Departamentni tanlang",
+        options:
+          departmentsData?.data?.map((department) => ({
+            label: department.name,
+            value: department.id,
+          })) ?? [],
+        colSpan: 2,
+      },
+      {
+        type: "select",
+        name: "responsibleUserId",
+        label: "Mas'ul shaxs",
+        placeholder: "Foydalanuvchini tanlang",
+        options:
+          usersData?.data?.map((user) => ({
+            label: user.username,
+            value: user.id,
+          })) ?? [],
+        colSpan: 2,
+      },
+    ];
+  }, [departmentsData, usersData]);
+
+  const handleSubmit = (values: any) => {
+    if (isUpdate && journal?.id) {
       journalUpdateMutation.mutate(
-        { data: values, id: journal.id },
+        { id: journal.id, data: values },
         {
           onSuccess: () => {
             modal.closeModal();
@@ -87,140 +112,34 @@ const JournalForm = ({ modal, mode, journal }: JournalFormProps) => {
     }
   };
 
-  const isLoading =
-    isLoadingDepartments ||
-    isLoadingUsers ||
-    journalCreateMutation.isLoading ||
-    journalUpdateMutation.isLoading;
-
   return (
-    <div className="space-y-4">
-      <Form {...form}>
-        <form
-          className="space-y-4"
-          onSubmit={form.handleSubmit(onSubmitHandler)}
-        >
-          {/* Поля формы для журнала */}
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Jurnal nomi</FormLabel>
-                <FormControl>
-                  <Input placeholder="Jurnal nomini kiriting..." {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <div className="grid grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="prefix"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Prefiks</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Masalan, KHM" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="format"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Format</FormLabel>
-                  <FormControl>
-                    <Input placeholder="YYYY-MM/{prefix}-{number}" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          {/* --- Выпадающий список для Департамента --- */}
-          <FormField
-            control={form.control}
-            name="departmentId"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Departament</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  value={field.value}
-                  disabled={isLoadingDepartments}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Departamentni tanlang" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {departmentsData?.data.map((department: any) => (
-                      <SelectItem key={department.id} value={department.id}>
-                        {department.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* --- Выпадающий список для Ответственного --- */}
-          <FormField
-            control={form.control}
-            name="responsibleUserId"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Mas'ul shaxs</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  value={field.value} // <--- ИЗМЕНЕНИЕ: defaultValue -> value
-                  disabled={isLoadingUsers}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Foydalanuvchini tanlang" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {usersData?.data.map((user: any) => (
-                      <SelectItem key={user.id} value={user.id}>
-                        {user.username}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Кнопки управления */}
-          <div className="flex justify-end gap-2 pt-3 border-t">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => form.reset()}
-              size="sm"
-            >
-              Bekor qilish
-            </Button>
-            <Button type="submit" disabled={isLoading} size="sm">
-              {isLoading ? "Saqlanmoqda..." : "Saqlash"}
-            </Button>
-          </div>
-        </form>
-      </Form>
-    </div>
+    <SimpleFormGenerator
+      schema={journalSchema}
+      fields={fields}
+      defaultValues={defaultValues}
+      onSubmit={handleSubmit}
+      submitLabel={isUpdate ? "Yangilash" : "Qo'shish"}
+      renderActions={({ isSubmitting }) => (
+        <div className="flex gap-2 justify-end">
+          <Button
+            variant="outline"
+            onClick={() => modal.closeModal()}
+            disabled={isLoading}
+          >
+            Bekor qilish
+          </Button>
+          <Button type="submit" disabled={isSubmitting || isLoading}>
+            {isSubmitting || isLoading
+              ? isUpdate
+                ? "Yangilanmoqda..."
+                : "Qo'shilmoqda..."
+              : isUpdate
+                ? "Yangilash"
+                : "Qo'shish"}
+          </Button>
+        </div>
+      )}
+    />
   );
 };
 

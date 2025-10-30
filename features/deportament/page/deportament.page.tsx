@@ -15,7 +15,8 @@ import { DataTable } from "@/components/shared/ui/custom-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Copy } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   CustomAction,
   ActionItem,
@@ -33,6 +34,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import DeportamentView from "@/features/deportament/component/deportament.view";
 
 const DeportamentPage = () => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const createModal: ModalState = useModal();
   const editModal: ModalState = useModal();
   const deleteModal: ModalState = useModal();
@@ -50,6 +53,37 @@ const DeportamentPage = () => {
   });
 
   const deleteDeportamentMutation = useDeleteDeportament();
+
+  useEffect(() => {
+    const deportamentId = searchParams.get("deportamentId");
+
+    if (deportamentId) {
+      const deportament = data?.data?.find(
+        (d: DepartmentResponse) => d.id === deportamentId,
+      );
+
+      if (deportament) {
+        setSelectedDeportament(deportament);
+        viewModal.openModal();
+      }
+    } else {
+      if (viewModal.isOpen) {
+        viewModal.closeModal();
+      }
+    }
+  }, [searchParams, data]);
+
+  const handleViewDeportament = (item: DepartmentResponse) => {
+    setSelectedDeportament(item);
+    viewModal.openModal();
+    router.push(`?deportamentId=${item.id}`, { scroll: false });
+  };
+
+  const handleCloseViewModal = () => {
+    viewModal.closeModal();
+    setSelectedDeportament(null);
+    router.push(window.location.pathname, { scroll: false });
+  };
 
   const handleEdit = (item: DepartmentResponse) => {
     setSelectedDeportament(item);
@@ -73,14 +107,6 @@ const DeportamentPage = () => {
     setSelectedDeportament(null);
     editModal.closeModal();
   };
-  const handleView = (item: DepartmentResponse) => {
-    setSelectedDeportament(item);
-    viewModal.openModal();
-  };
-  const handleViewModalClose = () => {
-    setSelectedDeportament(null);
-    viewModal.closeModal();
-  };
 
   return (
     <>
@@ -100,32 +126,6 @@ const DeportamentPage = () => {
         totalCount={data?.count || 0}
         currentPage={pageNumber}
         columns={[
-          {
-            header: "ID",
-            accessorKey: "id",
-            cell: ({ row }) => {
-              const id = row.original.id;
-              return (
-                <div className="flex w-full items-center gap-2">
-                  <Badge
-                    variant="outline"
-                    className="font-mono cursor-pointer hover:bg-muted"
-                    onClick={() => handleCopyToClipboard(id as string, "ID")}
-                  >
-                    {id?.slice(0, 8)}...
-                  </Badge>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-6 w-6 group"
-                    onClick={() => handleCopyToClipboard(id as string, "ID")}
-                  >
-                    <Copy className="h-3 w-3 group-hover:text-text-on-dark" />
-                  </Button>
-                </div>
-              );
-            },
-          },
           {
             header: "Nomi",
             accessorKey: "name",
@@ -175,8 +175,8 @@ const DeportamentPage = () => {
               const item = row.original;
 
               const actions: ActionItem[] = [
+                createViewAction(() => handleViewDeportament(item)),
                 createEditAction(() => handleEdit(item)),
-                createViewAction(() => handleView(item)),
                 createCopyAction(() =>
                   handleCopyToClipboard(item.id || "", "ID"),
                 ),
@@ -218,17 +218,14 @@ const DeportamentPage = () => {
         />
       </CustomModal>
       <CustomModal
+        closeOnOverlayClick
+        size="2xl"
         isOpen={viewModal.isOpen}
-        onClose={handleViewModalClose}
+        onClose={handleCloseViewModal}
         title="Departament ma'lumotlari"
         description="Departament haqida to'liq ma'lumot"
       >
-        {selectedDeportament && (
-          <DeportamentView
-            departament={selectedDeportament}
-            onClose={handleViewModalClose}
-          />
-        )}
+        <DeportamentView />
       </CustomModal>
 
       <ConfirmationModal

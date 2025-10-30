@@ -201,6 +201,7 @@ const UserPage = () => {
         <UserForm mode="create" modal={createModal} />
       </CustomModal>
       <CustomModal
+        size="2xl"
         closeOnOverlayClick
         onClose={editModal.closeModal}
         isOpen={editModal.isOpen}

@@ -1,20 +1,22 @@
 "use client";
 
+import { useState } from "react";
 import { ModalState } from "@/types/modal";
 import { Button } from "@/components/ui/button";
-import {
-  DocumentTemplateFormType,
-  documentTemplateSchema,
-} from "@/features/document-template/schema/document-template.schema";
+import SimpleFormGenerator, {
+  Field,
+} from "@/components/shared/ui/custom-form-generator";
+import { useGetAllDocumentTypes } from "@/features/document-type";
+import { toast } from "sonner";
 import {
   DocumentTemplateResponse,
   useCreateDocumentTemplate,
   useUpdateDocumentTemplate,
 } from "@/features/document-template";
-import SimpleFormGenerator, {
-  Field,
-} from "@/components/shared/ui/custom-form-generator";
-import { useGetAllDocumentTypes } from "@/features/document-type";
+import {
+  DocumentTemplateFormType,
+  documentTemplateSchema,
+} from "@/features/document-template/schema/document-template.schema";
 
 interface DocumentTemplateFormModalProps {
   modal: ModalState;
@@ -23,20 +25,29 @@ interface DocumentTemplateFormModalProps {
   onSuccess?: () => void;
 }
 
-//dev-a
-
 const DocumentTemplateFormModal = ({
-                                     modal,
-                                     mode,
-                                     documentTemplate,
-                                     onSuccess,
-                                   }: DocumentTemplateFormModalProps) => {
+  modal,
+  mode,
+  documentTemplate,
+  onSuccess,
+}: DocumentTemplateFormModalProps) => {
   const createMutation = useCreateDocumentTemplate();
   const updateMutation = useUpdateDocumentTemplate();
   const { data: documentTypes } = useGetAllDocumentTypes();
+  const [existingFiles, setExistingFiles] = useState(
+    documentTemplate?.templateFile ? [documentTemplate.templateFile] : [],
+  );
+  const [formInstance, setFormInstance] = useState<any>(null);
 
   const isUpdate = mode === "update";
-  const isLoading = createMutation.isLoading || updateMutation.isLoading;
+
+  const handleDeleteFile = (fileId: string) => {
+    setExistingFiles((prev) => prev.filter((f) => f.id !== fileId));
+    if (formInstance) {
+      formInstance.setValue("templateFileId", null, { shouldValidate: true });
+    }
+    toast.success("Fayl o'chirildi");
+  };
 
   const fields: Field[] = [
     {
@@ -58,64 +69,77 @@ const DocumentTemplateFormModal = ({
       label: "Hujjat turi",
       type: "select",
       placeholder: "Hujjat turini tanlang",
+      colSpan: 2,
       options:
-        documentTypes?.data?.map((type) => ({
-          value: type.id as string,
-          label: type.name as string,
+        documentTypes?.data?.map((t) => ({
+          value: t.id,
+          label: t.name,
         })) || [],
-      colSpan: 2,
-    },
-    {
-      name: "templateFileId",
-      label: "Shablon fayli",
-      type: "file",
-      placeholder: "Faylni yuklang",
-      multiple: false,
-      fileReturnShape: "id",
-      accept: {
-        "application/pdf": [".pdf"],
-        "application/msword": [".doc"],
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
-          [".docx"],
-      },
-      maxSize: 10 * 1024 * 1024,
-      helperText: "PDF, DOC, DOCX (max 10MB)",
-      colSpan: 2,
     },
     {
       name: "isActive",
       label: "Faol",
       type: "checkbox",
+      colSpan: 1,
     },
     {
       name: "isPublic",
       label: "Ommaviy",
       type: "checkbox",
+      colSpan: 1,
+    },
+    {
+      name: "templateFileId",
+      label: "Shablon fayli",
+      type: "file",
+      colSpan: 2,
+      multiple: false,
+      fileReturnShape: "id",
+      accept: {
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+          [".docx"],
+        "application/msword": [".doc"],
+      },
+      helperText: "Faqat DOCX formatdagi fayllar (max 50MB)",
+      maxSize: 50 * 1024 * 1024,
+      existingFiles: existingFiles.map((f) => ({
+        id: f.id,
+        fileName: f.fileName,
+        fileSize: f.fileSize,
+        fileUrl: f.fileUrl,
+      })),
+      onDeleteExisting: handleDeleteFile,
     },
   ];
 
   const defaultValues: DocumentTemplateFormType = isUpdate
     ? {
-      name: documentTemplate?.name ?? "",
-      description: documentTemplate?.description ?? "",
-      documentTypeId: documentTemplate?.documentType?.id ?? "",
-      templateFileId: "",
-      isActive: documentTemplate?.isActive ?? true,
-      isPublic: documentTemplate?.isPublic ?? true,
-    }
+        name: documentTemplate?.name ?? "",
+        description: documentTemplate?.description ?? "",
+        documentTypeId: documentTemplate?.documentType?.id ?? "",
+        isActive: documentTemplate?.isActive ?? true,
+        isPublic: documentTemplate?.isPublic ?? false,
+        templateFileId: documentTemplate?.templateFile?.id ?? "",
+      }
     : {
-      name: "",
-      description: "",
-      documentTypeId: "",
-      templateFileId: "",
-      isActive: true,
-      isPublic: true,
-    };
+        name: "",
+        description: "",
+        documentTypeId: "",
+        isActive: true,
+        isPublic: false,
+        templateFileId: "",
+      };
 
   const handleSubmit = (values: DocumentTemplateFormType) => {
+    const data = {
+      ...values,
+      templateFileId:
+        existingFiles.length > 0 ? existingFiles[0].id : values.templateFileId,
+    };
+
     if (isUpdate && documentTemplate) {
       updateMutation.mutate(
-        { id: documentTemplate.id, data: values },
+        { id: documentTemplate.id, data },
         {
           onSuccess: () => {
             modal.closeModal();
@@ -124,7 +148,7 @@ const DocumentTemplateFormModal = ({
         },
       );
     } else {
-      createMutation.mutate(values, {
+      createMutation.mutate(data, {
         onSuccess: () => {
           modal.closeModal();
           onSuccess?.();
@@ -139,19 +163,18 @@ const DocumentTemplateFormModal = ({
       fields={fields}
       defaultValues={defaultValues}
       onSubmit={handleSubmit}
-      submitLabel={isUpdate ? "Yangilash" : "Qo'shish"}
+      onFormReady={setFormInstance}
       renderActions={({ isSubmitting }) => (
         <div className="flex justify-end gap-2 pt-4">
           <Button
-            type="button"
+            className="btn-outline-destructive"
             variant="outline"
-            onClick={modal.closeModal}
-            disabled={isSubmitting || isLoading}
+            onClick={() => modal.closeModal()}
           >
             Bekor qilish
           </Button>
-          <Button type="submit" disabled={isSubmitting || isLoading}>
-            {isSubmitting || isLoading
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting
               ? isUpdate
                 ? "Yangilanmoqda..."
                 : "Qo'shilmoqda..."

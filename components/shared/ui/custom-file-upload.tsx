@@ -1,11 +1,19 @@
 "use client";
 
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useMemo } from "react";
 import { useDropzone, Accept } from "react-dropzone";
 import { cn } from "@/lib/utils";
 import { FormControl, FormItem, FormMessage } from "@/components/ui/form";
-import { Upload, FileText, File as FileIcon } from "lucide-react";
+import { Upload, FileText, File as FileIcon, X, Download } from "lucide-react";
 import { toast } from "sonner";
+import { useState } from "react";
+
+interface ExistingFile {
+  id: string;
+  fileName: string;
+  fileSize?: number;
+  fileUrl: string;
+}
 
 interface FileUploadProps {
   onChange: (file: File | File[] | undefined) => void;
@@ -14,16 +22,15 @@ interface FileUploadProps {
   name: string;
   multiple?: boolean;
   maxFiles?: number;
-  // Dinamik ruxsat etilgan turlar (react-dropzone Accept)
   accept?: Accept;
-  // Maksimal hajm (baytda). Masalan: 100 * 1024 * 1024 (100MB)
   maxSize?: number;
-  // Ko'rsatiladigan matnlar (ixtiyoriy)
   helperText?: string;
+  existingFiles?: ExistingFile[];
+  onDeleteExisting?: (fileId: string) => void;
 }
 
-const formatBytes = (bytes: number) => {
-  if (bytes === 0) return "0 B";
+const formatBytes = (bytes?: number) => {
+  if (!bytes || bytes === 0) return "0 B";
   const k = 1024;
   const sizes = ["B", "KB", "MB", "GB", "TB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
@@ -37,6 +44,26 @@ const isWord = (type: string) =>
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 const isPdf = (type: string) => type === "application/pdf";
 
+const getFileIcon = (fileName: string) => {
+  const ext = fileName.split(".").pop()?.toLowerCase();
+  if (ext === "pdf") return <FileText className="w-6 h-6 text-error" />;
+  if (["doc", "docx"].includes(ext || ""))
+    return <FileText className="w-6 h-6 text-info" />;
+  if (["jpg", "jpeg", "png", "gif"].includes(ext || ""))
+    return <FileIcon className="w-6 h-6 text-success" />;
+  return <FileIcon className="w-6 h-6 text-muted-foreground" />;
+};
+
+type DisplayFile = {
+  type: "existing" | "new";
+  id?: string;
+  file?: File;
+  fileName: string;
+  fileSize?: number;
+  fileUrl?: string;
+  index?: number;
+};
+
 export function FileUpload({
   onChange,
   label,
@@ -47,6 +74,8 @@ export function FileUpload({
   maxSize,
   helperText,
   value,
+  existingFiles = [],
+  onDeleteExisting,
 }: FileUploadProps) {
   const [localFiles, setLocalFiles] = useState<File[]>(
     Array.isArray(value) ? value : value ? [value] : [],
@@ -63,14 +92,24 @@ export function FileUpload({
       }
       if (!acceptedFiles.length) return;
 
+      if (!multiple && existingFiles.length > 0 && onDeleteExisting) {
+        existingFiles.forEach((file) => onDeleteExisting(file.id));
+      }
+
       const next = multiple
         ? [...localFiles, ...acceptedFiles]
         : [acceptedFiles[0]];
       setLocalFiles(next);
       onChange(multiple ? next : next[0]);
     },
-    [localFiles, multiple, onChange],
+    [localFiles, multiple, onChange, existingFiles, onDeleteExisting],
   );
+
+  const removeNewFile = (index: number) => {
+    const next = localFiles.filter((_, i) => i !== index);
+    setLocalFiles(next);
+    onChange(multiple ? next : next[0]);
+  };
 
   const computedAccept: Accept = accept ?? {
     "application/pdf": [".pdf"],
@@ -86,34 +125,55 @@ export function FileUpload({
     accept: computedAccept,
     multiple,
     maxFiles: maxFiles ?? (multiple ? 10 : 1),
-    maxSize: maxSize ?? 100 * 1024 * 1024, // default 100MB
+    maxSize: maxSize ?? 100 * 1024 * 1024,
   });
 
-  const filesToShow = useMemo(() => localFiles, [localFiles]);
+  const allFiles = useMemo<DisplayFile[]>(() => {
+    const existing: DisplayFile[] = existingFiles.map((file) => ({
+      type: "existing",
+      id: file.id,
+      fileName: file.fileName,
+      fileSize: file.fileSize,
+      fileUrl: file.fileUrl,
+    }));
+
+    const newFiles: DisplayFile[] = localFiles.map((file, index) => ({
+      type: "new",
+      file: file,
+      fileName: file.name,
+      fileSize: file.size,
+      index: index,
+    }));
+
+    return [...existing, ...newFiles];
+  }, [existingFiles, localFiles]);
+
+  const hasFiles = allFiles.length > 0;
 
   return (
     <FormItem>
       <FormControl>
-        <div className="space-y-2">
+        <div className="space-y-3">
           <div
             {...getRootProps()}
             className={cn(
-              "border-2 border-dashed rounded-md p-4 flex flex-col items-center justify-center transition-colors",
-              isDragActive ? "border-primary bg-primary/10" : "border-gray-300",
+              "border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center transition-colors cursor-pointer",
+              isDragActive ? "border-primary bg-primary/10" : "border-border",
               "hover:border-primary hover:bg-primary/5",
             )}
           >
             <input {...getInputProps()} name={name} />
             <div className="text-center">
-              <Upload className="w-8 h-8 mx-auto mb-2" />
-              <p className="text-sm text-gray-500">
+              <Upload className="w-10 h-10 mx-auto mb-3 text-muted-foreground" />
+              <p className="text-sm font-medium text-foreground mb-1">
                 {isDragActive
                   ? "Fayl(lar)ni bu yerga tashlang"
-                  : "Fayl(lar)ni tanlash uchun bosing yoki sudrab keling"}
+                  : hasFiles
+                    ? "Boshqa fayl yuklash"
+                    : "Fayl yuklash"}
               </p>
-              <p className="text-xs text-gray-400">
-                {helperText ??
-                  "(PDF, JPG, PNG, GIF, DOC, DOCX; max 100MB; ko‘p fayl uchun bir necha marta tanlang yoki birdan tashlang)"}
+              <p className="text-xs text-muted-foreground">
+                {helperText ?? "PDF, JPG, PNG, GIF, DOC, DOCX (max 100MB)"}
               </p>
               {label && (
                 <p className="text-xs text-muted-foreground mt-1">{label}</p>
@@ -121,34 +181,87 @@ export function FileUpload({
             </div>
           </div>
 
-          {filesToShow.length > 0 && (
-            <div className="rounded-md border p-3 space-y-2">
-              {filesToShow.map((f, idx) => (
+          {hasFiles && (
+            <div className="rounded-lg border border-border bg-card p-3 space-y-2">
+              <p className="text-sm font-medium text-foreground">
+                Yuklangan fayllar ({allFiles.length})
+              </p>
+              {allFiles.map((item, idx) => (
                 <div
-                  key={idx}
-                  className="flex items-center gap-3 p-2 rounded hover:bg-muted/50"
+                  key={item.type === "existing" ? item.id : `new-${idx}`}
+                  className="flex items-center gap-3 p-2 rounded-md bg-muted/30 hover:bg-accent/50 transition-colors"
                 >
                   <div className="w-10 h-10 flex items-center justify-center rounded bg-muted">
-                    {isImage(f.type) ? (
-                      // Image preview
+                    {item.type === "new" &&
+                    item.file &&
+                    isImage(item.file.type) ? (
                       <img
-                        src={URL.createObjectURL(f)}
-                        alt={f.name}
+                        src={URL.createObjectURL(item.file)}
+                        alt={item.fileName}
                         className="w-10 h-10 object-cover rounded"
                       />
-                    ) : isPdf(f.type) ? (
-                      <FileText className="w-6 h-6 text-red-600" />
-                    ) : isWord(f.type) ? (
-                      <FileText className="w-6 h-6 text-blue-600" />
+                    ) : item.type === "new" &&
+                      item.file &&
+                      isPdf(item.file.type) ? (
+                      <FileText className="w-6 h-6 text-error" />
+                    ) : item.type === "new" &&
+                      item.file &&
+                      isWord(item.file.type) ? (
+                      <FileText className="w-6 h-6 text-info" />
                     ) : (
-                      <FileIcon className="w-6 h-6 text-muted-foreground" />
+                      getFileIcon(item.fileName)
                     )}
                   </div>
+
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{f.name}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-medium text-foreground truncate">
+                        {item.fileName}
+                      </p>
+                      {item.type === "new" && (
+                        <span className="text-xs px-1.5 py-0.5 bg-primary/10 text-primary rounded">
+                          Yangi
+                        </span>
+                      )}
+                    </div>
                     <p className="text-xs text-muted-foreground">
-                      {f.type || "unknown"} • {formatBytes(f.size)}
+                      {item.type === "new" && item.file
+                        ? `${item.file.type || "unknown"} • ${formatBytes(item.fileSize)}`
+                        : formatBytes(item.fileSize)}
                     </p>
+                  </div>
+
+                  <div className="flex items-center gap-1">
+                    {item.type === "existing" && item.fileUrl && (
+                      <a
+                        href={item.fileUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-1.5 hover:bg-muted rounded-md transition-colors"
+                      >
+                        <Download className="w-4 h-4 text-primary" />
+                      </a>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (
+                          item.type === "existing" &&
+                          item.id &&
+                          onDeleteExisting
+                        ) {
+                          onDeleteExisting(item.id);
+                        } else if (
+                          item.type === "new" &&
+                          item.index !== undefined
+                        ) {
+                          removeNewFile(item.index);
+                        }
+                      }}
+                      className="p-1.5 hover:bg-destructive/10 rounded-md transition-colors"
+                    >
+                      <X className="w-4 h-4 text-destructive" />
+                    </button>
                   </div>
                 </div>
               ))}

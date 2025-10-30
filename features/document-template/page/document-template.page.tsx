@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   ConfirmationModal,
   CustomModal,
@@ -24,8 +24,10 @@ import {
   createEditAction,
   createDeleteAction,
   createCopyAction,
+  createViewAction,
 } from "@/components/shared/ui/custom-action";
 import DocumentTemplateFormModal from "../component/document-template.form";
+import DocumentTemplateView from "../component/document-template.view";
 import { useDebounce } from "@/hooks/use-debaunce";
 import { handleCopyToClipboard } from "@/utils/copy-text";
 import { usePagination } from "@/hooks/use-pagination";
@@ -35,9 +37,11 @@ import Cookies from "js-cookie";
 
 const DocumentTemplatePage = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const createModal: ModalState = useModal();
   const editModal: ModalState = useModal();
   const deleteModal: ModalState = useModal();
+  const viewModal: ModalState = useModal();
   const { handlePageChange, handlePageSizeChange, pageNumber, pageSize } =
     usePagination();
   const [selectedTemplate, setSelectedTemplate] =
@@ -51,6 +55,23 @@ const DocumentTemplatePage = () => {
   });
 
   const deleteMutation = useDeleteDocumentTemplate();
+
+  useEffect(() => {
+    const templateId = searchParams.get("templateId");
+
+    if (templateId) {
+      const template = data?.data?.find((t: DocumentTemplateResponse) => t.id === templateId);
+
+      if (template) {
+        setSelectedTemplate(template);
+        viewModal.openModal();
+      }
+    } else {
+      if (viewModal.isOpen) {
+        viewModal.closeModal();
+      }
+    }
+  }, [searchParams, data]);
 
   const handleEdit = (item: DocumentTemplateResponse) => {
     setSelectedTemplate(item);
@@ -90,6 +111,18 @@ const DocumentTemplatePage = () => {
     router.push(editUrl);
   };
 
+  const handleViewTemplate = (item: DocumentTemplateResponse) => {
+    setSelectedTemplate(item);
+    viewModal.openModal();
+    router.push(`?templateId=${item.id}`, { scroll: false });
+  };
+
+  const handleCloseViewModal = () => {
+    viewModal.closeModal();
+    setSelectedTemplate(null);
+    router.push(window.location.pathname, { scroll: false });
+  };
+
   return (
     <>
       <UserToolbar
@@ -108,32 +141,6 @@ const DocumentTemplatePage = () => {
         totalCount={data?.count || 0}
         currentPage={pageNumber}
         columns={[
-          {
-            header: "ID",
-            accessorKey: "id",
-            cell: ({ row }) => {
-              const id = row.original.id;
-              return (
-                <div className="flex w-full items-center gap-2">
-                  <Badge
-                    variant="outline"
-                    className="font-mono cursor-pointer hover:bg-muted"
-                    onClick={() => handleCopyToClipboard(id, "ID")}
-                  >
-                    {id.slice(0, 8)}...
-                  </Badge>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-6 w-6 group"
-                    onClick={() => handleCopyToClipboard(id, "ID")}
-                  >
-                    <Copy className="h-3 w-3 group-hover:text-text-on-dark" />
-                  </Button>
-                </div>
-              );
-            },
-          },
           {
             header: "Nomi",
             accessorKey: "name",
@@ -189,6 +196,7 @@ const DocumentTemplatePage = () => {
               const item = row.original;
 
               const actions: ActionItem[] = [
+                createViewAction(() => handleViewTemplate(item)),
                 {
                   label: "Hujjatni tahrirlash",
                   icon: FileEdit,
@@ -224,6 +232,7 @@ const DocumentTemplatePage = () => {
       </CustomModal>
 
       <CustomModal
+        size="3xl"
         closeOnOverlayClick={false}
         title="Shablonni yangilash"
         description="Shablon ma'lumotlarini tahrirlang"
@@ -248,6 +257,15 @@ const DocumentTemplatePage = () => {
           handleDelete(selectedTemplate?.id as string);
         }}
       />
+
+      <CustomModal
+        closeOnOverlayClick
+        isOpen={viewModal.isOpen}
+        onClose={handleCloseViewModal}
+        title="Shablon ma'lumotlari"
+      >
+        <DocumentTemplateView />
+      </CustomModal>
     </>
   );
 };

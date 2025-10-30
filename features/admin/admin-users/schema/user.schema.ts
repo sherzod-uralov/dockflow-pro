@@ -39,10 +39,7 @@ export const UserSchema = z.object({
     .string()
     .uuid({ message: "Bo‘lim identifikatori noto‘g‘ri formatda" }),
 
-  avatarUrl: z
-    .string()
-    .url({ message: "Avatar URL noto‘g‘ri formatda bo‘lishi kerak" })
-    .optional(),
+  avatarUrl: z.any().optional(),
 
   isActive: z
     .boolean({ required_error: "Foydalanuvchi holati ko‘rsatilishi shart" })

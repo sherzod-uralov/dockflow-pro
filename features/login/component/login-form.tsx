@@ -1,6 +1,7 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 import {
   Form,
   FormControl,
@@ -23,6 +24,8 @@ import Cookie from "js-cookie";
 export const LoginForm = () => {
   const authMutation = useLoginMutation();
   const router = useRouter();
+  const [showPassword, setShowPassword] = useState(false);
+
   const form = useForm<LoginFormValue>({
     resolver: zodResolver(loginScheme),
     defaultValues: {
@@ -45,23 +48,30 @@ export const LoginForm = () => {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-6 bg-card text-card-foreground p-6 rounded-lg shadow-md max-w-md mx-auto"
+        className="space-y-6 bg-card text-card-foreground p-8 rounded-xl max-w-md mx-auto"
       >
+        <div className="space-y-2 mb-8">
+          <h2 className="text-2xl font-bold text-foreground">Kirish</h2>
+          <p className="text-sm text-muted-foreground">
+            Tizimga kirish uchun ma'lumotlaringizni kiriting
+          </p>
+        </div>
+
         <FormField
           name="username"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-foreground font-semibold">
-                Username
+              <FormLabel className="text-foreground font-medium text-sm">
+                Foydalanuvchi nomi
               </FormLabel>
               <FormControl>
                 <Input
                   {...field}
                   placeholder="Foydalanuvchi nomi"
-                  className="bg-input text-foreground border-border rounded-md focus:ring-2 focus:ring-primary w-full py-3 px-4 transition-colors"
+                  className="bg-input text-foreground border border-input-border rounded-lg focus:border-input-focus focus:ring-2 focus:ring-primary/20 w-full py-3 px-4 transition-all duration-200 placeholder:text-muted-foreground hover:border-border-hover"
                 />
               </FormControl>
-              <FormMessage />
+              <FormMessage className="text-error text-xs mt-1" />
             </FormItem>
           )}
         />
@@ -70,25 +80,38 @@ export const LoginForm = () => {
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-foreground font-semibold">
+              <FormLabel className="text-foreground font-medium text-sm">
                 Parol
               </FormLabel>
               <FormControl>
-                <Input
-                  {...field}
-                  type="password"
-                  placeholder="Parolingiz"
-                  className="bg-input text-foreground border-border rounded-md focus:ring-2 focus:ring-primary w-full py-3 px-4 transition-colors"
-                />
+                <div className="relative">
+                  <Input
+                    {...field}
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    className="bg-input text-foreground border border-input-border rounded-lg focus:border-input-focus focus:ring-2 focus:ring-primary/20 w-full py-3 px-4 pr-12 transition-all duration-200 placeholder:text-muted-foreground hover:border-border-hover"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-5 w-5" />
+                    ) : (
+                      <Eye className="h-5 w-5" />
+                    )}
+                  </button>
+                </div>
               </FormControl>
-              <FormMessage />
+              <FormMessage className="text-error text-xs mt-1" />
             </FormItem>
           )}
         />
 
         <button
           type="submit"
-          className="w-full py-3 bg-primary text-primary-foreground font-semibold rounded-md hover:bg-primary/90 transition-colors"
+          className="w-full py-3 px-4 bg-primary text-primary-foreground font-semibold rounded-lg hover:bg-primary-hover transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background disabled:opacity-50 disabled:cursor-not-allowed shadow-custom-md hover:shadow-custom-lg active:scale-[0.98]"
         >
           Kirish
         </button>

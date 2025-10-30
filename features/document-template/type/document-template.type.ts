@@ -3,7 +3,7 @@ import { DataPagination } from "@/types/global.types";
 export interface TemplateFile {
   id: string;
   fileName: string;
-  fileSize: string;
+  fileSize: number;
   fileUrl: string;
   mimeType: string;
 }

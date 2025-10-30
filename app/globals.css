@@ -3,6 +3,327 @@
 
 @custom-variant dark (&:is(.dark *));
 
+.theme-ocean {
+    /* Base colors */
+    --background: oklch(0.98 0.01 220);
+    --foreground: oklch(0.15 0.02 220);
+    --card: oklch(0.975 0.01 220);
+    --card-foreground: oklch(0.15 0.02 220);
+    --popover: oklch(0.975 0.01 220);
+    --popover-foreground: oklch(0.15 0.02 220);
+
+    /* Primary colors - Deep Ocean Blue */
+    --primary: oklch(0.52 0.15 240);
+    --primary-foreground: oklch(1 0 0);
+    --primary-dark: oklch(0.42 0.15 240);
+    --primary-light: oklch(0.72 0.15 240);
+    --primary-muted: oklch(0.52 0.15 240 / 0.1);
+    --primary-hover: oklch(0.47 0.15 240);
+
+    /* Secondary colors - Turquoise */
+    --secondary: oklch(0.65 0.12 195);
+    --secondary-foreground: oklch(0.15 0.02 220);
+    --secondary-dark: oklch(0.55 0.12 195);
+    --secondary-light: oklch(0.75 0.12 195);
+    --secondary-muted: oklch(0.65 0.12 195 / 0.1);
+    --secondary-hover: oklch(0.6 0.12 195);
+
+    /* Status colors */
+    --success: oklch(0.62 0.16 170);
+    --success-foreground: oklch(1 0 0);
+    --success-muted: oklch(0.62 0.16 170 / 0.1);
+    --success-hover: oklch(0.57 0.16 170);
+
+    --warning: oklch(0.75 0.14 75);
+    --warning-foreground: oklch(0.15 0.02 220);
+    --warning-muted: oklch(0.75 0.14 75 / 0.1);
+    --warning-hover: oklch(0.7 0.14 75);
+
+    --error: oklch(0.58 0.22 25);
+    --error-foreground: oklch(1 0 0);
+    --error-muted: oklch(0.58 0.22 25 / 0.1);
+    --error-hover: oklch(0.53 0.22 25);
+
+    --info: oklch(0.6 0.18 235);
+    --info-foreground: oklch(1 0 0);
+    --info-muted: oklch(0.6 0.18 235 / 0.1);
+    --info-hover: oklch(0.55 0.18 235);
+
+    /* Neutral colors */
+    --muted: oklch(0.94 0.005 220);
+    --muted-foreground: oklch(0.4 0.01 220);
+    --accent: oklch(0.65 0.12 195);
+    --accent-foreground: oklch(0.15 0.02 220);
+
+    /* Borders */
+    --border: oklch(0.91 0.01 220);
+    --input: oklch(0.94 0.005 220);
+    --ring: oklch(0.52 0.15 240);
+
+    --radius: 0.75rem;
+}
+
+.theme-ocean.dark {
+    --background: oklch(0.15 0.02 220);
+    --foreground: oklch(0.98 0.01 220);
+    --card: oklch(0.2 0.02 220);
+    --card-foreground: oklch(0.98 0.01 220);
+
+    --primary: oklch(0.7 0.15 240);
+    --primary-foreground: oklch(0.15 0.02 220);
+    --primary-hover: oklch(0.75 0.15 240);
+
+    --secondary: oklch(0.68 0.12 195);
+    --secondary-foreground: oklch(0.98 0.01 220);
+
+    --muted: oklch(0.22 0.01 220);
+    --muted-foreground: oklch(0.7 0.01 220);
+    --border: oklch(0.28 0.015 220);
+}
+
+/* ========================================
+   THEME 2: SUNSET GLOW (Quyosh botiши)
+   ======================================== */
+.theme-sunset {
+    /* Base colors */
+    --background: oklch(0.985 0.01 40);
+    --foreground: oklch(0.15 0.01 40);
+    --card: oklch(0.98 0.01 40);
+    --card-foreground: oklch(0.15 0.01 40);
+    --popover: oklch(0.98 0.01 40);
+    --popover-foreground: oklch(0.15 0.01 40);
+
+    /* Primary colors - Sunset Orange */
+    --primary: oklch(0.62 0.2 45);
+    --primary-foreground: oklch(1 0 0);
+    --primary-dark: oklch(0.52 0.2 45);
+    --primary-light: oklch(0.72 0.2 45);
+    --primary-muted: oklch(0.62 0.2 45 / 0.1);
+    --primary-hover: oklch(0.57 0.2 45);
+
+    /* Secondary colors - Coral Pink */
+    --secondary: oklch(0.68 0.18 15);
+    --secondary-foreground: oklch(0.15 0.01 40);
+    --secondary-dark: oklch(0.58 0.18 15);
+    --secondary-light: oklch(0.78 0.18 15);
+    --secondary-muted: oklch(0.68 0.18 15 / 0.1);
+    --secondary-hover: oklch(0.63 0.18 15);
+
+    /* Status colors */
+    --success: oklch(0.64 0.17 142);
+    --success-foreground: oklch(1 0 0);
+    --success-muted: oklch(0.64 0.17 142 / 0.1);
+    --success-hover: oklch(0.59 0.17 142);
+
+    --warning: oklch(0.76 0.16 70);
+    --warning-foreground: oklch(0.15 0.01 40);
+    --warning-muted: oklch(0.76 0.16 70 / 0.1);
+    --warning-hover: oklch(0.71 0.16 70);
+
+    --error: oklch(0.56 0.24 30);
+    --error-foreground: oklch(1 0 0);
+    --error-muted: oklch(0.56 0.24 30 / 0.1);
+    --error-hover: oklch(0.51 0.24 30);
+
+    --info: oklch(0.63 0.19 280);
+    --info-foreground: oklch(1 0 0);
+    --info-muted: oklch(0.63 0.19 280 / 0.1);
+    --info-hover: oklch(0.58 0.19 280);
+
+    /* Neutral colors */
+    --muted: oklch(0.95 0.005 40);
+    --muted-foreground: oklch(0.4 0.01 40);
+    --accent: oklch(0.68 0.18 15);
+    --accent-foreground: oklch(0.15 0.01 40);
+
+    /* Borders */
+    --border: oklch(0.92 0.01 40);
+    --input: oklch(0.95 0.005 40);
+    --ring: oklch(0.62 0.2 45);
+
+    --radius: 0.75rem;
+}
+
+.theme-sunset.dark {
+    --background: oklch(0.16 0.02 30);
+    --foreground: oklch(0.985 0.01 40);
+    --card: oklch(0.21 0.02 30);
+    --card-foreground: oklch(0.985 0.01 40);
+
+    --primary: oklch(0.72 0.2 45);
+    --primary-foreground: oklch(0.16 0.02 30);
+    --primary-hover: oklch(0.77 0.2 45);
+
+    --secondary: oklch(0.72 0.18 15);
+    --secondary-foreground: oklch(0.985 0.01 40);
+
+    --muted: oklch(0.21 0.015 30);
+    --muted-foreground: oklch(0.72 0.01 40);
+    --border: oklch(0.28 0.02 30);
+}
+
+/* ========================================
+   THEME 3: FOREST HAVEN (Yashil o'rmon)
+   ======================================== */
+.theme-forest {
+    /* Base colors */
+    --background: oklch(0.982 0.008 140);
+    --foreground: oklch(0.15 0.015 140);
+    --card: oklch(0.977 0.008 140);
+    --card-foreground: oklch(0.15 0.015 140);
+    --popover: oklch(0.977 0.008 140);
+    --popover-foreground: oklch(0.15 0.015 140);
+
+    /* Primary colors - Forest Green */
+    --primary: oklch(0.48 0.14 150);
+    --primary-foreground: oklch(1 0 0);
+    --primary-dark: oklch(0.38 0.14 150);
+    --primary-light: oklch(0.68 0.14 150);
+    --primary-muted: oklch(0.48 0.14 150 / 0.1);
+    --primary-hover: oklch(0.43 0.14 150);
+
+    /* Secondary colors - Sage Green */
+    --secondary: oklch(0.62 0.095 135);
+    --secondary-foreground: oklch(0.15 0.015 140);
+    --secondary-dark: oklch(0.52 0.095 135);
+    --secondary-light: oklch(0.72 0.095 135);
+    --secondary-muted: oklch(0.62 0.095 135 / 0.1);
+    --secondary-hover: oklch(0.57 0.095 135);
+
+    /* Status colors */
+    --success: oklch(0.58 0.16 145);
+    --success-foreground: oklch(1 0 0);
+    --success-muted: oklch(0.58 0.16 145 / 0.1);
+    --success-hover: oklch(0.53 0.16 145);
+
+    --warning: oklch(0.7 0.14 85);
+    --warning-foreground: oklch(0.15 0.015 140);
+    --warning-muted: oklch(0.7 0.14 85 / 0.1);
+    --warning-hover: oklch(0.65 0.14 85);
+
+    --error: oklch(0.55 0.2 35);
+    --error-foreground: oklch(1 0 0);
+    --error-muted: oklch(0.55 0.2 35 / 0.1);
+    --error-hover: oklch(0.5 0.2 35);
+
+    --info: oklch(0.58 0.16 200);
+    --info-foreground: oklch(1 0 0);
+    --info-muted: oklch(0.58 0.16 200 / 0.1);
+    --info-hover: oklch(0.53 0.16 200);
+
+    /* Neutral colors */
+    --muted: oklch(0.945 0.006 140);
+    --muted-foreground: oklch(0.38 0.012 140);
+    --accent: oklch(0.62 0.095 135);
+    --accent-foreground: oklch(0.15 0.015 140);
+
+    /* Borders */
+    --border: oklch(0.915 0.008 140);
+    --input: oklch(0.945 0.006 140);
+    --ring: oklch(0.48 0.14 150);
+
+    --radius: 0.75rem;
+}
+
+.theme-forest.dark {
+    --background: oklch(0.14 0.015 140);
+    --foreground: oklch(0.982 0.008 140);
+    --card: oklch(0.19 0.018 140);
+    --card-foreground: oklch(0.982 0.008 140);
+
+    --primary: oklch(0.68 0.14 150);
+    --primary-foreground: oklch(0.14 0.015 140);
+    --primary-hover: oklch(0.73 0.14 150);
+
+    --secondary: oklch(0.66 0.095 135);
+    --secondary-foreground: oklch(0.982 0.008 140);
+
+    --muted: oklch(0.2 0.012 140);
+    --muted-foreground: oklch(0.68 0.01 140);
+    --border: oklch(0.26 0.015 140);
+}
+
+/* ========================================
+   THEME 4: LAVENDER DREAM (Lavanta orzusi)
+   ======================================== */
+.theme-lavender {
+    /* Base colors */
+    --background: oklch(0.984 0.012 295);
+    --foreground: oklch(0.15 0.01 295);
+    --card: oklch(0.979 0.012 295);
+    --card-foreground: oklch(0.15 0.01 295);
+    --popover: oklch(0.979 0.012 295);
+    --popover-foreground: oklch(0.15 0.01 295);
+
+    /* Primary colors - Lavender Purple */
+    --primary: oklch(0.58 0.18 295);
+    --primary-foreground: oklch(1 0 0);
+    --primary-dark: oklch(0.48 0.18 295);
+    --primary-light: oklch(0.78 0.18 295);
+    --primary-muted: oklch(0.58 0.18 295 / 0.1);
+    --primary-hover: oklch(0.53 0.18 295);
+
+    /* Secondary colors - Soft Magenta */
+    --secondary: oklch(0.66 0.15 320);
+    --secondary-foreground: oklch(0.15 0.01 295);
+    --secondary-dark: oklch(0.56 0.15 320);
+    --secondary-light: oklch(0.76 0.15 320);
+    --secondary-muted: oklch(0.66 0.15 320 / 0.1);
+    --secondary-hover: oklch(0.61 0.15 320);
+
+    /* Status colors */
+    --success: oklch(0.62 0.17 148);
+    --success-foreground: oklch(1 0 0);
+    --success-muted: oklch(0.62 0.17 148 / 0.1);
+    --success-hover: oklch(0.57 0.17 148);
+
+    --warning: oklch(0.74 0.15 78);
+    --warning-foreground: oklch(0.15 0.01 295);
+    --warning-muted: oklch(0.74 0.15 78 / 0.1);
+    --warning-hover: oklch(0.69 0.15 78);
+
+    --error: oklch(0.57 0.23 28);
+    --error-foreground: oklch(1 0 0);
+    --error-muted: oklch(0.57 0.23 28 / 0.1);
+    --error-hover: oklch(0.52 0.23 28);
+
+    --info: oklch(0.61 0.19 265);
+    --info-foreground: oklch(1 0 0);
+    --info-muted: oklch(0.61 0.19 265 / 0.1);
+    --info-hover: oklch(0.56 0.19 265);
+
+    /* Neutral colors */
+    --muted: oklch(0.948 0.008 295);
+    --muted-foreground: oklch(0.39 0.01 295);
+    --accent: oklch(0.66 0.15 320);
+    --accent-foreground: oklch(0.15 0.01 295);
+
+    /* Borders */
+    --border: oklch(0.918 0.01 295);
+    --input: oklch(0.948 0.008 295);
+    --ring: oklch(0.58 0.18 295);
+
+    --radius: 0.75rem;
+}
+
+.theme-lavender.dark {
+    --background: oklch(0.145 0.015 295);
+    --foreground: oklch(0.984 0.012 295);
+    --card: oklch(0.195 0.018 295);
+    --card-foreground: oklch(0.984 0.012 295);
+
+    --primary: oklch(0.74 0.18 295);
+    --primary-foreground: oklch(0.145 0.015 295);
+    --primary-hover: oklch(0.79 0.18 295);
+
+    --secondary: oklch(0.7 0.15 320);
+    --secondary-foreground: oklch(0.984 0.012 295);
+
+    --muted: oklch(0.205 0.012 295);
+    --muted-foreground: oklch(0.7 0.01 295);
+    --border: oklch(0.27 0.015 295);
+}
+
 :root {
   /* Base colors */
   --background: oklch(0.985 0 0);
@@ -732,3 +1053,5 @@ form{
     padding-left: 4px;
     padding-right:4px;
 }
+
+
