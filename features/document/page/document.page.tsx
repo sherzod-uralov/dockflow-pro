@@ -10,16 +10,19 @@ import { ModalState } from "@/types/modal";
 import { DataTable } from "@/components/shared/ui/custom-table";
 import { Button } from "@/components/ui/button";
 import { Copy } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   CustomAction,
   ActionItem,
   createEditAction,
   createDeleteAction,
   createCopyAction,
+  createViewAction,
 } from "@/components/shared/ui/custom-action";
 import { DocumentGetResponse } from "@/features/document/type/document.type";
 import DocumentFormModal from "../component/document.form";
+import DocumentView from "../component/document.view";
 import { useDebounce } from "@/hooks/use-debaunce";
 import { handleCopyToClipboard } from "@/utils/copy-text";
 import { usePagination } from "@/hooks/use-pagination";
@@ -27,9 +30,12 @@ import { useDeleteDocument, useGetAllDocuments } from "@/features/document";
 import { Badge } from "@/components/ui/badge";
 
 const DocumentPage = () => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const createModal: ModalState = useModal();
   const editModal: ModalState = useModal();
   const deleteModal: ModalState = useModal();
+  const viewModal: ModalState = useModal();
 
   const { handlePageChange, handlePageSizeChange, pageNumber, pageSize } =
     usePagination();
@@ -43,6 +49,25 @@ const DocumentPage = () => {
     pageNumber: pageNumber,
   });
   const deleteDocumentMutation = useDeleteDocument();
+
+  useEffect(() => {
+    const documentId = searchParams.get("documentId");
+
+    if (documentId) {
+      const document = data?.data?.find(
+        (d: DocumentGetResponse) => d.id === documentId,
+      );
+
+      if (document) {
+        setSelectedDocument(document);
+        viewModal.openModal();
+      }
+    } else {
+      if (viewModal.isOpen) {
+        viewModal.closeModal();
+      }
+    }
+  }, [searchParams, data]);
 
   const handleEdit = (item: DocumentGetResponse) => {
     setSelectedDocument(item);
@@ -67,13 +92,25 @@ const DocumentPage = () => {
     editModal.closeModal();
   };
 
+  const handleViewDocument = (item: DocumentGetResponse) => {
+    setSelectedDocument(item);
+    viewModal.openModal();
+    router.push(`?documentId=${item.id}`, { scroll: false });
+  };
+
+  const handleCloseViewModal = () => {
+    viewModal.closeModal();
+    setSelectedDocument(null);
+    router.push(window.location.pathname, { scroll: false });
+  };
+
   return (
     <>
       <UserToolbar
         searchQuery={searchQuery}
-        searchPlaceholder="Documentlarni qidirish..."
+        searchPlaceholder="Hujjatlarni qidirish..."
         onSearch={handleSearch}
-        createLabel="Document qo'shish"
+        createLabel="Hujjat qo'shish"
         onCreate={createModal.openModal}
       />
 
@@ -85,32 +122,6 @@ const DocumentPage = () => {
         totalCount={data?.count || 0}
         currentPage={pageNumber}
         columns={[
-          {
-            header: "ID",
-            accessorKey: "id",
-            cell: ({ row }) => {
-              const id = row.original.id;
-              return (
-                <div className="flex items-center gap-2">
-                  <Badge
-                    variant="outline"
-                    className="font-mono cursor-pointer hover:bg-muted"
-                    onClick={() => handleCopyToClipboard(id as string, "ID")}
-                  >
-                    {id?.slice(0, 8)}
-                  </Badge>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-6 w-6 group"
-                    onClick={() => handleCopyToClipboard(id as string, "ID")}
-                  >
-                    <Copy className="h-3 w-3 group-hover:text-text-on-dark" />
-                  </Button>
-                </div>
-              );
-            },
-          },
           {
             header: "Sarlavha",
             accessorKey: "title",
@@ -164,6 +175,7 @@ const DocumentPage = () => {
               const item = row.original;
 
               const actions: ActionItem[] = [
+                createViewAction(() => handleViewDocument(item)),
                 createEditAction(() => handleEdit(item)),
                 createCopyAction(() =>
                   handleCopyToClipboard(item.id || "", "ID"),
@@ -184,8 +196,8 @@ const DocumentPage = () => {
       <CustomModal
         size="3xl"
         closeOnOverlayClick={false}
-        title="Document qo'shish"
-        description="Document qo'shish uchun maydonlar to'ldirilishi kerak"
+        title="Hujjat qo'shish"
+        description="Hujjat qo'shish uchun maydonlar to'ldirilishi kerak"
         isOpen={createModal.isOpen}
         onClose={createModal.closeModal}
       >
@@ -195,8 +207,8 @@ const DocumentPage = () => {
       <CustomModal
         size="3xl"
         closeOnOverlayClick={false}
-        title="Documentni yangilash"
-        description="Document ma'lumotlarini yangilang"
+        title="Hujjatni yangilash"
+        description="Hujjat ma'lumotlarini yangilang"
         isOpen={editModal.isOpen}
         onClose={handleEditModalClose}
       >
@@ -207,10 +219,9 @@ const DocumentPage = () => {
           onSuccess={handleEditSuccess}
         />
       </CustomModal>
-
       <ConfirmationModal
         closeOnOverlayClick={false}
-        title="Documentni o'chirish"
+        title="Hujjatni o'chirish"
         description="Ushbu ma'lumotni o'chirgandan so'ng qaytarib bo'lmaydi. Rozimisiz?"
         onClose={deleteModal.closeModal}
         isOpen={deleteModal.isOpen}
@@ -218,6 +229,16 @@ const DocumentPage = () => {
           handleDelete(selectedDocument?.id as string);
         }}
       />
+
+      <CustomModal
+        size="2xl"
+        closeOnOverlayClick
+        isOpen={viewModal.isOpen}
+        onClose={handleCloseViewModal}
+        title="Hujjat ma'lumotlari"
+      >
+        <DocumentView />
+      </CustomModal>
     </>
   );
 };

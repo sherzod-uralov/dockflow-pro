@@ -1,15 +1,16 @@
-import { FileStats } from "@/components/shared/file-stats";
-import { FileGrid } from "@/components/shared/file-grid";
+"use client";
+
 import { PageHeader } from "@/components/shared/ui/custom-breadcrumb";
 import { Home } from "lucide-react";
+import { StatisticsPage } from "@/features/statistics";
 
 export default function DashboardPage() {
   return (
     <>
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between mb-6">
         <PageHeader
           title="Statistika"
-          description="Fayllar boshqaruv paneli"
+          description="Tizim ko'rsatkichlari va hisobotlar"
           items={[
             {
               label: "Bosh sahifa",
@@ -20,8 +21,7 @@ export default function DashboardPage() {
         />
       </div>
 
-      <FileStats />
-      <FileGrid />
+      <StatisticsPage />
     </>
   );
 }

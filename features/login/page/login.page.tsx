@@ -26,19 +26,6 @@ export default function LoginPage() {
             </div>
 
             <LoginForm />
-
-            <div className="space-y-4">
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t border-border" />
-                </div>
-                <div className="relative flex justify-center text-xs">
-                  <span className="bg-card px-2 text-muted-foreground">
-                    Yoki boshqa usul bilan kirish
-                  </span>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
 
@@ -52,10 +39,10 @@ export default function LoginPage() {
       <div className="flex-1 bg-primary max-lg:hidden p-8 flex flex-col justify-center text-primary-foreground relative overflow-hidden">
         <div className="max-w-lg mx-auto space-y-6 z-10">
           <div className="space-y-4">
-            <h2 className="text-4xl text-foreground font-bold leading-tight">
+            <h2 className="text-4xl  text-text-on-dark font-bold leading-tight">
               Hujjat aylanishini oson boshqaring.
             </h2>
-            <p className="text-foreground text-lg">
+            <p className="text-text-on-dark text-lg">
               Hujjatlar boshqaruvi tizimiga kiring va fayl aylanishini nazorat
               qiling.
             </p>

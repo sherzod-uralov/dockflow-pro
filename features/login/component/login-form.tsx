@@ -115,18 +115,6 @@ export const LoginForm = () => {
         >
           Kirish
         </button>
-
-        <div className="mt-4 text-center">
-          <p className="text-sm text-muted-foreground">
-            Parolingizni unutdingizmi?{" "}
-            <a
-              href="#"
-              className="text-primary hover:text-primary-hover font-medium transition-colors duration-200 hover:underline"
-            >
-              Tiklash
-            </a>
-          </p>
-        </div>
       </form>
     </Form>
   );

@@ -31,4 +31,10 @@ export const journalService = {
       axiosInstance.delete(endpoints.journal.delete(id)),
     );
   },
+
+  getJournalById: async (id: string) => {
+    return await handleJournalError.executeGet(() =>
+      axiosInstance.get(endpoints.journal.detail(id)),
+    );
+  },
 };

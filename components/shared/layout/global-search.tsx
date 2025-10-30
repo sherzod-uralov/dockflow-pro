@@ -8,6 +8,10 @@ import {
   ArrowRight,
   Loader2,
   X,
+  Building,
+  BookOpen,
+  File,
+  FileType,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
@@ -15,6 +19,11 @@ import { useGetUserQuery } from "@/features/admin/admin-users/hook/user.hook";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useGetRoles } from "@/features/admin/roles/hook/role.hook";
 import { useGetAllPermissions } from "@/features/admin/permissions/hook/permission.hook";
+import { useGetAllDocumentTemplates } from "@/features/document-template/hook/document-template.hook";
+import { useGetAllDocuments } from "@/features/document/hook/document.hook";
+import { useGetAllJournals } from "@/features/journal/hook/journal.hook";
+import { useGetAllDeportaments } from "@/features/deportament/hook/deportament.hook";
+import { useGetAllDocumentTypes } from "@/features/document-type/hook/document-type.hook";
 
 // Static pages data
 const staticPages = [
@@ -96,6 +105,46 @@ export function GlobalSearch() {
       search: debouncedQuery,
     });
 
+  // Fetch document templates when searching
+  const { data: documentTemplatesData, isLoading: documentTemplatesLoading } =
+    useGetAllDocumentTemplates({
+      pageSize: 5,
+      pageNumber: 1,
+      search: debouncedQuery,
+    });
+
+  // Fetch documents when searching
+  const { data: documentsData, isLoading: documentsLoading } =
+    useGetAllDocuments({
+      pageSize: 5,
+      pageNumber: 1,
+      search: debouncedQuery,
+    });
+
+  // Fetch journals when searching
+  const { data: journalsData, isLoading: journalsLoading } =
+    useGetAllJournals({
+      pageSize: 5,
+      pageNumber: 1,
+      search: debouncedQuery,
+    });
+
+  // Fetch deportaments when searching
+  const { data: deportamentsData, isLoading: deportamentsLoading } =
+    useGetAllDeportaments({
+      pageSize: 5,
+      pageNumber: 1,
+      search: debouncedQuery,
+    });
+
+  // Fetch document types when searching
+  const { data: documentTypesData, isLoading: documentTypesLoading } =
+    useGetAllDocumentTypes({
+      pageSize: 5,
+      pageNumber: 1,
+      search: debouncedQuery,
+    });
+
   const filteredPages = staticPages.filter((page) =>
     page.title.toLowerCase().includes(searchQuery.toLowerCase()),
   );
@@ -110,10 +159,32 @@ export function GlobalSearch() {
         })),
       )
     : [];
-  const totalResults =
-    filteredPages.length + roles.length + permissions.length + users.length;
+  const documentTemplates = documentTemplatesData?.data || [];
+  const documents = documentsData?.data || [];
+  const journals = journalsData?.data || [];
+  const deportaments = deportamentsData?.data || [];
+  const documentTypes = documentTypesData?.data || [];
 
-  const anyLoading = usersLoading || rolesLoading || permissionsLoading;
+  const totalResults =
+    filteredPages.length +
+    roles.length +
+    permissions.length +
+    users.length +
+    documentTemplates.length +
+    documents.length +
+    journals.length +
+    deportaments.length +
+    documentTypes.length;
+
+  const anyLoading =
+    usersLoading ||
+    rolesLoading ||
+    permissionsLoading ||
+    documentTemplatesLoading ||
+    documentsLoading ||
+    journalsLoading ||
+    deportamentsLoading ||
+    documentTypesLoading;
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -175,6 +246,11 @@ export function GlobalSearch() {
       const pagesOffset = filteredPages.length;
       const rolesOffset = pagesOffset + roles.length;
       const permissionsOffset = rolesOffset + permissions.length;
+      const documentTemplatesOffset = permissionsOffset + documentTemplates.length;
+      const documentsOffset = documentTemplatesOffset + documents.length;
+      const journalsOffset = documentsOffset + journals.length;
+      const deportamentsOffset = journalsOffset + deportaments.length;
+      const documentTypesOffset = deportamentsOffset + documentTypes.length;
 
       if (index < rolesOffset) {
         // Navigate to role
@@ -188,9 +264,34 @@ export function GlobalSearch() {
         router.push(
           `/dashboard/admin/permissions?permissionId=${permission.id}`,
         );
+      } else if (index < documentTemplatesOffset) {
+        // Navigate to document template
+        const templateIndex = index - permissionsOffset;
+        const template = documentTemplates[templateIndex];
+        router.push(`/dashboard/document-template?templateId=${template.id}`);
+      } else if (index < documentsOffset) {
+        // Navigate to document
+        const documentIndex = index - documentTemplatesOffset;
+        const document = documents[documentIndex];
+        router.push(`/dashboard/document?documentId=${document.id}`);
+      } else if (index < journalsOffset) {
+        // Navigate to journal
+        const journalIndex = index - documentsOffset;
+        const journal = journals[journalIndex];
+        router.push(`/dashboard/journal?journalId=${journal.id}`);
+      } else if (index < deportamentsOffset) {
+        // Navigate to deportament
+        const deportamentIndex = index - journalsOffset;
+        const deportament = deportaments[deportamentIndex];
+        router.push(`/dashboard/deportament?deportamentId=${deportament.id}`);
+      } else if (index < documentTypesOffset) {
+        // Navigate to document type
+        const documentTypeIndex = index - deportamentsOffset;
+        const documentType = documentTypes[documentTypeIndex];
+        router.push(`/dashboard/document-type?documentTypeId=${documentType.id}`);
       } else {
         // Navigate to user
-        const userIndex = index - permissionsOffset;
+        const userIndex = index - documentTypesOffset;
         const user = users[userIndex];
         router.push(`/dashboard/admin/users?userId=${user.id}`);
       }
@@ -243,7 +344,7 @@ export function GlobalSearch() {
                 Qidiruv uchun yozing...
               </p>
               <p className="text-xs text-muted-foreground mt-1">
-                Sahifalar va foydalanuvchilarni qidiring
+                Sahifalar, hujjatlar, jurnallar, bo'limlar va foydalanuvchilarni qidiring
               </p>
             </div>
           ) : (
@@ -415,6 +516,276 @@ export function GlobalSearch() {
                 </div>
               )}
 
+              {/* Document Templates Section */}
+              {documentTemplates.length > 0 && (
+                <div className="p-2 border-t border-border">
+                  <div className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                    Hujjat Andozalari
+                  </div>
+                  {documentTemplates.map((template, idx) => {
+                    const globalIdx = filteredPages.length + roles.length + permissions.length + idx;
+                    return (
+                      <button
+                        key={template.id}
+                        onClick={() => handleSelect(globalIdx)}
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors ${
+                          activeIndex === globalIdx
+                            ? "bg-primary text-primary-foreground"
+                            : "hover:bg-muted"
+                        }`}
+                      >
+                        <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center">
+                          <FileText className="w-4 h-4 text-muted-foreground" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p
+                            className={`text-sm font-medium truncate ${
+                              activeIndex === globalIdx
+                                ? "text-primary-foreground"
+                                : "text-foreground"
+                            }`}
+                          >
+                            {template.name}
+                          </p>
+                          <p
+                            className={`text-xs truncate ${
+                              activeIndex === globalIdx
+                                ? "text-primary-foreground/70"
+                                : "text-muted-foreground"
+                            }`}
+                          >
+                            {template.description || "Tavsif yo'q"}
+                          </p>
+                        </div>
+                        <ArrowRight
+                          className={`w-4 h-4 flex-shrink-0 ${
+                            activeIndex === globalIdx
+                              ? "text-primary-foreground"
+                              : "text-muted-foreground"
+                          }`}
+                        />
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Documents Section */}
+              {documents.length > 0 && (
+                <div className="p-2 border-t border-border">
+                  <div className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                    Hujjatlar
+                  </div>
+                  {documents.map((document, idx) => {
+                    const globalIdx = filteredPages.length + roles.length + permissions.length + documentTemplates.length + idx;
+                    return (
+                      <button
+                        key={document.id}
+                        onClick={() => handleSelect(globalIdx)}
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors ${
+                          activeIndex === globalIdx
+                            ? "bg-primary text-primary-foreground"
+                            : "hover:bg-muted"
+                        }`}
+                      >
+                        <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center">
+                          <File className="w-4 h-4 text-muted-foreground" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p
+                            className={`text-sm font-medium truncate ${
+                              activeIndex === globalIdx
+                                ? "text-primary-foreground"
+                                : "text-foreground"
+                            }`}
+                          >
+                            {document.title}
+                          </p>
+                          <p
+                            className={`text-xs truncate ${
+                              activeIndex === globalIdx
+                                ? "text-primary-foreground/70"
+                                : "text-muted-foreground"
+                            }`}
+                          >
+                            {document.documentNumber || "Raqamsiz"}
+                          </p>
+                        </div>
+                        <ArrowRight
+                          className={`w-4 h-4 flex-shrink-0 ${
+                            activeIndex === globalIdx
+                              ? "text-primary-foreground"
+                              : "text-muted-foreground"
+                          }`}
+                        />
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Journals Section */}
+              {journals.length > 0 && (
+                <div className="p-2 border-t border-border">
+                  <div className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                    Jurnallar
+                  </div>
+                  {journals.map((journal, idx) => {
+                    const globalIdx = filteredPages.length + roles.length + permissions.length + documentTemplates.length + documents.length + idx;
+                    return (
+                      <button
+                        key={journal.id}
+                        onClick={() => handleSelect(globalIdx)}
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors ${
+                          activeIndex === globalIdx
+                            ? "bg-primary text-primary-foreground"
+                            : "hover:bg-muted"
+                        }`}
+                      >
+                        <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center">
+                          <BookOpen className="w-4 h-4 text-muted-foreground" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p
+                            className={`text-sm font-medium truncate ${
+                              activeIndex === globalIdx
+                                ? "text-primary-foreground"
+                                : "text-foreground"
+                            }`}
+                          >
+                            {journal.name}
+                          </p>
+                          <p
+                            className={`text-xs truncate ${
+                              activeIndex === globalIdx
+                                ? "text-primary-foreground/70"
+                                : "text-muted-foreground"
+                            }`}
+                          >
+                            {journal.prefix}
+                          </p>
+                        </div>
+                        <ArrowRight
+                          className={`w-4 h-4 flex-shrink-0 ${
+                            activeIndex === globalIdx
+                              ? "text-primary-foreground"
+                              : "text-muted-foreground"
+                          }`}
+                        />
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Deportaments Section */}
+              {deportaments.length > 0 && (
+                <div className="p-2 border-t border-border">
+                  <div className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                    Bo'limlar
+                  </div>
+                  {deportaments.map((deportament, idx) => {
+                    const globalIdx = filteredPages.length + roles.length + permissions.length + documentTemplates.length + documents.length + journals.length + idx;
+                    return (
+                      <button
+                        key={deportament.id}
+                        onClick={() => handleSelect(globalIdx)}
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors ${
+                          activeIndex === globalIdx
+                            ? "bg-primary text-primary-foreground"
+                            : "hover:bg-muted"
+                        }`}
+                      >
+                        <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center">
+                          <Building className="w-4 h-4 text-muted-foreground" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p
+                            className={`text-sm font-medium truncate ${
+                              activeIndex === globalIdx
+                                ? "text-primary-foreground"
+                                : "text-foreground"
+                            }`}
+                          >
+                            {deportament.name}
+                          </p>
+                          <p
+                            className={`text-xs truncate ${
+                              activeIndex === globalIdx
+                                ? "text-primary-foreground/70"
+                                : "text-muted-foreground"
+                            }`}
+                          >
+                            {deportament.description || "Tavsif yo'q"}
+                          </p>
+                        </div>
+                        <ArrowRight
+                          className={`w-4 h-4 flex-shrink-0 ${
+                            activeIndex === globalIdx
+                              ? "text-primary-foreground"
+                              : "text-muted-foreground"
+                          }`}
+                        />
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Document Types Section */}
+              {documentTypes.length > 0 && (
+                <div className="p-2 border-t border-border">
+                  <div className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                    Hujjat Turlari
+                  </div>
+                  {documentTypes.map((documentType, idx) => {
+                    const globalIdx = filteredPages.length + roles.length + permissions.length + documentTemplates.length + documents.length + journals.length + deportaments.length + idx;
+                    return (
+                      <button
+                        key={documentType.id}
+                        onClick={() => handleSelect(globalIdx)}
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors ${
+                          activeIndex === globalIdx
+                            ? "bg-primary text-primary-foreground"
+                            : "hover:bg-muted"
+                        }`}
+                      >
+                        <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center">
+                          <FileType className="w-4 h-4 text-muted-foreground" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p
+                            className={`text-sm font-medium truncate ${
+                              activeIndex === globalIdx
+                                ? "text-primary-foreground"
+                                : "text-foreground"
+                            }`}
+                          >
+                            {documentType.name}
+                          </p>
+                          <p
+                            className={`text-xs truncate ${
+                              activeIndex === globalIdx
+                                ? "text-primary-foreground/70"
+                                : "text-muted-foreground"
+                            }`}
+                          >
+                            {documentType.description || "Tavsif yo'q"}
+                          </p>
+                        </div>
+                        <ArrowRight
+                          className={`w-4 h-4 flex-shrink-0 ${
+                            activeIndex === globalIdx
+                              ? "text-primary-foreground"
+                              : "text-muted-foreground"
+                          }`}
+                        />
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
               {/* Users Section */}
               {users.length > 0 && (
                 <div className="p-2 border-t border-border">
@@ -488,6 +859,11 @@ export function GlobalSearch() {
                 filteredPages.length === 0 &&
                 roles.length === 0 &&
                 permissions.length === 0 &&
+                documentTemplates.length === 0 &&
+                documents.length === 0 &&
+                journals.length === 0 &&
+                deportaments.length === 0 &&
+                documentTypes.length === 0 &&
                 users.length === 0 && (
                   <div className="p-8 text-center">
                     <Search className="w-12 h-12 mx-auto text-muted-foreground/50 mb-3" />

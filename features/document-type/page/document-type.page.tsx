@@ -15,7 +15,8 @@ import { DataTable } from "@/components/shared/ui/custom-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Copy } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   CustomAction,
   ActionItem,
@@ -26,14 +27,18 @@ import {
 } from "@/components/shared/ui/custom-action";
 import { DocumentType } from "../type/document-type.type";
 import DocumentTypeFormModal from "../component/document-type.form";
+import DocumentTypeView from "../component/document-type.view";
 import { useDebounce } from "@/hooks/use-debaunce";
 import { handleCopyToClipboard } from "@/utils/copy-text";
 import { usePagination } from "@/hooks/use-pagination";
 
 const DocumentTypePage = () => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const createModal: ModalState = useModal();
   const editModal: ModalState = useModal();
   const deleteModal: ModalState = useModal();
+  const viewModal: ModalState = useModal();
 
   const { handlePageChange, handlePageSizeChange, pageNumber, pageSize } =
     usePagination();
@@ -47,6 +52,37 @@ const DocumentTypePage = () => {
     pageNumber: pageNumber,
   });
   const deleteDocumentTypeMutation = useDeleteDocumentType();
+
+  useEffect(() => {
+    const documentTypeId = searchParams.get("documentTypeId");
+
+    if (documentTypeId) {
+      const documentType = data?.data?.find(
+        (dt: DocumentType) => dt.id === documentTypeId,
+      );
+
+      if (documentType) {
+        setSelectedDocumentType(documentType);
+        viewModal.openModal();
+      }
+    } else {
+      if (viewModal.isOpen) {
+        viewModal.closeModal();
+      }
+    }
+  }, [searchParams, data]);
+
+  const handleViewDocumentType = (item: DocumentType) => {
+    setSelectedDocumentType(item);
+    viewModal.openModal();
+    router.push(`?documentTypeId=${item.id}`, { scroll: false });
+  };
+
+  const handleCloseViewModal = () => {
+    viewModal.closeModal();
+    setSelectedDocumentType(null);
+    router.push(window.location.pathname, { scroll: false });
+  };
 
   const handleEdit = (item: DocumentType) => {
     setSelectedDocumentType(item);
@@ -90,33 +126,6 @@ const DocumentTypePage = () => {
         currentPage={pageNumber}
         columns={[
           {
-            header: "ID",
-            accessorKey: "id",
-            cell: ({ row }) => {
-              const id = row.original.id;
-
-              return (
-                <div className="flex w-full items-center gap-2">
-                  <Badge
-                    variant="outline"
-                    className="font-mono cursor-pointer hover:bg-muted"
-                    onClick={() => handleCopyToClipboard(id ?? "", "ID")}
-                  >
-                    {id?.slice(0, 8)}...
-                  </Badge>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-6 w-6 group"
-                    onClick={() => handleCopyToClipboard(id ?? "", "ID")}
-                  >
-                    <Copy className="h-3 w-3 group-hover:text-text-on-dark" />
-                  </Button>
-                </div>
-              );
-            },
-          },
-          {
             header: "Nom",
             accessorKey: "name",
           },
@@ -132,6 +141,7 @@ const DocumentTypePage = () => {
               const item = row.original;
 
               const actions: ActionItem[] = [
+                createViewAction(() => handleViewDocumentType(item)),
                 createEditAction(() => handleEdit(item)),
                 createCopyAction(() =>
                   handleCopyToClipboard(item.id || "", "ID"),
@@ -184,6 +194,17 @@ const DocumentTypePage = () => {
           handleDelete(selectedDocumentType?.id as string);
         }}
       />
+
+      <CustomModal
+        closeOnOverlayClick
+        size="2xl"
+        isOpen={viewModal.isOpen}
+        onClose={handleCloseViewModal}
+        title="Hujjat turi ma'lumotlari"
+        description="Hujjat turi haqida to'liq ma'lumot"
+      >
+        <DocumentTypeView />
+      </CustomModal>
     </>
   );
 };

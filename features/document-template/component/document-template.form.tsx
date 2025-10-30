@@ -69,6 +69,7 @@ const DocumentTemplateFormModal = ({
       label: "Hujjat turi",
       type: "select",
       placeholder: "Hujjat turini tanlang",
+      colSpan: 2,
       options:
         documentTypes?.data?.map((t) => ({
           value: t.id,
@@ -79,11 +80,13 @@ const DocumentTemplateFormModal = ({
       name: "isActive",
       label: "Faol",
       type: "checkbox",
+      colSpan: 1,
     },
     {
       name: "isPublic",
       label: "Ommaviy",
       type: "checkbox",
+      colSpan: 1,
     },
     {
       name: "templateFileId",

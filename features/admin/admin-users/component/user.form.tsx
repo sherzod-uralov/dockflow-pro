@@ -2,6 +2,9 @@
 
 import React, { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { UserSchema } from "../schema/user.schema";
 import {
   useCreateUserMutation,
@@ -13,7 +16,6 @@ import SimpleFormGenerator, {
   Field,
 } from "@/components/shared/ui/custom-form-generator";
 import type { UserFormProps } from "../type/user.types";
-import { de } from "date-fns/locale";
 
 export default function UserForm({ mode, modal, userData }: UserFormProps) {
   const createUser = useCreateUserMutation();
@@ -90,11 +92,29 @@ export default function UserForm({ mode, modal, userData }: UserFormProps) {
           })) ?? [],
       },
       {
-        type: "text",
+        type: "file",
         name: "avatarUrl",
         label: "Profil uchun rasm",
-        placeholder: "Avatar URL",
+        multiple: false,
+        fileReturnShape: "object",
+        fileUrlTarget: "fileUrl",
+        accept: {
+          "image/*": [".jpg", ".jpeg", ".png"],
+        },
+        maxFiles: 1,
+        maxSize: 10 * 1024 * 1024,
+        helperText: "Profil rasm faylni yuklang (≤10MB) (.jpg, .jpeg, .png)",
         colSpan: 2,
+        existingFiles:
+          isUpdate && userData?.avatarUrl
+            ? [
+                {
+                  id: userData.id || "current-avatar",
+                  fileName: "Avatar",
+                  fileUrl: userData.avatarUrl,
+                },
+              ]
+            : undefined,
       },
       {
         type: "checkbox",
@@ -117,7 +137,11 @@ export default function UserForm({ mode, modal, userData }: UserFormProps) {
   }, [roles, departments, isUpdate, changePassword]);
 
   const handleSubmit = (values: any) => {
-    const payload = { ...values };
+    const payload = {
+      ...values,
+      avatarUrl: values.avatarUrl?.fileUrl || values.avatarUrl || "",
+    };
+
     if (isUpdate && !changePassword) {
       delete payload.password;
     }
@@ -140,17 +164,48 @@ export default function UserForm({ mode, modal, userData }: UserFormProps) {
     }
   };
 
+  const getInitials = (name: string) => {
+    if (!name) return "?";
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
   return (
     <div className="flex flex-col gap-4">
       {isUpdate && (
         <div className="flex items-center gap-2">
-          <input
-            type="checkbox"
+          <Checkbox
             id="changePassword"
             checked={changePassword}
-            onChange={(e) => setChangePassword(e.target.checked)}
+            onCheckedChange={(checked) => setChangePassword(checked === true)}
           />
-          <label htmlFor="changePassword">Parolni o‘zgartirasizmi?</label>
+          <Label
+            htmlFor="changePassword"
+            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+          >
+            Parolni o'zgartirasizmi?
+          </Label>
+        </div>
+      )}
+
+      {isUpdate && userData?.avatarUrl && (
+        <div className="flex items-center gap-4 p-4 bg-muted/50 rounded-lg">
+          <Avatar className="h-16 w-16 border-2 border-border">
+            <AvatarImage src={userData.avatarUrl} alt={userData.fullname} />
+            <AvatarFallback className="text-lg font-semibold">
+              {getInitials(userData.fullname)}
+            </AvatarFallback>
+          </Avatar>
+          <div>
+            <p className="text-sm font-medium">Joriy avatar</p>
+            <p className="text-xs text-muted-foreground">
+              Yangi avatar yuklash uchun quyidagi formadan foydalaning
+            </p>
+          </div>
         </div>
       )}
 
@@ -163,6 +218,7 @@ export default function UserForm({ mode, modal, userData }: UserFormProps) {
         renderActions={({ isSubmitting }) => (
           <div className="flex gap-2 justify-end">
             <Button
+              className="hover:text-text-on-dark"
               variant="outline"
               onClick={() => modal.closeModal()}
               disabled={isLoading}

@@ -11,24 +11,23 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { handleCopyToClipboard } from "@/utils/copy-text";
+import { useSearchParams } from "next/navigation";
+import { useGetJournalById } from "../hook/journal.hook";
+import SkeletonWrapper from "@/components/wrappers/skleton-wrapper";
+import { Copy, FileText, Building, User, Type } from "lucide-react";
 
-// 1. Импортируем тип для одного журнала
-import { SingleJournalApiResponse } from "../types/journal.types";
+const JournalView = () => {
+  const params = useSearchParams();
+  const journalId = params.get("journalId") || "";
 
-// 2. Импортируем новые иконки, которые лучше подходят для журнала
-import { Copy, FileText, Building, User, Type, Calendar } from "lucide-react";
+  const { data: journal, isLoading, isFetching } = useGetJournalById(journalId);
 
-// 3. Обновляем интерфейс пропсов
-interface JournalViewProps {
-  journal: SingleJournalApiResponse;
-  onClose?: () => void;
-}
-
-const JournalView = ({ journal, onClose }: JournalViewProps) => {
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
+    <SkeletonWrapper isLoading={isLoading || isFetching}>
+      {journal && (
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
           <div className="flex items-start justify-between">
             <div className="space-y-1">
               <CardTitle className="flex items-center gap-2 text-xl">
@@ -126,16 +125,9 @@ const JournalView = ({ journal, onClose }: JournalViewProps) => {
           {/* --- 7. Даты создания и обновления --- */}
         </CardContent>
       </Card>
-
-      {/* Кнопка "Закрыть" осталась без изменений */}
-      {onClose && (
-        <div className="flex justify-end gap-3 pt-4">
-          <Button variant="outline" onClick={onClose}>
-            Yopish
-          </Button>
-        </div>
-      )}
     </div>
+      )}
+    </SkeletonWrapper>
   );
 };
 

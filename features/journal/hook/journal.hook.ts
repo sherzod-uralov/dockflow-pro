@@ -76,3 +76,18 @@ export const useDeleteJournal = () => {
     },
   });
 };
+
+export const useGetJournalById = (id: string) => {
+  return useQuery<SingleJournalApiResponse>({
+    queryKey: ["journal", id],
+    queryFn: () => journalService.getJournalById(id),
+    enabled: !!id,
+    onError: (error: any) => {
+      toast.error(
+        error?.response?.data?.message ||
+          error.message ||
+          "Ma'lumotni olishda xatolik",
+      );
+    },
+  });
+};

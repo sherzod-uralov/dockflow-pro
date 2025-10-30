@@ -1,5 +1,6 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { UserToolbar } from "@/components/shared/ui/custom-dashboard-toolbar";
 import {
   ConfirmationModal,
@@ -29,6 +30,8 @@ import JournalView from "@/features/journal/component/journal-view";
 import { usePagination } from "@/hooks/use-pagination";
 
 const JournalPage = () => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const createModal: ModalState = useModal();
   const editModal: ModalState = useModal();
   const viewModal: ModalState = useModal();
@@ -47,6 +50,38 @@ const JournalPage = () => {
   });
 
   const deleteMutation = useDeleteJournal();
+
+  useEffect(() => {
+    const journalId = searchParams.get("journalId");
+
+    if (journalId) {
+      const journal = data?.data?.find(
+        (j: SingleJournalApiResponse) => j.id === journalId,
+      );
+
+      if (journal) {
+        setSelectedJournal(journal);
+        viewModal.openModal();
+      }
+    } else {
+      if (viewModal.isOpen) {
+        viewModal.closeModal();
+      }
+    }
+  }, [searchParams, data]);
+
+  const handleViewJournal = (journal: SingleJournalApiResponse) => {
+    setSelectedJournal(journal);
+    viewModal.openModal();
+    router.push(`?journalId=${journal.id}`, { scroll: false });
+  };
+
+  const handleCloseViewModal = () => {
+    viewModal.closeModal();
+    setSelectedJournal(null);
+    router.push(window.location.pathname, { scroll: false });
+  };
+
   const confirmDelete = () => {
     if (selectedJournal) {
       deleteMutation.mutate(selectedJournal.id, {
@@ -76,10 +111,7 @@ const JournalPage = () => {
       cell: ({ row }) => {
         const journal = row.original;
         const actions: ActionItem[] = [
-          createViewAction(() => {
-            setSelectedJournal(journal);
-            viewModal.openModal();
-          }),
+          createViewAction(() => handleViewJournal(journal)),
           createEditAction(() => {
             setSelectedJournal(journal);
             editModal.openModal();
@@ -95,7 +127,7 @@ const JournalPage = () => {
       },
     },
   ];
-  console.log(selectedJournal);
+
   return (
     <>
       <UserToolbar
@@ -107,7 +139,7 @@ const JournalPage = () => {
         onSearch={setSearch}
       />
       <CustomModal
-        size="3xl"
+        size="xl"
         closeOnOverlayClick={false}
         title="Jurnal qo'shish"
         description="Jurnal qo'shish uchun maydonlar to'ldirilishi kerak"
@@ -120,6 +152,7 @@ const JournalPage = () => {
       {selectedJournal && (
         <>
           <CustomModal
+            size="xl"
             closeOnOverlayClick={false}
             title="Jurnalni tahrirlash"
             description="Jurnal ma'lumotlarini o'zgartirishingiz mumkin"
@@ -133,16 +166,14 @@ const JournalPage = () => {
             />
           </CustomModal>
           <CustomModal
-            size="3xl"
+            size="2xl"
+            closeOnOverlayClick
             title="Jurnal haqida ma'lumot"
             description="Jurnalning to'liq ma'lumotlarini ko'rish"
             isOpen={viewModal.isOpen}
-            onClose={viewModal.closeModal}
+            onClose={handleCloseViewModal}
           >
-            <JournalView
-              journal={selectedJournal}
-              onClose={viewModal.closeModal}
-            />
+            <JournalView />
           </CustomModal>
         </>
       )}

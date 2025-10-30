@@ -15,44 +15,96 @@ import {
   ClipboardCheck,
 } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Cookie from "js-cookie";
 import { useLogoutMutation } from "@/features/login/hook/login.hook";
+import { usePermission } from "@/providers/permission-provider";
+
 interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
+}
+
+interface SubItem {
+  label: string;
+  href: string;
+  permission?: string;
 }
 
 interface MenuItem {
   icon: any;
   label: string;
   href?: string;
-  subItems?: { label: string; href: string }[];
+  permission?: string;
+  subItems?: SubItem[];
 }
 const menuItems: MenuItem[] = [
-  { icon: Home, label: "Statistika", href: "/dashboard" },
-  { icon: DockIcon, label: "Xujjat turini", href: "/dashboard/document-type" },
-  { icon: Home, label: "Bo'limlar", href: "/dashboard/deportament" },
-  { icon: Book, label: "Jurnallar", href: "/dashboard/journal" },
-  { icon: DockIcon, label: "Hujjatlar", href: "/dashboard/document" },
-  { icon: Layers, label: "Hujjatlar Aylanmasi", href: "/dashboard/workflow" },
+  {
+    icon: Home,
+    label: "Statistika",
+    href: "/dashboard",
+  },
+  {
+    icon: DockIcon,
+    label: "Xujjat turini",
+    href: "/dashboard/document-type",
+    permission: "document-type:list",
+  },
+  {
+    icon: Home,
+    label: "Bo'limlar",
+    href: "/dashboard/deportament",
+    permission: "department:list",
+  },
+  {
+    icon: Book,
+    label: "Jurnallar",
+    href: "/dashboard/journal",
+    permission: "journal:list",
+  },
+  {
+    icon: DockIcon,
+    label: "Hujjatlar",
+    href: "/dashboard/document",
+    permission: "document:list",
+  },
+  {
+    icon: Layers,
+    label: "Hujjatlar Aylanmasi",
+    href: "/dashboard/workflow",
+    permission: "workflow:list",
+  },
   {
     icon: ClipboardCheck,
     label: "Mening Vazifalarim",
     href: "/dashboard/my-tasks",
+    permission: "task:list",
   },
   {
     icon: DockIcon,
-    label: "Hujjat Andozalari ",
+    label: "Hujjat Andozalari",
     href: "/dashboard/document-template",
+    permission: "document_template:list",
   },
   {
     icon: Settings,
     label: "Boshqaruv",
     subItems: [
-      { label: "Foydalanuvchilar", href: "/dashboard/admin/users" },
-      { label: "Rollar", href: "/dashboard/admin/roles" },
-      { label: "Ruxsatlar", href: "/dashboard/admin/permissions" },
+      {
+        label: "Foydalanuvchilar",
+        href: "/dashboard/admin/users",
+        permission: "user:list",
+      },
+      {
+        label: "Rollar",
+        href: "/dashboard/admin/roles",
+        permission: "role:list",
+      },
+      {
+        label: "Ruxsatlar",
+        href: "/dashboard/admin/permissions",
+        permission: "permission:list",
+      },
     ],
   },
   {
@@ -69,18 +121,49 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const router = useRouter();
   const pathname: any = usePathname();
   const logOutMutation = useLogoutMutation();
+  const { hasPermission } = usePermission();
 
   const [openMenus, setOpenMenus] = useState<string[]>([]);
 
+  // Filter menu items based on user permissions
+  const filteredMenuItems = useMemo(() => {
+    return menuItems
+      .map((item) => {
+        // If item has no permission requirement, show it
+        if (!item.permission && !item.subItems) return item;
+
+        // If item has permission requirement, check it
+        if (item.permission && !hasPermission(item.permission)) return null;
+
+        // If item has subItems, filter them
+        if (item.subItems) {
+          const filteredSubItems = item.subItems.filter((sub) => {
+            // If sub-item has no permission requirement, show it
+            if (!sub.permission) return true;
+            // Check permission for sub-item
+            return hasPermission(sub.permission);
+          });
+
+          // Only show parent if it has visible sub-items
+          if (filteredSubItems.length === 0) return null;
+
+          return { ...item, subItems: filteredSubItems };
+        }
+
+        return item;
+      })
+      .filter((item): item is MenuItem => item !== null);
+  }, [hasPermission]);
+
   useEffect(() => {
-    menuItems.forEach((item) => {
+    filteredMenuItems.forEach((item) => {
       if (item.subItems?.some((sub) => pathname.startsWith(sub.href))) {
         setOpenMenus((prev) =>
           prev.includes(item.label) ? prev : [...prev, item.label],
         );
       }
     });
-  }, [pathname]);
+  }, [pathname, filteredMenuItems]);
 
   const toggleMenu = (label: string) => {
     setOpenMenus((prev) =>
@@ -131,7 +214,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
           </Button>
         </div>
         <nav className="flex-1 p-4 space-y-2">
-          {menuItems.map((item) => (
+          {filteredMenuItems.map((item) => (
             <div key={item.label}>
               {item.subItems ? (
                 <button

@@ -34,6 +34,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
+import { Button } from "@/components/ui/button";
 
 const SystemSettingPage = () => {
   // State for all settings
@@ -68,7 +69,6 @@ const SystemSettingPage = () => {
     }
   }, [settings]);
 
-  // Apply theme colors based on theme name
   const applyThemeColors = (themeName: string | number) => {
     const themeColors = {
       default: {
@@ -90,26 +90,6 @@ const SystemSettingPage = () => {
         primary: "oklch(0.577 0.245 27.325)",
         primaryHover: "oklch(0.527 0.245 27.325)",
         ring: "oklch(0.577 0.245 27.325)",
-      },
-      purple: {
-        primary: "oklch(0.6 0.22 300)",
-        primaryHover: "oklch(0.55 0.22 300)",
-        ring: "oklch(0.6 0.22 300)",
-      },
-      orange: {
-        primary: "oklch(0.737 0.155 86.93)",
-        primaryHover: "oklch(0.687 0.155 86.93)",
-        ring: "oklch(0.737 0.155 86.93)",
-      },
-      teal: {
-        primary: "oklch(0.65 0.18 180)",
-        primaryHover: "oklch(0.6 0.18 180)",
-        ring: "oklch(0.65 0.18 180)",
-      },
-      pink: {
-        primary: "oklch(0.7 0.24 350)",
-        primaryHover: "oklch(0.65 0.24 350)",
-        ring: "oklch(0.7 0.24 350)",
       },
     };
 
@@ -220,35 +200,35 @@ const SystemSettingPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background p-4 md:p-8">
-      <div className="mx-auto max-w-6xl space-y-6">
+    <div className="bg-background">
+      <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
-              <Settings className="h-8 w-8 text-primary" />
+            <h1 className="text-xl font-bold tracking-tight flex items-center gap-2">
+              <Settings className="h-5 w-5 text-primary" />
               Tizim Sozlamalari
             </h1>
-            <p className="text-muted-foreground mt-1">
+            <p className="text-muted-foreground text-sm mt-1">
               O'zingizga qulay muhitni yarating
             </p>
           </div>
           <div className="flex gap-2">
-            <button
+            <Button
               onClick={resetSettings}
               className="flex items-center gap-2 px-4 py-2 rounded-md border border-border hover:bg-accent transition-colors"
             >
               <RotateCcw className="h-4 w-4" />
               Qayta tiklash
-            </button>
+            </Button>
             {!settings.autoSave && (
-              <button
+              <Button
                 onClick={saveSettings}
                 className="flex items-center gap-2 px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary-hover transition-colors"
               >
                 <Save className="h-4 w-4" />
                 Saqlash
-              </button>
+              </Button>
             )}
           </div>
         </div>
@@ -470,216 +450,10 @@ const SystemSettingPage = () => {
                 </button>
 
                 {/* Purple Theme */}
-                <button
-                  onClick={() => {
-                    document.documentElement.style.setProperty(
-                      "--primary",
-                      "oklch(0.6 0.22 300)",
-                    );
-                    document.documentElement.style.setProperty(
-                      "--primary-hover",
-                      "oklch(0.55 0.22 300)",
-                    );
-                    document.documentElement.style.setProperty(
-                      "--ring",
-                      "oklch(0.6 0.22 300)",
-                    );
-                    updateSetting("theme", "purple");
-                  }}
-                  className={`group relative p-4 rounded-lg border-2 transition-all hover:scale-105 ${
-                    settings.theme === "purple"
-                      ? "border-[oklch(0.6_0.22_300)] ring-2 ring-[oklch(0.6_0.22_300)] ring-offset-2"
-                      : "border-border hover:border-[oklch(0.6_0.22_300)]/50"
-                  }`}
-                >
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-center gap-1 mb-2">
-                      <div className="w-8 h-8 rounded-full bg-[oklch(0.6_0.22_300)]" />
-                      <div className="w-6 h-6 rounded-full bg-[oklch(0.7_0.22_300)]" />
-                      <div className="w-4 h-4 rounded-full bg-[oklch(0.5_0.22_300)]" />
-                    </div>
-                    <div className="text-center">
-                      <p className="font-semibold text-sm">Binafsha</p>
-                      <p className="text-xs text-muted-foreground">Kreativ</p>
-                    </div>
-                  </div>
-                  {settings.theme === "purple" && (
-                    <div className="absolute top-2 right-2">
-                      <div className="w-5 h-5 rounded-full bg-[oklch(0.6_0.22_300)] flex items-center justify-center">
-                        <svg
-                          className="w-3 h-3 text-white"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                      </div>
-                    </div>
-                  )}
-                </button>
 
                 {/* Orange/Yellow Theme */}
-                <button
-                  onClick={() => {
-                    document.documentElement.style.setProperty(
-                      "--primary",
-                      "oklch(0.737 0.155 86.93)",
-                    );
-                    document.documentElement.style.setProperty(
-                      "--primary-hover",
-                      "oklch(0.687 0.155 86.93)",
-                    );
-                    document.documentElement.style.setProperty(
-                      "--ring",
-                      "oklch(0.737 0.155 86.93)",
-                    );
-                    updateSetting("theme", "orange");
-                  }}
-                  className={`group relative p-4 rounded-lg border-2 transition-all hover:scale-105 ${
-                    settings.theme === "orange"
-                      ? "border-[oklch(0.737_0.155_86.93)] ring-2 ring-[oklch(0.737_0.155_86.93)] ring-offset-2"
-                      : "border-border hover:border-[oklch(0.737_0.155_86.93)]/50"
-                  }`}
-                >
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-center gap-1 mb-2">
-                      <div className="w-8 h-8 rounded-full bg-[oklch(0.737_0.155_86.93)]" />
-                      <div className="w-6 h-6 rounded-full bg-[oklch(0.837_0.155_86.93)]" />
-                      <div className="w-4 h-4 rounded-full bg-[oklch(0.637_0.155_86.93)]" />
-                    </div>
-                    <div className="text-center">
-                      <p className="font-semibold text-sm">Sariq</p>
-                      <p className="text-xs text-muted-foreground">Quyosh</p>
-                    </div>
-                  </div>
-                  {settings.theme === "orange" && (
-                    <div className="absolute top-2 right-2">
-                      <div className="w-5 h-5 rounded-full bg-[oklch(0.737_0.155_86.93)] flex items-center justify-center">
-                        <svg
-                          className="w-3 h-3 text-foreground"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                      </div>
-                    </div>
-                  )}
-                </button>
-
-                {/* Teal Theme */}
-                <button
-                  onClick={() => {
-                    document.documentElement.style.setProperty(
-                      "--primary",
-                      "oklch(0.65 0.18 180)",
-                    );
-                    document.documentElement.style.setProperty(
-                      "--primary-hover",
-                      "oklch(0.6 0.18 180)",
-                    );
-                    document.documentElement.style.setProperty(
-                      "--ring",
-                      "oklch(0.65 0.18 180)",
-                    );
-                    updateSetting("theme", "teal");
-                  }}
-                  className={`group relative p-4 rounded-lg border-2 transition-all hover:scale-105 ${
-                    settings.theme === "teal"
-                      ? "border-[oklch(0.65_0.18_180)] ring-2 ring-[oklch(0.65_0.18_180)] ring-offset-2"
-                      : "border-border hover:border-[oklch(0.65_0.18_180)]/50"
-                  }`}
-                >
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-center gap-1 mb-2">
-                      <div className="w-8 h-8 rounded-full bg-[oklch(0.65_0.18_180)]" />
-                      <div className="w-6 h-6 rounded-full bg-[oklch(0.75_0.18_180)]" />
-                      <div className="w-4 h-4 rounded-full bg-[oklch(0.55_0.18_180)]" />
-                    </div>
-                    <div className="text-center">
-                      <p className="font-semibold text-sm">Turkuaz</p>
-                      <p className="text-xs text-muted-foreground">Osmon</p>
-                    </div>
-                  </div>
-                  {settings.theme === "teal" && (
-                    <div className="absolute top-2 right-2">
-                      <div className="w-5 h-5 rounded-full bg-[oklch(0.65_0.18_180)] flex items-center justify-center">
-                        <svg
-                          className="w-3 h-3 text-white"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                      </div>
-                    </div>
-                  )}
-                </button>
 
                 {/* Pink Theme */}
-                <button
-                  onClick={() => {
-                    document.documentElement.style.setProperty(
-                      "--primary",
-                      "oklch(0.7 0.24 350)",
-                    );
-                    document.documentElement.style.setProperty(
-                      "--primary-hover",
-                      "oklch(0.65 0.24 350)",
-                    );
-                    document.documentElement.style.setProperty(
-                      "--ring",
-                      "oklch(0.7 0.24 350)",
-                    );
-                    updateSetting("theme", "pink");
-                  }}
-                  className={`group relative p-4 rounded-lg border-2 transition-all hover:scale-105 ${
-                    settings.theme === "pink"
-                      ? "border-[oklch(0.7_0.24_350)] ring-2 ring-[oklch(0.7_0.24_350)] ring-offset-2"
-                      : "border-border hover:border-[oklch(0.7_0.24_350)]/50"
-                  }`}
-                >
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-center gap-1 mb-2">
-                      <div className="w-8 h-8 rounded-full bg-[oklch(0.7_0.24_350)]" />
-                      <div className="w-6 h-6 rounded-full bg-[oklch(0.8_0.24_350)]" />
-                      <div className="w-4 h-4 rounded-full bg-[oklch(0.6_0.24_350)]" />
-                    </div>
-                    <div className="text-center">
-                      <p className="font-semibold text-sm">Pushti</p>
-                      <p className="text-xs text-muted-foreground">Romantik</p>
-                    </div>
-                  </div>
-                  {settings.theme === "pink" && (
-                    <div className="absolute top-2 right-2">
-                      <div className="w-5 h-5 rounded-full bg-[oklch(0.7_0.24_350)] flex items-center justify-center">
-                        <svg
-                          className="w-3 h-3 text-white"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                      </div>
-                    </div>
-                  )}
-                </button>
               </div>
             </div>
 
