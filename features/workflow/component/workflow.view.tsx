@@ -27,17 +27,25 @@ import {
   CheckCircle,
   XCircle,
   MessageSquare,
+  RotateCcw,
+  ArrowLeft,
+  ArrowRight,
 } from "lucide-react";
 import {
   WorkflowApiResponse,
   WorkflowStepApiResponse,
+  WorkflowType,
+  getAvailableRollbackUsers,
+  RollbackUser,
+  validateAndExtractUserIds,
 } from "../type/workflow.type";
 import {
   useUpdateWorkflowStep,
   useCompleteWorkflowStep,
   useRejectWorkflowStep,
+  useEnrichedRollbackUsers,
 } from "../hook/workflow.hook";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   Dialog,
   DialogContent,
@@ -48,10 +56,30 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface WorkflowViewProps {
   workflow: WorkflowApiResponse;
   onClose?: () => void;
+}
+
+interface RollbackHistoryItem {
+  id: string;
+  rejectedAt: string;
+  rejectedBy: any;
+  fromStepOrder: number;
+  fromStepUser: any;
+  toStepOrder: number;
+  toStepUser: any;
+  rejectionReason: string;
+  comment?: string;
 }
 
 const WorkflowView = ({ workflow, onClose }: WorkflowViewProps) => {
@@ -62,6 +90,9 @@ const WorkflowView = ({ workflow, onClose }: WorkflowViewProps) => {
   const [selectedStep, setSelectedStep] =
     useState<WorkflowStepApiResponse | null>(null);
   const [rejectionReason, setRejectionReason] = useState("");
+  const [comment, setComment] = useState("");
+  const [enableRollback, setEnableRollback] = useState(false);
+  const [selectedRollbackUserId, setSelectedRollbackUserId] = useState("");
 
   const isLoading =
     updateStepMutation.isLoading ||
@@ -84,9 +115,37 @@ const WorkflowView = ({ workflow, onClose }: WorkflowViewProps) => {
     completeMutation.mutate(stepId);
   };
 
+  // Валидация workflow steps
+  const workflowValidation = useMemo(
+    () => validateAndExtractUserIds(workflow),
+    [workflow],
+  );
+
+  // Получить доступных пользователей для rollback
+  const availableRollbackUsers = useMemo(() => {
+    if (!selectedStep) return [];
+    return getAvailableRollbackUsers(selectedStep, workflow);
+  }, [selectedStep, workflow]);
+
+  // Загрузить расширенные данные о пользователях
+  const { enrichedUsers, isLoading: isLoadingUsers } = useEnrichedRollbackUsers(
+    availableRollbackUsers,
+  );
+
   // Открыть диалог отклонения
   const handleRejectClick = (step: WorkflowStepApiResponse) => {
+    // Проверка валидности workflow
+    const validation = validateAndExtractUserIds(workflow);
+    if (!validation.isValid) {
+      alert(validation.error || "Нет доступных шагов workflow для отклонения");
+      return;
+    }
+
     setSelectedStep(step);
+    setRejectionReason("");
+    setComment("");
+    setEnableRollback(false);
+    setSelectedRollbackUserId("");
     setRejectDialogOpen(true);
   };
 
@@ -94,22 +153,97 @@ const WorkflowView = ({ workflow, onClose }: WorkflowViewProps) => {
   const handleConfirmReject = () => {
     if (!selectedStep) return;
 
+    // Валидация причины отклонения (минимум 10 символов)
+    if (!rejectionReason.trim()) {
+      alert("Iltimos, rad etish sababini kiriting");
+      return;
+    }
+    if (rejectionReason.trim().length < 10) {
+      alert("Rad etish sababi kamida 10 ta belgidan iborat bo'lishi kerak");
+      return;
+    }
+
+    // Валидация выбора пользователя для rollback
+    if (enableRollback && !selectedRollbackUserId) {
+      alert("Iltimos, qaytarish uchun foydalanuvchini tanlang");
+      return;
+    }
+
+    const payload: any = {
+      rejectionReason: rejectionReason.trim(),
+    };
+
+    if (comment.trim()) {
+      payload.comment = comment.trim();
+    }
+
+    if (enableRollback && selectedRollbackUserId) {
+      payload.rollbackToUserId = selectedRollbackUserId;
+    }
+
     rejectMutation.mutate(
       {
         id: selectedStep.id,
-        data: rejectionReason.trim()
-          ? { comment: rejectionReason.trim() }
-          : undefined,
+        data: payload,
       },
       {
         onSuccess: () => {
           setRejectDialogOpen(false);
           setRejectionReason("");
+          setComment("");
+          setEnableRollback(false);
+          setSelectedRollbackUserId("");
           setSelectedStep(null);
         },
       },
     );
   };
+
+  // Получить историю rollback из workflow
+  const getRollbackHistory = (): RollbackHistoryItem[] => {
+    const rollbackHistory: RollbackHistoryItem[] = [];
+
+    // Проходим по всем шагам
+    workflow.workflowSteps.forEach((step) => {
+      // Ищем действия типа REJECTED с metadata о rollback
+      const rejectedActions =
+        step.actions?.filter(
+          (action: any) =>
+            action.actionType === "REJECTED" &&
+            action.metadata?.rollbackToUserId,
+        ) || [];
+
+      rejectedActions.forEach((rejectedAction: any) => {
+        const metadata = rejectedAction.metadata;
+
+        // Находим шаг, к которому произошел откат
+        const targetStep = workflow.workflowSteps.find(
+          (s) => s.id === metadata.rollbackToStepId,
+        );
+
+        rollbackHistory.push({
+          id: rejectedAction.id,
+          rejectedAt: rejectedAction.createdAt,
+          rejectedBy: rejectedAction.performedBy,
+          fromStepOrder: step.order,
+          fromStepUser: step.assignedToUser,
+          toStepOrder: metadata.rollbackToStepOrder,
+          toStepUser: targetStep?.assignedToUser,
+          rejectionReason: metadata.rejectionReason || "",
+          comment: rejectedAction.comment,
+        });
+      });
+    });
+
+    // Сортируем по дате (новые первые)
+    return rollbackHistory.sort((a, b) => {
+      const dateA = new Date(a.rejectedAt).getTime();
+      const dateB = new Date(b.rejectedAt).getTime();
+      return dateB - dateA;
+    });
+  };
+
+  const rollbackHistory = useMemo(() => getRollbackHistory(), [workflow]);
 
   // Функция для получения badge статуса workflow
   const getStatusBadge = (status: string) => {
@@ -219,233 +353,246 @@ const WorkflowView = ({ workflow, onClose }: WorkflowViewProps) => {
   const renderStep = (
     step: WorkflowStepApiResponse,
     isCurrentStep: boolean,
-  ) => (
-    <div
-      key={step.id}
-      className={`relative pl-8 pb-6 ${isCurrentStep ? "border-l-2 border-primary" : "border-l-2 border-gray-200"}`}
-    >
-      {/* Круг на линии */}
+  ) => {
+    // Фильтруем действия: показываем только действия текущего пользователя этого шага
+    const filteredActions =
+      step.actions?.filter(
+        (action) => action.performedBy?.id === step.assignedToUser?.id,
+      ) || [];
+
+    return (
       <div
-        className={`absolute left-0 top-0 -translate-x-1/2 h-4 w-4 rounded-full border-2 ${
-          isCurrentStep
-            ? "bg-primary border-primary"
-            : step.status === "COMPLETED"
-              ? "bg-green-500 border-green-500"
-              : step.status === "REJECTED"
-                ? "bg-red-500 border-red-500"
-                : "bg-gray-300 border-gray-300"
-        }`}
-      />
+        key={step.id}
+        className={`relative pl-8 pb-6 ${isCurrentStep ? "border-l-2 border-primary" : "border-l-2 border-gray-200"}`}
+      >
+        {/* Круг на линии */}
+        <div
+          className={`absolute left-0 top-0 -translate-x-1/2 h-4 w-4 rounded-full border-2 ${
+            isCurrentStep
+              ? "bg-primary border-primary"
+              : step.status === "COMPLETED"
+                ? "bg-green-500 border-green-500"
+                : step.status === "REJECTED"
+                  ? "bg-red-500 border-red-500"
+                  : "bg-gray-300 border-gray-300"
+          }`}
+        />
 
-      <Card className={isCurrentStep ? "border-primary shadow-md" : ""}>
-        <CardContent className="p-4 space-y-3">
-          {/* Header */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="font-semibold text-sm">
-                Bosqich {step.order}
-              </span>
-              {isCurrentStep && (
-                <Badge variant="default" className="text-xs">
-                  Joriy
-                </Badge>
-              )}
+        <Card className={isCurrentStep ? "border-primary shadow-md" : ""}>
+          <CardContent className="p-4 space-y-3">
+            {/* Header */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="font-semibold text-sm">
+                  Bosqich {step.order}
+                </span>
+                {isCurrentStep && (
+                  <Badge variant="default" className="text-xs">
+                    Joriy
+                  </Badge>
+                )}
+              </div>
+              {getStepStatusBadge(step.status)}
             </div>
-            {getStepStatusBadge(step.status)}
-          </div>
 
-          {/* Mas'ul shaxs */}
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <User className="h-4 w-4 text-muted-foreground" />
-              <span className="font-medium text-sm">Mas'ul shaxs</span>
-            </div>
-            <div className="flex items-center space-x-3">
-              <Avatar className="h-8 w-8">
-                <AvatarImage src="" alt={step.assignedToUser?.username || ""} />
-                <AvatarFallback>
-                  {step.assignedToUser?.fullname
-                    ?.split(" ")
-                    .map((n) => n[0])
-                    .join("") || "??"}
-                </AvatarFallback>
-              </Avatar>
-              <div>
-                <p className="font-medium text-sm">
-                  {step.assignedToUser?.fullname || "N/A"}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  @{step.assignedToUser?.username || "N/A"}
-                </p>
+            {/* Mas'ul shaxs */}
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <User className="h-4 w-4 text-muted-foreground" />
+                <span className="font-medium text-sm">Mas'ul shaxs</span>
               </div>
-            </div>
-          </div>
-
-          {/* Dates */}
-          <div className="grid grid-cols-2 gap-3 text-sm">
-            {step.startedAt && (
-              <div>
-                <p className="text-muted-foreground text-xs">Boshlangan</p>
-                <p className="font-medium">{formatDateTime(step.startedAt)}</p>
-              </div>
-            )}
-            {step.completedAt && (
-              <div>
-                <p className="text-muted-foreground text-xs">Tugallangan</p>
-                <p className="font-medium">
-                  {formatDateTime(step.completedAt)}
-                </p>
-              </div>
-            )}
-            {step.dueDate && (
-              <div>
-                <p className="text-muted-foreground text-xs">Muddat</p>
-                <p className="font-medium">{formatDate(step.dueDate)}</p>
-              </div>
-            )}
-          </div>
-
-          {/* Rejection Info */}
-          {step.isRejected && step.rejectionReason && (
-            <div className="bg-red-50 border border-red-200 rounded-md p-3">
-              <div className="flex items-start gap-2">
-                <AlertCircle className="h-4 w-4 text-red-600 mt-0.5" />
+              <div className="flex items-center space-x-3">
+                <Avatar className="h-8 w-8">
+                  <AvatarImage
+                    src=""
+                    alt={step.assignedToUser?.username || ""}
+                  />
+                  <AvatarFallback>
+                    {step.assignedToUser?.fullname
+                      ?.split(" ")
+                      .map((n) => n[0])
+                      .join("") || "??"}
+                  </AvatarFallback>
+                </Avatar>
                 <div>
-                  <p className="text-sm font-medium text-red-800">
-                    Rad etilgan sabab:
+                  <p className="font-medium text-sm">
+                    {step.assignedToUser?.fullname || "N/A"}
                   </p>
-                  <p className="text-sm text-red-700 mt-1">
-                    {step.rejectionReason}
+                  <p className="text-xs text-muted-foreground">
+                    @{step.assignedToUser?.username || "N/A"}
                   </p>
-                  {step.rejectedAt && (
-                    <p className="text-xs text-red-600 mt-1">
-                      {formatDateTime(step.rejectedAt)}
-                    </p>
-                  )}
                 </div>
               </div>
             </div>
-          )}
 
-          {/* Actions History */}
-          {step.actions && step.actions.length > 0 && (
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <MessageSquare className="h-4 w-4 text-muted-foreground" />
-                <span className="font-medium text-sm">Amallar tarixi</span>
-              </div>
-              <div className="space-y-2">
-                {step.actions.map((action) => (
-                  <div
-                    key={action.id}
-                    className={`border rounded-md p-3 ${
-                      action.actionType === "REJECTED"
-                        ? "bg-red-50 border-red-200"
-                        : action.actionType === "APPROVED"
-                          ? "bg-green-50 border-green-200"
-                          : "bg-blue-50 border-blue-200"
-                    }`}
-                  >
-                    <div className="flex items-start justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <Avatar className="h-6 w-6">
-                          <AvatarImage
-                            src=""
-                            alt={action.performedBy?.username || ""}
-                          />
-                          <AvatarFallback className="text-xs">
-                            {action.performedBy?.fullname
-                              ?.split(" ")
-                              .map((n) => n[0])
-                              .join("") || "??"}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <p className="text-xs font-medium">
-                            {action.performedBy?.fullname || "N/A"}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {formatDateTime(action.createdAt)}
-                          </p>
-                        </div>
-                      </div>
-                      <Badge
-                        variant="outline"
-                        className={`text-xs ${
-                          action.actionType === "REJECTED"
-                            ? "bg-red-100 text-red-800 border-red-300"
-                            : action.actionType === "APPROVED"
-                              ? "bg-green-100 text-green-800 border-green-300"
-                              : "bg-blue-100 text-blue-800 border-blue-300"
-                        }`}
-                      >
-                        {action.actionType === "REJECTED"
-                          ? "Rad etildi"
-                          : action.actionType === "APPROVED"
-                            ? "Tasdiqlandi"
-                            : action.actionType === "REVIEWED"
-                              ? "Ko'rildi"
-                              : action.actionType === "SIGNED"
-                                ? "Imzolandi"
-                                : "Xabarnoma"}
-                      </Badge>
-                    </div>
-                    {action.comment && (
-                      <p className="text-sm mt-2">{action.comment}</p>
+            {/* Dates */}
+            <div className="grid grid-cols-2 gap-3 text-sm">
+              {step.startedAt && (
+                <div>
+                  <p className="text-muted-foreground text-xs">Boshlangan</p>
+                  <p className="font-medium">
+                    {formatDateTime(step.startedAt)}
+                  </p>
+                </div>
+              )}
+              {step.completedAt && (
+                <div>
+                  <p className="text-muted-foreground text-xs">Tugallangan</p>
+                  <p className="font-medium">
+                    {formatDateTime(step.completedAt)}
+                  </p>
+                </div>
+              )}
+              {step.dueDate && (
+                <div>
+                  <p className="text-muted-foreground text-xs">Muddat</p>
+                  <p className="font-medium">{formatDate(step.dueDate)}</p>
+                </div>
+              )}
+            </div>
+
+            {/* Rejection Info */}
+            {step.isRejected && step.rejectionReason && (
+              <div className="bg-red-50 border border-red-200 rounded-md p-3">
+                <div className="flex items-start gap-2">
+                  <AlertCircle className="h-4 w-4 text-red-600 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-medium text-red-800">
+                      Rad etilgan sabab:
+                    </p>
+                    <p className="text-sm text-red-700 mt-1">
+                      {step.rejectionReason}
+                    </p>
+                    {step.rejectedAt && (
+                      <p className="text-xs text-red-600 mt-1">
+                        {formatDateTime(step.rejectedAt)}
+                      </p>
                     )}
                   </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Action Buttons */}
-          {isCurrentStep &&
-            step.status !== "COMPLETED" &&
-            step.status !== "REJECTED" && (
-              <div className="flex gap-2 pt-2 border-t">
-                {(step.status === "NOT_STARTED" ||
-                  step.status === "PENDING") && (
-                  <Button
-                    size="sm"
-                    onClick={() => handleStartStep(step.id)}
-                    disabled={isLoading}
-                    className="flex-1"
-                  >
-                    <Play className="h-4 w-4 mr-2" />
-                    {isLoading ? "Yuklanmoqda..." : "Boshlash"}
-                  </Button>
-                )}
-                {step.status === "IN_PROGRESS" && (
-                  <>
-                    <Button
-                      size="sm"
-                      variant="default"
-                      onClick={() => handleCompleteStep(step.id)}
-                      disabled={isLoading}
-                      className="flex-1"
-                    >
-                      <CheckCircle className="h-4 w-4 mr-2" />
-                      {isLoading ? "Yuklanmoqda..." : "Tasdiqlash"}
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      onClick={() => handleRejectClick(step)}
-                      disabled={isLoading}
-                      className="flex-1"
-                    >
-                      <XCircle className="h-4 w-4 mr-2" />
-                      Rad etish
-                    </Button>
-                  </>
-                )}
+                </div>
               </div>
             )}
-        </CardContent>
-      </Card>
-    </div>
-  );
+
+            {/* Actions History - только действия текущего пользователя */}
+            {filteredActions.length > 0 && (
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <MessageSquare className="h-4 w-4 text-muted-foreground" />
+                  <span className="font-medium text-sm">Amallar tarixi</span>
+                </div>
+                <div className="space-y-2">
+                  {filteredActions.map((action) => (
+                    <div
+                      key={action.id}
+                      className={`border rounded-md p-3 ${
+                        action.actionType === "REJECTED"
+                          ? "bg-red-50 border-red-200"
+                          : action.actionType === "APPROVED"
+                            ? "bg-green-50 border-green-200"
+                            : "bg-blue-50 border-blue-200"
+                      }`}
+                    >
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <Avatar className="h-6 w-6">
+                            <AvatarImage
+                              src=""
+                              alt={action.performedBy?.username || ""}
+                            />
+                            <AvatarFallback className="text-xs">
+                              {action.performedBy?.fullname
+                                ?.split(" ")
+                                .map((n) => n[0])
+                                .join("") || "??"}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="text-xs font-medium">
+                              {action.performedBy?.fullname || "N/A"}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {formatDateTime(action.createdAt)}
+                            </p>
+                          </div>
+                        </div>
+                        <Badge
+                          variant="outline"
+                          className={`text-xs ${
+                            action.actionType === "REJECTED"
+                              ? "bg-red-100 text-red-800 border-red-300"
+                              : action.actionType === "APPROVED"
+                                ? "bg-green-100 text-green-800 border-green-300"
+                                : "bg-blue-100 text-blue-800 border-blue-300"
+                          }`}
+                        >
+                          {action.actionType === "REJECTED"
+                            ? "Rad etildi"
+                            : action.actionType === "APPROVED"
+                              ? "Tasdiqlandi"
+                              : action.actionType === "REVIEWED"
+                                ? "Ko'rildi"
+                                : action.actionType === "SIGNED"
+                                  ? "Imzolandi"
+                                  : "Xabarnoma"}
+                        </Badge>
+                      </div>
+                      {action.comment && (
+                        <p className="text-sm mt-2">{action.comment}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            {isCurrentStep &&
+              step.status !== "COMPLETED" &&
+              step.status !== "REJECTED" && (
+                <div className="flex gap-2 pt-2 border-t">
+                  {(step.status === "NOT_STARTED" ||
+                    step.status === "PENDING") && (
+                    <Button
+                      size="sm"
+                      onClick={() => handleStartStep(step.id)}
+                      disabled={isLoading}
+                      className="flex-1"
+                    >
+                      <Play className="h-4 w-4 mr-2" />
+                      {isLoading ? "Yuklanmoqda..." : "Boshlash"}
+                    </Button>
+                  )}
+                  {step.status === "IN_PROGRESS" && (
+                    <>
+                      <Button
+                        size="sm"
+                        variant="default"
+                        onClick={() => handleCompleteStep(step.id)}
+                        disabled={isLoading}
+                        className="flex-1"
+                      >
+                        <CheckCircle className="h-4 w-4 mr-2" />
+                        {isLoading ? "Yuklanmoqda..." : "Tasdiqlash"}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => handleRejectClick(step)}
+                        disabled={isLoading}
+                        className="flex-1"
+                      >
+                        <XCircle className="h-4 w-4 mr-2" />
+                        Rad etish
+                      </Button>
+                    </>
+                  )}
+                </div>
+              )}
+          </CardContent>
+        </Card>
+      </div>
+    );
+  };
 
   return (
     <div className="space-y-6">
@@ -543,6 +690,134 @@ const WorkflowView = ({ workflow, onClose }: WorkflowViewProps) => {
         </CardContent>
       </Card>
 
+      {/* Rollback History Card - показываем если есть история */}
+      {rollbackHistory.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <RotateCcw className="h-5 w-5 text-orange-500" />
+              Qaytarishlar tarixi
+            </CardTitle>
+            <CardDescription>
+              Jami {rollbackHistory.length} ta qaytarish amalga oshirilgan
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {rollbackHistory.map((rollback, index) => (
+                <div
+                  key={rollback.id}
+                  className="bg-orange-50 border border-orange-200 rounded-lg p-4"
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 mt-1">
+                      <div className="h-10 w-10 rounded-full bg-orange-100 flex items-center justify-center">
+                        <ArrowLeft className="h-5 w-5 text-orange-600" />
+                      </div>
+                    </div>
+                    <div className="flex-1 space-y-3">
+                      {/* Header */}
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-center gap-2">
+                          <Avatar className="h-7 w-7">
+                            <AvatarImage
+                              src={rollback.rejectedBy?.avatarUrl || ""}
+                              alt={rollback.rejectedBy?.username || ""}
+                            />
+                            <AvatarFallback className="text-xs">
+                              {rollback.rejectedBy?.fullname
+                                ?.split(" ")
+                                .map((n: string) => n[0])
+                                .join("") || "??"}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="text-sm font-medium">
+                              {rollback.rejectedBy?.fullname || "N/A"}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {formatDateTime(rollback.rejectedAt)}
+                            </p>
+                          </div>
+                        </div>
+                        <Badge
+                          variant="outline"
+                          className="bg-orange-100 text-orange-800 border-orange-300"
+                        >
+                          <RotateCcw className="h-3 w-3 mr-1" />
+                          Qaytarildi
+                        </Badge>
+                      </div>
+
+                      {/* Rollback Flow */}
+                      <div className="bg-white rounded-md p-3 border border-orange-100">
+                        <div className="flex items-center gap-2 text-sm">
+                          <div className="flex items-center gap-2 flex-1">
+                            <Badge variant="secondary" className="text-xs">
+                              Bosqich {rollback.fromStepOrder}
+                            </Badge>
+                            <div className="text-xs">
+                              <p className="font-medium">
+                                {rollback.fromStepUser?.fullname}
+                              </p>
+                              <p className="text-muted-foreground">
+                                @{rollback.fromStepUser?.username}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-1 text-orange-600">
+                            <span className="text-xs font-medium">
+                              qaytarildi
+                            </span>
+                            <ArrowRight className="h-4 w-4" />
+                          </div>
+
+                          <div className="flex items-center gap-2 flex-1">
+                            <Badge variant="secondary" className="text-xs">
+                              Bosqich {rollback.toStepOrder}
+                            </Badge>
+                            <div className="text-xs">
+                              <p className="font-medium">
+                                {rollback.toStepUser?.fullname}
+                              </p>
+                              <p className="text-muted-foreground">
+                                @{rollback.toStepUser?.username}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Rollback Reason */}
+                      <div className="bg-white rounded-md p-3 border border-orange-100">
+                        <p className="text-xs font-medium text-orange-800 mb-1">
+                          Rad etish sababi:
+                        </p>
+                        <p className="text-sm text-gray-700">
+                          {rollback.rejectionReason}
+                        </p>
+                        {rollback.comment &&
+                          rollback.comment !== rollback.rejectionReason && (
+                            <>
+                              <p className="text-xs font-medium text-orange-800 mt-2 mb-1">
+                                Qo'shimcha izoh:
+                              </p>
+                              <p className="text-sm text-gray-700">
+                                {rollback.comment}
+                              </p>
+                            </>
+                          )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Workflow Steps Timeline */}
       <Card>
         <CardHeader>
@@ -573,25 +848,176 @@ const WorkflowView = ({ workflow, onClose }: WorkflowViewProps) => {
 
       {/* Reject Dialog */}
       <Dialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>Bosqichni rad etish</DialogTitle>
             <DialogDescription>
-              Iltimos, rad etish sababini kiriting (ixtiyoriy).
+              Iltimos, rad etish sababini kiriting va qaytarish (rollback)
+              parametrlarini sozlang.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-2">
-            <Label htmlFor="rejection-reason">Rad etish sababi</Label>
-            <Textarea
-              id="rejection-reason"
-              placeholder="Sabab yozing..."
-              value={rejectionReason}
-              onChange={(e) => setRejectionReason(e.target.value)}
-              rows={4}
-              className="resize-none"
-              disabled={isLoading}
-            />
+          <div className="space-y-4">
+            {/* Rejection Reason */}
+            <div className="space-y-2">
+              <Label htmlFor="rejection-reason">
+                Rad etish sababi <span className="text-destructive">*</span>
+                <span className="text-xs text-muted-foreground ml-2">
+                  (kamida 10 ta belgi)
+                </span>
+              </Label>
+              <Textarea
+                id="rejection-reason"
+                placeholder="Rad etish sababini batafsil yozing (kamida 10 ta belgi)..."
+                value={rejectionReason}
+                onChange={(e) => setRejectionReason(e.target.value)}
+                rows={3}
+                maxLength={500}
+                minLength={10}
+                required
+                className={`resize-none ${
+                  rejectionReason.length > 0 && rejectionReason.length < 10
+                    ? "border-destructive"
+                    : ""
+                }`}
+                disabled={isLoading}
+              />
+              <div className="flex justify-between text-xs">
+                {rejectionReason.length === 0 ? (
+                  <p className="text-destructive">
+                    Bu maydon majburiy (kamida 10 ta belgi)
+                  </p>
+                ) : rejectionReason.length < 10 ? (
+                  <p className="text-destructive">
+                    Yana {10 - rejectionReason.length} ta belgi kerak
+                  </p>
+                ) : (
+                  <p className="text-green-600">✓ Yetarli</p>
+                )}
+                <p className="text-muted-foreground">
+                  {rejectionReason.length}/500
+                </p>
+              </div>
+            </div>
+
+            {/* Additional Comment */}
+            <div className="space-y-2">
+              <Label htmlFor="comment">Qo'shimcha izoh</Label>
+              <Textarea
+                id="comment"
+                placeholder="Qo'shimcha ma'lumot kiriting..."
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                rows={2}
+                maxLength={1000}
+                className="resize-none"
+                disabled={isLoading}
+              />
+              <p className="text-xs text-muted-foreground">
+                {comment.length}/1000
+              </p>
+            </div>
+
+            {/* Rollback Option */}
+            <div className="space-y-3 pt-2 border-t">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="enable-rollback"
+                  checked={enableRollback}
+                  onCheckedChange={(checked) => {
+                    setEnableRollback(checked === true);
+                    if (!checked) {
+                      setSelectedRollbackUserId("");
+                    }
+                  }}
+                  disabled={
+                    isLoading ||
+                    isLoadingUsers ||
+                    workflow.type !== "CONSECUTIVE" ||
+                    enrichedUsers.length === 0
+                  }
+                />
+                <label
+                  htmlFor="enable-rollback"
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                >
+                  Avvalgi ko'rib chiquvchiga qaytarish (rollback)
+                </label>
+              </div>
+
+              {/* Показываем информацию, почему недоступен rollback */}
+              {workflow.type !== "CONSECUTIVE" && (
+                <p className="text-xs text-muted-foreground pl-6">
+                  ℹ️ Rollback faqat ketma-ket (CONSECUTIVE) workflow uchun
+                  mavjud
+                </p>
+              )}
+
+              {workflow.type === "CONSECUTIVE" &&
+                enrichedUsers.length === 0 && (
+                  <p className="text-xs text-muted-foreground pl-6">
+                    ℹ️ Avvalgi bosqichlar mavjud emas
+                  </p>
+                )}
+
+              {enableRollback && (
+                <div className="space-y-2 pl-6">
+                  <Label htmlFor="rollback-user">
+                    Qaytarish uchun foydalanuvchi{" "}
+                    <span className="text-destructive">*</span>
+                  </Label>
+                  {isLoadingUsers ? (
+                    <div className="text-sm text-muted-foreground">
+                      Foydalanuvchilar yuklanmoqda...
+                    </div>
+                  ) : enrichedUsers.length === 0 ? (
+                    <div className="text-sm text-destructive">
+                      Avvalgi foydalanuvchilar topilmadi
+                    </div>
+                  ) : (
+                    <Select
+                      value={selectedRollbackUserId}
+                      onValueChange={setSelectedRollbackUserId}
+                      disabled={isLoading}
+                    >
+                      <SelectTrigger id="rollback-user">
+                        <SelectValue placeholder="Foydalanuvchini tanlang" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {enrichedUsers.map((user) => {
+                          // Формируем детальную строку для пользователя
+                          const userDisplay = [
+                            `Bosqich ${user.stepOrder}`,
+                            user.userName,
+                            user.userRole && `- ${user.userRole}`,
+                            user.userEmail && `(${user.userEmail})`,
+                          ]
+                            .filter(Boolean)
+                            .join(" ");
+
+                          return (
+                            <SelectItem key={user.userId} value={user.userId}>
+                              {userDisplay}
+                            </SelectItem>
+                          );
+                        })}
+                      </SelectContent>
+                    </Select>
+                  )}
+                  <p className="text-xs text-muted-foreground">
+                    ⚠️ Workflow ushbu foydalanuvchining bosqichidan qayta
+                    boshlanadi
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Ошибка валидации workflow */}
+            {!workflowValidation.isValid && (
+              <div className="text-sm text-destructive bg-red-50 p-3 rounded-md border border-red-200">
+                ⚠️ {workflowValidation.error}
+              </div>
+            )}
           </div>
 
           <DialogFooter>
@@ -600,6 +1026,9 @@ const WorkflowView = ({ workflow, onClose }: WorkflowViewProps) => {
               onClick={() => {
                 setRejectDialogOpen(false);
                 setRejectionReason("");
+                setComment("");
+                setEnableRollback(false);
+                setSelectedRollbackUserId("");
                 setSelectedStep(null);
               }}
               disabled={isLoading}
@@ -609,7 +1038,11 @@ const WorkflowView = ({ workflow, onClose }: WorkflowViewProps) => {
             <Button
               variant="destructive"
               onClick={handleConfirmReject}
-              disabled={isLoading}
+              disabled={
+                isLoading ||
+                !rejectionReason.trim() ||
+                (enableRollback && !selectedRollbackUserId)
+              }
             >
               {isLoading ? "Rad etilmoqda..." : "Rad etish"}
             </Button>
