@@ -74,6 +74,7 @@ export type WorkflowStepApiResponse = {
 
 // Workflow с полными данными (как приходит из API)
 export type WorkflowApiResponse = {
+  type: string;
   id: string;
   documentId: string;
   currentStepOrder: number;
@@ -114,8 +115,121 @@ export type WorkflowStepUpdateType = {
 
 // Данные для отклонения workflow step
 export type WorkflowStepRejectPayload = {
-  comment?: string; // Причина отклонения (опционально)
+  rejectionReason: string; // Причина отклонения (обязательно)
+  comment?: string; // Дополнительный комментарий (опционально)
+  rollbackToUserId?: string; // ID пользователя для отката (опционально, только для CONSECUTIVE)
 };
+
+// Пользователь, доступный для rollback
+export type RollbackUser = {
+  userId: string;
+  userName: string;
+  username?: string;
+  userEmail?: string;
+  userRole?: string;
+  stepOrder: number;
+  stepActionType: string;
+  stepStatus: string;
+};
+
+// Результат валидации workflowSteps
+export type WorkflowStepsValidation = {
+  isValid: boolean;
+  error?: string;
+  userIds: string[];
+};
+
+// Валидация и извлечение ID пользователей из workflowSteps
+export function validateAndExtractUserIds(
+  workflow: WorkflowApiResponse | undefined | null,
+): WorkflowStepsValidation {
+  // Проверка наличия workflow
+  if (!workflow) {
+    return {
+      isValid: false,
+      error: "Workflow недоступен",
+      userIds: [],
+    };
+  }
+
+  // Проверка наличия workflowSteps
+  if (!workflow.workflowSteps || workflow.workflowSteps.length === 0) {
+    return {
+      isValid: false,
+      error: "Нет доступных шагов workflow для отклонения",
+      userIds: [],
+    };
+  }
+
+  // Извлечение ID пользователей
+  const userIds = workflow.workflowSteps
+    .filter((step) => step.assignedToUserId != null)
+    .map((step) => step.assignedToUserId);
+
+  if (userIds.length === 0) {
+    return {
+      isValid: false,
+      error: "Ни одному пользователю не назначен workflow",
+      userIds: [],
+    };
+  }
+
+  return {
+    isValid: true,
+    userIds: [...new Set(userIds)], // Убираем дубликаты
+  };
+}
+
+// Вспомогательная функция для получения списка пользователей, доступных для rollback
+export function getAvailableRollbackUsers(
+  currentStep: WorkflowStepApiResponse,
+  workflow: WorkflowApiResponse,
+): RollbackUser[] {
+  // Rollback доступен только для CONSECUTIVE workflows
+  if (workflow.workflowType !== WorkflowType.CONSECUTIVE) {
+    return [];
+  }
+
+  // Валидация и извлечение данных
+  const validation = validateAndExtractUserIds(workflow);
+  if (!validation.isValid) {
+    return [];
+  }
+
+  // Фильтруем предыдущие шаги с назначенными пользователями
+  const previousSteps = workflow.workflowSteps
+    .filter(
+      (step) => step.order < currentStep.order && step.assignedToUserId != null,
+    )
+    .map((step) => ({
+      userId: step.assignedToUserId,
+      userName: step.assignedToUser?.fullname || "Неизвестный пользователь",
+      username: step.assignedToUser?.username,
+      userEmail: undefined, // Email нужно загрузить отдельно
+      userRole: undefined, // Роль нужно загрузить отдельно
+      stepOrder: step.order,
+      stepActionType: step.actionType,
+      stepStatus: step.status,
+    }))
+    .sort((a, b) => b.stepOrder - a.stepOrder); // Сначала самые недавние
+
+  return previousSteps;
+}
+
+// Функция для проверки, может ли пользователь быть использован для rollback
+export function isUserEligibleForRollback(
+  userId: string,
+  currentStep: WorkflowStepApiResponse,
+  workflow: WorkflowApiResponse,
+): boolean {
+  // Находим шаги, назначенные этому пользователю
+  const userSteps = workflow.workflowSteps.filter(
+    (step) => step.assignedToUserId === userId,
+  );
+
+  // Проверяем, есть ли у пользователя шаги до текущего
+  return userSteps.some((step) => step.order < currentStep.order);
+}
 
 // Список задач пользователя (workflow steps)
 export interface MyTasksResponse extends DataPagination {

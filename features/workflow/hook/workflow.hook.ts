@@ -9,9 +9,12 @@ import {
   WorkflowStepRejectPayload,
   MyTasksResponse,
   MyTasksQueryParams,
+  RollbackUser,
 } from "../type/workflow.type";
 import { WorkflowCreateType } from "../schema/workflow.schema";
 import { toast } from "sonner";
+import { useGetUserByIdQuery } from "@/features/admin/admin-users/hook/user.hook";
+import { useMemo } from "react";
 
 /**
  * Создать workflow с вложенными steps
@@ -214,4 +217,59 @@ export const useGetMyTasks = (params?: MyTasksQueryParams) => {
     queryFn: () => workflowService.getMyTasks(params),
     keepPreviousData: true,
   });
+};
+
+/**
+ * Хук для загрузки расширенных данных о пользователях для rollback
+ * Загружает детальную информацию о пользователе (email, роль и т.д.)
+ */
+export const useEnrichedRollbackUsers = (
+  rollbackUsers: RollbackUser[]
+): {
+  enrichedUsers: RollbackUser[];
+  isLoading: boolean;
+  hasError: boolean;
+} => {
+  // Извлекаем уникальные ID пользователей
+  const userIds = useMemo(
+    () => [...new Set(rollbackUsers.map((u) => u.userId))],
+    [rollbackUsers]
+  );
+
+  // Загружаем данные для каждого пользователя
+  // Примечание: это может быть неоптимально для большого количества пользователей
+  // В production лучше использовать batch API endpoint
+  const userQueries = userIds.map((userId) => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    return useGetUserByIdQuery(userId);
+  });
+
+  const isLoading = userQueries.some((query) => query.isLoading);
+  const hasError = userQueries.some((query) => query.isError);
+
+  // Обогащаем данные о пользователях
+  const enrichedUsers = useMemo(() => {
+    return rollbackUsers.map((rollbackUser) => {
+      const userQuery = userQueries.find(
+        (query) => query.data?.id === rollbackUser.userId
+      );
+
+      if (userQuery?.data) {
+        return {
+          ...rollbackUser,
+          userEmail: undefined, // Email не доступен в текущей API
+          userRole: userQuery.data.role?.name,
+          username: userQuery.data.username,
+        };
+      }
+
+      return rollbackUser;
+    });
+  }, [rollbackUsers, userQueries]);
+
+  return {
+    enrichedUsers,
+    isLoading,
+    hasError,
+  };
 };

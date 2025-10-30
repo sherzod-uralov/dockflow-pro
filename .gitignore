@@ -6,7 +6,9 @@
 # next.js
 /.next/
 /out/
-
+/WORKFLOW_GUIDE.md
+/WORKFLOW_REJECTION_ASSIGNMENT.md
+/BACKEND_NEW_FEATURES.md
 # production
 /build
 

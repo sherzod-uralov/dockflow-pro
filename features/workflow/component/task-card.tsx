@@ -17,6 +17,7 @@ import { WorkflowStepApiResponse } from "@/features/workflow";
 import {
   useCompleteWorkflowStep,
   useRejectWorkflowStep,
+  useGetWorkflowById,
 } from "@/features/workflow";
 import {
   AlertDialog,
@@ -28,6 +29,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { formatDate } from "@/lib/date-utils";
@@ -58,14 +66,32 @@ const TaskCard = ({ task, onActionComplete }: TaskCardProps) => {
   const [showRejectDialog, setShowRejectDialog] = useState(false);
   const [showCompleteDialog, setShowCompleteDialog] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
+  const [comment, setComment] = useState("");
+  const [rollbackToUserId, setRollbackToUserId] = useState<string>("");
 
   const completeMutation = useCompleteWorkflowStep();
   const rejectMutation = useRejectWorkflowStep();
 
-  // Получаем данные пользователя по ID
+  // Получаем данные пользователя
   const { data: userData, isLoading: isUserLoading } = useGetUserByIdQuery(
     task.assignedToUserId,
   );
+
+  // Загружаем workflow для получения списка пользователей
+  const { data: workflowData, isLoading: isWorkflowLoading } =
+    useGetWorkflowById(task.workflowId);
+
+  // Получаем пользователей из предыдущих шагов для rollback
+  const previousUsers =
+    workflowData?.workflowSteps
+      .filter((step) => step.order < task.order && step.assignedToUser)
+      .map((step) => ({
+        id: step.assignedToUserId,
+        name:
+          step.assignedToUser?.fullname || step.assignedToUser?.username || "",
+        username: step.assignedToUser?.username || "",
+        stepOrder: step.order,
+      })) || [];
 
   const isLoading =
     completeMutation.isLoading || rejectMutation.isLoading || isUserLoading;
@@ -80,15 +106,36 @@ const TaskCard = ({ task, onActionComplete }: TaskCardProps) => {
   };
 
   const handleReject = () => {
+    if (!rejectReason.trim() || rejectReason.trim().length < 10) {
+      alert("Rad etish sababi kamida 10 ta belgidan iborat bo'lishi kerak");
+      return;
+    }
+
+    if (!rollbackToUserId) {
+      alert("Iltimos, qaytarish uchun foydalanuvchini tanlang");
+      return;
+    }
+
+    const payload: any = {
+      rejectionReason: rejectReason.trim(),
+      rollbackToUserId: rollbackToUserId,
+    };
+
+    if (comment.trim()) {
+      payload.comment = comment.trim();
+    }
+
     rejectMutation.mutate(
       {
         id: task.id,
-        data: rejectReason ? { comment: rejectReason } : undefined,
+        data: payload,
       },
       {
         onSuccess: () => {
           setShowRejectDialog(false);
           setRejectReason("");
+          setComment("");
+          setRollbackToUserId("");
           onActionComplete?.();
         },
       },
@@ -151,13 +198,11 @@ const TaskCard = ({ task, onActionComplete }: TaskCardProps) => {
   const actionConfig = getActionTypeConfig();
   const ActionIcon = actionConfig.icon;
 
-  // Проверяем, можно ли выполнять действия над задачей
   const canPerformActions =
     task.status === "NOT_STARTED" ||
     task.status === "PENDING" ||
     task.status === "IN_PROGRESS";
 
-  // Данные документа из workflow
   const document = task.workflow?.document;
 
   return (
@@ -181,7 +226,6 @@ const TaskCard = ({ task, onActionComplete }: TaskCardProps) => {
         </CardHeader>
 
         <CardContent className="space-y-4">
-          {/* Action Type */}
           <div className="flex items-center gap-2">
             <Badge
               variant="outline"
@@ -195,7 +239,6 @@ const TaskCard = ({ task, onActionComplete }: TaskCardProps) => {
             </span>
           </div>
 
-          {/* Due Date */}
           {task.dueDate && (
             <div className="flex items-center gap-2 text-sm">
               <Clock className="h-4 w-4 text-muted-foreground" />
@@ -204,7 +247,6 @@ const TaskCard = ({ task, onActionComplete }: TaskCardProps) => {
             </div>
           )}
 
-          {/* Assigned User */}
           <div className="flex items-center gap-2 text-sm">
             <User className="h-4 w-4 text-muted-foreground" />
             <span className="text-muted-foreground">Mas'ul:</span>
@@ -219,7 +261,6 @@ const TaskCard = ({ task, onActionComplete }: TaskCardProps) => {
             )}
           </div>
 
-          {/* Completed Date */}
           {task.completedAt && (
             <div className="flex items-center gap-2 text-sm">
               <CheckCircle2 className="h-4 w-4 text-green-600" />
@@ -230,7 +271,6 @@ const TaskCard = ({ task, onActionComplete }: TaskCardProps) => {
             </div>
           )}
 
-          {/* Rejection Reason (if rejected) */}
           {task.isRejected && task.rejectionReason && (
             <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-md">
               <p className="text-sm font-medium text-destructive mb-1">
@@ -242,7 +282,6 @@ const TaskCard = ({ task, onActionComplete }: TaskCardProps) => {
             </div>
           )}
 
-          {/* Action Buttons */}
           {canPerformActions && (
             <div className="flex gap-2 pt-2">
               <Button
@@ -268,7 +307,7 @@ const TaskCard = ({ task, onActionComplete }: TaskCardProps) => {
         </CardContent>
       </Card>
 
-      {/* Complete Confirmation Dialog */}
+      {/* Complete Dialog */}
       <AlertDialog
         open={showCompleteDialog}
         onOpenChange={setShowCompleteDialog}
@@ -277,8 +316,7 @@ const TaskCard = ({ task, onActionComplete }: TaskCardProps) => {
           <AlertDialogHeader>
             <AlertDialogTitle>Vazifani tasdiqlash</AlertDialogTitle>
             <AlertDialogDescription>
-              Siz haqiqatan ham bu vazifani tasdiqlashni xohlaysizmi? Bu amaldan
-              keyin workflow keyingi bosqichga o'tadi.
+              Siz haqiqatan ham bu vazifani tasdiqlashni xohlaysizmi?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -292,35 +330,125 @@ const TaskCard = ({ task, onActionComplete }: TaskCardProps) => {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Reject Dialog with Reason */}
+      {/* Reject Dialog with Rollback */}
       <AlertDialog open={showRejectDialog} onOpenChange={setShowRejectDialog}>
-        <AlertDialogContent>
+        <AlertDialogContent className="max-w-lg">
           <AlertDialogHeader>
             <AlertDialogTitle>Vazifani rad etish</AlertDialogTitle>
             <AlertDialogDescription>
-              Iltimos, rad etish sababini kiriting (ixtiyoriy).
+              Hujjatni qaytarish uchun foydalanuvchini tanlang va rad etish
+              sababini kiriting
             </AlertDialogDescription>
           </AlertDialogHeader>
 
-          <div className="space-y-2">
-            <Label htmlFor="reject-reason">Rad etish sababi</Label>
-            <Textarea
-              id="reject-reason"
-              placeholder="Sabab kiriting..."
-              value={rejectReason}
-              onChange={(e) => setRejectReason(e.target.value)}
-              rows={4}
-              disabled={isLoading}
-            />
+          <div className="space-y-4">
+            {/* ROLLBACK USER SELECT */}
+            <div className="space-y-2">
+              <Label htmlFor="rollback-user">
+                Qaytarish uchun foydalanuvchi{" "}
+                <span className="text-destructive">*</span>
+              </Label>
+              {isWorkflowLoading ? (
+                <div className="text-sm text-muted-foreground">
+                  Yuklanmoqda...
+                </div>
+              ) : previousUsers.length === 0 ? (
+                <div className="text-sm text-muted-foreground">
+                  Qaytarish uchun foydalanuvchilar yo'q
+                </div>
+              ) : (
+                <Select
+                  value={rollbackToUserId}
+                  onValueChange={setRollbackToUserId}
+                  disabled={isLoading}
+                >
+                  <SelectTrigger id="rollback-user">
+                    <SelectValue placeholder="Foydalanuvchini tanlang..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {previousUsers.map((user) => (
+                      <SelectItem key={user.id} value={user.id}>
+                        {user.name} (@{user.username}) - Bosqich{" "}
+                        {user.stepOrder}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            </div>
+
+            {/* REJECTION REASON */}
+            <div className="space-y-2">
+              <Label htmlFor="reject-reason">
+                Rad etish sababi <span className="text-destructive">*</span>
+                <span className="text-xs text-muted-foreground ml-2">
+                  (kamida 10 ta belgi)
+                </span>
+              </Label>
+              <Textarea
+                id="reject-reason"
+                placeholder="Rad etish sababini kiriting..."
+                value={rejectReason}
+                onChange={(e) => setRejectReason(e.target.value)}
+                rows={4}
+                maxLength={500}
+                disabled={isLoading}
+                className="resize-none"
+              />
+              <div className="flex justify-between text-xs">
+                {rejectReason.length < 10 ? (
+                  <p className="text-destructive">
+                    {rejectReason.length === 0
+                      ? "Bu maydon majburiy"
+                      : `Yana ${10 - rejectReason.length} ta belgi kerak`}
+                  </p>
+                ) : (
+                  <p className="text-green-600">✓ Yetarli</p>
+                )}
+                <p className="text-muted-foreground">
+                  {rejectReason.length}/500
+                </p>
+              </div>
+            </div>
+
+            {/* COMMENT */}
+            <div className="space-y-2">
+              <Label htmlFor="reject-comment">Qo'shimcha izoh</Label>
+              <Textarea
+                id="reject-comment"
+                placeholder="Qo'shimcha ma'lumot kiriting..."
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                rows={2}
+                maxLength={1000}
+                disabled={isLoading}
+                className="resize-none"
+              />
+              <p className="text-xs text-muted-foreground text-right">
+                {comment.length}/1000
+              </p>
+            </div>
           </div>
 
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isLoading}>
+            <AlertDialogCancel
+              disabled={isLoading}
+              onClick={() => {
+                setRejectReason("");
+                setComment("");
+                setRollbackToUserId("");
+              }}
+            >
               Bekor qilish
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleReject}
-              disabled={isLoading}
+              disabled={
+                isLoading ||
+                !rejectReason.trim() ||
+                rejectReason.trim().length < 10 ||
+                !rollbackToUserId
+              }
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               {isLoading ? "Rad etilmoqda..." : "Rad etish"}
