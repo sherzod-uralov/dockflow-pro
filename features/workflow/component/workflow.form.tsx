@@ -32,6 +32,7 @@ import {
 } from "../hook/workflow.hook";
 import WorkflowStepItem from "./workflow-step-item";
 import { useGetUserQuery } from "@/features/admin/admin-users/hook/user.hook";
+import { useGetAllDeportaments } from "@/features/deportament/hook/deportament.hook";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   apiToFormData,
@@ -81,7 +82,13 @@ const WorkflowForm = ({
 }: WorkflowFormProps) => {
   const createWorkflowMutation = useCreateWorkflow();
   const updateStepMutation = useUpdateWorkflowStep(); // ✅ ИЗМЕНЕНО: используем хук для step
-  const { data: usersData, isLoading: isLoadingUsers } = useGetUserQuery();
+  const { data: usersData, isLoading: isLoadingUsers } = useGetUserQuery({
+    pageSize: 1000, // Загружаем всех пользователей
+  });
+  const { data: departmentsData, isLoading: isLoadingDepartments } =
+    useGetAllDeportaments({
+      pageSize: 1000, // Загружаем все отделы
+    });
 
   const { data: documentsData, isLoading: isLoadingDocuments } =
     useGetAllDocuments();
@@ -352,7 +359,9 @@ const WorkflowForm = ({
                 control={form.control}
                 onRemove={() => remove(index)}
                 usersData={usersData}
+                departmentsData={departmentsData}
                 isLoadingUsers={isLoadingUsers}
+                isLoadingDepartments={isLoadingDepartments}
                 canRemove={fields.length > 1}
               />
             ))}
