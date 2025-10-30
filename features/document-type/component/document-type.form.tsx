@@ -78,6 +78,7 @@ const DocumentTypeFormModal = ({
         },
       );
     } else {
+      // @ts-ignore
       createDocumentTypeMutation.mutate(values, {
         onSuccess: () => {
           modal.closeModal();
