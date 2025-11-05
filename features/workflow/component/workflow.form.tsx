@@ -1,11 +1,27 @@
 "use client";
+
+import { useEffect, useMemo } from "react";
+import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, useFieldArray } from "react-hook-form";
+import { Plus, Info, Trash2 } from "lucide-react";
 import {
   workflowCreateSchema,
   workflowUpdateSchema,
   WorkflowFormType,
 } from "../schema/workflow.schema";
+import {
+  WorkflowFormProps,
+  ACTION_TYPE_OPTIONS,
+  WORKFLOW_TYPE_OPTIONS,
+  WorkflowActionType,
+  WorkflowType,
+  WorkflowStepUpdateType,
+} from "@/features/workflow/type/workflow.type";
+import { useGetUserQuery } from "@/features/admin/admin-users/hook/user.hook";
+import { useGetAllDocuments } from "@/features/document";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Form,
   FormControl,
@@ -22,56 +38,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { Plus, Info } from "lucide-react";
-import { useEffect, useMemo } from "react";
-import { WorkflowFormProps } from "../type/workflow.type";
-import {
-  useCreateWorkflow,
-  useUpdateWorkflowStep, // ✅ ДОБАВИЛИ импорт
-} from "../hook/workflow.hook";
-import WorkflowStepItem from "./workflow-step-item";
-import { useGetUserQuery } from "@/features/admin/admin-users/hook/user.hook";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Input } from "@/components/ui/input";
 import {
   apiToFormData,
   formToApiPayload,
   createEmptyStep,
 } from "../utils/workflow.mapper";
-import { useGetAllDocuments } from "@/features/document";
-
-const ACTION_TYPE_OPTIONS = [
-  {
-    value: "APPROVAL",
-    label: "Tasdiqlash",
-    description: "Hujjatni tasdiqlash jarayoni",
-  },
-  {
-    value: "REVIEW",
-    label: "Ko'rib chiqish",
-    description: "Hujjatni ko'rib chiqish",
-  },
-  { value: "SIGN", label: "Imzolash", description: "Hujjatga imzo qo'yish" },
-  {
-    value: "NOTIFY",
-    label: "Xabarnoma",
-    description: "Foydalanuvchilarga xabar yuborish",
-  },
-] as const;
-
-const WORKFLOW_TYPE_OPTIONS = [
-  {
-    value: "Ketma-ket",
-    label: "Ketma-ket",
-    description:
-      "Har bir bosqich oldingi bosqich tugaganidan keyin boshlanadi",
-  },
-  {
-    value: "Parallel",
-    label: "Parallel",
-    description: "Barcha bosqichlar bir vaqtning o'zida bajariladi",
-  },
-] as const;
+import { useCreateWorkflow, useUpdateWorkflowStep } from "@/features/workflow";
 
 const WorkflowForm = ({
   modal,
@@ -80,17 +53,14 @@ const WorkflowForm = ({
   onSuccess,
 }: WorkflowFormProps) => {
   const createWorkflowMutation = useCreateWorkflow();
-  const updateStepMutation = useUpdateWorkflowStep(); // ✅ ИЗМЕНЕНО: используем хук для step
+  const updateStepMutation = useUpdateWorkflowStep();
   const { data: usersData, isLoading: isLoadingUsers } = useGetUserQuery();
-
-  const { data: documentsData, isLoading: isLoadingDocuments } =
-    useGetAllDocuments();
+  const { data: documentsData } = useGetAllDocuments();
 
   const isUpdate = mode === "edit";
   const isLoading =
-    createWorkflowMutation.isLoading || updateStepMutation.isLoading; // ✅ ИЗМЕНЕНО
+    createWorkflowMutation.isLoading || updateStepMutation.isLoading;
 
-  // Выбираем правильную схему валидации
   const validationSchema = useMemo(
     () => (isUpdate ? workflowUpdateSchema : workflowCreateSchema),
     [isUpdate],
@@ -101,8 +71,8 @@ const WorkflowForm = ({
     mode: "onChange",
     defaultValues: {
       documentId: "",
-      actionType: "APPROVAL",
-      workflowType: "Ketma-ket",
+      actionType: WorkflowActionType.APPROVAL,
+      workflowType: WorkflowType.CONSECUTIVE,
       steps: [createEmptyStep()],
     },
   });
@@ -112,7 +82,6 @@ const WorkflowForm = ({
     name: "steps",
   });
 
-  // Загрузка данных при редактировании
   useEffect(() => {
     if (isUpdate && workflow) {
       const formData = apiToFormData(workflow);
@@ -120,8 +89,8 @@ const WorkflowForm = ({
     } else if (!isUpdate) {
       form.reset({
         documentId: "",
-        actionType: "APPROVAL",
-        workflowType: "Ketma-ket",
+        actionType: WorkflowActionType.APPROVAL,
+        workflowType: WorkflowType.CONSECUTIVE,
         steps: [createEmptyStep()],
       });
     }
@@ -139,9 +108,9 @@ const WorkflowForm = ({
       const total = stepsToUpdate.length;
 
       stepsToUpdate.forEach((step, index) => {
-        const payload = {
+        const payload: WorkflowStepUpdateType = {
           order: index,
-          actionType: values.actionType,
+          actionType: values.actionType as WorkflowActionType,
           assignedToUserId: step.assignedToUserId,
           dueDate: step.dueDate ? `${step.dueDate}T23:59:59.000Z` : null,
         };
@@ -187,14 +156,13 @@ const WorkflowForm = ({
 
   return (
     <Form {...form}>
-      <form className="space-y-6" onSubmit={form.handleSubmit(handleSubmit)}>
-        {/* Document Selection */}
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         <FormField
           control={form.control}
           name="documentId"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Hujjat *</FormLabel>
+              <FormLabel>Hujjat</FormLabel>
               <Select
                 onValueChange={field.onChange}
                 value={field.value}
@@ -218,13 +186,12 @@ const WorkflowForm = ({
           )}
         />
 
-        {/* Workflow Type */}
         <FormField
           control={form.control}
           name="workflowType"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Workflow turi *</FormLabel>
+              <FormLabel>Workflow turi</FormLabel>
               <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
                   <SelectTrigger>
@@ -254,13 +221,12 @@ const WorkflowForm = ({
           )}
         />
 
-        {/* Action Type */}
         <FormField
           control={form.control}
           name="actionType"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Amal turi (barcha bosqichlar uchun) *</FormLabel>
+              <FormLabel>Amal turi (barcha bosqichlar uchun)</FormLabel>
               <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
                   <SelectTrigger>
@@ -290,7 +256,6 @@ const WorkflowForm = ({
           )}
         />
 
-        {/* Info Alert */}
         <Alert>
           <Info className="h-4 w-4" />
           <AlertDescription>
@@ -311,7 +276,6 @@ const WorkflowForm = ({
           </AlertDescription>
         </Alert>
 
-        {/* Workflow Steps Section */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
@@ -334,7 +298,6 @@ const WorkflowForm = ({
             </Button>
           </div>
 
-          {/* Validation Error for steps array */}
           {form.formState.errors.steps?.root && (
             <Alert variant="destructive">
               <AlertDescription>
@@ -343,18 +306,75 @@ const WorkflowForm = ({
             </Alert>
           )}
 
-          {/* Steps List */}
           <div className="space-y-3 max-h-[400px] overflow-y-auto pr-1">
             {fields.map((field, index) => (
-              <WorkflowStepItem
-                key={field.id}
-                index={index}
-                control={form.control}
-                onRemove={() => remove(index)}
-                usersData={usersData}
-                isLoadingUsers={isLoadingUsers}
-                canRemove={fields.length > 1}
-              />
+              <Card key={field.id}>
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-base">
+                      Bosqich {index + 1}
+                    </CardTitle>
+                    {fields.length > 1 && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => remove(index)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                </CardHeader>
+                <CardContent className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name={`steps.${index}.assignedToUserId`}
+                    render={({ field: formField }) => (
+                      <FormItem>
+                        <FormLabel>Mas'ul shaxs</FormLabel>
+                        <Select
+                          onValueChange={formField.onChange}
+                          value={formField.value}
+                          disabled={isLoadingUsers}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Foydalanuvchini tanlang" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {usersData?.data.map((user: any) => (
+                              <SelectItem key={user.id} value={user.id}>
+                                {user.fullname} ({user.username})
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name={`steps.${index}.dueDate`}
+                    render={({ field: formField }) => (
+                      <FormItem>
+                        <FormLabel>Muddat</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="date"
+                            {...formField}
+                            value={formField.value || ""}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </CardContent>
+              </Card>
             ))}
           </div>
 
@@ -367,7 +387,6 @@ const WorkflowForm = ({
           )}
         </div>
 
-        {/* Form Actions */}
         <div className="flex justify-end gap-2 pt-4 border-t">
           <Button
             type="button"

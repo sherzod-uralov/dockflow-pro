@@ -8,22 +8,17 @@ import {
   WorkflowStepRejectPayload,
   MyTasksResponse,
   MyTasksQueryParams,
-} from "../type/workflow.type";
+} from "@/features/workflow/type/workflow.type";
 import { WorkflowCreateType } from "../schema/workflow.schema";
-import { errorHandlers } from "@/utils/http-error-handler";
+import { workflowErrorHandler } from "../error/workflow.http.error";
 import { endpoints } from "@/api/axios.endpoints";
 
-const workflowHandler = errorHandlers.workflow;
-
 export const workflowService = {
-  /**
-   * Получить список всех workflows с пагинацией
-   */
   getAllWorkflows: async (params?: WorkflowQueryParams) => {
-    return await workflowHandler.executeList(() =>
+    return workflowErrorHandler(() =>
       axiosInstance.get<WorkflowListResponse>(endpoints.workflow.list, {
         params: {
-          documentId: params?.documentId, // ✨ ИЗМЕНЕНО
+          documentId: params?.documentId,
           status: params?.status,
           page: params?.page, // ✨ ИЗМЕНЕНО: было pageNumber
           limit: params?.limit, // ✨ ИЗМЕНЕНО: было pageSize
@@ -37,7 +32,7 @@ export const workflowService = {
    * Backend автоматически создаст все steps за один запрос
    */
   createWorkflow: async (data: WorkflowCreateType) => {
-    return await workflowHandler.executeCreate(() =>
+    return workflowErrorHandler(() =>
       axiosInstance.post<WorkflowApiResponse>(endpoints.workflow.create, data),
     );
   },
@@ -47,7 +42,7 @@ export const workflowService = {
    * Можно обновить как сам workflow, так и его steps
    */
   updateWorkflow: async (id: string, data: Partial<WorkflowCreateType>) => {
-    return await workflowHandler.executeUpdate(() =>
+    return workflowErrorHandler(() =>
       axiosInstance.patch<WorkflowApiResponse>(
         endpoints.workflow.update(id),
         data,
@@ -59,7 +54,7 @@ export const workflowService = {
    * Удалить workflow (cascade удаление steps происходит на backend)
    */
   deleteWorkflow: async (id: string) => {
-    return await workflowHandler.executeDelete(() =>
+    return workflowErrorHandler(() =>
       axiosInstance.delete(endpoints.workflow.delete(id)),
     );
   },
@@ -68,7 +63,7 @@ export const workflowService = {
    * Получить один workflow по ID с полными данными
    */
   getWorkflowById: async (id: string) => {
-    return await workflowHandler.executeGet(() =>
+    return workflowErrorHandler(() =>
       axiosInstance.get<WorkflowApiResponse>(endpoints.workflow.detail(id)),
     );
   },
@@ -77,7 +72,7 @@ export const workflowService = {
    * Получить steps конкретного workflow
    */
   getWorkflowSteps: async (workflowId: string) => {
-    return await workflowHandler.executeList(() =>
+    return workflowErrorHandler(() =>
       axiosInstance.get(`/api/v1/workflow-step/workflow/${workflowId}`),
     );
   },
@@ -86,7 +81,7 @@ export const workflowService = {
    * Обновить конкретный workflow step
    */
   updateWorkflowStep: async (id: string, data: WorkflowStepUpdateType) => {
-    return await workflowHandler.executeUpdate(() =>
+    return workflowErrorHandler(() =>
       axiosInstance.patch<WorkflowStepApiResponse>(
         endpoints.workflowStep.update(id),
         data,
@@ -98,7 +93,7 @@ export const workflowService = {
    * Завершить (принять) workflow step
    */
   completeWorkflowStep: async (id: string) => {
-    return await workflowHandler.executeUpdate(() =>
+    return workflowErrorHandler(() =>
       axiosInstance.patch<WorkflowStepApiResponse>(
         endpoints.workflowStep.complete(id),
       ),
@@ -109,7 +104,7 @@ export const workflowService = {
    * Отклонить workflow step
    */
   rejectWorkflowStep: async (id: string, data?: WorkflowStepRejectPayload) => {
-    return await workflowHandler.executeUpdate(() =>
+    return workflowErrorHandler(() =>
       axiosInstance.patch<WorkflowStepApiResponse>(
         endpoints.workflowStep.reject(id),
         data || {},
@@ -117,16 +112,6 @@ export const workflowService = {
     );
   },
 
-  /**
-   * Получить мои задачи (workflow steps, назначенные текущему пользователю)
-   * Backend автоматически фильтрует по accessToken
-   *
-   * ВАЖНО: Для корректного отображения данных на карточке, backend должен возвращать:
-   * - assignedToUser (expanded) - объект с fullname, username
-   * - workflow.document (expanded) - объект с title, documentNumber
-   *
-   * Если backend не поддерживает expand, добавьте параметр: expand=assignedToUser,workflow.document
-   */
   getMyTasks: async (params?: MyTasksQueryParams) => {
     const queryParams: Record<string, any> = {
       pageNumber: params?.page ?? 1,
@@ -136,7 +121,7 @@ export const workflowService = {
     if (params?.status) queryParams.status = params.status;
     if (params?.actionType) queryParams.actionType = params.actionType;
 
-    return await workflowHandler.executeList(() =>
+    return workflowErrorHandler(() =>
       axiosInstance.get<MyTasksResponse>(endpoints.workflowStep.list, {
         params: queryParams,
       }),

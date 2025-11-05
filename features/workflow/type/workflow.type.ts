@@ -1,29 +1,69 @@
 import { DataPagination } from "@/types/global.types";
 import { ModalState } from "@/types/modal";
 
-// ============================================
-// ENUMS & CONSTANTS
-// ============================================
-
 export enum WorkflowType {
   CONSECUTIVE = "Ketma-ket",
   PARALLEL = "Parallel",
 }
 
-export type WorkflowStatus = "ACTIVE" | "COMPLETED" | "CANCELLED" | "DRAFT";
-export type WorkflowStepStatus =
-  | "NOT_STARTED"
-  | "PENDING"
-  | "IN_PROGRESS"
-  | "COMPLETED"
-  | "REJECTED";
-export type WorkflowActionType = "APPROVAL" | "REVIEW" | "SIGN" | "NOTIFY";
+export enum WorkflowStatus {
+  ACTIVE = "ACTIVE",
+  COMPLETED = "COMPLETED",
+  CANCELLED = "CANCELLED",
+  DRAFT = "DRAFT",
+}
 
-// ============================================
-// API RESPONSE TYPES
-// ============================================
+export enum WorkflowStepStatus {
+  NOT_STARTED = "NOT_STARTED",
+  PENDING = "PENDING",
+  IN_PROGRESS = "IN_PROGRESS",
+  COMPLETED = "COMPLETED",
+  REJECTED = "REJECTED",
+}
 
-// Информация о документе (вложенная)
+export enum WorkflowActionType {
+  APPROVAL = "APPROVAL",
+  REVIEW = "REVIEW",
+  SIGN = "SIGN",
+  NOTIFY = "NOTIFY",
+}
+
+export const ACTION_TYPE_OPTIONS = [
+  {
+    value: WorkflowActionType.APPROVAL,
+    label: "Tasdiqlash",
+    description: "Hujjatni tasdiqlash jarayoni",
+  },
+  {
+    value: WorkflowActionType.REVIEW,
+    label: "Ko'rib chiqish",
+    description: "Hujjatni ko'rib chiqish",
+  },
+  {
+    value: WorkflowActionType.SIGN,
+    label: "Imzolash",
+    description: "Hujjatga imzo qo'yish",
+  },
+  {
+    value: WorkflowActionType.NOTIFY,
+    label: "Xabarnoma",
+    description: "Foydalanuvchilarga xabar yuborish",
+  },
+] as const;
+
+export const WORKFLOW_TYPE_OPTIONS = [
+  {
+    value: WorkflowType.CONSECUTIVE,
+    label: "Ketma-ket",
+    description: "Har bir bosqich oldingi bosqich tugaganidan keyin boshlanadi",
+  },
+  {
+    value: WorkflowType.PARALLEL,
+    label: "Parallel",
+    description: "Barcha bosqichlar bir vaqtning o'zida bajariladi",
+  },
+] as const;
+
 export type DocumentInfo = {
   id: string;
   title: string;
@@ -32,14 +72,12 @@ export type DocumentInfo = {
   version: number;
 };
 
-// Назначенный пользователь (вложенная)
 export type AssignedUser = {
   id: string;
   fullname: string;
   username: string;
 };
 
-// Действие, выполненное над WorkflowStep
 export type WorkflowStepAction = {
   id: string;
   workflowStepId: string;
@@ -52,7 +90,6 @@ export type WorkflowStepAction = {
   updatedAt: string;
 };
 
-// WorkflowStep с полными данными (как приходит из API)
 export type WorkflowStepApiResponse = {
   id: string;
   order: number;
@@ -60,26 +97,25 @@ export type WorkflowStepApiResponse = {
   actionType: WorkflowActionType;
   workflowId: string;
   assignedToUserId: string;
-  assignedToUser?: AssignedUser; // ✨ Опциональное (если API не возвращает expanded данные)
+  assignedToUser?: AssignedUser;
   startedAt: string | null;
   completedAt: string | null;
-  dueDate: string | null; // ✨ Опциональное
+  dueDate: string | null;
   isRejected: boolean;
   rejectionReason: string | null;
   rejectedAt: string | null;
-  actions?: WorkflowStepAction[]; // ✨ История действий
+  actions?: WorkflowStepAction[];
   createdAt: string;
   updatedAt: string;
 };
 
-// Workflow с полными данными (как приходит из API)
 export type WorkflowApiResponse = {
   type: string;
   id: string;
   documentId: string;
   currentStepOrder: number;
   status: WorkflowStatus;
-  workflowType?: WorkflowType; // ⚠️ Опциональное - backend пока не поддерживает это поле
+  workflowType?: WorkflowType;
   document: DocumentInfo;
   workflowSteps: WorkflowStepApiResponse[];
   createdAt: string;
@@ -87,19 +123,12 @@ export type WorkflowApiResponse = {
   deletedAt: string | null;
 };
 
-// ============================================
-// FORM TYPES (для создания/редактирования)
-// ============================================
-
-// Данные одного step для формы (плоская структура)
-// ✨ ОБНОВЛЕНО: вернули dueDate как опциональное
 export type WorkflowStepFormData = {
-  id?: string; // ✨ ID существующего step (только для edit режима)
+  id?: string;
   assignedToUserId: string;
-  dueDate?: string | null; // Опциональное поле
+  dueDate?: string | null;
 };
 
-// Данные для обновления workflow step
 export type WorkflowStepUpdateType = {
   order?: number;
   status?: WorkflowStepStatus;
@@ -113,14 +142,12 @@ export type WorkflowStepUpdateType = {
   rejectedAt?: string | null;
 };
 
-// Данные для отклонения workflow step
 export type WorkflowStepRejectPayload = {
-  rejectionReason: string; // Причина отклонения (обязательно)
-  comment?: string; // Дополнительный комментарий (опционально)
-  rollbackToUserId?: string; // ID пользователя для отката (опционально, только для CONSECUTIVE)
+  rejectionReason: string;
+  comment?: string;
+  rollbackToUserId?: string;
 };
 
-// Пользователь, доступный для rollback
 export type RollbackUser = {
   userId: string;
   userName: string;
@@ -132,18 +159,15 @@ export type RollbackUser = {
   stepStatus: string;
 };
 
-// Результат валидации workflowSteps
 export type WorkflowStepsValidation = {
   isValid: boolean;
   error?: string;
   userIds: string[];
 };
 
-// Валидация и извлечение ID пользователей из workflowSteps
 export function validateAndExtractUserIds(
   workflow: WorkflowApiResponse | undefined | null,
 ): WorkflowStepsValidation {
-  // Проверка наличия workflow
   if (!workflow) {
     return {
       isValid: false,
@@ -152,7 +176,6 @@ export function validateAndExtractUserIds(
     };
   }
 
-  // Проверка наличия workflowSteps
   if (!workflow.workflowSteps || workflow.workflowSteps.length === 0) {
     return {
       isValid: false,
@@ -161,7 +184,6 @@ export function validateAndExtractUserIds(
     };
   }
 
-  // Извлечение ID пользователей
   const userIds = workflow.workflowSteps
     .filter((step) => step.assignedToUserId != null)
     .map((step) => step.assignedToUserId);

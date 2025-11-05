@@ -77,6 +77,7 @@ interface Props {
     isValid: boolean;
   }) => React.ReactNode;
   onFormReady?: (form: any) => void;
+  children?: React.ReactNode;
 }
 
 export default function SimpleFormGenerator({
@@ -88,6 +89,7 @@ export default function SimpleFormGenerator({
   className = "",
   renderActions,
   onFormReady,
+  children,
 }: Props) {
   const form = useForm({
     resolver: zodResolver(schema),
@@ -308,6 +310,8 @@ export default function SimpleFormGenerator({
             />
           </div>
         ))}
+
+        {children}
 
         <div className="flex justify-end col-span-2 gap-2">
           {renderActions ? (

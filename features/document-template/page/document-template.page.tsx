@@ -60,7 +60,9 @@ const DocumentTemplatePage = () => {
     const templateId = searchParams.get("templateId");
 
     if (templateId) {
-      const template = data?.data?.find((t: DocumentTemplateResponse) => t.id === templateId);
+      const template = data?.data?.find(
+        (t: DocumentTemplateResponse) => t.id === templateId,
+      );
 
       if (template) {
         setSelectedTemplate(template);
@@ -97,18 +99,7 @@ const DocumentTemplatePage = () => {
   };
 
   const handleEditDocument = (item: DocumentTemplateResponse) => {
-    if (!item.templateFile?.fileUrl) {
-      toast.error("Hujjat fayli topilmadi");
-      return;
-    }
-
-    const editUrl = createDocumentEditUrl(
-      item.templateFile.fileUrl,
-      item.id,
-      Cookies.get("accessToken") || "",
-    );
-
-    router.push(editUrl);
+    router.push(`/document-edit?id=${item.templateFile?.id}`);
   };
 
   const handleViewTemplate = (item: DocumentTemplateResponse) => {
