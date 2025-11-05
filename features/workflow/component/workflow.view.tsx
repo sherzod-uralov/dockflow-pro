@@ -35,6 +35,7 @@ import {
   WorkflowApiResponse,
   WorkflowStepApiResponse,
   WorkflowType,
+  WorkflowStepStatus,
   getAvailableRollbackUsers,
   RollbackUser,
   validateAndExtractUserIds,
@@ -104,7 +105,7 @@ const WorkflowView = ({ workflow, onClose }: WorkflowViewProps) => {
     updateStepMutation.mutate({
       id: stepId,
       data: {
-        status: "IN_PROGRESS",
+        status: WorkflowStepStatus.IN_PROGRESS,
         startedAt: new Date().toISOString(),
       },
     });
