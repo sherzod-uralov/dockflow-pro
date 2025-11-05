@@ -77,7 +77,7 @@ export default function StatisticsPage() {
   }
 
   const formatTrend = (value: number | null | undefined) => {
-    if (value === null || value === undefined) return null;
+    if (value === null || value === undefined) return undefined;
     return {
       value: Math.abs(value),
       isPositive: value >= 0,
