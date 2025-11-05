@@ -17,15 +17,28 @@ import { Button } from "@/components/ui/button";
 import { Trash2, GripVertical } from "lucide-react";
 import { WorkflowFormType } from "../schema/workflow.schema";
 import { Card, CardContent } from "@/components/ui/card";
+import { useState } from "react";
 
 interface WorkflowStepItemProps {
   index: number;
   control: Control<WorkflowFormType>;
   onRemove: () => void;
   usersData?: {
-    data: Array<{ id: string; fullname: string; username: string }>;
+    data: Array<{
+      id: string;
+      fullname: string;
+      username: string;
+      department?: {
+        id: string;
+        name?: string;
+      } | null;
+    }>;
+  };
+  departmentsData?: {
+    data: Array<{ id: string; name: string }>;
   };
   isLoadingUsers?: boolean;
+  isLoadingDepartments?: boolean;
   canRemove: boolean;
 }
 
@@ -34,9 +47,16 @@ const WorkflowStepItem = ({
   control,
   onRemove,
   usersData,
+  departmentsData,
   isLoadingUsers,
+  isLoadingDepartments,
   canRemove,
 }: WorkflowStepItemProps) => {
+  // Состояние для выбранного отдела
+  const [selectedDepartmentId, setSelectedDepartmentId] = useState<
+    string | null
+  >(null);
+
   // ✨ НОВОЕ: Следим за всеми выбранными пользователями
   const allSteps =
     useWatch({
@@ -49,9 +69,16 @@ const WorkflowStepItem = ({
     .map((step, idx) => (idx !== index ? step?.assignedToUserId : null))
     .filter(Boolean) as string[];
 
-  // Фильтруем пользователей: убираем уже выбранных
-  const availableUsers =
-    usersData?.data.filter((user) => !selectedUserIds.includes(user.id)) || [];
+  // Фильтруем пользователей: сначала по отделу, затем убираем уже выбранных
+  const filteredByDepartment = selectedDepartmentId
+    ? usersData?.data.filter(
+        (user) => user.department?.id === selectedDepartmentId,
+      ) || []
+    : usersData?.data || [];
+
+  const availableUsers = filteredByDepartment.filter(
+    (user) => !selectedUserIds.includes(user.id),
+  );
 
   return (
     <Card className="relative">
@@ -74,6 +101,30 @@ const WorkflowStepItem = ({
               <Trash2 className="h-4 w-4" />
             </Button>
           )}
+        </div>
+
+        {/* ✨ Department Selection */}
+        <div className="mb-4">
+          <FormLabel>Bo'lim</FormLabel>
+          <Select
+            onValueChange={(value) => {
+              setSelectedDepartmentId(value === "all" ? null : value);
+            }}
+            value={selectedDepartmentId || "all"}
+            disabled={isLoadingDepartments}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Bo'limni tanlang" />
+            </SelectTrigger>
+            <SelectContent className="max-h-[300px]">
+              <SelectItem value="all">Barcha bo'limlar</SelectItem>
+              {departmentsData?.data.map((dept) => (
+                <SelectItem key={dept.id} value={dept.id}>
+                  {dept.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         {/* ✨ Assigned User с фильтрацией */}
