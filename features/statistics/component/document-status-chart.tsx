@@ -15,10 +15,10 @@ import {
   Legend,
   Tooltip,
 } from "recharts";
-import type { DocumentsByStatus } from "../type/statistics.type";
+import type { DocumentStatusChartData } from "../type/statistics.type";
 
 interface DocumentStatusChartProps {
-  data: DocumentsByStatus[];
+  data: DocumentStatusChartData[];
 }
 
 export function DocumentStatusChart({ data }: DocumentStatusChartProps) {
