@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
-import { useFieldArray, useForm } from "react-hook-form";
+import { useEffect, useMemo, useState } from "react";
+import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Plus, Info, Trash2 } from "lucide-react";
+import { Plus, Info, Trash2, Search } from "lucide-react";
 import {
   workflowCreateSchema,
   workflowUpdateSchema,
@@ -57,6 +57,11 @@ const WorkflowForm = ({
   const { data: usersData, isLoading: isLoadingUsers } = useGetUserQuery();
   const { data: documentsData } = useGetAllDocuments();
 
+  // Состояние для поиска пользователей в каждом шаге
+  const [searchQueries, setSearchQueries] = useState<{ [key: number]: string }>(
+    {},
+  );
+
   const isUpdate = mode === "edit";
   const isLoading =
     createWorkflowMutation.isLoading || updateStepMutation.isLoading;
@@ -71,7 +76,6 @@ const WorkflowForm = ({
     mode: "onChange",
     defaultValues: {
       documentId: "",
-      actionType: WorkflowActionType.APPROVAL,
       workflowType: WorkflowType.CONSECUTIVE,
       steps: [createEmptyStep()],
     },
@@ -89,7 +93,6 @@ const WorkflowForm = ({
     } else if (!isUpdate) {
       form.reset({
         documentId: "",
-        actionType: WorkflowActionType.APPROVAL,
         workflowType: WorkflowType.CONSECUTIVE,
         steps: [createEmptyStep()],
       });
@@ -110,9 +113,8 @@ const WorkflowForm = ({
       stepsToUpdate.forEach((step, index) => {
         const payload: WorkflowStepUpdateType = {
           order: index,
-          actionType: values.actionType as WorkflowActionType,
+          actionType: step.actionType as WorkflowActionType,
           assignedToUserId: step.assignedToUserId,
-          dueDate: step.dueDate ? `${step.dueDate}T23:59:59.000Z` : null,
         };
 
         updateStepMutation.mutate(
@@ -221,56 +223,19 @@ const WorkflowForm = ({
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="actionType"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Amal turi (barcha bosqichlar uchun)</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Amal turini tanlang" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {ACTION_TYPE_OPTIONS.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      <div className="flex flex-col">
-                        <span className="font-medium">{option.label}</span>
-                        <span className="text-xs text-muted-foreground">
-                          {option.description}
-                        </span>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormDescription>
-                {isUpdate
-                  ? "Siz amal turini o'zgartirishingiz mumkin. Bu barcha bosqichlarga qo'llaniladi."
-                  : "Bu amal turi barcha workflow bosqichlariga qo'llaniladi"}
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
         <Alert>
           <Info className="h-4 w-4" />
           <AlertDescription>
             {isUpdate ? (
               <>
-                <strong>Tahrirlash rejimi:</strong> Siz amal turini
-                o'zgartirishingiz, yangi bosqichlar qo'shishingiz yoki
-                mavjudlarini o'chirishingiz mumkin. Hujjatni o'zgartirish mumkin
-                emas.
+                <strong>Tahrirlash rejimi:</strong> Siz yangi bosqichlar
+                qo'shishingiz yoki mavjudlarini o'chirishingiz mumkin. Hujjatni
+                o'zgartirish mumkin emas.
               </>
             ) : (
               <>
                 Workflow bosqichlari ketma-ket bajariladi. Har bir bosqich uchun
-                mas'ul shaxsni belgilang. Muddat avtomatik ravishda joriy vaqt
-                bilan belgilanadi.
+                mas'ul shaxs va amal turini belgilang.
               </>
             )}
           </AlertDescription>
@@ -330,45 +295,158 @@ const WorkflowForm = ({
                   <FormField
                     control={form.control}
                     name={`steps.${index}.assignedToUserId`}
-                    render={({ field: formField }) => (
-                      <FormItem>
-                        <FormLabel>Mas'ul shaxs</FormLabel>
-                        <Select
-                          onValueChange={formField.onChange}
-                          value={formField.value}
-                          disabled={isLoadingUsers}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Foydalanuvchini tanlang" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {usersData?.data.map((user: any) => (
-                              <SelectItem key={user.id} value={user.id}>
-                                {user.fullname} ({user.username})
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    render={({ field: formField }) => {
+                      // Следим за всеми выбранными пользователями
+                      const allSteps =
+                        useWatch({
+                          control: form.control,
+                          name: "steps",
+                        }) || [];
+
+                      // Получаем ID всех уже выбранных пользователей (кроме текущего step)
+                      const selectedUserIds = allSteps
+                        .map((step, idx) =>
+                          idx !== index ? step?.assignedToUserId : null,
+                        )
+                        .filter(Boolean) as string[];
+
+                      // Фильтруем пользователей: убираем уже выбранных
+                      const availableUsers =
+                        usersData?.data.filter(
+                          (user: any) => !selectedUserIds.includes(user.id),
+                        ) || [];
+
+                      // Фильтрация по поисковому запросу
+                      const searchQuery = searchQueries[index] || "";
+                      const filteredUsers = availableUsers.filter(
+                        (user: any) => {
+                          const query = searchQuery.toLowerCase();
+                          return (
+                            user.fullname.toLowerCase().includes(query) ||
+                            user.username.toLowerCase().includes(query)
+                          );
+                        },
+                      );
+
+                      return (
+                        <FormItem>
+                          <FormLabel>Mas'ul shaxs</FormLabel>
+                          <Select
+                            onValueChange={formField.onChange}
+                            value={formField.value}
+                            disabled={isLoadingUsers}
+                            onOpenChange={(open) => {
+                              if (!open) {
+                                setSearchQueries((prev) => ({
+                                  ...prev,
+                                  [index]: "",
+                                }));
+                              }
+                            }}
+                          >
+                            <FormControl>
+                              <SelectTrigger
+                                className={
+                                  formField.value &&
+                                  !availableUsers.find(
+                                    (u: any) => u.id === formField.value,
+                                  )
+                                    ? "border-destructive"
+                                    : ""
+                                }
+                              >
+                                <SelectValue placeholder="Foydalanuvchini tanlang" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent className="p-0">
+                              {/* Зафиксированная шапка с поиском */}
+                              <div className="sticky top-0 z-10 bg-background border-b">
+                                <div className="flex items-center gap-2 px-2 py-2">
+                                  <Search className="h-4 w-4 text-muted-foreground shrink-0" />
+                                  <Input
+                                    placeholder="Qidirish..."
+                                    value={searchQuery}
+                                    onChange={(e) => {
+                                      setSearchQueries((prev) => ({
+                                        ...prev,
+                                        [index]: e.target.value,
+                                      }));
+                                    }}
+                                    className="h-8 border-0 focus-visible:ring-0 focus-visible:ring-offset-0 px-0"
+                                    onClick={(e) => e.stopPropagation()}
+                                    onKeyDown={(e) => e.stopPropagation()}
+                                  />
+                                </div>
+                              </div>
+
+                              {/* Скроллируемый список */}
+                              <div className="max-h-[200px] overflow-y-auto p-1">
+                                {/* Если текущий пользователь уже выбран в другом шаге */}
+                                {formField.value &&
+                                  !availableUsers.find(
+                                    (u: any) => u.id === formField.value,
+                                  ) && (
+                                    <SelectItem
+                                      value={formField.value}
+                                      className="text-muted-foreground"
+                                    >
+                                      {usersData?.data.find(
+                                        (u: any) => u.id === formField.value,
+                                      )?.fullname ||
+                                        "Tanlangan foydalanuvchi"}{" "}
+                                      (allaqachon tanlangan)
+                                    </SelectItem>
+                                  )}
+
+                                {/* Доступные пользователи */}
+                                {filteredUsers.length > 0 ? (
+                                  filteredUsers.map((user: any) => (
+                                    <SelectItem key={user.id} value={user.id}>
+                                      {user.fullname} (@{user.username})
+                                    </SelectItem>
+                                  ))
+                                ) : (
+                                  <div className="px-2 py-6 text-sm text-center text-muted-foreground">
+                                    {searchQuery
+                                      ? "Foydalanuvchi topilmadi"
+                                      : "Barcha foydalanuvchilar tanlangan"}
+                                  </div>
+                                )}
+                              </div>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      );
+                    }}
                   />
 
                   <FormField
                     control={form.control}
-                    name={`steps.${index}.dueDate`}
+                    name={`steps.${index}.actionType`}
                     render={({ field: formField }) => (
                       <FormItem>
-                        <FormLabel>Muddat</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="date"
-                            {...formField}
-                            value={formField.value || ""}
-                          />
-                        </FormControl>
+                        <FormLabel>Amal turi</FormLabel>
+                        <Select
+                          onValueChange={formField.onChange}
+                          value={formField.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Amal turini tanlang" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {ACTION_TYPE_OPTIONS.map((option) => (
+                              <SelectItem
+                                key={option.value}
+                                value={option.value}
+                              >
+                                {option.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                         <FormMessage />
                       </FormItem>
                     )}

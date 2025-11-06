@@ -19,22 +19,10 @@ export const workflowStepSchema = z.object({
     })
     .min(1, "Mas'ul shaxsni tanlang"),
 
-  dueDate: z
-    .string()
-    .nullable()
-    .optional()
-    .refine(
-      (date) => {
-        if (!date) return true;
-        const selectedDate = new Date(date);
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        return selectedDate >= today;
-      },
-      {
-        message: "Muddat bugungi kundan oldinroq bo'lishi mumkin emas",
-      },
-    ),
+  actionType: z.enum(["APPROVAL", "REVIEW", "SIGN", "NOTIFY"], {
+    required_error: "Amal turini tanlang",
+    invalid_type_error: "Noto'g'ri amal turi",
+  }),
 });
 
 // ============================================
@@ -49,11 +37,6 @@ export const workflowCreateSchema = z
         message: "Hujjat IDsi noto'g'ri formatda",
       })
       .min(1, "Hujjatni tanlang"),
-
-    actionType: z.enum(["APPROVAL", "REVIEW", "SIGN", "NOTIFY"], {
-      required_error: "Amal turini tanlang",
-      invalid_type_error: "Noto'g'ri amal turi",
-    }),
 
     workflowType: z.enum(["Ketma-ket", "Parallel"], {
       required_error: "Workflow turini tanlang",
@@ -99,11 +82,6 @@ export const workflowUpdateSchema = z
     // ✅ ИСПРАВЛЕНО: documentId не валидируется в edit режиме
     // Он будет игнорироваться при отправке на backend
     documentId: z.string().optional(),
-
-    actionType: z.enum(["APPROVAL", "REVIEW", "SIGN", "NOTIFY"], {
-      required_error: "Amal turini tanlang",
-      invalid_type_error: "Noto'g'ri amal turi",
-    }),
 
     workflowType: z.enum(["Ketma-ket", "Parallel"], {
       required_error: "Workflow turini tanlang",

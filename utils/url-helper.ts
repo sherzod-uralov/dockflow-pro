@@ -15,3 +15,12 @@ export function createDocumentEditUrl(
 
   return `http://localhost:5173/document-editor?${params.toString()}`;
 }
+
+/**
+ * Create URL for editing document attachment in workflow
+ * @param attachmentId - ID of the document attachment to edit
+ * @returns URL to document-edit page with Collabora Online
+ */
+export function createWorkflowDocumentEditUrl(attachmentId: string): string {
+  return `/document-edit?id=${attachmentId}`;
+}

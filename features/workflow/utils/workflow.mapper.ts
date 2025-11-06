@@ -16,18 +16,15 @@ import {
 export const apiToFormData = (
   apiData: WorkflowApiResponse,
 ): WorkflowFormType => {
-  const actionType = apiData.workflowSteps[0]?.actionType || "APPROVAL";
-
   return {
     documentId: apiData.documentId,
-    actionType: actionType,
     workflowType: apiData.workflowType || WorkflowType.CONSECUTIVE,
     steps: apiData.workflowSteps
       .sort((a, b) => a.order - b.order)
       .map((step) => ({
         id: step.id,
         assignedToUserId: step.assignedToUserId,
-        dueDate: step.dueDate ? step.dueDate.split("T")[0] : null,
+        actionType: step.actionType || WorkflowActionType.APPROVAL,
       })),
   };
 };
@@ -44,9 +41,8 @@ export const formToApiPayload = (
   const payload: any = {
     steps: formData.steps.map((step, index) => ({
       order: index,
-      actionType: formData.actionType,
+      actionType: step.actionType,
       assignedToUserId: step.assignedToUserId,
-      dueDate: step.dueDate ? `${step.dueDate}T23:59:59.000Z` : null,
       isRejected: false,
     })),
   };
@@ -56,7 +52,6 @@ export const formToApiPayload = (
     payload.currentStepOrder = 0;
     payload.status = "ACTIVE";
   } else {
-    payload.actionType = formData.actionType;
     if (payload.documentId) {
       delete payload.documentId;
     }
@@ -74,7 +69,6 @@ export const hasFormChanged = (
 ): boolean => {
   const originalForm = apiToFormData(original);
 
-  if (originalForm.actionType !== current.actionType) return true;
   if (originalForm.workflowType !== current.workflowType) return true;
   if (originalForm.steps.length !== current.steps.length) return true;
 
@@ -84,7 +78,7 @@ export const hasFormChanged = (
 
     return (
       originalStep.assignedToUserId !== currentStep.assignedToUserId ||
-      originalStep.dueDate !== currentStep.dueDate
+      originalStep.actionType !== currentStep.actionType
     );
   });
 };
@@ -96,17 +90,14 @@ export const duplicateWorkflow = (
   workflow: WorkflowApiResponse,
   newDocumentId?: string,
 ): WorkflowFormType => {
-  const actionType = workflow.workflowSteps[0]?.actionType || "APPROVAL";
-
   return {
     documentId: newDocumentId || workflow.documentId,
-    actionType: actionType,
     workflowType: workflow.workflowType || WorkflowType.CONSECUTIVE,
     steps: workflow.workflowSteps
       .sort((a, b) => a.order - b.order)
       .map((step) => ({
         assignedToUserId: step.assignedToUserId,
-        dueDate: null,
+        actionType: step.actionType || WorkflowActionType.APPROVAL,
       })),
   };
 };
@@ -118,7 +109,7 @@ export const createEmptyStep = (): WorkflowStepFormData => {
   return {
     // id отсутствует - это новый step
     assignedToUserId: "",
-    dueDate: null,
+    actionType: WorkflowActionType.APPROVAL,
   };
 };
 

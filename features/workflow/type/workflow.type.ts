@@ -126,7 +126,7 @@ export type WorkflowApiResponse = {
 export type WorkflowStepFormData = {
   id?: string;
   assignedToUserId: string;
-  dueDate?: string | null;
+  actionType: WorkflowActionType;
 };
 
 export type WorkflowStepUpdateType = {
@@ -277,10 +277,9 @@ export interface MyTasksQueryParams {
 }
 
 // Данные workflow для формы (плоская структура)
-// ✨ Общий actionType остается (все steps имеют одинаковый)
+// ✨ ОБНОВЛЕНО: actionType теперь в каждом step отдельно
 export type WorkflowFormData = {
   documentId: string;
-  actionType: WorkflowActionType; // Общий для всех steps
   workflowType: WorkflowType; // Тип выполнения workflow
   steps: WorkflowStepFormData[];
 };

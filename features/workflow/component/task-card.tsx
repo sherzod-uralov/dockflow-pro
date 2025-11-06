@@ -12,6 +12,7 @@ import {
   Clock,
   User,
   FileText,
+  FileEdit,
 } from "lucide-react";
 import { WorkflowStepApiResponse } from "@/features/workflow";
 import {
@@ -41,6 +42,9 @@ import { Label } from "@/components/ui/label";
 import { formatDate } from "@/lib/date-utils";
 import { useGetUserByIdQuery } from "@/features/admin/admin-users/hook/user.hook";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useGetDocumentById } from "@/features/document";
+import { createWorkflowDocumentEditUrl } from "@/utils/url-helper";
+import { useRouter } from "next/navigation";
 
 interface TaskCardProps {
   task: WorkflowStepApiResponse & {
@@ -63,6 +67,7 @@ interface TaskCardProps {
 }
 
 const TaskCard = ({ task, onActionComplete }: TaskCardProps) => {
+  const router = useRouter();
   const [showRejectDialog, setShowRejectDialog] = useState(false);
   const [showCompleteDialog, setShowCompleteDialog] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
@@ -80,6 +85,10 @@ const TaskCard = ({ task, onActionComplete }: TaskCardProps) => {
   // Загружаем workflow для получения списка пользователей
   const { data: workflowData, isLoading: isWorkflowLoading } =
     useGetWorkflowById(task.workflowId);
+
+  // Получаем полные данные документа с attachments
+  const documentId = task.workflow?.document?.id || "";
+  const { data: documentData } = useGetDocumentById(documentId);
 
   // Получаем пользователей из предыдущих шагов для rollback
   const previousUsers =
@@ -205,6 +214,21 @@ const TaskCard = ({ task, onActionComplete }: TaskCardProps) => {
 
   const document = task.workflow?.document;
 
+  // Проверяем возможность редактирования документа
+  const canEditDocument =
+    task.status === "IN_PROGRESS" &&
+    documentData?.attachments &&
+    documentData.attachments.length > 0;
+
+  const handleEditDocument = () => {
+    if (documentData?.attachments?.[0]?.id) {
+      const editUrl = createWorkflowDocumentEditUrl(
+        documentData.attachments[0].id,
+      );
+      router.push(editUrl);
+    }
+  };
+
   return (
     <>
       <Card className="hover:shadow-lg transition-shadow">
@@ -283,25 +307,38 @@ const TaskCard = ({ task, onActionComplete }: TaskCardProps) => {
           )}
 
           {canPerformActions && (
-            <div className="flex gap-2 pt-2">
-              <Button
-                onClick={() => setShowCompleteDialog(true)}
-                disabled={isLoading}
-                className="flex-1"
-                variant="default"
-              >
-                <CheckCircle2 className="h-4 w-4 mr-2" />
-                Tasdiqlash
-              </Button>
-              <Button
-                onClick={() => setShowRejectDialog(true)}
-                disabled={isLoading}
-                className="flex-1"
-                variant="destructive"
-              >
-                <XCircle className="h-4 w-4 mr-2" />
-                Rad etish
-              </Button>
+            <div className="space-y-2 pt-2">
+              {canEditDocument && (
+                <Button
+                  onClick={handleEditDocument}
+                  disabled={isLoading}
+                  className="w-full"
+                  variant="outline"
+                >
+                  <FileEdit className="h-4 w-4 mr-2" />
+                  Hujjatni tahrirlash
+                </Button>
+              )}
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => setShowCompleteDialog(true)}
+                  disabled={isLoading}
+                  className="flex-1"
+                  variant="default"
+                >
+                  <CheckCircle2 className="h-4 w-4 mr-2" />
+                  Tasdiqlash
+                </Button>
+                <Button
+                  onClick={() => setShowRejectDialog(true)}
+                  disabled={isLoading}
+                  className="flex-1"
+                  variant="destructive"
+                >
+                  <XCircle className="h-4 w-4 mr-2" />
+                  Rad etish
+                </Button>
+              </div>
             </div>
           )}
         </CardContent>

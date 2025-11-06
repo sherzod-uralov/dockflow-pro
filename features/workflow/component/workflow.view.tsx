@@ -30,6 +30,7 @@ import {
   RotateCcw,
   ArrowLeft,
   ArrowRight,
+  FileEdit,
 } from "lucide-react";
 import {
   WorkflowApiResponse,
@@ -65,6 +66,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useGetDocumentById } from "@/features/document";
+import { createWorkflowDocumentEditUrl } from "@/utils/url-helper";
+import { useRouter } from "next/navigation";
 
 interface WorkflowViewProps {
   workflow: WorkflowApiResponse;
@@ -84,6 +88,7 @@ interface RollbackHistoryItem {
 }
 
 const WorkflowView = ({ workflow, onClose }: WorkflowViewProps) => {
+  const router = useRouter();
   const updateStepMutation = useUpdateWorkflowStep();
   const completeMutation = useCompleteWorkflowStep();
   const rejectMutation = useRejectWorkflowStep();
@@ -94,6 +99,9 @@ const WorkflowView = ({ workflow, onClose }: WorkflowViewProps) => {
   const [comment, setComment] = useState("");
   const [enableRollback, setEnableRollback] = useState(false);
   const [selectedRollbackUserId, setSelectedRollbackUserId] = useState("");
+
+  // Получаем полные данные документа с attachments
+  const { data: documentData } = useGetDocumentById(workflow.document?.id || "");
 
   const isLoading =
     updateStepMutation.isLoading ||
@@ -115,6 +123,20 @@ const WorkflowView = ({ workflow, onClose }: WorkflowViewProps) => {
   const handleCompleteStep = (stepId: string) => {
     completeMutation.mutate(stepId);
   };
+
+  // Функция для редактирования документа
+  const handleEditDocument = () => {
+    if (documentData?.attachments?.[0]?.id) {
+      const editUrl = createWorkflowDocumentEditUrl(
+        documentData.attachments[0].id,
+      );
+      router.push(editUrl);
+    }
+  };
+
+  // Проверяем возможность редактирования документа
+  const canEditDocument =
+    documentData?.attachments && documentData.attachments.length > 0;
 
   // Валидация workflow steps
   const workflowValidation = useMemo(
@@ -550,43 +572,60 @@ const WorkflowView = ({ workflow, onClose }: WorkflowViewProps) => {
             {isCurrentStep &&
               step.status !== "COMPLETED" &&
               step.status !== "REJECTED" && (
-                <div className="flex gap-2 pt-2 border-t">
-                  {(step.status === "NOT_STARTED" ||
-                    step.status === "PENDING") && (
+                <div className="space-y-2 pt-2 border-t">
+                  {/* Кнопка редактирования документа */}
+                  {step.status === "IN_PROGRESS" && canEditDocument && (
                     <Button
                       size="sm"
-                      onClick={() => handleStartStep(step.id)}
+                      onClick={handleEditDocument}
                       disabled={isLoading}
-                      className="flex-1"
+                      className="w-full"
+                      variant="outline"
                     >
-                      <Play className="h-4 w-4 mr-2" />
-                      {isLoading ? "Yuklanmoqda..." : "Boshlash"}
+                      <FileEdit className="h-4 w-4 mr-2" />
+                      Hujjatni tahrirlash
                     </Button>
                   )}
-                  {step.status === "IN_PROGRESS" && (
-                    <>
+
+                  {/* Основные действия */}
+                  <div className="flex gap-2">
+                    {(step.status === "NOT_STARTED" ||
+                      step.status === "PENDING") && (
                       <Button
                         size="sm"
-                        variant="default"
-                        onClick={() => handleCompleteStep(step.id)}
+                        onClick={() => handleStartStep(step.id)}
                         disabled={isLoading}
                         className="flex-1"
                       >
-                        <CheckCircle className="h-4 w-4 mr-2" />
-                        {isLoading ? "Yuklanmoqda..." : "Tasdiqlash"}
+                        <Play className="h-4 w-4 mr-2" />
+                        {isLoading ? "Yuklanmoqda..." : "Boshlash"}
                       </Button>
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        onClick={() => handleRejectClick(step)}
-                        disabled={isLoading}
-                        className="flex-1"
-                      >
-                        <XCircle className="h-4 w-4 mr-2" />
-                        Rad etish
-                      </Button>
-                    </>
-                  )}
+                    )}
+                    {step.status === "IN_PROGRESS" && (
+                      <>
+                        <Button
+                          size="sm"
+                          variant="default"
+                          onClick={() => handleCompleteStep(step.id)}
+                          disabled={isLoading}
+                          className="flex-1"
+                        >
+                          <CheckCircle className="h-4 w-4 mr-2" />
+                          {isLoading ? "Yuklanmoqda..." : "Tasdiqlash"}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => handleRejectClick(step)}
+                          disabled={isLoading}
+                          className="flex-1"
+                        >
+                          <XCircle className="h-4 w-4 mr-2" />
+                          Rad etish
+                        </Button>
+                      </>
+                    )}
+                  </div>
                 </div>
               )}
           </CardContent>
