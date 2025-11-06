@@ -13,7 +13,7 @@ const Page = () => {
   console.log(wopiData);
   useEffect(() => {
     if (wopiData && iframeRef.current) {
-      const WOPI_SRC = `${wopiData.wopiSrc}?access_token=${wopiData.accessToken}?permission=edit`;
+      const WOPI_SRC = `${wopiData.wopiSrc}?access_token=${wopiData.accessToken}`;
       const COLLABORA_URL = `https://office.nordicuniversity.org/browser/e808afa229/cool.html?WOPISrc=${encodeURIComponent(WOPI_SRC)}`;
 
       iframeRef.current.src = COLLABORA_URL;
