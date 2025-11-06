@@ -13,11 +13,12 @@ import {
   useDeleteDocumentTemplate,
   useGetAllDocumentTemplates,
   DocumentTemplateResponse,
+  DocumentTemplateFilter,
+  DocumentTemplateFilterValues,
 } from "@/features/document-template";
 import { DataTable } from "@/components/shared/ui/custom-table";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Copy, FileEdit } from "lucide-react";
+import { FileEdit } from "lucide-react";
 import {
   CustomAction,
   ActionItem,
@@ -31,9 +32,6 @@ import DocumentTemplateView from "../component/document-template.view";
 import { useDebounce } from "@/hooks/use-debaunce";
 import { handleCopyToClipboard } from "@/utils/copy-text";
 import { usePagination } from "@/hooks/use-pagination";
-import { createDocumentEditUrl } from "@/utils/url-helper";
-import { toast } from "sonner";
-import Cookies from "js-cookie";
 
 const DocumentTemplatePage = () => {
   const router = useRouter();
@@ -47,11 +45,20 @@ const DocumentTemplatePage = () => {
   const [selectedTemplate, setSelectedTemplate] =
     useState<DocumentTemplateResponse | null>(null);
   const [searchQuery, debouncedSearch, setSearchQuery] = useDebounce("", 500);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [filters, setFilters] = useState<DocumentTemplateFilterValues>({
+    documentTypeId: undefined,
+    isActive: undefined,
+    isPublic: undefined,
+  });
 
   const { data, isLoading } = useGetAllDocumentTemplates({
     search: debouncedSearch,
     pageSize: pageSize,
     pageNumber: pageNumber,
+    documentTypeId: filters.documentTypeId,
+    isActive: filters.isActive,
+    isPublic: filters.isPublic,
   });
 
   const deleteMutation = useDeleteDocumentTemplate();
@@ -114,6 +121,14 @@ const DocumentTemplatePage = () => {
     router.push(window.location.pathname, { scroll: false });
   };
 
+  const handleApplyFilters = (newFilters: DocumentTemplateFilterValues) => {
+    setFilters(newFilters);
+  };
+
+  const handleToggleFilter = () => {
+    setIsFilterOpen((prev) => !prev);
+  };
+
   return (
     <>
       <UserToolbar
@@ -122,6 +137,15 @@ const DocumentTemplatePage = () => {
         onSearch={handleSearch}
         createLabel="Shablon qo'shish"
         onCreate={createModal.openModal}
+        filterLabel="Filtrlash"
+        onFilter={() => handleToggleFilter()}
+      />
+
+      <DocumentTemplateFilter
+        isOpen={isFilterOpen}
+        onToggle={handleToggleFilter}
+        filters={filters}
+        onApplyFilters={handleApplyFilters}
       />
 
       <DataTable

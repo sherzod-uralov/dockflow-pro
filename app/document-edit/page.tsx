@@ -1,25 +1,69 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
+import { useGetWopiToken } from "@/features/document-editor";
 
 const Page = () => {
-  const id = useSearchParams().get("id");
+  const searchParams = useSearchParams();
+  const fileId = searchParams.get("id") || "";
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const { data: wopiData, isLoading, error } = useGetWopiToken(fileId);
 
-  const [selectedFile, setSelectedFile] = useState("");
-  const iframeRef = useRef<any>(null);
-
-  const handleFileClick = (fileName: string) => {
-    setSelectedFile(fileName);
-  };
-
+  console.log(wopiData);
   useEffect(() => {
-    const WOPI_SRC = `https://docflow-back.nordicuniversity.org/api/v1/wopi/files/${id}?access_token=secret`;
-    const COLLABORA_URL = `https://office.nordicuniversity.org/browser/e808afa229/cool.html?WOPISrc=${encodeURIComponent(WOPI_SRC)}`;
+    if (wopiData && iframeRef.current) {
+      const WOPI_SRC = `${wopiData.wopiSrc}?access_token=${wopiData.accessToken}?permission=edit`;
+      const COLLABORA_URL = `https://office.nordicuniversity.org/browser/e808afa229/cool.html?WOPISrc=${encodeURIComponent(WOPI_SRC)}`;
 
-    console.log("🚀 Загружаем Collabora:", COLLABORA_URL);
-    iframeRef.current.src = COLLABORA_URL;
-  }, [selectedFile]);
+      iframeRef.current.src = COLLABORA_URL;
+    }
+  }, [wopiData]);
+
+  if (!fileId) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          height: "100vh",
+        }}
+      >
+        <p>Fayl ID topilmadi. URL'da id parametri bo'lishi kerak.</p>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          height: "100vh",
+        }}
+      >
+        <p>Yuklanmoqda...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          height: "100vh",
+        }}
+      >
+        <p>Xatolik yuz berdi. Iltimos, qaytadan urinib ko'ring.</p>
+      </div>
+    );
+  }
 
   return (
     <div style={{ display: "flex", height: "100vh", fontFamily: "sans-serif" }}>

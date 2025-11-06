@@ -87,6 +87,9 @@ export const endpoints = {
     delete: (id: string) => `/attachment/${id}`,
     detail: (id: string) => `/attachment/${id}`,
   },
+  wopi: {
+    token: "/wopi/token",
+  },
 } as const;
 
 export type Endpoints = typeof endpoints;
