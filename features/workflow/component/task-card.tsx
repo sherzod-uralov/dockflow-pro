@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,8 +13,13 @@ import {
   User,
   FileText,
   FileEdit,
+  AlertCircle,
+  TrendingUp,
+  Minus,
+  TrendingDown,
+  Layers,
 } from "lucide-react";
-import { WorkflowStepApiResponse } from "@/features/workflow";
+import type { WorkflowStepApiResponse } from "@/features/workflow";
 import {
   useCompleteWorkflowStep,
   useRejectWorkflowStep,
@@ -45,6 +50,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useGetDocumentById } from "@/features/document";
 import { createWorkflowDocumentEditUrl } from "@/utils/url-helper";
 import { useRouter } from "next/navigation";
+import { Progress } from "@/components/ui/progress";
 
 interface TaskCardProps {
   task: WorkflowStepApiResponse & {
@@ -77,20 +83,16 @@ const TaskCard = ({ task, onActionComplete }: TaskCardProps) => {
   const completeMutation = useCompleteWorkflowStep();
   const rejectMutation = useRejectWorkflowStep();
 
-  // Получаем данные пользователя
   const { data: userData, isLoading: isUserLoading } = useGetUserByIdQuery(
     task.assignedToUserId,
   );
 
-  // Загружаем workflow для получения списка пользователей
   const { data: workflowData, isLoading: isWorkflowLoading } =
     useGetWorkflowById(task.workflowId);
 
-  // Получаем полные данные документа с attachments
   const documentId = task.workflow?.document?.id || "";
   const { data: documentData } = useGetDocumentById(documentId);
 
-  // Получаем пользователей из предыдущих шагов для rollback
   const previousUsers =
     workflowData?.workflowSteps
       .filter((step) => step.order < task.order && step.assignedToUser)
@@ -158,54 +160,121 @@ const TaskCard = ({ task, onActionComplete }: TaskCardProps) => {
         label: string;
         icon: any;
         color: string;
+        bgColor: string;
+        borderColor: string;
       }
     > = {
       APPROVAL: {
         label: "Tasdiqlash",
         icon: CheckCircle2,
-        color: "bg-green-100 text-green-800 border-green-300",
+        color: "text-green-700",
+        bgColor: "bg-green-50",
+        borderColor: "border-green-200",
       },
       REVIEW: {
         label: "Ko'rib chiqish",
         icon: FileSearch,
-        color: "bg-blue-100 text-blue-800 border-blue-300",
+        color: "text-blue-700",
+        bgColor: "bg-blue-50",
+        borderColor: "border-blue-200",
       },
       SIGN: {
         label: "Imzolash",
         icon: FileSignature,
-        color: "bg-purple-100 text-purple-800 border-purple-300",
+        color: "text-purple-700",
+        bgColor: "bg-purple-50",
+        borderColor: "border-purple-200",
       },
       NOTIFY: {
         label: "Xabarnoma",
         icon: Bell,
-        color: "bg-yellow-100 text-yellow-800 border-yellow-300",
+        color: "text-amber-700",
+        bgColor: "bg-amber-50",
+        borderColor: "border-amber-200",
       },
     };
 
     return configs[task.actionType] || configs.APPROVAL;
   };
 
-  const getStatusBadge = () => {
-    const variants: Record<
+  const getStatusConfig = () => {
+    const configs: Record<
       string,
       {
         label: string;
         variant: "default" | "secondary" | "destructive" | "outline";
+        className: string;
       }
     > = {
-      NOT_STARTED: { label: "Boshlanmagan", variant: "outline" },
-      PENDING: { label: "Kutilmoqda", variant: "outline" },
-      IN_PROGRESS: { label: "Jarayonda", variant: "default" },
-      COMPLETED: { label: "Tugallangan", variant: "secondary" },
-      REJECTED: { label: "Rad etilgan", variant: "destructive" },
+      NOT_STARTED: {
+        label: "Boshlanmagan",
+        variant: "outline",
+        className: "border-gray-300 text-gray-700",
+      },
+      PENDING: {
+        label: "Kutilmoqda",
+        variant: "outline",
+        className: "border-orange-300 text-orange-700 bg-orange-50",
+      },
+      IN_PROGRESS: {
+        label: "Jarayonda",
+        variant: "default",
+        className: "bg-blue-600 text-white border-blue-600",
+      },
+      COMPLETED: {
+        label: "Tugallangan",
+        variant: "secondary",
+        className: "bg-green-100 text-green-800 border-green-300",
+      },
+      REJECTED: {
+        label: "Rad etilgan",
+        variant: "destructive",
+        className: "bg-red-100 text-red-800 border-red-300",
+      },
     };
 
-    const status = variants[task.status] || variants.NOT_STARTED;
-    return <Badge variant={status.variant}>{status.label}</Badge>;
+    return configs[task.status] || configs.NOT_STARTED;
+  };
+
+  const getPriorityConfig = (priority?: string) => {
+    const configs: Record<
+      string,
+      { label: string; icon: any; className: string }
+    > = {
+      HIGH: {
+        label: "Yuqori",
+        icon: TrendingUp,
+        className: "text-red-600 bg-red-50 border-red-200",
+      },
+      MEDIUM: {
+        label: "O'rta",
+        icon: Minus,
+        className: "text-orange-600 bg-orange-50 border-orange-200",
+      },
+      LOW: {
+        label: "Past",
+        icon: TrendingDown,
+        className: "text-blue-600 bg-blue-50 border-blue-200",
+      },
+    };
+
+    return priority ? configs[priority] : null;
+  };
+
+  const calculateProgress = () => {
+    if (!workflowData?.workflowSteps) return 0;
+    const totalSteps = workflowData.workflowSteps.length;
+    const completedSteps = workflowData.workflowSteps.filter(
+      (step) => step.status === "COMPLETED",
+    ).length;
+    return (completedSteps / totalSteps) * 100;
   };
 
   const actionConfig = getActionTypeConfig();
+  const statusConfig = getStatusConfig();
   const ActionIcon = actionConfig.icon;
+  const priorityConfig = getPriorityConfig(task.workflow?.document?.priority);
+  const PriorityIcon = priorityConfig?.icon;
 
   const canPerformActions =
     task.status === "NOT_STARTED" ||
@@ -214,7 +283,6 @@ const TaskCard = ({ task, onActionComplete }: TaskCardProps) => {
 
   const document = task.workflow?.document;
 
-  // Проверяем возможность редактирования документа
   const canEditDocument =
     task.status === "IN_PROGRESS" &&
     documentData?.attachments &&
@@ -229,78 +297,194 @@ const TaskCard = ({ task, onActionComplete }: TaskCardProps) => {
     }
   };
 
+  const isOverdue =
+    task.dueDate &&
+    new Date(task.dueDate) < new Date() &&
+    task.status !== "COMPLETED";
+
+  const progress = calculateProgress();
+
   return (
     <>
-      <Card className="hover:shadow-lg transition-shadow">
-        <CardHeader>
+      <Card className="hover:shadow-xl transition-all duration-300 border-2 hover:border-primary/20 overflow-hidden">
+        <div
+          className={`h-1.5 ${actionConfig.bgColor.replace("bg-", "bg-gradient-to-r from-")}`}
+        />
+
+        <CardHeader className="pb-3">
           <div className="flex items-start justify-between gap-4">
-            <div className="flex-1 min-w-0">
-              <CardTitle className="text-lg flex items-center gap-2 mb-1">
-                <FileText className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+            <div className="flex-1 min-w-0 space-y-2">
+              <CardTitle className="text-xl font-bold flex items-center gap-2.5">
+                <div className={`p-2 rounded-lg ${actionConfig.bgColor}`}>
+                  <FileText className={`h-5 w-5 ${actionConfig.color}`} />
+                </div>
                 <span className="truncate">
                   {document?.title || "Hujjat topilmadi"}
                 </span>
               </CardTitle>
-              <p className="text-sm text-muted-foreground">
-                {document?.documentNumber || "—"}
-              </p>
+
+              <div className="flex items-center gap-3 flex-wrap">
+                <Badge variant="outline" className="font-mono text-xs">
+                  {document?.documentNumber || "—"}
+                </Badge>
+                {document?.status && (
+                  <Badge variant="secondary" className="text-xs">
+                    {document.status}
+                  </Badge>
+                )}
+              </div>
             </div>
-            <div className="flex-shrink-0">{getStatusBadge()}</div>
+
+            <div className="flex flex-col gap-2 items-end">
+              <Badge
+                variant={statusConfig.variant}
+                className={statusConfig.className}
+              >
+                {statusConfig.label}
+              </Badge>
+              {priorityConfig && PriorityIcon && (
+                <Badge
+                  variant="outline"
+                  className={`${priorityConfig.className} flex items-center gap-1`}
+                >
+                  <PriorityIcon className="h-3 w-3" />
+                  {priorityConfig.label}
+                </Badge>
+              )}
+            </div>
           </div>
+
+          {document?.description && (
+            <p className="text-sm text-muted-foreground mt-3 line-clamp-2 pl-11">
+              {document.description}
+            </p>
+          )}
         </CardHeader>
 
         <CardContent className="space-y-4">
-          <div className="flex items-center gap-2">
-            <Badge
-              variant="outline"
-              className={`${actionConfig.color} flex items-center gap-1.5`}
-            >
-              <ActionIcon className="h-3 w-3" />
-              {actionConfig.label}
-            </Badge>
-            <span className="text-sm text-muted-foreground">
-              Bosqich {task.order}
-            </span>
-          </div>
-
-          {task.dueDate && (
-            <div className="flex items-center gap-2 text-sm">
-              <Clock className="h-4 w-4 text-muted-foreground" />
-              <span className="text-muted-foreground">Muddat:</span>
-              <span className="font-medium">{formatDate(task.dueDate)}</span>
+          {workflowData && (
+            <div className="space-y-2 p-3 rounded-lg bg-muted/50">
+              <div className="flex items-center justify-between text-sm">
+                <div className="flex items-center gap-2">
+                  <Layers className="h-4 w-4 text-muted-foreground" />
+                  <span className="font-medium">Workflow jarayoni</span>
+                </div>
+                <span className="text-xs text-muted-foreground">
+                  {Math.round(progress)}%
+                </span>
+              </div>
+              <Progress value={progress} className="h-2" />
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <span>
+                  Bosqich {task.order} / {workflowData.workflowSteps.length}
+                </span>
+                <span>
+                  {
+                    workflowData.workflowSteps.filter(
+                      (s) => s.status === "COMPLETED",
+                    ).length
+                  }{" "}
+                  tugallangan
+                </span>
+              </div>
             </div>
           )}
 
-          <div className="flex items-center gap-2 text-sm">
-            <User className="h-4 w-4 text-muted-foreground" />
-            <span className="text-muted-foreground">Mas'ul:</span>
-            {isUserLoading ? (
-              <Skeleton className="h-4 w-32" />
-            ) : (
-              <span className="font-medium">
-                {userData?.fullname ||
-                  userData?.username ||
-                  "Foydalanuvchi topilmadi"}
-              </span>
+          <div
+            className={`flex items-center gap-3 p-3 rounded-lg border ${actionConfig.bgColor} ${actionConfig.borderColor}`}
+          >
+            <div className={`p-2 rounded-md bg-white shadow-sm`}>
+              <ActionIcon className={`h-5 w-5 ${actionConfig.color}`} />
+            </div>
+            <div>
+              <p className={`font-semibold ${actionConfig.color}`}>
+                {actionConfig.label}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Bosqich {task.order}
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {/* Due date with overdue indicator */}
+            {task.dueDate && (
+              <div
+                className={`flex items-center gap-2.5 p-3 rounded-lg border ${
+                  isOverdue
+                    ? "bg-red-50 border-red-200"
+                    : "bg-background border-border"
+                }`}
+              >
+                <div
+                  className={`p-2 rounded-md ${isOverdue ? "bg-red-100" : "bg-muted"}`}
+                >
+                  {isOverdue ? (
+                    <AlertCircle className="h-4 w-4 text-red-600" />
+                  ) : (
+                    <Clock className="h-4 w-4 text-muted-foreground" />
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-muted-foreground">Muddat</p>
+                  <p
+                    className={`text-sm font-medium truncate ${isOverdue ? "text-red-700" : ""}`}
+                  >
+                    {formatDate(task.dueDate)}
+                  </p>
+                  {isOverdue && (
+                    <p className="text-xs text-red-600 font-medium">
+                      Muddati o'tgan
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Assigned user */}
+            <div className="flex items-center gap-2.5 p-3 rounded-lg border bg-background">
+              <div className="p-2 rounded-md bg-muted">
+                <User className="h-4 w-4 text-muted-foreground" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-muted-foreground">Mas'ul</p>
+                {isUserLoading ? (
+                  <Skeleton className="h-4 w-32" />
+                ) : (
+                  <p className="text-sm font-medium truncate">
+                    {userData?.fullname ||
+                      userData?.username ||
+                      "Foydalanuvchi topilmadi"}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Completed date */}
+            {task.completedAt && (
+              <div className="flex items-center gap-2.5 p-3 rounded-lg border bg-green-50 border-green-200 md:col-span-2">
+                <div className="p-2 rounded-md bg-green-100">
+                  <CheckCircle2 className="h-4 w-4 text-green-700" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-green-700">Tugallangan</p>
+                  <p className="text-sm font-medium text-green-900">
+                    {formatDate(task.completedAt)}
+                  </p>
+                </div>
+              </div>
             )}
           </div>
 
-          {task.completedAt && (
-            <div className="flex items-center gap-2 text-sm">
-              <CheckCircle2 className="h-4 w-4 text-green-600" />
-              <span className="text-muted-foreground">Tugallangan:</span>
-              <span className="font-medium">
-                {formatDate(task.completedAt)}
-              </span>
-            </div>
-          )}
-
           {task.isRejected && task.rejectionReason && (
-            <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-md">
-              <p className="text-sm font-medium text-destructive mb-1">
-                Rad etish sababi:
-              </p>
-              <p className="text-sm text-muted-foreground">
+            <div className="p-4 bg-red-50 border-2 border-red-200 rounded-lg space-y-2">
+              <div className="flex items-center gap-2">
+                <XCircle className="h-5 w-5 text-red-600" />
+                <p className="text-sm font-bold text-red-900">
+                  Rad etish sababi:
+                </p>
+              </div>
+              <p className="text-sm text-red-800 pl-7">
                 {task.rejectionReason}
               </p>
             </div>
@@ -312,19 +496,21 @@ const TaskCard = ({ task, onActionComplete }: TaskCardProps) => {
                 <Button
                   onClick={handleEditDocument}
                   disabled={isLoading}
-                  className="w-full"
+                  className="w-full h-11 font-medium bg-transparent"
                   variant="outline"
+                  size="lg"
                 >
                   <FileEdit className="h-4 w-4 mr-2" />
                   Hujjatni tahrirlash
                 </Button>
               )}
-              <div className="flex gap-2">
+              <div className="grid grid-cols-2 gap-2">
                 <Button
                   onClick={() => setShowCompleteDialog(true)}
                   disabled={isLoading}
-                  className="flex-1"
+                  className="h-11 font-medium"
                   variant="default"
+                  size="lg"
                 >
                   <CheckCircle2 className="h-4 w-4 mr-2" />
                   Tasdiqlash
@@ -332,8 +518,9 @@ const TaskCard = ({ task, onActionComplete }: TaskCardProps) => {
                 <Button
                   onClick={() => setShowRejectDialog(true)}
                   disabled={isLoading}
-                  className="flex-1"
+                  className="h-11 font-medium"
                   variant="destructive"
+                  size="lg"
                 >
                   <XCircle className="h-4 w-4 mr-2" />
                   Rad etish
@@ -344,7 +531,6 @@ const TaskCard = ({ task, onActionComplete }: TaskCardProps) => {
         </CardContent>
       </Card>
 
-      {/* Complete Dialog */}
       <AlertDialog
         open={showCompleteDialog}
         onOpenChange={setShowCompleteDialog}
@@ -367,7 +553,6 @@ const TaskCard = ({ task, onActionComplete }: TaskCardProps) => {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Reject Dialog with Rollback */}
       <AlertDialog open={showRejectDialog} onOpenChange={setShowRejectDialog}>
         <AlertDialogContent className="max-w-lg">
           <AlertDialogHeader>
@@ -379,7 +564,6 @@ const TaskCard = ({ task, onActionComplete }: TaskCardProps) => {
           </AlertDialogHeader>
 
           <div className="space-y-4">
-            {/* ROLLBACK USER SELECT */}
             <div className="space-y-2">
               <Label htmlFor="rollback-user">
                 Qaytarish uchun foydalanuvchi{" "}
@@ -414,7 +598,6 @@ const TaskCard = ({ task, onActionComplete }: TaskCardProps) => {
               )}
             </div>
 
-            {/* REJECTION REASON */}
             <div className="space-y-2">
               <Label htmlFor="reject-reason">
                 Rad etish sababi <span className="text-destructive">*</span>
@@ -448,7 +631,6 @@ const TaskCard = ({ task, onActionComplete }: TaskCardProps) => {
               </div>
             </div>
 
-            {/* COMMENT */}
             <div className="space-y-2">
               <Label htmlFor="reject-comment">Qo'shimcha izoh</Label>
               <Textarea
