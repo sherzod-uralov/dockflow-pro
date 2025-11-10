@@ -9,7 +9,7 @@ import { UserToolbar } from "@/components/shared/ui/custom-dashboard-toolbar";
 import { ModalState } from "@/types/modal";
 import { DataTable } from "@/components/shared/ui/custom-table";
 import { Button } from "@/components/ui/button";
-import { Copy } from "lucide-react";
+import { Copy, FileEdit } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
