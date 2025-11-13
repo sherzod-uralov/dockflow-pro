@@ -18,6 +18,8 @@ import {
   Minus,
   TrendingDown,
   Layers,
+  Edit,
+  Trash2,
 } from "lucide-react";
 import type { WorkflowStepApiResponse } from "@/features/workflow";
 import {
@@ -51,6 +53,7 @@ import { useGetDocumentById } from "@/features/document";
 import { createWorkflowDocumentEditUrl } from "@/utils/url-helper";
 import { useRouter } from "next/navigation";
 import { Progress } from "@/components/ui/progress";
+import { useGetProfileQuery } from "@/features/login/hook/login.hook";
 
 interface TaskCardProps {
   task: WorkflowStepApiResponse & {
@@ -70,9 +73,22 @@ interface TaskCardProps {
     };
   };
   onActionComplete?: () => void;
+  onEdit?: () => void;
+  onDelete?: () => void;
+  onView?: () => void;
+  onCardClick?: () => void;
+  showActions?: boolean;
 }
 
-const TaskCard = ({ task, onActionComplete }: TaskCardProps) => {
+const TaskCard = ({
+  task,
+  onActionComplete,
+  onEdit,
+  onDelete,
+  onView,
+  onCardClick,
+  showActions = true,
+}: TaskCardProps) => {
   const router = useRouter();
   const [showRejectDialog, setShowRejectDialog] = useState(false);
   const [showCompleteDialog, setShowCompleteDialog] = useState(false);
@@ -82,6 +98,10 @@ const TaskCard = ({ task, onActionComplete }: TaskCardProps) => {
 
   const completeMutation = useCompleteWorkflowStep();
   const rejectMutation = useRejectWorkflowStep();
+
+  // Получаем информацию о текущем пользователе
+  const { data: currentUserProfile, isLoading: isProfileLoading } =
+    useGetProfileQuery();
 
   const { data: userData, isLoading: isUserLoading } = useGetUserByIdQuery(
     task.assignedToUserId,
@@ -93,16 +113,50 @@ const TaskCard = ({ task, onActionComplete }: TaskCardProps) => {
   const documentId = task.workflow?.document?.id || "";
   const { data: documentData } = useGetDocumentById(documentId);
 
-  const previousUsers =
-    workflowData?.workflowSteps
-      .filter((step) => step.order < task.order && step.assignedToUser)
-      .map((step) => ({
-        id: step.assignedToUserId,
-        name:
-          step.assignedToUser?.fullname || step.assignedToUser?.username || "",
-        username: step.assignedToUser?.username || "",
-        stepOrder: step.order,
-      })) || [];
+  // Получаем список пользователей для отклонения (создатель документа + участники workflow)
+  const availableUsersForRejection = () => {
+    const users: Array<{
+      id: string;
+      name: string;
+      username: string;
+      stepOrder?: number;
+      isCreator?: boolean;
+    }> = [];
+
+    // Добавляем создателя документа первым
+    if (documentData?.createdBy) {
+      users.push({
+        id: documentData.createdBy.id,
+        name: documentData.createdBy.fullname,
+        username: "Yaratuvchi",
+        isCreator: true,
+      });
+    }
+
+    // Добавляем предыдущих участников workflow
+    const previousStepUsers =
+      workflowData?.workflowSteps
+        .filter(
+          (step) =>
+            step.order < task.order &&
+            step.assignedToUser &&
+            step.assignedToUserId !== documentData?.createdBy?.id, // Не дублируем создателя
+        )
+        .map((step) => ({
+          id: step.assignedToUserId,
+          name:
+            step.assignedToUser?.fullname ||
+            step.assignedToUser?.username ||
+            "",
+          username: step.assignedToUser?.username || "",
+          stepOrder: step.order,
+        })) || [];
+
+    users.push(...previousStepUsers);
+    return users;
+  };
+
+  const rollbackUsers = availableUsersForRejection();
 
   const isLoading =
     completeMutation.isLoading || rejectMutation.isLoading || isUserLoading;
@@ -276,14 +330,20 @@ const TaskCard = ({ task, onActionComplete }: TaskCardProps) => {
   const priorityConfig = getPriorityConfig(task.workflow?.document?.priority);
   const PriorityIcon = priorityConfig?.icon;
 
+  // Проверяем, является ли текущий пользователь исполнителем задачи
+  const isCurrentUserAssigned =
+    currentUserProfile?.id === task.assignedToUserId;
+
   const canPerformActions =
-    task.status === "NOT_STARTED" ||
-    task.status === "PENDING" ||
-    task.status === "IN_PROGRESS";
+    isCurrentUserAssigned &&
+    (task.status === "NOT_STARTED" ||
+      task.status === "PENDING" ||
+      task.status === "IN_PROGRESS");
 
   const document = task.workflow?.document;
 
   const canEditDocument =
+    isCurrentUserAssigned &&
     task.status === "IN_PROGRESS" &&
     documentData?.attachments &&
     documentData.attachments.length > 0;
@@ -306,7 +366,12 @@ const TaskCard = ({ task, onActionComplete }: TaskCardProps) => {
 
   return (
     <>
-      <Card className="hover:shadow-xl transition-all duration-300 border-2 hover:border-primary/20 overflow-hidden">
+      <Card
+        className={`hover:shadow-xl transition-all duration-300 border-2 hover:border-primary/20 overflow-hidden ${
+          onCardClick ? "cursor-pointer" : ""
+        }`}
+        onClick={onCardClick}
+      >
         <div
           className={`h-1.5 ${actionConfig.bgColor.replace("bg-", "bg-gradient-to-r from-")}`}
         />
@@ -314,14 +379,48 @@ const TaskCard = ({ task, onActionComplete }: TaskCardProps) => {
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 min-w-0 space-y-2">
-              <CardTitle className="text-xl font-bold flex items-center gap-2.5">
-                <div className={`p-2 rounded-lg ${actionConfig.bgColor}`}>
-                  <FileText className={`h-5 w-5 ${actionConfig.color}`} />
-                </div>
-                <span className="truncate">
-                  {document?.title || "Hujjat topilmadi"}
-                </span>
-              </CardTitle>
+              <div className="flex items-center justify-between gap-2">
+                <CardTitle className="text-xl font-bold flex items-center gap-2.5 flex-1 min-w-0">
+                  <div className={`p-2 rounded-lg ${actionConfig.bgColor}`}>
+                    <FileText className={`h-5 w-5 ${actionConfig.color}`} />
+                  </div>
+                  <span className="truncate">
+                    {document?.title || "Hujjat topilmadi"}
+                  </span>
+                </CardTitle>
+                {showActions && (onEdit || onDelete) && (
+                  <div className="flex items-center gap-1 shrink-0">
+                    {onEdit && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onEdit();
+                        }}
+                        title="Tahrirlash"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                    )}
+                    {onDelete && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onDelete();
+                        }}
+                        title="O'chirish"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                )}
+              </div>
 
               <div className="flex items-center gap-3 flex-wrap">
                 <Badge variant="outline" className="font-mono text-xs">
@@ -494,7 +593,10 @@ const TaskCard = ({ task, onActionComplete }: TaskCardProps) => {
             <div className="space-y-2 pt-2">
               {canEditDocument && (
                 <Button
-                  onClick={handleEditDocument}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleEditDocument();
+                  }}
                   disabled={isLoading}
                   className="w-full h-11 font-medium bg-transparent"
                   variant="outline"
@@ -506,7 +608,10 @@ const TaskCard = ({ task, onActionComplete }: TaskCardProps) => {
               )}
               <div className="grid grid-cols-2 gap-2">
                 <Button
-                  onClick={() => setShowCompleteDialog(true)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowCompleteDialog(true);
+                  }}
                   disabled={isLoading}
                   className="h-11 font-medium"
                   variant="default"
@@ -516,7 +621,14 @@ const TaskCard = ({ task, onActionComplete }: TaskCardProps) => {
                   Tasdiqlash
                 </Button>
                 <Button
-                  onClick={() => setShowRejectDialog(true)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    // Устанавливаем создателя документа по умолчанию
+                    if (documentData?.createdBy?.id) {
+                      setRollbackToUserId(documentData.createdBy.id);
+                    }
+                    setShowRejectDialog(true);
+                  }}
                   disabled={isLoading}
                   className="h-11 font-medium"
                   variant="destructive"
@@ -573,28 +685,40 @@ const TaskCard = ({ task, onActionComplete }: TaskCardProps) => {
                 <div className="text-sm text-muted-foreground">
                   Yuklanmoqda...
                 </div>
-              ) : previousUsers.length === 0 ? (
+              ) : rollbackUsers.length === 0 ? (
                 <div className="text-sm text-muted-foreground">
                   Qaytarish uchun foydalanuvchilar yo'q
                 </div>
               ) : (
-                <Select
-                  value={rollbackToUserId}
-                  onValueChange={setRollbackToUserId}
-                  disabled={isLoading}
-                >
-                  <SelectTrigger id="rollback-user">
-                    <SelectValue placeholder="Foydalanuvchini tanlang..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {previousUsers.map((user) => (
-                      <SelectItem key={user.id} value={user.id}>
-                        {user.name} (@{user.username}) - Bosqich{" "}
-                        {user.stepOrder}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <>
+                  <Select
+                    value={rollbackToUserId}
+                    onValueChange={setRollbackToUserId}
+                    disabled={isLoading}
+                  >
+                    <SelectTrigger id="rollback-user">
+                      <SelectValue placeholder="Foydalanuvchini tanlang..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {rollbackUsers.map((user) => (
+                        <SelectItem key={user.id} value={user.id}>
+                          {user.isCreator && "🔖 "}
+                          {user.name}
+                          {user.isCreator
+                            ? " (Yaratuvchi)"
+                            : user.stepOrder
+                              ? ` (@${user.username}) - Bosqich ${user.stepOrder}`
+                              : ` (@${user.username})`}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {documentData?.createdBy && (
+                    <p className="text-xs text-muted-foreground">
+                      💡 Sukut bo'yicha hujjat yaratuvchiga qaytariladi
+                    </p>
+                  )}
+                </>
               )}
             </div>
 

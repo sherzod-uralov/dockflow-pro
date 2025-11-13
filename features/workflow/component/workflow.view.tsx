@@ -23,7 +23,6 @@ import {
   Clock,
   User,
   AlertCircle,
-  Play,
   CheckCircle,
   XCircle,
   MessageSquare,
@@ -31,6 +30,7 @@ import {
   ArrowLeft,
   ArrowRight,
   FileEdit,
+  Play,
 } from "lucide-react";
 import {
   WorkflowApiResponse,
@@ -69,6 +69,7 @@ import {
 import { useGetDocumentById } from "@/features/document";
 import { createWorkflowDocumentEditUrl } from "@/utils/url-helper";
 import { useRouter } from "next/navigation";
+import { useGetProfileQuery } from "@/features/login/hook/login.hook";
 
 interface WorkflowViewProps {
   workflow: WorkflowApiResponse;
@@ -100,8 +101,17 @@ const WorkflowView = ({ workflow, onClose }: WorkflowViewProps) => {
   const [enableRollback, setEnableRollback] = useState(false);
   const [selectedRollbackUserId, setSelectedRollbackUserId] = useState("");
 
+  // Получаем информацию о текущем пользователе
+  const { data: currentUserProfile, isLoading: isProfileLoading } =
+    useGetProfileQuery();
+
   // Получаем полные данные документа с attachments
-  const { data: documentData } = useGetDocumentById(workflow.document?.id || "");
+  const { data: documentData } = useGetDocumentById(
+    workflow.document?.id || "",
+  );
+
+  // Примечание: Автоматический запуск первого шага происходит при создании workflow
+  // через formToApiPayload в workflow.mapper.ts (первый шаг создается сразу в статусе IN_PROGRESS)
 
   const isLoading =
     updateStepMutation.isLoading ||
@@ -144,11 +154,34 @@ const WorkflowView = ({ workflow, onClose }: WorkflowViewProps) => {
     [workflow],
   );
 
-  // Получить доступных пользователей для rollback
+  // Получить доступных пользователей для rollback (создатель документа + участники workflow)
   const availableRollbackUsers = useMemo(() => {
     if (!selectedStep) return [];
-    return getAvailableRollbackUsers(selectedStep, workflow);
-  }, [selectedStep, workflow]);
+
+    const users: RollbackUser[] = [];
+
+    // Добавляем создателя документа первым
+    if (documentData?.createdBy) {
+      users.push({
+        userId: documentData.createdBy.id,
+        userName: documentData.createdBy.fullname,
+        stepOrder: 0, // Специальное значение для создателя
+        userEmail: undefined,
+        userRole: "Yaratuvchi",
+        stepActionType: "CREATOR",
+        stepStatus: "CREATOR",
+      });
+    }
+
+    // Добавляем предыдущих участников workflow (без дубликатов создателя)
+    const workflowUsers = getAvailableRollbackUsers(selectedStep, workflow);
+    const filteredWorkflowUsers = workflowUsers.filter(
+      (user) => user.userId !== documentData?.createdBy?.id,
+    );
+
+    users.push(...filteredWorkflowUsers);
+    return users;
+  }, [selectedStep, workflow, documentData]);
 
   // Загрузить расширенные данные о пользователях
   const { enrichedUsers, isLoading: isLoadingUsers } = useEnrichedRollbackUsers(
@@ -167,8 +200,13 @@ const WorkflowView = ({ workflow, onClose }: WorkflowViewProps) => {
     setSelectedStep(step);
     setRejectionReason("");
     setComment("");
-    setEnableRollback(false);
-    setSelectedRollbackUserId("");
+    setEnableRollback(true); // Включаем rollback по умолчанию
+    // Устанавливаем создателя документа по умолчанию
+    if (documentData?.createdBy?.id) {
+      setSelectedRollbackUserId(documentData.createdBy.id);
+    } else {
+      setSelectedRollbackUserId("");
+    }
     setRejectDialogOpen(true);
   };
 
@@ -383,6 +421,10 @@ const WorkflowView = ({ workflow, onClose }: WorkflowViewProps) => {
         (action) => action.performedBy?.id === step.assignedToUser?.id,
       ) || [];
 
+    // Проверяем, является ли текущий пользователь исполнителем этого шага
+    const isCurrentUserAssigned =
+      currentUserProfile?.id === step.assignedToUserId;
+
     return (
       <div
         key={step.id}
@@ -570,11 +612,12 @@ const WorkflowView = ({ workflow, onClose }: WorkflowViewProps) => {
 
             {/* Action Buttons */}
             {isCurrentStep &&
+              isCurrentUserAssigned &&
               step.status !== "COMPLETED" &&
               step.status !== "REJECTED" && (
                 <div className="space-y-2 pt-2 border-t">
                   {/* Кнопка редактирования документа */}
-                  {step.status === "IN_PROGRESS" && canEditDocument && (
+                  {canEditDocument && (
                     <Button
                       size="sm"
                       onClick={handleEditDocument}
@@ -587,45 +630,31 @@ const WorkflowView = ({ workflow, onClose }: WorkflowViewProps) => {
                     </Button>
                   )}
 
-                  {/* Основные действия */}
-                  <div className="flex gap-2">
-                    {(step.status === "NOT_STARTED" ||
-                      step.status === "PENDING") && (
+                  {/* Основные действия - показываем только когда статус IN_PROGRESS */}
+                  {step.status === "IN_PROGRESS" && (
+                    <div className="flex gap-2">
                       <Button
                         size="sm"
-                        onClick={() => handleStartStep(step.id)}
+                        variant="default"
+                        onClick={() => handleCompleteStep(step.id)}
                         disabled={isLoading}
                         className="flex-1"
                       >
-                        <Play className="h-4 w-4 mr-2" />
-                        {isLoading ? "Yuklanmoqda..." : "Boshlash"}
+                        <CheckCircle className="h-4 w-4 mr-2" />
+                        {isLoading ? "Yuklanmoqda..." : "Tasdiqlash"}
                       </Button>
-                    )}
-                    {step.status === "IN_PROGRESS" && (
-                      <>
-                        <Button
-                          size="sm"
-                          variant="default"
-                          onClick={() => handleCompleteStep(step.id)}
-                          disabled={isLoading}
-                          className="flex-1"
-                        >
-                          <CheckCircle className="h-4 w-4 mr-2" />
-                          {isLoading ? "Yuklanmoqda..." : "Tasdiqlash"}
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => handleRejectClick(step)}
-                          disabled={isLoading}
-                          className="flex-1"
-                        >
-                          <XCircle className="h-4 w-4 mr-2" />
-                          Rad etish
-                        </Button>
-                      </>
-                    )}
-                  </div>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => handleRejectClick(step)}
+                        disabled={isLoading}
+                        className="flex-1"
+                      >
+                        <XCircle className="h-4 w-4 mr-2" />
+                        Rad etish
+                      </Button>
+                    </div>
+                  )}
                 </div>
               )}
           </CardContent>
@@ -968,37 +997,26 @@ const WorkflowView = ({ workflow, onClose }: WorkflowViewProps) => {
                     setEnableRollback(checked === true);
                     if (!checked) {
                       setSelectedRollbackUserId("");
+                    } else if (documentData?.createdBy?.id) {
+                      // При включении чекбокса выбираем создателя по умолчанию
+                      setSelectedRollbackUserId(documentData.createdBy.id);
                     }
                   }}
-                  disabled={
-                    isLoading ||
-                    isLoadingUsers ||
-                    workflow.type !== "CONSECUTIVE" ||
-                    enrichedUsers.length === 0
-                  }
+                  disabled={isLoading || isLoadingUsers}
                 />
                 <label
                   htmlFor="enable-rollback"
                   className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
                 >
-                  Avvalgi ko'rib chiquvchiga qaytarish (rollback)
+                  Hujjatni qaytarish (rollback)
                 </label>
               </div>
 
-              {/* Показываем информацию, почему недоступен rollback */}
-              {workflow.type !== "CONSECUTIVE" && (
+              {!enableRollback && (
                 <p className="text-xs text-muted-foreground pl-6">
-                  ℹ️ Rollback faqat ketma-ket (CONSECUTIVE) workflow uchun
-                  mavjud
+                  ℹ️ Hujjatni qaytarmasdan rad etish
                 </p>
               )}
-
-              {workflow.type === "CONSECUTIVE" &&
-                enrichedUsers.length === 0 && (
-                  <p className="text-xs text-muted-foreground pl-6">
-                    ℹ️ Avvalgi bosqichlar mavjud emas
-                  </p>
-                )}
 
               {enableRollback && (
                 <div className="space-y-2 pl-6">
@@ -1015,34 +1033,44 @@ const WorkflowView = ({ workflow, onClose }: WorkflowViewProps) => {
                       Avvalgi foydalanuvchilar topilmadi
                     </div>
                   ) : (
-                    <Select
-                      value={selectedRollbackUserId}
-                      onValueChange={setSelectedRollbackUserId}
-                      disabled={isLoading}
-                    >
-                      <SelectTrigger id="rollback-user">
-                        <SelectValue placeholder="Foydalanuvchini tanlang" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {enrichedUsers.map((user) => {
-                          // Формируем детальную строку для пользователя
-                          const userDisplay = [
-                            `Bosqich ${user.stepOrder}`,
-                            user.userName,
-                            user.userRole && `- ${user.userRole}`,
-                            user.userEmail && `(${user.userEmail})`,
-                          ]
-                            .filter(Boolean)
-                            .join(" ");
+                    <>
+                      <Select
+                        value={selectedRollbackUserId}
+                        onValueChange={setSelectedRollbackUserId}
+                        disabled={isLoading}
+                      >
+                        <SelectTrigger id="rollback-user">
+                          <SelectValue placeholder="Foydalanuvchini tanlang" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {enrichedUsers.map((user) => {
+                            // Формируем детальную строку для пользователя
+                            const isCreator = user.stepOrder === 0;
+                            const userDisplay = isCreator
+                              ? `🔖 ${user.userName} (Yaratuvchi)`
+                              : [
+                                  `Bosqich ${user.stepOrder}`,
+                                  user.userName,
+                                  user.username && `@${user.username}`,
+                                  user.userRole && `- ${user.userRole}`,
+                                ]
+                                  .filter(Boolean)
+                                  .join(" ");
 
-                          return (
-                            <SelectItem key={user.userId} value={user.userId}>
-                              {userDisplay}
-                            </SelectItem>
-                          );
-                        })}
-                      </SelectContent>
-                    </Select>
+                            return (
+                              <SelectItem key={user.userId} value={user.userId}>
+                                {userDisplay}
+                              </SelectItem>
+                            );
+                          })}
+                        </SelectContent>
+                      </Select>
+                      {documentData?.createdBy && (
+                        <p className="text-xs text-muted-foreground">
+                          💡 Sukut bo'yicha hujjat yaratuvchiga qaytariladi
+                        </p>
+                      )}
+                    </>
                   )}
                   <p className="text-xs text-muted-foreground">
                     ⚠️ Workflow ushbu foydalanuvchining bosqichidan qayta

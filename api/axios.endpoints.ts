@@ -90,6 +90,10 @@ export const endpoints = {
   wopi: {
     token: "/wopi/token",
   },
+  documents: {
+    qrData: "/api/documents/qr-data",
+    generateQR: "/api/documents/generate-qr",
+  },
 } as const;
 
 export type Endpoints = typeof endpoints;

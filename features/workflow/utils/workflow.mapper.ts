@@ -33,6 +33,7 @@ export const apiToFormData = (
  * Трансформация Form data → API payload
  * ✅ КРИТИЧНО: Добавляет ВСЕ обязательные поля для Backend
  * ⚠️ workflowType не отправляется на backend (поле используется только на frontend)
+ * ✨ ПРИМЕЧАНИЕ: Backend автоматически устанавливает первый шаг в статус IN_PROGRESS
  */
 export const formToApiPayload = (
   formData: WorkflowFormType,
