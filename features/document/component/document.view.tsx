@@ -1,7 +1,6 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
-import SkeletonWrapper from "@/components/wrappers/skleton-wrapper";
+import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import {
   FileText,
@@ -15,6 +14,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useGetDocumentById } from "@/features/document";
 import { Button } from "@/components/ui/button";
+import { FC } from "react";
 
 const formatDate = (dateString: string | undefined): string => {
   if (!dateString) return "Ma'lumot yo'q";
@@ -79,7 +79,6 @@ const StatusBadge = ({ status }: { status: string }) => {
   );
 };
 
-// Priority badge
 const PriorityBadge = ({ priority }: { priority: string }) => {
   const config = {
     HIGH: {
@@ -112,189 +111,182 @@ const PriorityBadge = ({ priority }: { priority: string }) => {
   );
 };
 
-const DocumentView = () => {
-  const params = useSearchParams();
-  const documentId = params.get("documentId") || "";
+const DocumentView: FC<{ documentId: string }> = ({ documentId }) => {
   const router = useRouter();
 
-  const { data, isLoading, isFetching } = useGetDocumentById(documentId);
+  const { data, isLoading } = useGetDocumentById(documentId);
 
   const handleDownload = (fileUrl: string) => {
     window.open(fileUrl, "_blank");
   };
 
+  if (!data && isLoading) {
+    return (
+      <div className="p-6 text-sm text-muted-foreground">
+        Ma'lumot yuklanmoqda...
+      </div>
+    );
+  }
+
   return (
-    <SkeletonWrapper isLoading={isLoading || isFetching}>
-      {data && (
-        <div className="space-y-8 animate-in fade-in duration-500">
-          {/* Header */}
-          <div className="border-b pb-4">
-            <h3 className="text-xl font-semibold">{data.title}</h3>
-            {data.description && (
-              <p className="text-sm text-muted-foreground mt-1">
-                {data.description}
-              </p>
-            )}
+    <div className="space-y-8 animate-in fade-in duration-500">
+      {/* Header */}
+      <div className="border-b pb-4">
+        <h3 className="text-xl font-semibold">{data.title}</h3>
+        {data.description && (
+          <p className="text-sm text-muted-foreground mt-1">
+            {data.description}
+          </p>
+        )}
+      </div>
+
+      {/* Info Grid */}
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-x-8 gap-y-6">
+        <div className="group">
+          <p className="text-xs text-muted-foreground mb-1.5 transition-colors group-hover:text-foreground">
+            Hujjat raqami
+          </p>
+          <p className="font-medium">{data.documentNumber || "—"}</p>
+        </div>
+
+        <div className="group">
+          <p className="text-xs text-muted-foreground mb-1.5 transition-colors group-hover:text-foreground">
+            Hujjat turi
+          </p>
+          <p className="font-medium">{data.documentType?.name || "—"}</p>
+        </div>
+
+        <div className="group">
+          <p className="text-xs text-muted-foreground mb-1.5 transition-colors group-hover:text-foreground">
+            Jurnal
+          </p>
+          <p className="font-medium">{data.journal?.name || "—"}</p>
+        </div>
+
+        <div className="group">
+          <p className="text-xs text-muted-foreground mb-1.5 transition-colors group-hover:text-foreground">
+            Holati
+          </p>
+          <StatusBadge status={data.status} />
+        </div>
+
+        <div className="group">
+          <p className="text-xs text-muted-foreground mb-1.5 transition-colors group-hover:text-foreground">
+            Muhimlik
+          </p>
+          <PriorityBadge priority={data.priority} />
+        </div>
+
+        <div className="group">
+          <p className="text-xs text-muted-foreground mb-1.5 transition-colors group-hover:text-foreground">
+            Versiya
+          </p>
+          <Badge
+            variant="outline"
+            className="font-mono bg-indigo-50 text-indigo-700 border-indigo-300"
+          >
+            v{data.versions || 0}
+          </Badge>
+        </div>
+      </div>
+      <div className="border-t pt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="flex items-start gap-3 p-3 rounded-lg hover:bg-accent/50 transition-colors">
+          <div className="p-2 rounded-full bg-blue-100">
+            <User className="h-4 w-4 text-blue-600" />
           </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-xs text-muted-foreground mb-1">Yaratuvchi</p>
+            <p className="font-medium">{data.createdBy?.fullname || "—"}</p>
+          </div>
+        </div>
 
-          {/* Info Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-x-8 gap-y-6">
-            <div className="group">
-              <p className="text-xs text-muted-foreground mb-1.5 transition-colors group-hover:text-foreground">
-                Hujjat raqami
-              </p>
-              <p className="font-medium">{data.documentNumber || "—"}</p>
+        <div className="flex items-start gap-3 p-3 rounded-lg hover:bg-accent/50 transition-colors">
+          <div className="p-2 rounded-full bg-green-100">
+            <Calendar className="h-4 w-4 text-green-600" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-xs text-muted-foreground mb-1">
+              Yaratilgan sana
+            </p>
+            <p className="text-sm">{formatDate(data.createdAt)}</p>
+          </div>
+        </div>
+
+        {data.updatedAtBy && (
+          <div className="flex items-start gap-3 p-3 rounded-lg hover:bg-accent/50 transition-colors">
+            <div className="p-2 rounded-full bg-purple-100">
+              <User className="h-4 w-4 text-purple-600" />
             </div>
-
-            <div className="group">
-              <p className="text-xs text-muted-foreground mb-1.5 transition-colors group-hover:text-foreground">
-                Hujjat turi
+            <div className="min-w-0 flex-1">
+              <p className="text-xs text-muted-foreground mb-1">
+                Oxirgi o'zgartiruvchi
               </p>
-              <p className="font-medium">{data.documentType?.name || "—"}</p>
+              <p className="font-medium">{data.updatedAtBy?.fullname || "—"}</p>
             </div>
+          </div>
+        )}
 
-            <div className="group">
-              <p className="text-xs text-muted-foreground mb-1.5 transition-colors group-hover:text-foreground">
-                Jurnal
-              </p>
-              <p className="font-medium">{data.journal?.name || "—"}</p>
-            </div>
+        <div className="flex items-start gap-3 p-3 rounded-lg hover:bg-accent/50 transition-colors">
+          <div className="p-2 rounded-full bg-amber-100">
+            <Calendar className="h-4 w-4 text-amber-600" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-xs text-muted-foreground mb-1">
+              Yangilangan sana
+            </p>
+            <p className="text-sm">{formatDate(data.updatedAt)}</p>
+          </div>
+        </div>
+      </div>
 
-            <div className="group">
-              <p className="text-xs text-muted-foreground mb-1.5 transition-colors group-hover:text-foreground">
-                Holati
-              </p>
-              <StatusBadge status={data.status} />
-            </div>
-
-            <div className="group">
-              <p className="text-xs text-muted-foreground mb-1.5 transition-colors group-hover:text-foreground">
-                Muhimlik
-              </p>
-              <PriorityBadge priority={data.priority} />
-            </div>
-
-            <div className="group">
-              <p className="text-xs text-muted-foreground mb-1.5 transition-colors group-hover:text-foreground">
-                Versiya
-              </p>
-              <Badge
-                variant="outline"
-                className="font-mono bg-indigo-50 text-indigo-700 border-indigo-300"
+      {/* Attachments */}
+      {data.attachments && data.attachments.length > 0 && (
+        <div className="border-t pt-6">
+          <div className="flex items-center gap-2 mb-4">
+            <FileText className="h-4 w-4 text-muted-foreground" />
+            <p className="text-sm font-semibold">Biriktirilgan fayllar</p>
+            <Badge variant="secondary" className="ml-auto text-text-on-dark">
+              {data.attachments.length}
+            </Badge>
+          </div>
+          <div className="space-y-2">
+            {data.attachments.map((file: any, index: number) => (
+              <div
+                key={file.id}
+                className="flex items-center justify-between gap-4 p-3 border rounded-lg transition-all duration-200 group"
+                style={{ animationDelay: `${index * 50}ms` }}
               >
-                v{data.versions || 0}
-              </Badge>
-            </div>
-          </div>
-
-          {/* Created/Updated Info */}
-          <div className="border-t pt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="flex items-start gap-3 p-3 rounded-lg hover:bg-accent/50 transition-colors">
-              <div className="p-2 rounded-full bg-blue-100">
-                <User className="h-4 w-4 text-blue-600" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-xs text-muted-foreground mb-1">Yaratuvchi</p>
-                <p className="font-medium">{data.createdBy?.fullname || "—"}</p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3 p-3 rounded-lg hover:bg-accent/50 transition-colors">
-              <div className="p-2 rounded-full bg-green-100">
-                <Calendar className="h-4 w-4 text-green-600" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-xs text-muted-foreground mb-1">
-                  Yaratilgan sana
-                </p>
-                <p className="text-sm">{formatDate(data.createdAt)}</p>
-              </div>
-            </div>
-
-            {data.updatedAtBy && (
-              <div className="flex items-start gap-3 p-3 rounded-lg hover:bg-accent/50 transition-colors">
-                <div className="p-2 rounded-full bg-purple-100">
-                  <User className="h-4 w-4 text-purple-600" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs text-muted-foreground mb-1">
-                    Oxirgi o'zgartiruvchi
-                  </p>
-                  <p className="font-medium">
-                    {data.updatedAtBy?.fullname || "—"}
-                  </p>
-                </div>
-              </div>
-            )}
-
-            <div className="flex items-start gap-3 p-3 rounded-lg hover:bg-accent/50 transition-colors">
-              <div className="p-2 rounded-full bg-amber-100">
-                <Calendar className="h-4 w-4 text-amber-600" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-xs text-muted-foreground mb-1">
-                  Yangilangan sana
-                </p>
-                <p className="text-sm">{formatDate(data.updatedAt)}</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Attachments */}
-          {data.attachments && data.attachments.length > 0 && (
-            <div className="border-t pt-6">
-              <div className="flex items-center gap-2 mb-4">
-                <FileText className="h-4 w-4 text-muted-foreground" />
-                <p className="text-sm font-semibold">Biriktirilgan fayllar</p>
-                <Badge
-                  variant="secondary"
-                  className="ml-auto text-text-on-dark"
-                >
-                  {data.attachments.length}
-                </Badge>
-              </div>
-              <div className="space-y-2">
-                {data.attachments.map((file: any, index: number) => (
-                  <div
-                    key={file.id}
-                    className="flex items-center justify-between gap-4 p-3 border rounded-lg transition-all duration-200 group"
-                    style={{ animationDelay: `${index * 50}ms` }}
-                  >
-                    <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <div className="p-2 rounded-lg bg-blue-50 group-hover:bg-blue-100 transition-colors">
-                        <FileText className="h-4 w-4 text-blue-600" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="font-medium truncate group-hover:text-primary transition-colors">
-                          {file.fileName}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <Button
-                        className="text-text-on-dark"
-                        onClick={() =>
-                          router.push(`/document-edit?id=${file.id}`)
-                        }
-                      >
-                        hujjatni tahrirlash
-                      </Button>
-                      <button
-                        onClick={() => handleDownload(file.fileUrl)}
-                        className="flex items-center gap-2 hover:text-text-on-dark px-3 py-1.5 text-sm border rounded-md hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all duration-200 flex-shrink-0 group/btn"
-                      >
-                        <Download className="h-4 w-4 group-hover/btn:animate-bounce" />
-                        Yuklab olish
-                      </button>
-                    </div>
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <div className="p-2 rounded-lg bg-blue-50 group-hover:bg-blue-100 transition-colors">
+                    <FileText className="h-4 w-4 text-blue-600" />
                   </div>
-                ))}
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium truncate group-hover:text-primary transition-colors">
+                      {file.fileName}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Button
+                    className="text-text-on-dark"
+                    onClick={() => router.push(`/pdf/${documentId}`)}
+                  >
+                    hujjatni tahrirlash
+                  </Button>
+                  <button
+                    onClick={() => handleDownload(file.fileUrl)}
+                    className="flex items-center gap-2 hover:text-text-on-dark px-3 py-1.5 text-sm border rounded-md hover:bg-primary hover:border-primary transition-all duration-200 flex-shrink-0 group/btn"
+                  >
+                    <Download className="h-4 w-4 group-hover/btn:animate-bounce" />
+                    Yuklab olish
+                  </button>
+                </div>
               </div>
-            </div>
-          )}
+            ))}
+          </div>
         </div>
       )}
-    </SkeletonWrapper>
+    </div>
   );
 };
 

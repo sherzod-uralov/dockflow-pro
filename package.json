@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
+    "@pdftron/webviewer": "^11.8.0",
     "@pspdfkit/document-authoring": "^1.2.3",
     "@radix-ui/react-accordion": "1.2.2",
     "@radix-ui/react-alert-dialog": "1.1.4",
@@ -41,6 +42,7 @@
     "@radix-ui/react-tooltip": "1.1.6",
     "@remix-run/react": "latest",
     "@sveltejs/kit": "latest",
+    "@tanstack/react-query": "^5.90.8",
     "@tanstack/react-table": "^8.21.3",
     "@types/file-saver": "^2.0.7",
     "@types/html-to-docx": "^1.8.0",
@@ -53,6 +55,7 @@
     "autoprefixer": "^10.4.20",
     "axios": "^1.11.0",
     "class-variance-authority": "^0.7.1",
+    "claude": "^0.1.1",
     "clsx": "^2.1.1",
     "cmdk": "1.0.4",
     "cookies-next": "^6.1.0",

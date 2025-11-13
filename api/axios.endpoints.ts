@@ -90,6 +90,10 @@ export const endpoints = {
   wopi: {
     token: "/wopi/token",
   },
+  pdf: {
+    list: (id: string | number) => `/document/${id}/pdf-url`,
+    create: (id: string | number) => `/document/${id}/pdf-url`,
+  },
 } as const;
 
 export type Endpoints = typeof endpoints;
