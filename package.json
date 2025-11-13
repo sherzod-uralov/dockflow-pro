@@ -47,7 +47,7 @@
     "@types/file-saver": "^2.0.7",
     "@types/html-to-docx": "^1.8.0",
     "@types/js-cookie": "^3.0.6",
-    "@types/qrcode": "^1.5.5",
+    "@types/qrcode": "^1.5.6",
     "@types/react-transition-group": "^4.4.12",
     "@types/xml2js": "^0.4.14",
     "@vercel/analytics": "latest",

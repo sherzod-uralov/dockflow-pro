@@ -23,6 +23,7 @@ export const useCreateWorkflow = () => {
       workflowService.createWorkflow(payload),
     onSuccess: () => {
       queryClient?.invalidateQueries(["workflows"]);
+      queryClient?.invalidateQueries(["my-tasks"]);
       toast.success("Workflow muvaffaqiyatli yaratildi");
     },
     onError: (error: any) => {

@@ -68,23 +68,24 @@ const menuItems: MenuItem[] = [
     href: "/dashboard/document",
     permission: "document:list",
   },
-  {
-    icon: Layers,
-    label: "Hujjatlar Aylanmasi",
-    href: "/dashboard/workflow",
-    permission: "workflow:list",
-  },
-  {
-    icon: ClipboardCheck,
-    label: "Mening Vazifalarim",
-    href: "/dashboard/my-tasks",
-    permission: "task:list",
-  },
+
   {
     icon: DockIcon,
     label: "Hujjat Andozalari",
     href: "/dashboard/document-template",
     permission: "document_template:list",
+  },
+  {
+    icon: Layers,
+    label: "Hujjatlar Aylanmasi",
+    permission: "workflow:list",
+    subItems: [
+      {
+        label: "Hujjatlar Aylanmasi",
+        href: "/dashboard/workflow",
+        permission: "workflow:list",
+      },
+    ],
   },
   {
     icon: Settings,
@@ -220,13 +221,13 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                 <button
                   onClick={() => toggleMenu(item.label)}
                   className={cn(
-                    "flex w-full items-center justify-between px-4 py-2 rounded-xl text-left text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                    "flex w-full items-center justify-between px-3 py-2 rounded-xl text-left text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
                     openMenus.includes(item.label) &&
                       "bg-sidebar-accent text-sidebar-accent-foreground",
                   )}
                 >
                   <div className="flex items-center">
-                    <item.icon className="w-5 h-5 mr-3" />
+                    <item.icon className="w-4 h-4 mr-3" />
                     {item.label}
                   </div>
                   <ChevronDown

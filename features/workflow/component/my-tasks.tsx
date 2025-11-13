@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useGetMyTasks } from "@/features/workflow";
 import { usePagination } from "@/hooks/use-pagination";
 import TaskCard from "./task-card";
@@ -16,12 +17,10 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import {
-  WorkflowStepStatus,
-  WorkflowActionType,
-} from "@/features/workflow";
+import { WorkflowStepStatus, WorkflowActionType } from "@/features/workflow";
 
 const MyTasks = () => {
+  const router = useRouter();
   const { pageNumber, pageSize, handlePageSizeChange, handlePageChange } =
     usePagination();
 
@@ -97,9 +96,7 @@ const MyTasks = () => {
                 value={statusFilter}
                 onValueChange={(value) =>
                   setStatusFilter(
-                    value === "all"
-                      ? undefined
-                      : (value as WorkflowStepStatus),
+                    value === "all" ? undefined : (value as WorkflowStepStatus),
                   )
                 }
               >
@@ -123,9 +120,7 @@ const MyTasks = () => {
                 value={actionTypeFilter}
                 onValueChange={(value) =>
                   setActionTypeFilter(
-                    value === "all"
-                      ? undefined
-                      : (value as WorkflowActionType),
+                    value === "all" ? undefined : (value as WorkflowActionType),
                   )
                 }
               >
@@ -202,6 +197,10 @@ const MyTasks = () => {
                   key={step.id}
                   task={taskData}
                   onActionComplete={refetch}
+                  onCardClick={() => {
+                    router.push(`/dashboard/workflow/${step.workflowId}`);
+                  }}
+                  showActions={false}
                 />
               );
             })}
