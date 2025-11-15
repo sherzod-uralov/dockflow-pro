@@ -92,10 +92,11 @@ export const workflowService = {
   /**
    * Завершить (принять) workflow step
    */
-  completeWorkflowStep: async (id: string) => {
+  completeWorkflowStep: async (id: string, comment?: string) => {
     return workflowErrorHandler(() =>
       axiosInstance.patch<WorkflowStepApiResponse>(
         endpoints.workflowStep.complete(id),
+        comment ? { comment } : {},
       ),
     );
   },

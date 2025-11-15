@@ -11,7 +11,7 @@ export const permissionScheme = z
     key: z
       .string()
       .regex(
-        /^[a-zA-Z]+:(read|create|delete|update|change-request)$/,
+        /^[a-zA-Z]+:(read|create|delete|update|change-request|list)$/,
         "Kalit faqat 'soz:read|create|delete|update|change-request' formatida bo'lishi kerak (masalan: document:delete)",
       ),
     module: z

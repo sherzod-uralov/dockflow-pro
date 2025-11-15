@@ -20,6 +20,7 @@ import {
   Layers,
   Edit,
   Trash2,
+  Eye,
 } from "lucide-react";
 import type { WorkflowStepApiResponse } from "@/features/workflow";
 import {
@@ -50,7 +51,10 @@ import { formatDate } from "@/lib/date-utils";
 import { useGetUserByIdQuery } from "@/features/admin/admin-users/hook/user.hook";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useGetDocumentById } from "@/features/document";
-import { createWorkflowDocumentEditUrl } from "@/utils/url-helper";
+import {
+  createWorkflowDocumentEditUrl,
+  createWorkflowDocumentViewUrl,
+} from "@/utils/url-helper";
 import { useRouter } from "next/navigation";
 import { Progress } from "@/components/ui/progress";
 import { useGetProfileQuery } from "@/features/login/hook/login.hook";
@@ -216,6 +220,7 @@ const TaskCard = ({
         color: string;
         bgColor: string;
         borderColor: string;
+        canEdit: boolean;
       }
     > = {
       APPROVAL: {
@@ -224,6 +229,7 @@ const TaskCard = ({
         color: "text-green-700",
         bgColor: "bg-green-50",
         borderColor: "border-green-200",
+        canEdit: false,
       },
       REVIEW: {
         label: "Ko'rib chiqish",
@@ -231,6 +237,7 @@ const TaskCard = ({
         color: "text-blue-700",
         bgColor: "bg-blue-50",
         borderColor: "border-blue-200",
+        canEdit: false,
       },
       SIGN: {
         label: "Imzolash",
@@ -238,13 +245,23 @@ const TaskCard = ({
         color: "text-purple-700",
         bgColor: "bg-purple-50",
         borderColor: "border-purple-200",
+        canEdit: true,
       },
-      NOTIFY: {
-        label: "Xabarnoma",
-        icon: Bell,
-        color: "text-amber-700",
-        bgColor: "bg-amber-50",
-        borderColor: "border-amber-200",
+      QR_CODE: {
+        label: "QR kod qo'shish",
+        icon: FileEdit,
+        color: "text-indigo-700",
+        bgColor: "bg-indigo-50",
+        borderColor: "border-indigo-200",
+        canEdit: true,
+      },
+      ACKNOWLEDGE: {
+        label: "Tanishish",
+        icon: FileText,
+        color: "text-teal-700",
+        bgColor: "bg-teal-50",
+        borderColor: "border-teal-200",
+        canEdit: false,
       },
     };
 
@@ -345,15 +362,29 @@ const TaskCard = ({
   const canEditDocument =
     isCurrentUserAssigned &&
     task.status === "IN_PROGRESS" &&
+    actionConfig.canEdit &&
     documentData?.attachments &&
     documentData.attachments.length > 0;
 
   const handleEditDocument = () => {
-    if (documentData?.attachments?.[0]?.id) {
+    if (documentData?.attachments?.[0]?.id && documentId) {
       const editUrl = createWorkflowDocumentEditUrl(
         documentData.attachments[0].id,
+        documentId,
+        task.actionType, // Pass actionType to determine which editor to use
       );
       router.push(editUrl);
+    }
+  };
+
+  const handleViewDocument = () => {
+    if (documentData?.attachments?.[0]?.id && documentId) {
+      const viewUrl = createWorkflowDocumentViewUrl(
+        documentData.attachments[0].id,
+        documentId,
+        task.actionType, // Pass actionType to determine which viewer to use
+      );
+      router.push(viewUrl);
     }
   };
 
@@ -589,6 +620,26 @@ const TaskCard = ({
             </div>
           )}
 
+          {/* View button for completed tasks */}
+          {task.status === "COMPLETED" &&
+            documentData?.attachments &&
+            documentData.attachments.length > 0 && (
+              <div className="space-y-2 pt-2">
+                <Button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleViewDocument();
+                  }}
+                  className="w-full h-11 font-medium"
+                  variant="outline"
+                  size="lg"
+                >
+                  <Eye className="h-4 w-4 mr-2" />
+                  Hujjatni ko'rish
+                </Button>
+              </div>
+            )}
+
           {canPerformActions && (
             <div className="space-y-2 pt-2">
               {canEditDocument && (
@@ -603,7 +654,9 @@ const TaskCard = ({
                   size="lg"
                 >
                   <FileEdit className="h-4 w-4 mr-2" />
-                  Hujjatni tahrirlash
+                  {task.actionType === "QR_CODE"
+                    ? "QR kod qo'shish"
+                    : "Hujjatni tahrirlash"}
                 </Button>
               )}
               <div className="grid grid-cols-2 gap-2">

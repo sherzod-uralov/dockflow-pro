@@ -127,6 +127,85 @@ const WorkflowStepItem = ({
           </Select>
         </div>
 
+        {/* ✨ Action Type Selection */}
+        <FormField
+          control={control}
+          name={`steps.${index}.actionType`}
+          render={({ field }) => (
+            <FormItem className="mb-4">
+              <FormLabel>Amal turi *</FormLabel>
+              <Select
+                onValueChange={field.onChange}
+                value={field.value}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Amal turini tanlang" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent className="max-h-[300px]">
+                  <SelectItem value="APPROVAL">
+                    <div className="flex items-center gap-2">
+                      <span>✓</span>
+                      <div>
+                        <div className="font-medium">Tasdiqlash</div>
+                        <div className="text-xs text-muted-foreground">
+                          Hujjatni tasdiqlash jarayoni
+                        </div>
+                      </div>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="REVIEW">
+                    <div className="flex items-center gap-2">
+                      <span>🔍</span>
+                      <div>
+                        <div className="font-medium">Ko'rib chiqish</div>
+                        <div className="text-xs text-muted-foreground">
+                          Hujjatni ko'rib chiqish
+                        </div>
+                      </div>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="SIGN">
+                    <div className="flex items-center gap-2">
+                      <span>✍️</span>
+                      <div>
+                        <div className="font-medium">Imzolash</div>
+                        <div className="text-xs text-muted-foreground">
+                          Hujjatga imzo qo'yish
+                        </div>
+                      </div>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="QR_CODE">
+                    <div className="flex items-center gap-2">
+                      <span>📝</span>
+                      <div>
+                        <div className="font-medium">QR kod qo'shish</div>
+                        <div className="text-xs text-muted-foreground">
+                          Hujjatga QR kod va izohlar qo'shish
+                        </div>
+                      </div>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="ACKNOWLEDGE">
+                    <div className="flex items-center gap-2">
+                      <span>📄</span>
+                      <div>
+                        <div className="font-medium">Tanishish</div>
+                        <div className="text-xs text-muted-foreground">
+                          Hujjat bilan tanishish
+                        </div>
+                      </div>
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         {/* ✨ Assigned User с фильтрацией */}
         <FormField
           control={control}

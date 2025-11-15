@@ -28,6 +28,7 @@ export const endpoints = {
     detail: (id: string | number) => `/document/${id}`,
     update: (id: string | number) => `/document/${id}`,
     delete: (id: string | number) => `/document/${id}`,
+    savePdfAnnotations: (id: string | number) => `/document/${id}/pdf-url`,
   },
   deportament: {
     list: "/department",

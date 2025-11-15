@@ -21,9 +21,14 @@ export const HTTP_ERRORS: Record<string, string> = {
 };
 
 const findErrorMessage = (
-  message: string,
+  message: string | any,
   errorMaps: Record<string, string>[],
 ): string | null => {
+  // ✨ ИСПРАВЛЕНО: проверяем, что message - это строка
+  if (!message || typeof message !== 'string') {
+    return null;
+  }
+
   const lowerMsg = message.toLowerCase();
 
   for (const errorMap of errorMaps) {
@@ -40,7 +45,47 @@ const findErrorMessage = (
 export const createErrorHandler = (domainErrors: Record<string, string>) => {
   const handleError = (error: any, custom?: Record<string, string>): string => {
     const status = error.response?.status;
-    const message = error.response?.data?.message || error.message;
+    const responseData = error.response?.data;
+
+    // ✨ УЛУЧШЕНО: извлечение сообщения с поддержкой разных форматов
+    let message: string | any =
+      responseData?.message ||
+      responseData?.error ||
+      error.message;
+
+    // ✨ НОВОЕ: обработка когда message - это массив
+    if (Array.isArray(message)) {
+      message = message
+        .map((msg: any) => {
+          if (typeof msg === 'string') return msg;
+          if (msg.message) return msg.message;
+          return JSON.stringify(msg);
+        })
+        .filter(Boolean)
+        .join(', ');
+    }
+
+    // ✨ НОВОЕ: обработка массива ошибок валидации
+    if (responseData?.errors && Array.isArray(responseData.errors)) {
+      const validationMessages = responseData.errors
+        .map((err: any) => {
+          if (typeof err === 'string') return err;
+          if (err.message) return err.message;
+          if (err.field && err.message) return `${err.field}: ${err.message}`;
+          return JSON.stringify(err);
+        })
+        .filter(Boolean)
+        .join(', ');
+
+      if (validationMessages) {
+        message = validationMessages;
+      }
+    }
+
+    // ✨ НОВОЕ: обработка вложенных ошибок
+    if (!message && responseData?.error && typeof responseData.error === 'object') {
+      message = responseData.error.message || JSON.stringify(responseData.error);
+    }
 
     if (custom && message) {
       const customMatch = findErrorMessage(message, [custom]);
@@ -56,6 +101,15 @@ export const createErrorHandler = (domainErrors: Record<string, string>) => {
       return HTTP_ERRORS[status];
     }
 
+    // ✨ УЛУЧШЕНО: преобразование message в строку
+    if (message && typeof message !== 'string') {
+      try {
+        message = JSON.stringify(message);
+      } catch {
+        message = String(message);
+      }
+    }
+
     return message || "Xatolik yuz berdi";
   };
 
@@ -64,11 +118,22 @@ export const createErrorHandler = (domainErrors: Record<string, string>) => {
       const response = await apiCall();
       return response.data;
     } catch (error: any) {
+      // ✨ НОВОЕ: детальное логирование для отладки
+      if (process.env.NODE_ENV === "development") {
+        console.group("🚫 HTTP Error Details");
+        console.error("Status:", error.response?.status);
+        console.error("Response Data:", error.response?.data);
+        console.error("Original Message:", error.message);
+        console.error("Full Error:", error);
+        console.groupEnd();
+      }
+
       const errorMessage = handleError(error);
       const processedError = new Error(errorMessage) as any;
       processedError.response = error.response;
       processedError.status = error.response?.status;
       processedError.code = error.response?.data?.code || error.code;
+      processedError.originalData = error.response?.data; // ✨ НОВОЕ: сохраняем оригинальные данные
       throw processedError;
     }
   };
