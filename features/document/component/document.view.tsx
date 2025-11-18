@@ -267,7 +267,9 @@ const DocumentView = ({ id }: { id: string }) => {
                       <Button
                         className="text-text-on-dark"
                         onClick={() =>
-                          router.push(`/document-edit?id=${file.id}`)
+                          router.push(
+                            `/document-edit?id=${file.id}&documentId=${data.id}`,
+                          )
                         }
                       >
                         hujjatni tahrirlash
