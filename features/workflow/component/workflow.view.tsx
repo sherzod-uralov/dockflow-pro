@@ -31,6 +31,7 @@ import {
   ArrowRight,
   FileEdit,
   Play,
+  Eye,
 } from "lucide-react";
 import {
   WorkflowApiResponse,
@@ -67,7 +68,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useGetDocumentById } from "@/features/document";
-import { createWorkflowDocumentEditUrl } from "@/utils/url-helper";
+import {
+  createWorkflowDocumentEditUrl,
+  createWorkflowDocumentViewUrl,
+} from "@/utils/url-helper";
 import { useRouter } from "next/navigation";
 import { useGetProfileQuery } from "@/features/login/hook/login.hook";
 
@@ -135,12 +139,26 @@ const WorkflowView = ({ workflow, onClose }: WorkflowViewProps) => {
   };
 
   // Функция для редактирования документа
-  const handleEditDocument = () => {
-    if (documentData?.attachments?.[0]?.id) {
+  const handleEditDocument = (actionType?: string) => {
+    if (documentData?.attachments?.[0]?.id && workflow.documentId) {
       const editUrl = createWorkflowDocumentEditUrl(
         documentData.attachments[0].id,
+        workflow.documentId,
+        actionType, // Pass actionType to determine which editor to use
       );
       router.push(editUrl);
+    }
+  };
+
+  // Функция для просмотра документа (только чтение)
+  const handleViewDocument = (actionType?: string) => {
+    if (documentData?.attachments?.[0]?.id && workflow.documentId) {
+      const viewUrl = createWorkflowDocumentViewUrl(
+        documentData.attachments[0].id,
+        workflow.documentId,
+        actionType, // Pass actionType to determine which viewer to use
+      );
+      router.push(viewUrl);
     }
   };
 
@@ -389,11 +407,6 @@ const WorkflowView = ({ workflow, onClose }: WorkflowViewProps) => {
           icon: FileSignature,
           color: "bg-purple-100 text-purple-800 border-purple-300",
         },
-        NOTIFY: {
-          label: "Xabarnoma",
-          icon: Bell,
-          color: "bg-yellow-100 text-yellow-800 border-yellow-300",
-        },
       };
 
     const item = config[actionType] || config.APPROVAL;
@@ -610,6 +623,21 @@ const WorkflowView = ({ workflow, onClose }: WorkflowViewProps) => {
               </div>
             )}
 
+            {/* View button for completed steps */}
+            {step.status === "COMPLETED" && canEditDocument && (
+              <div className="space-y-2 pt-2 border-t">
+                <Button
+                  size="sm"
+                  onClick={() => handleViewDocument(step.actionType)}
+                  className="w-full"
+                  variant="outline"
+                >
+                  <Eye className="h-4 w-4 mr-2" />
+                  Hujjatni ko'rish
+                </Button>
+              </div>
+            )}
+
             {/* Action Buttons */}
             {isCurrentStep &&
               isCurrentUserAssigned &&
@@ -620,13 +648,15 @@ const WorkflowView = ({ workflow, onClose }: WorkflowViewProps) => {
                   {canEditDocument && (
                     <Button
                       size="sm"
-                      onClick={handleEditDocument}
+                      onClick={() => handleEditDocument(step.actionType)}
                       disabled={isLoading}
                       className="w-full"
                       variant="outline"
                     >
                       <FileEdit className="h-4 w-4 mr-2" />
-                      Hujjatni tahrirlash
+                      {step.actionType === "QR_CODE"
+                        ? "QR kod qo'shish"
+                        : "Hujjatni tahrirlash"}
                     </Button>
                   )}
 

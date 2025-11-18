@@ -48,14 +48,26 @@ export const formToApiPayload = (
     })),
   };
 
+  // ✅ ИСПРАВЛЕНО: documentId только для создания, не для обновления
   if (!isUpdate) {
     payload.documentId = formData.documentId;
     payload.currentStepOrder = 0;
     payload.status = "ACTIVE";
-  } else {
-    if (payload.documentId) {
-      delete payload.documentId;
-    }
+  }
+  // ✨ ВАЖНО: При update documentId НЕ должен включаться в payload
+
+  // ✨ ДОПОЛНИТЕЛЬНАЯ ЗАЩИТА: убираем documentId если он случайно попал в payload при update
+  if (isUpdate && 'documentId' in payload) {
+    delete payload.documentId;
+  }
+
+  // 🐛 DEBUG: Логирование для отладки
+  if (process.env.NODE_ENV === "development") {
+    console.log("📦 Workflow Payload:", {
+      isUpdate,
+      hasDocumentId: 'documentId' in payload,
+      payload,
+    });
   }
 
   return payload;

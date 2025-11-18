@@ -48,7 +48,7 @@ const menuItems: MenuItem[] = [
     icon: DockIcon,
     label: "Xujjat turini",
     href: "/dashboard/document-type",
-    permission: "document-type:list",
+    permission: "document_type:list",
   },
   {
     icon: Home,
