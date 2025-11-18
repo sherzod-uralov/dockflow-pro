@@ -117,6 +117,7 @@ const DocumentView = () => {
   const documentId = params.get("documentId") || "";
   const router = useRouter();
 
+  // @ts-ignore
   const { data, isLoading, isFetching } = useGetDocumentById(documentId);
 
   const handleDownload = (fileUrl: string) => {
