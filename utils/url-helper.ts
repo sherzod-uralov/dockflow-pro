@@ -46,7 +46,7 @@ export function createWorkflowDocumentEditUrl(
     return `/pdf/${documentId}`;
   }
 
-  // For all other action types (SIGN, etc.), use Collabora document editor
+  // For all other action type (SIGN, etc.), use Collabora document editor
   return `/document-edit?id=${attachmentId}&documentId=${documentId}`;
 }
 
@@ -69,6 +69,6 @@ export function createWorkflowDocumentViewUrl(
     return `/pdf/${documentId}?readonly=true`;
   }
 
-  // For all other action types, use Collabora in read-only mode
+  // For all other action type, use Collabora in read-only mode
   return `/document-edit?id=${attachmentId}&documentId=${documentId}&readonly=true`;
 }

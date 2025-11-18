@@ -60,8 +60,8 @@ export function Header({ onMenuClick }: HeaderProps) {
         </div>
 
         <div className="flex items-center space-x-4">
-          {/* Notification Dropdown */}
-          <NotificationDropdown />
+          {/*/!* Notification Dropdown *!/*/}
+          {/*<NotificationDropdown />*/}
 
           <ThemeToggle />
 
@@ -70,7 +70,8 @@ export function Header({ onMenuClick }: HeaderProps) {
               <Button variant="ghost" className="relative h-10 w-10 rounded-xl">
                 <Avatar className="h-9 w-9">
                   {data.avatarUrl && (
-                    <AvatarImage src={data.avatarUrl} alt="User" />
+                    //@ts-ignore
+                    <AvatarImage src={data?.avatarUrl || ""} alt="User" />
                   )}
                   <AvatarFallback className="bg-primary text-primary-foreground">
                     {initials}

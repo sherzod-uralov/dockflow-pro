@@ -42,4 +42,5 @@ export interface DocumentQueryParams {
   search?: string;
   pageSize?: number;
   pageNumber?: number;
+  documentTypeId?: string;
 }

@@ -237,7 +237,7 @@ export const SplitLayoutWithTabs = ({
         <div className="flex-1 flex flex-col overflow-hidden bg-gray-50">
           {selectedItem ? (
             <>
-              <div className="px-6 py-3 bg-card border-b flex items-center gap-2">
+              <div className="px-6 py-3.5 bg-card border-b flex items-center gap-2">
                 {selectedItemActions.map((action, index) => (
                   <Button
                     key={index}

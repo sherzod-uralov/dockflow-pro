@@ -26,6 +26,7 @@ import {
 } from "@/features/document";
 import { SplitLayoutWithTabs } from "@/components/shared/layout/document.management.layout";
 import WorkflowForm from "@/features/workflow/component/workflow.form";
+import { useGetAllDocumentTypes } from "@/features/document-type";
 const DocumentPage: FC<{ children: ReactElement }> = ({ children }) => {
   const router = useRouter();
   const params = useParams();
@@ -40,11 +41,21 @@ const DocumentPage: FC<{ children: ReactElement }> = ({ children }) => {
   const [selectedDocument, setSelectedDocument] =
     useState<DocumentGetResponse | null>(null);
   const [searchQuery, debouncedSearch, setSearchQuery] = useDebounce("", 500);
+  const [selectedTab, setSelectedTab] = useState<string>("");
+  useEffect(() => {
+    handlePageChange(1);
+  }, [selectedTab]);
 
   const { data, isLoading } = useGetAllDocuments({
     search: debouncedSearch || undefined,
     pageSize: pageSize,
     pageNumber: pageNumber,
+    documentTypeId: selectedTab || undefined,
+  });
+
+  const { data: documentTypes } = useGetAllDocumentTypes({
+    pageNumber: 1,
+    pageSize: 1000,
   });
 
   const { data: documentData, isLoading: isDocumentLoading } =
@@ -108,21 +119,11 @@ const DocumentPage: FC<{ children: ReactElement }> = ({ children }) => {
   };
 
   const tabs = [
-    { value: "borchasi", label: "Borchasi" },
-    { value: "chiquvchi", label: "Chiquvchi hujjatlar" },
-    { value: "javob", label: "Javob xati" },
-    {
-      value: "ichki",
-      label: "Ichki hujjatlar",
-      badge: 0,
-      badgeColor: "bg-purple-500",
-    },
-    {
-      value: "boshqalar",
-      label: "Boshqalar",
-      badge: 0,
-      badgeColor: "bg-green-500",
-    },
+    { value: "", label: "Barchasi" },
+    ...(documentTypes?.data.map((type) => ({
+      value: type.id,
+      label: type.name,
+    })) || []),
   ];
 
   const actionButtons = [
@@ -144,18 +145,18 @@ const DocumentPage: FC<{ children: ReactElement }> = ({ children }) => {
       icon: <Trash2 className="h-4 w-4" />,
       onClick: () => deleteModal.openModal(),
     },
-    {
-      label: "Ijro qadamlari (beta)",
-      icon: <FileEdit className="h-4 w-4" />,
-      onClick: () => {},
-    },
+    // {
+    //   label: "Ijro qadamlari (beta)",
+    //   icon: <FileEdit className="h-4 w-4" />,
+    //   onClick: () => {},
+    // },
   ];
 
   return (
     <>
       <SplitLayoutWithTabs
         tabs={tabs}
-        defaultTab="borchasi"
+        defaultTab=""
         createButtonLabel="+ Yangi hujjat"
         onCreateNew={createModal.openModal}
         searchPlaceholder="HUJJATLAR RO'YXATI"
@@ -173,6 +174,7 @@ const DocumentPage: FC<{ children: ReactElement }> = ({ children }) => {
         totalCount={data?.count || 0}
         onPageChange={handlePageChange}
         rightPanelContent={children}
+        onTabChange={(tab) => setSelectedTab(tab)}
         selectedItemActions={actionButtons}
         additionalActions={
           selectedDocument && (

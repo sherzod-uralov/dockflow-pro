@@ -122,12 +122,11 @@ export function GlobalSearch() {
     });
 
   // Fetch journals when searching
-  const { data: journalsData, isLoading: journalsLoading } =
-    useGetAllJournals({
-      pageSize: 5,
-      pageNumber: 1,
-      search: debouncedQuery,
-    });
+  const { data: journalsData, isLoading: journalsLoading } = useGetAllJournals({
+    pageSize: 5,
+    pageNumber: 1,
+    search: debouncedQuery,
+  });
 
   // Fetch deportaments when searching
   const { data: deportamentsData, isLoading: deportamentsLoading } =
@@ -137,7 +136,7 @@ export function GlobalSearch() {
       search: debouncedQuery,
     });
 
-  // Fetch document types when searching
+  // Fetch document type when searching
   const { data: documentTypesData, isLoading: documentTypesLoading } =
     useGetAllDocumentTypes({
       pageSize: 5,
@@ -246,7 +245,8 @@ export function GlobalSearch() {
       const pagesOffset = filteredPages.length;
       const rolesOffset = pagesOffset + roles.length;
       const permissionsOffset = rolesOffset + permissions.length;
-      const documentTemplatesOffset = permissionsOffset + documentTemplates.length;
+      const documentTemplatesOffset =
+        permissionsOffset + documentTemplates.length;
       const documentsOffset = documentTemplatesOffset + documents.length;
       const journalsOffset = documentsOffset + journals.length;
       const deportamentsOffset = journalsOffset + deportaments.length;
@@ -288,7 +288,9 @@ export function GlobalSearch() {
         // Navigate to document type
         const documentTypeIndex = index - deportamentsOffset;
         const documentType = documentTypes[documentTypeIndex];
-        router.push(`/dashboard/document-type?documentTypeId=${documentType.id}`);
+        router.push(
+          `/dashboard/document-type?documentTypeId=${documentType.id}`,
+        );
       } else {
         // Navigate to user
         const userIndex = index - documentTypesOffset;
@@ -344,7 +346,8 @@ export function GlobalSearch() {
                 Qidiruv uchun yozing...
               </p>
               <p className="text-xs text-muted-foreground mt-1">
-                Sahifalar, hujjatlar, jurnallar, bo'limlar va foydalanuvchilarni qidiring
+                Sahifalar, hujjatlar, jurnallar, bo'limlar va foydalanuvchilarni
+                qidiring
               </p>
             </div>
           ) : (
@@ -523,7 +526,11 @@ export function GlobalSearch() {
                     Hujjat Andozalari
                   </div>
                   {documentTemplates.map((template, idx) => {
-                    const globalIdx = filteredPages.length + roles.length + permissions.length + idx;
+                    const globalIdx =
+                      filteredPages.length +
+                      roles.length +
+                      permissions.length +
+                      idx;
                     return (
                       <button
                         key={template.id}
@@ -577,7 +584,12 @@ export function GlobalSearch() {
                     Hujjatlar
                   </div>
                   {documents.map((document, idx) => {
-                    const globalIdx = filteredPages.length + roles.length + permissions.length + documentTemplates.length + idx;
+                    const globalIdx =
+                      filteredPages.length +
+                      roles.length +
+                      permissions.length +
+                      documentTemplates.length +
+                      idx;
                     return (
                       <button
                         key={document.id}
@@ -631,7 +643,13 @@ export function GlobalSearch() {
                     Jurnallar
                   </div>
                   {journals.map((journal, idx) => {
-                    const globalIdx = filteredPages.length + roles.length + permissions.length + documentTemplates.length + documents.length + idx;
+                    const globalIdx =
+                      filteredPages.length +
+                      roles.length +
+                      permissions.length +
+                      documentTemplates.length +
+                      documents.length +
+                      idx;
                     return (
                       <button
                         key={journal.id}
@@ -685,7 +703,14 @@ export function GlobalSearch() {
                     Bo'limlar
                   </div>
                   {deportaments.map((deportament, idx) => {
-                    const globalIdx = filteredPages.length + roles.length + permissions.length + documentTemplates.length + documents.length + journals.length + idx;
+                    const globalIdx =
+                      filteredPages.length +
+                      roles.length +
+                      permissions.length +
+                      documentTemplates.length +
+                      documents.length +
+                      journals.length +
+                      idx;
                     return (
                       <button
                         key={deportament.id}
@@ -739,7 +764,15 @@ export function GlobalSearch() {
                     Hujjat Turlari
                   </div>
                   {documentTypes.map((documentType, idx) => {
-                    const globalIdx = filteredPages.length + roles.length + permissions.length + documentTemplates.length + documents.length + journals.length + deportaments.length + idx;
+                    const globalIdx =
+                      filteredPages.length +
+                      roles.length +
+                      permissions.length +
+                      documentTemplates.length +
+                      documents.length +
+                      journals.length +
+                      deportaments.length +
+                      idx;
                     return (
                       <button
                         key={documentType.id}

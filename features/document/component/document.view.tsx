@@ -15,6 +15,8 @@ import {
 import { cn } from "@/lib/utils";
 import { useGetDocumentById } from "@/features/document";
 import { Button } from "@/components/ui/button";
+import { useGetAllWorkflows } from "@/features/workflow";
+import DocumentStepper from "@/features/document/component/document.stepper";
 
 const formatDate = (dateString: string | undefined): string => {
   if (!dateString) return "Ma'lumot yo'q";
@@ -112,10 +114,13 @@ const PriorityBadge = ({ priority }: { priority: string }) => {
 };
 
 const DocumentView = ({ id }: { id: string }) => {
-  const params = useSearchParams();
   const router = useRouter();
-
+  const { data: workflow } = useGetAllWorkflows({
+    documentId: id,
+  });
   const { data, isLoading, isFetching } = useGetDocumentById(id);
+
+  console.log(workflow);
 
   const handleDownload = (fileUrl: string) => {
     window.open(fileUrl, "_blank");
@@ -123,6 +128,9 @@ const DocumentView = ({ id }: { id: string }) => {
 
   return (
     <SkeletonWrapper isLoading={isLoading || isFetching}>
+      {workflow?.data && workflow.data.length > 0 && (
+        <DocumentStepper workflow={workflow.data} />
+      )}
       {data && (
         <div className="space-y-8 animate-in fade-in duration-500">
           <div className="border-b pb-4">

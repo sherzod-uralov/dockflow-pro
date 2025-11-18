@@ -13,7 +13,7 @@ export const WORKFLOW_ERRORS: Record<string, string> = {
   "Workflow not found for this document":
     "Bu hujjat uchun ish jarayoni topilmadi",
 
-  // ✨ НОВЫЕ: ошибки для action types
+  // ✨ НОВЫЕ: ошибки для action type
   "Invalid action type": "Noto'g'ri amal turi",
   "QR_CODE action type requires document": "QR_CODE turi uchun hujjat kerak",
   "Cannot save annotations for this action type":
@@ -23,12 +23,10 @@ export const WORKFLOW_ERRORS: Record<string, string> = {
   "Invalid workflow step data": "Noto'g'ri ish jarayoni qadam ma'lumotlari",
   "workflowType must be either Ketma-ket or Parallel":
     "Ish jarayoni turi Ketma-ket yoki Parallel bo'lishi kerak",
-  "steps must contain at least 1 element":
-    "Kamida bitta qadam bo'lishi kerak",
+  "steps must contain at least 1 element": "Kamida bitta qadam bo'lishi kerak",
   "actionType must be one of the following values":
     "Amal turi quyidagi qiymatlardan biri bo'lishi kerak",
-  "actionType must be one of":
-    "Amal turi quyidagilardan biri bo'lishi kerak",
+  "actionType must be one of": "Amal turi quyidagilardan biri bo'lishi kerak",
   "APPROVAL, SIGN, QR_CODE, REVIEW, ACKNOWLEDGE":
     "APPROVAL (Tasdiqlash), SIGN (Imzolash), QR_CODE (QR kod), REVIEW (Ko'rib chiqish), ACKNOWLEDGE (Tanishish)",
   "property documentId should not exist":

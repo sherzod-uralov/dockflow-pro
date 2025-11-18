@@ -156,10 +156,7 @@ const DocumentFormModal = ({
   const handleSubmit = (values: DocumentFormType) => {
     const data = {
       ...values,
-      attachments: [
-        ...existingFiles.map((f) => f.id),
-        ...(values.attachments || []),
-      ],
+      attachments: values.attachments || [],
     };
 
     if (isUpdate && document) {

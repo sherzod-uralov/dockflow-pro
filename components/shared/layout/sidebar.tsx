@@ -1,5 +1,4 @@
 "use client";
-
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,7 +11,7 @@ import {
   DockIcon,
   Book,
   Layers,
-  ClipboardCheck,
+  LucideLogs,
 } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 import { useState, useEffect, useMemo } from "react";
@@ -68,7 +67,12 @@ const menuItems: MenuItem[] = [
     href: "/dashboard/document",
     permission: "document:list",
   },
-
+  {
+    icon: LucideLogs,
+    label: "audit loglar",
+    href: "/dashboard/audit-log",
+    permission: "audit_log:list",
+  },
   {
     icon: DockIcon,
     label: "Hujjat Andozalari",
@@ -113,7 +117,7 @@ const menuItems: MenuItem[] = [
     label: "Sozlamalar",
     subItems: [
       { label: "Profil", href: "/dashboard/setting/profile" },
-      { label: "Tizim sozalamari", href: "/dashboard/setting/system-setting" },
+      // { label: "Tizim sozalamari", href: "/dashboard/setting/system-setting" },
     ],
   },
 ];
@@ -126,26 +130,19 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
 
   const [openMenus, setOpenMenus] = useState<string[]>([]);
 
-  // Filter menu items based on user permissions
   const filteredMenuItems = useMemo(() => {
     return menuItems
       .map((item) => {
-        // If item has no permission requirement, show it
         if (!item.permission && !item.subItems) return item;
 
-        // If item has permission requirement, check it
         if (item.permission && !hasPermission(item.permission)) return null;
 
-        // If item has subItems, filter them
         if (item.subItems) {
           const filteredSubItems = item.subItems.filter((sub) => {
-            // If sub-item has no permission requirement, show it
             if (!sub.permission) return true;
-            // Check permission for sub-item
             return hasPermission(sub.permission);
           });
 
-          // Only show parent if it has visible sub-items
           if (filteredSubItems.length === 0) return null;
 
           return { ...item, subItems: filteredSubItems };

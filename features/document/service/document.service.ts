@@ -14,6 +14,7 @@ export const documentService = {
           search: params?.search,
           pageSize: params?.pageSize,
           pageNumber: params?.pageNumber,
+          documentTypeId: params?.documentTypeId,
         },
       }),
     );

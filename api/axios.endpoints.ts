@@ -1,5 +1,10 @@
 // endpoints.ts
 export const endpoints = {
+  auditLog: {
+    list: "audit-log",
+    create: "audit-log",
+    detail: (id: string | number) => `/audit-log/${id}`,
+  },
   workflow: {
     list: "workflow",
     create: "workflow",
