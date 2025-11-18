@@ -68,7 +68,7 @@ export const useDeleteDocument = () => {
   });
 };
 
-export const useGetDocumentById = (id: string) => {
+export const useGetDocumentById = (id: string, p0: { enabled: boolean }) => {
   return useQuery({
     queryKey: ["document", id],
     queryFn: () => documentService.getDocumentById(id),

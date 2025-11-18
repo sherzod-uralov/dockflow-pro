@@ -39,11 +39,10 @@ const WorkflowPage = () => {
 
   const [search, debouncedSearch, setSearch] = useDebounce("", 500);
 
-  // ✨ ИЗМЕНЕНО: Маппим параметры для Backend
   const { data, isLoading } = useGetAllWorkflows({
-    documentId: debouncedSearch || undefined, // search → documentId
-    page: pageNumber, // pageNumber → page
-    limit: pageSize, // pageSize → limit
+    documentId: debouncedSearch || undefined,
+    page: pageNumber,
+    limit: pageSize,
   });
   console.log(data);
   const deleteMutation = useDeleteWorkflow();
@@ -129,40 +128,23 @@ const WorkflowPage = () => {
           />
         </CustomModal>
       )}
-
-      {/* Delete Confirmation */}
       <ConfirmationModal
         isOpen={deleteModal.isOpen}
         onClose={deleteModal.closeModal}
         onConfirm={confirmDelete}
       />
-
-      {/* Info Alert */}
-      <Alert>
-        <Info className="h-4 w-4" />
-        <AlertDescription>
-          Bu yerda barcha workflow lar ko'rsatilgan. Har bir workflow ning
-          joriy bosqichini ko'rish va boshqarish mumkin.
-        </AlertDescription>
-      </Alert>
-
-      {/* Workflows Grid */}
       {isLoading ? (
         renderSkeleton()
       ) : !data || data.data.length === 0 ? (
         renderEmptyState()
       ) : (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {data.data.map((workflow) => {
-              // Находим текущий шаг workflow
+          <div className="grid grid-cols-1 gap-4">
+            {data?.data?.map((workflow) => {
               const currentStep = workflow.workflowSteps.find(
                 (step) => step.order === workflow.currentStepOrder,
               );
-
               if (!currentStep) return null;
-
-              // Адаптируем данные для TaskCard
               const taskData = {
                 ...currentStep,
                 workflow: {
@@ -187,9 +169,6 @@ const WorkflowPage = () => {
                 <TaskCard
                   key={workflow.id}
                   task={taskData}
-                  onActionComplete={() => {
-                    // Обновляем список workflows после действия
-                  }}
                   onCardClick={() => {
                     router.push(`/dashboard/workflow/${workflow.id}`);
                   }}
@@ -207,7 +186,6 @@ const WorkflowPage = () => {
             })}
           </div>
 
-          {/* Pagination Info */}
           {data.count > pageSize && (
             <div className="flex items-center justify-between">
               <p className="text-sm text-muted-foreground">

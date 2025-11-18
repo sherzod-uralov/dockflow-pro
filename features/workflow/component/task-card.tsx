@@ -99,7 +99,6 @@ const TaskCard = ({
   const completeMutation = useCompleteWorkflowStep();
   const rejectMutation = useRejectWorkflowStep();
 
-  // Получаем информацию о текущем пользователе
   const { data: currentUserProfile, isLoading: isProfileLoading } =
     useGetProfileQuery();
 
@@ -111,9 +110,9 @@ const TaskCard = ({
     useGetWorkflowById(task.workflowId);
 
   const documentId = task.workflow?.document?.id || "";
+  // @ts-ignore
   const { data: documentData } = useGetDocumentById(documentId);
 
-  // Получаем список пользователей для отклонения (создатель документа + участники workflow)
   const availableUsersForRejection = () => {
     const users: Array<{
       id: string;
@@ -123,7 +122,6 @@ const TaskCard = ({
       isCreator?: boolean;
     }> = [];
 
-    // Добавляем создателя документа первым
     if (documentData?.createdBy) {
       users.push({
         id: documentData.createdBy.id,
@@ -133,7 +131,6 @@ const TaskCard = ({
       });
     }
 
-    // Добавляем предыдущих участников workflow
     const previousStepUsers =
       workflowData?.workflowSteps
         .filter(
