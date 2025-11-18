@@ -79,7 +79,6 @@ const StatusBadge = ({ status }: { status: string }) => {
   );
 };
 
-// Priority badge
 const PriorityBadge = ({ priority }: { priority: string }) => {
   const config = {
     HIGH: {
@@ -112,13 +111,11 @@ const PriorityBadge = ({ priority }: { priority: string }) => {
   );
 };
 
-const DocumentView = () => {
+const DocumentView = ({ id }: { id: string }) => {
   const params = useSearchParams();
-  const documentId = params.get("documentId") || "";
   const router = useRouter();
 
-  // @ts-ignore
-  const { data, isLoading, isFetching } = useGetDocumentById(documentId);
+  const { data, isLoading, isFetching } = useGetDocumentById(id);
 
   const handleDownload = (fileUrl: string) => {
     window.open(fileUrl, "_blank");
@@ -128,7 +125,6 @@ const DocumentView = () => {
     <SkeletonWrapper isLoading={isLoading || isFetching}>
       {data && (
         <div className="space-y-8 animate-in fade-in duration-500">
-          {/* Header */}
           <div className="border-b pb-4">
             <h3 className="text-xl font-semibold">{data.title}</h3>
             {data.description && (
@@ -137,8 +133,6 @@ const DocumentView = () => {
               </p>
             )}
           </div>
-
-          {/* Info Grid */}
           <div className="grid grid-cols-2 md:grid-cols-3 gap-x-8 gap-y-6">
             <div className="group">
               <p className="text-xs text-muted-foreground mb-1.5 transition-colors group-hover:text-foreground">
@@ -187,8 +181,6 @@ const DocumentView = () => {
               </Badge>
             </div>
           </div>
-
-          {/* Created/Updated Info */}
           <div className="border-t pt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="flex items-start gap-3 p-3 rounded-lg hover:bg-accent/50 transition-colors">
               <div className="p-2 rounded-full bg-blue-100">

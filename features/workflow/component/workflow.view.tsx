@@ -109,14 +109,9 @@ const WorkflowView = ({ workflow, onClose }: WorkflowViewProps) => {
   const { data: currentUserProfile, isLoading: isProfileLoading } =
     useGetProfileQuery();
 
-  // Получаем полные данные документа с attachments
   const { data: documentData } = useGetDocumentById(
     workflow.document?.id || "",
   );
-
-  // Примечание: Автоматический запуск первого шага происходит при создании workflow
-  // через formToApiPayload в workflow.mapper.ts (первый шаг создается сразу в статусе IN_PROGRESS)
-
   const isLoading =
     updateStepMutation.isLoading ||
     completeMutation.isLoading ||
