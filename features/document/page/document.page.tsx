@@ -62,7 +62,7 @@ const DocumentPage: FC<{ children: ReactElement }> = ({ children }) => {
     useGetDocumentById(documentId || "", {
       enabled: !!documentId,
     });
-
+  console.log(documentData, "Jonim");
   const deleteDocumentMutation = useDeleteDocument();
 
   useEffect(() => {
