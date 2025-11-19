@@ -22,12 +22,10 @@ const Page = () => {
   const fileId = searchParams.get("id") || "";
   const documentId = searchParams.get("documentId") || "";
   const iframeRef = useRef<HTMLIFrameElement>(null);
-  const [xfdfContent, setXfdfContent] = useState<string>("");
+  const [xfdfContent] = useState<string>("");
 
   const {
-    data: wopiData,
-    isLoading,
-    error,
+    data: wopiData
   } = useGetWopiToken(fileId, documentId);
   const saveAnnotationsMutation = useSaveAnnotations();
 
@@ -65,7 +63,7 @@ const Page = () => {
       <div className="border-b bg-card shadow-sm">
         <div className="flex items-center justify-between px-4 py-3 max-w-screen-2xl mx-auto">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" onClick={handleGoBack}>
+            <Button variant="ghost" size="sm" className="hover:text-text-on-dark" onClick={handleGoBack}>
               <ArrowLeft className="mr-2 h-4 w-4" />
               Orqaga
             </Button>

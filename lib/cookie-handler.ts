@@ -42,7 +42,7 @@ export class CookieHandler {
 
     if (!setCookieHeader) return null;
 
-    console.log("🔧 Set-Cookie header:", setCookieHeader);
+    ("🔧 Set-Cookie header:", setCookieHeader);
 
     // Extract refresh token value
     const refreshTokenMatch = setCookieHeader.match(/refresh-token=([^;]+)/);
@@ -50,7 +50,7 @@ export class CookieHandler {
     if (!refreshTokenMatch) return null;
 
     const refreshTokenValue = refreshTokenMatch[1];
-    console.log("🔧 Extracted refresh token:", refreshTokenValue.substring(0, 20) + "...");
+    ("🔧 Extracted refresh token:", refreshTokenValue.substring(0, 20) + "...");
 
     // Extract cookie attributes from original Set-Cookie header
     const maxAgeMatch = setCookieHeader.match(/Max-Age=(\d+)/i);
@@ -77,7 +77,7 @@ export class CookieHandler {
     }
 
     this.setCookie(nextResponse, cookieConfig);
-    console.log("🔧 Refresh token cookie set successfully");
+    ("🔧 Refresh token cookie set successfully");
 
     return refreshTokenValue;
   }
@@ -160,20 +160,20 @@ export class CookieHandler {
   static debug(request?: NextRequest): void {
     if (process.env.NODE_ENV !== "development") return;
 
-    console.log("🔧 Cookie Debug Information:");
+    ("🔧 Cookie Debug Information:");
 
     if (request) {
-      console.log("📝 Server-side cookies:");
+      ("📝 Server-side cookies:");
       request.cookies.getAll().forEach(cookie => {
-        console.log(`  ${cookie.name}: ${cookie.value.substring(0, 20)}...`);
+        (`  ${cookie.name}: ${cookie.value.substring(0, 20)}...`);
       });
     }
 
     if (typeof document !== "undefined") {
-      console.log("📝 Client-side cookies:");
+      ("📝 Client-side cookies:");
       const clientCookies = this.client.getAll();
       Object.entries(clientCookies).forEach(([name, value]) => {
-        console.log(`  ${name}: ${value.substring(0, 20)}...`);
+        (`  ${name}: ${value.substring(0, 20)}...`);
       });
     }
   }

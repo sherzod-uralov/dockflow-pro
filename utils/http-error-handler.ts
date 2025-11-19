@@ -141,7 +141,7 @@ export class HttpErrorHandler {
     type: "error" | "success" = "error",
   ): void {
     if (typeof window !== "undefined") {
-      console.log(`${type === "error" ? "❌" : "✅"} ${message}`);
+      (`${type === "error" ? "❌" : "✅"} ${message}`);
     }
   }
 
@@ -216,7 +216,7 @@ export class HttpErrorHandler {
     }
 
     if (process.env.NODE_ENV === "development") {
-      console.log(`✅ ${successMessage}`);
+      (`✅ ${successMessage}`);
     }
 
     return response;

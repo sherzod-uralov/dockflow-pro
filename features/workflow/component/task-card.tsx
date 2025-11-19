@@ -455,7 +455,7 @@ const TaskCard = ({
                   {document?.documentNumber || "—"}
                 </Badge>
                 {document?.status && (
-                  <Badge variant="secondary" className="text-xs">
+                  <Badge variant="secondary" className="text-xs text-text-on-dark">
                     {document.status}
                   </Badge>
                 )}
@@ -627,7 +627,7 @@ const TaskCard = ({
                     e.stopPropagation();
                     handleViewDocument();
                   }}
-                  className="w-full h-11 font-medium"
+                  className="w-full h-11 hover:text-text-on-dark font-medium"
                   variant="outline"
                   size="lg"
                 >

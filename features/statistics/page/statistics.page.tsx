@@ -49,13 +49,7 @@ export default function StatisticsPage() {
   const workflowsQuery = useWorkflowAnalytics(filters);
   const usersQuery = useUserAnalytics(filters);
 
-  const isLoading =
-    dashboardQuery.isLoading ||
-    documentsQuery.isLoading ||
-    workflowsQuery.isLoading ||
-    usersQuery.isLoading;
 
-  // Show error only if ALL queries fail
   const allFailed =
     dashboardQuery.isError &&
     documentsQuery.isError &&
@@ -145,13 +139,13 @@ export default function StatisticsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Filters */}
-      <AnalyticsFiltersComponent
-        filters={filters}
-        onFiltersChange={setFilters}
-        showDepartmentFilter={true}
-        showUserFilter={false}
-      />
+      {/*/!* Filters *!/*/}
+      {/*<AnalyticsFiltersComponent*/}
+      {/*  filters={filters}*/}
+      {/*  onFiltersChange={setFilters}*/}
+      {/*  showDepartmentFilter={true}*/}
+      {/*  showUserFilter={false}*/}
+      {/*/>*/}
 
       <Tabs defaultValue="dashboard" className="space-y-6">
         <TabsList className="grid w-full grid-cols-4">
@@ -177,6 +171,7 @@ export default function StatisticsPage() {
             <>
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 <StatCard
+                    href="document"
                   title="Jami Hujjatlar"
                   value={
                     dashboardQuery.data?.totalDocuments.value.toLocaleString() ||
@@ -191,6 +186,7 @@ export default function StatisticsPage() {
                   description="Tizimdagi barcha hujjatlar"
                 />
                 <StatCard
+                    href="admin/users"
                   title="Aktiv Foydalanuvchilar"
                   value={
                     dashboardQuery.data?.activeUsers.value.toLocaleString() || 0
@@ -205,6 +201,7 @@ export default function StatisticsPage() {
                 />
                 <StatCard
                   title="Bo'limlar"
+                  href="/department"
                   value={dashboardQuery.data?.totalDepartments || 0}
                   icon={Building2}
                   iconColor="text-purple-600"
@@ -213,6 +210,7 @@ export default function StatisticsPage() {
                 />
                 <StatCard
                   title="Jurnallar"
+                  href="journal"
                   value={
                     dashboardQuery.data?.totalJournals.value.toLocaleString() ||
                     0
@@ -227,6 +225,7 @@ export default function StatisticsPage() {
                 />
                 <StatCard
                   title="Aktiv Workflow"
+                  href="workflow"
                   value={dashboardQuery.data?.activeWorkflows || 0}
                   icon={WorkflowIcon}
                   iconColor="text-pink-600"
@@ -234,6 +233,7 @@ export default function StatisticsPage() {
                   description="Jarayondagi workflowlar"
                 />
                 <StatCard
+                    href="workflow"
                   title="Kutilayotgan Vazifalar"
                   value={
                     dashboardQuery.data?.pendingTasks.value.toLocaleString() ||

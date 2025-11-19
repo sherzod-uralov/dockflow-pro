@@ -20,7 +20,7 @@ const Page = () => {
           },
           {
             label: "Bo'limlar",
-            href: "/dashboard/admin/deportament",
+            href: "/dashboard/admin/department",
           },
         ]}
       />

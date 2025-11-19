@@ -111,12 +111,12 @@ export function extractRefreshToken(response: Response): string | null {
   const setCookieHeader = response.headers.get("set-cookie");
   if (!setCookieHeader) return null;
 
-  console.log("Full Set-Cookie header:", setCookieHeader);
+  ("Full Set-Cookie header:", setCookieHeader);
 
   // Look for refresh-token specifically
   const refreshTokenMatch = setCookieHeader.match(/refresh-token=([^;]+)/);
   if (refreshTokenMatch) {
-    console.log("Found refresh-token:", refreshTokenMatch[1]);
+    ("Found refresh-token:", refreshTokenMatch[1]);
     return refreshTokenMatch[1];
   }
 

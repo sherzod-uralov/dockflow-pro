@@ -10,8 +10,8 @@ export function middleware(req: NextRequest) {
   }
 
   if (process.env.NODE_ENV === "development") {
-    console.log("Middleware - Path:", req.nextUrl.pathname);
-    console.log("Middleware - Token:", token ? "Present" : "Missing");
+    ("Middleware - Path:", req.nextUrl.pathname);
+    ("Middleware - Token:", token ? "Present" : "Missing");
   }
 
   const isAuth = !!token;

@@ -34,7 +34,7 @@ const staticPages = [
     path: "/dashboard/document-type",
     icon: "📁",
   },
-  { id: 3, title: "Bo'limlar", path: "/dashboard/deportament", icon: "🏢" },
+  { id: 3, title: "Bo'limlar", path: "/dashboard/department", icon: "🏢" },
   { id: 4, title: "Jurnallar", path: "/dashboard/journal", icon: "📖" },
   { id: 5, title: "Hujjatlar", path: "/dashboard/document", icon: "📄" },
   {
@@ -280,7 +280,7 @@ export function GlobalSearch() {
         const journal = journals[journalIndex];
         router.push(`/dashboard/journal?journalId=${journal.id}`);
       } else if (index < deportamentsOffset) {
-        // Navigate to deportament
+        // Navigate to department
         const deportamentIndex = index - journalsOffset;
         const deportament = deportaments[deportamentIndex];
         router.push(`/dashboard/deportament?deportamentId=${deportament.id}`);

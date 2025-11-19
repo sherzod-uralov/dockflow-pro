@@ -120,7 +120,7 @@ const DocumentView = ({ id }: { id: string }) => {
   });
   const { data, isLoading, isFetching } = useGetDocumentById(id);
 
-  console.log(workflow);
+  (workflow);
 
   const handleDownload = (fileUrl: string) => {
     window.open(fileUrl, "_blank");

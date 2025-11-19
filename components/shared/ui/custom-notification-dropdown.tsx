@@ -280,7 +280,7 @@ export function NotificationDropdown({ className }: NotificationDropdownProps) {
               className="w-full text-sm text-primary hover:text-primary hover:bg-primary-muted"
               onClick={() => {
                 // Navigate to notifications page
-                console.log("Barcha bildirishnomalarni ko'rish");
+                ("Barcha bildirishnomalarni ko'rish");
                 setOpen(false);
               }}
             >
