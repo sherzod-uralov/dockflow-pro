@@ -12,10 +12,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Menu, Settings, User, LogOut } from "lucide-react";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
-import { useGetProfileQuery } from "@/features/login/hook/login.hook";
+import {useGetProfileQuery, useLogoutMutation} from "@/features/login/hook/login.hook";
 import { useRouter } from "next/navigation";
 import { GlobalSearch } from "@/components/shared/layout/global-search";
 import { NotificationDropdown } from "@/components/shared/ui/custom-notification-dropdown";
+import Cookie from "js-cookie";
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -24,7 +25,7 @@ interface HeaderProps {
 export function Header({ onMenuClick }: HeaderProps) {
   const { data, isLoading } = useGetProfileQuery();
   const router = useRouter();
-
+  const logOutMutation = useLogoutMutation();
   if (isLoading || !data) {
     return (
       <header className="bg-card border-b border-border px-6 py-4">
@@ -105,7 +106,11 @@ export function Header({ onMenuClick }: HeaderProps) {
                 <span className="group-hover:text-white">Tizimni Sozlash</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="rounded-lg group hover:bg-accent cursor-pointer">
+              <DropdownMenuItem onClick={() => {
+                  logOutMutation.mutate();
+                  Cookie.remove("accessToken");
+                  router.push("/login");
+              }} className="rounded-lg group hover:bg-accent cursor-pointer">
                 <LogOut className="mr-2 group-hover:text-white h-4 w-4" />
                 <span className="group-hover:text-white">Tizimdan Chiqish</span>
               </DropdownMenuItem>

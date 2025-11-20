@@ -123,7 +123,7 @@ const WorkflowTracker = ({ workflow }: { workflow: any }) => {
 
       <div className="border-t border-gray-200 pt-3">
         <p className="text-xs font-semibold text-gray-500">Harakat turi</p>
-        <p className="text-sm">{getActionTypeName(step.actionType)}</p>
+        <p className="text-sm text-text-on-dark">{getActionTypeName(step.actionType)}</p>
       </div>
 
       <div className="border-t border-gray-200 pt-3">
@@ -219,7 +219,7 @@ const WorkflowTracker = ({ workflow }: { workflow: any }) => {
           </TooltipTrigger>
           <TooltipContent
             side="top"
-            className="bg-gray-50 text-white p-3 rounded-lg shadow-lg"
+            className="bg-card text-text-on-light p-3 rounded-lg shadow-lg"
           >
             {createUserTooltipContent(step)}
           </TooltipContent>
@@ -229,7 +229,7 @@ const WorkflowTracker = ({ workflow }: { workflow: any }) => {
 
     const description = (
       <div className="space-y-1 mt-2">
-        <p className="text-xs font-medium">
+        <p className="text-xs text-text-on-dark font-medium">
           {getActionTypeName(step.actionType)}
         </p>
         {step.completedAt && (
@@ -258,7 +258,7 @@ const WorkflowTracker = ({ workflow }: { workflow: any }) => {
   return (
     <div className="mb-5">
       <div>
-        <Card className="p-6 bg-white">
+        <Card className="p-6 bg-card">
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div>

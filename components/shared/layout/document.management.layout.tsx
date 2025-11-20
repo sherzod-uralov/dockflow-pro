@@ -87,7 +87,7 @@ export const SplitLayoutWithTabs = ({
       onClick={() => onItemClick(item)}
       className={cn(
         "border rounded-lg p-4 cursor-pointer transition-all hover:shadow-md hover:border-blue-400",
-        isSelected ? "border-blue-500 bg-blue-50" : "bg-card",
+        isSelected ? "border-blue-500 bg-card" : "bg-card",
       )}
     >
       <div className="flex items-start justify-between mb-2">
@@ -206,7 +206,7 @@ export const SplitLayoutWithTabs = ({
             </TabsContent>
           ))}
 
-          <div className="border-t p-3 bg-gray-50">
+          <div className="border-t p-3 bg-card">
             <div className="flex items-center justify-between text-xs text-muted-foreground">
               <div>Sahifadagi elementlar: {pageSize}</div>
               <div>
@@ -234,7 +234,7 @@ export const SplitLayoutWithTabs = ({
           </div>
         </div>
 
-        <div className="flex-1 flex flex-col overflow-hidden bg-gray-50">
+        <div className="flex-1 flex flex-col overflow-hidden">
           {selectedItem ? (
             <>
               <div className="px-6 py-3.5 bg-card border-b flex items-center gap-2">
