@@ -42,7 +42,7 @@ export class CookieHandler {
 
     if (!setCookieHeader) return null;
 
-    ("🔧 Set-Cookie header:", setCookieHeader);
+    console.log("🔧 Set-Cookie header:", setCookieHeader);
 
     // Extract refresh token value
     const refreshTokenMatch = setCookieHeader.match(/refresh-token=([^;]+)/);
@@ -50,7 +50,7 @@ export class CookieHandler {
     if (!refreshTokenMatch) return null;
 
     const refreshTokenValue = refreshTokenMatch[1];
-    ("🔧 Extracted refresh token:", refreshTokenValue.substring(0, 20) + "...");
+    console.log("🔧 Extracted refresh token:", refreshTokenValue.substring(0, 20) + "...");
 
     // Extract cookie attributes from original Set-Cookie header
     const maxAgeMatch = setCookieHeader.match(/Max-Age=(\d+)/i);

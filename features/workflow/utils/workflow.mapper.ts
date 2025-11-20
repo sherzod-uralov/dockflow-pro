@@ -63,7 +63,7 @@ export const formToApiPayload = (
 
   // 🐛 DEBUG: Логирование для отладки
   if (process.env.NODE_ENV === "development") {
-    ("📦 Workflow Payload:", {
+    console.log("📦 Workflow Payload:", {
       isUpdate,
       hasDocumentId: 'documentId' in payload,
       payload,
