@@ -132,7 +132,8 @@ const MyTasks = () => {
                   <SelectItem value="APPROVAL">Tasdiqlash</SelectItem>
                   <SelectItem value="REVIEW">Ko'rib chiqish</SelectItem>
                   <SelectItem value="SIGN">Imzolash</SelectItem>
-                  <SelectItem value="NOTIFY">Xabarnoma</SelectItem>
+                  <SelectItem value="QR_CODE">QR kod qo'shish</SelectItem>
+                  <SelectItem value="ACKNOWLEDGE">Tanishish</SelectItem>
                 </SelectContent>
               </Select>
             </div>

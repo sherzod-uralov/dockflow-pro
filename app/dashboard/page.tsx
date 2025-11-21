@@ -7,20 +7,17 @@ import { StatisticsPage } from "@/features/statistics";
 export default function DashboardPage() {
   return (
     <>
-      <div className="flex items-center justify-between mb-6">
-        <PageHeader
-          title="Statistika"
-          description="Tizim ko'rsatkichlari va hisobotlar"
-          items={[
-            {
-              label: "Bosh sahifa",
-              href: "/dashboard",
-              icon: <Home size={16} />,
-            },
-          ]}
-        />
-      </div>
-
+      <PageHeader
+        title="Bosh sahifa"
+        description="Tizim ko'rsatkichlari va sizning vazifalaringiz"
+        items={[
+          {
+            label: "Statistika",
+            href: "/dashboard",
+            icon: <Home size={16} />,
+          },
+        ]}
+      />
       <StatisticsPage />
     </>
   );

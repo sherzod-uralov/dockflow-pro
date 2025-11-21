@@ -93,7 +93,11 @@ const RolesPage = () => {
       <DataTable
         columns={[
           { header: "Nomi", accessorKey: "name" },
-          { header: "Tavsifi", accessorKey: "description" },
+          { header: "Tavsifi", accessorKey: "description",cell:({row}) => {
+              return (
+                  <h2 className="text-sm font-normal">{row.original.description.slice(0,30)} ...</h2>
+              )
+              }},
           {
             header: "Ruxsatlar",
             accessorKey: "permissions",
@@ -144,7 +148,6 @@ const RolesPage = () => {
               const actions: ActionItem[] = [
                 createViewAction(() => handleViewRole(role)),
                 createEditAction(() => handleUpdate(role)),
-                createCopyAction(() => console.log("copy", role.id)),
                 createDeleteAction(() => {
                   deleteModal.openModal();
                   setSelectedRole(role);

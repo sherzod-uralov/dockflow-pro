@@ -45,6 +45,7 @@ import {
   createEmptyStep,
 } from "../utils/workflow.mapper";
 import { useCreateWorkflow, useUpdateWorkflowStep } from "@/features/workflow";
+import { useSearchParams } from "next/navigation";
 
 const WorkflowForm = ({
   modal,
@@ -56,11 +57,11 @@ const WorkflowForm = ({
   const updateStepMutation = useUpdateWorkflowStep();
   const { data: usersData, isLoading: isLoadingUsers } = useGetUserQuery();
   const { data: documentsData } = useGetAllDocuments();
-
-  // Состояние для поиска пользователей в каждом шаге
   const [searchQueries, setSearchQueries] = useState<{ [key: number]: string }>(
     {},
   );
+  const searchParams = useSearchParams();
+  const queryDocumentId = searchParams.get("documentId");
 
   const isUpdate = mode === "edit";
   const isLoading =
@@ -98,6 +99,18 @@ const WorkflowForm = ({
       });
     }
   }, [workflow, isUpdate, form, modal.isOpen]);
+
+  useEffect(() => {
+    if (!isUpdate && queryDocumentId && documentsData) {
+      const exists = documentsData.data.some(
+        (d: any) => d.id === queryDocumentId,
+      );
+
+      if (exists) {
+        form.setValue("documentId", queryDocumentId);
+      }
+    }
+  }, [queryDocumentId, documentsData, isUpdate, form]);
 
   const handleSubmit = (values: WorkflowFormType) => {
     if (isUpdate && workflow) {
@@ -159,69 +172,63 @@ const WorkflowForm = ({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        <FormField
-          control={form.control}
-          name="documentId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Hujjat</FormLabel>
-              <Select
-                onValueChange={field.onChange}
-                value={field.value}
-                disabled={isUpdate}
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Hujjatni tanlang" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {documentsData?.data.map((doc: any) => (
-                    <SelectItem key={doc.id} value={doc.id}>
-                      {doc.title} - {doc.documentNumber}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className="flex items-center gap-3">
+          <FormField
+            control={form.control}
+            name="documentId"
+            render={({ field }) => (
+              <FormItem className="w-full">
+                <FormLabel>Hujjat</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value}
+                  disabled={isUpdate}
+                >
+                  <FormControl>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Hujjatni tanlang" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {documentsData?.data.map((doc: any) => (
+                      <SelectItem key={doc.id} value={doc.id}>
+                        {doc.title} - {doc.documentNumber}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <FormField
-          control={form.control}
-          name="workflowType"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Workflow turi</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Workflow turini tanlang" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {WORKFLOW_TYPE_OPTIONS.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      <div className="flex flex-col">
-                        <span className="font-medium">{option.label}</span>
-                        <span className="text-xs text-muted-foreground">
-                          {option.description}
-                        </span>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormDescription>
-                Ketma-ket: har bir bosqich oldingi bosqich tugaganidan keyin
-                boshlanadi. Parallel: barcha bosqichlar bir vaqtning o'zida
-                bajariladi.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          <FormField
+            control={form.control}
+            name="workflowType"
+            render={({ field }) => (
+              <FormItem className="w-full">
+                <FormLabel>Workflow turi</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Workflow turini tanlang" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {WORKFLOW_TYPE_OPTIONS.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        <div className="flex flex-col">
+                          <span className="font-medium">{option.label}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
         <Alert>
           <Info className="h-4 w-4" />
@@ -253,7 +260,7 @@ const WorkflowForm = ({
             </div>
             <Button
               type="button"
-              variant="outline"
+              variant="default"
               size="sm"
               onClick={handleAddStep}
               disabled={fields.length >= 20}
@@ -296,27 +303,21 @@ const WorkflowForm = ({
                     control={form.control}
                     name={`steps.${index}.assignedToUserId`}
                     render={({ field: formField }) => {
-                      // Следим за всеми выбранными пользователями
                       const allSteps =
                         useWatch({
                           control: form.control,
                           name: "steps",
                         }) || [];
-
-                      // Получаем ID всех уже выбранных пользователей (кроме текущего step)
                       const selectedUserIds = allSteps
                         .map((step, idx) =>
                           idx !== index ? step?.assignedToUserId : null,
                         )
                         .filter(Boolean) as string[];
-
-                      // Фильтруем пользователей: убираем уже выбранных
                       const availableUsers =
                         usersData?.data.filter(
                           (user: any) => !selectedUserIds.includes(user.id),
                         ) || [];
 
-                      // Фильтрация по поисковому запросу
                       const searchQuery = searchQueries[index] || "";
                       const filteredUsers = availableUsers.filter(
                         (user: any) => {
@@ -329,7 +330,7 @@ const WorkflowForm = ({
                       );
 
                       return (
-                        <FormItem>
+                        <FormItem className="w-full">
                           <FormLabel>Mas'ul shaxs</FormLabel>
                           <Select
                             onValueChange={formField.onChange}
@@ -351,15 +352,14 @@ const WorkflowForm = ({
                                   !availableUsers.find(
                                     (u: any) => u.id === formField.value,
                                   )
-                                    ? "border-destructive"
-                                    : ""
+                                    ? "border-destructive w-full"
+                                    : "w-full"
                                 }
                               >
                                 <SelectValue placeholder="Foydalanuvchini tanlang" />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent className="p-0">
-                              {/* Зафиксированная шапка с поиском */}
                               <div className="sticky top-0 z-10 bg-background border-b">
                                 <div className="flex items-center gap-2 px-2 py-2">
                                   <Search className="h-4 w-4 text-muted-foreground shrink-0" />
@@ -378,10 +378,7 @@ const WorkflowForm = ({
                                   />
                                 </div>
                               </div>
-
-                              {/* Скроллируемый список */}
                               <div className="max-h-[200px] overflow-y-auto p-1">
-                                {/* Если текущий пользователь уже выбран в другом шаге */}
                                 {formField.value &&
                                   !availableUsers.find(
                                     (u: any) => u.id === formField.value,
@@ -397,8 +394,6 @@ const WorkflowForm = ({
                                       (allaqachon tanlangan)
                                     </SelectItem>
                                   )}
-
-                                {/* Доступные пользователи */}
                                 {filteredUsers.length > 0 ? (
                                   filteredUsers.map((user: any) => (
                                     <SelectItem key={user.id} value={user.id}>
@@ -425,14 +420,14 @@ const WorkflowForm = ({
                     control={form.control}
                     name={`steps.${index}.actionType`}
                     render={({ field: formField }) => (
-                      <FormItem>
+                      <FormItem className="w-full">
                         <FormLabel>Amal turi</FormLabel>
                         <Select
                           onValueChange={formField.onChange}
                           value={formField.value}
                         >
                           <FormControl>
-                            <SelectTrigger>
+                            <SelectTrigger className="w-full">
                               <SelectValue placeholder="Amal turini tanlang" />
                             </SelectTrigger>
                           </FormControl>
@@ -468,7 +463,7 @@ const WorkflowForm = ({
         <div className="flex justify-end gap-2 pt-4 border-t">
           <Button
             type="button"
-            variant="outline"
+            variant="destructive"
             onClick={handleCancel}
             disabled={isLoading}
           >

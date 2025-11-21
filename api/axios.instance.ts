@@ -1,37 +1,88 @@
-import axios from "axios";
-import Cookies from "js-cookie";
+import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
+import { authService } from "@/features/login/service/login.service";
 
 export const axiosInstance = axios.create({
   baseURL: process.env.NEXT_PUBLIC_SERVER_URL,
   maxContentLength: Infinity,
   maxBodyLength: Infinity,
-  timeout: 300000,
+  timeout: 30000,
 });
 
-axiosInstance.interceptors.request.use((config) => {
-  const token = Cookies.get("accessToken");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+let isRefreshing = false;
+let failedQueue: Array<{
+  resolve: (token: string) => void;
+  reject: (error: any) => void;
+}> = [];
 
-if (typeof window !== "undefined") {
-  axiosInstance.interceptors.response.use(
-    (response) => response,
-    (error) => {
-      const is401 = error.response?.status === 401;
+const processQueue = (error: any, token: string | null = null) => {
+  failedQueue.forEach(({ resolve, reject }) => {
+    if (error) {
+      reject(error);
+    } else {
+      resolve(token!);
+    }
+  });
 
-      if (is401) {
-        Cookies.remove("accessToken");
-        Cookies.remove("refreshToken");
+  failedQueue = [];
+};
 
-        return Promise.reject(error);
+axiosInstance.interceptors.request.use(
+  (config: InternalAxiosRequestConfig) => {
+    const token = authService.getAccessToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  },
+);
+
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  async (error: AxiosError) => {
+    const originalRequest = error.config as InternalAxiosRequestConfig & {
+      _retry?: boolean;
+    };
+
+    // Agar 401 xatosi va token yangilanishi kerak bo'lsa
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        })
+          .then((token) => {
+            originalRequest.headers.Authorization = `Bearer ${token}`;
+            return axiosInstance(originalRequest);
+          })
+          .catch((err) => {
+            return Promise.reject(err);
+          });
       }
 
-      return Promise.reject(error);
-    },
-  );
-}
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      try {
+        const newAccessToken = await authService.refreshToken();
+
+        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+
+        processQueue(null, newAccessToken);
+
+        return axiosInstance(originalRequest);
+      } catch (refreshError) {
+        processQueue(refreshError, null);
+        authService.logout();
+        return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
+      }
+    }
+
+    return Promise.reject(error);
+  },
+);
 
 export default axiosInstance;

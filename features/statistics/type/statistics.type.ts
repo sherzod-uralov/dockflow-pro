@@ -8,7 +8,7 @@ export enum TimeRange {
   CUSTOM = "CUSTOM",
 }
 
-// Filter types
+// Filter type
 export interface AnalyticsFilters {
   timeRange?: TimeRange;
   startDate?: string; // ISO 8601 format
@@ -17,7 +17,7 @@ export interface AnalyticsFilters {
   userId?: number;
 }
 
-// API Response types
+// API Response type
 export interface ValueWithChange {
   value: number;
   changePercentage: number | null;
@@ -132,7 +132,7 @@ export interface UserAnalytics {
   activityTrend: TrendData[];
 }
 
-// Legacy types (keep for backward compatibility with existing components)
+// Legacy type (keep for backward compatibility with existing components)
 export interface ChartDataPoint {
   name: string;
   value: number;

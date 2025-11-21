@@ -97,6 +97,19 @@ const UserPage = () => {
         width: 280,
       },
     },
+      {
+          accessorKey: "role",
+          cell: ({ row }) => {
+              return (
+                  <div className="flex items-center space-x-3">
+                      {row.original.role.name}
+                  </div>
+              )
+          },
+          meta:{
+              width: 50
+          }
+      },
     {
       accessorKey: "createdAt",
       header: "Qo'shilgan sana",

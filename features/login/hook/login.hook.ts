@@ -1,4 +1,6 @@
 import { useMutation, useQuery } from "react-query";
+import { useRouter } from "next/navigation";
+import Cookie from "js-cookie";
 import { LoginBody } from "@/features/login/type/login.type";
 import { authService } from "@/features/login/service/login.service";
 import { toast } from "sonner";
@@ -26,10 +28,13 @@ export const useGetProfileQuery = () => {
 };
 
 export const useLogoutMutation = () => {
+  const router = useRouter();
   return useMutation({
     mutationFn: () => authService.logout(),
     onSuccess: () => {
+      Cookie.remove("accessToken");
       toast.success("Tizimdan muvaffaqiyatli chiqdingiz");
+      router.push("/login");
     },
     onError: () => {
       toast.error("Chiqishda xatolik");

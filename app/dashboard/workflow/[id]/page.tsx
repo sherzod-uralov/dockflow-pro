@@ -119,6 +119,7 @@ const WorkflowDetailPage = () => {
       <div className="space-y-6">
         <div className="flex justify-start">
           <Button
+              className="hover:text-text-on-dark"
             variant="outline"
             onClick={() => router.push("/dashboard/workflow")}
           >

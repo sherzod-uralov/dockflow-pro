@@ -151,7 +151,8 @@ export const getActionTypeLabel = (actionType: string): string => {
     APPROVAL: "Tasdiqlash",
     REVIEW: "Ko'rib chiqish",
     SIGN: "Imzolash",
-    NOTIFY: "Xabarnoma",
+    QR_CODE: "QR kod qo'shish",
+    ACKNOWLEDGE: "Tanishish",
   };
 
   return labels[actionType] || actionType;
@@ -165,7 +166,8 @@ export const getActionTypeDescription = (actionType: string): string => {
     APPROVAL: "Hujjatni tasdiqlash jarayoni",
     REVIEW: "Hujjatni ko'rib chiqish va baholash",
     SIGN: "Hujjatga elektron imzo qo'yish",
-    NOTIFY: "Foydalanuvchilarga xabar yuborish",
+    QR_CODE: "Hujjatga QR kod va izohlar qo'shish",
+    ACKNOWLEDGE: "Hujjat bilan tanishish",
   };
 
   return descriptions[actionType] || "";

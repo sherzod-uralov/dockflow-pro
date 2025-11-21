@@ -11,7 +11,7 @@ export interface GlobalGetAllPaginationProps {
   pageNumber?: number;
 }
 
-// types/api-error.types.ts
+// type/api-error.type.ts
 
 /**
  * API error response structure

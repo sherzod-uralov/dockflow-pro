@@ -1,4 +1,4 @@
-// features/journal/types/journal.types.ts
+// features/journal/type/journal.type.ts
 
 import { ModalState } from "@/types/modal";
 import { DataPagination } from "@/types/global.types";

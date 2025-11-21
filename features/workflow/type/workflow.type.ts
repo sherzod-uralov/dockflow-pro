@@ -25,7 +25,8 @@ export enum WorkflowActionType {
   APPROVAL = "APPROVAL",
   REVIEW = "REVIEW",
   SIGN = "SIGN",
-  NOTIFY = "NOTIFY",
+  QR_CODE = "QR_CODE",
+  ACKNOWLEDGE = "ACKNOWLEDGE",
 }
 
 export const ACTION_TYPE_OPTIONS = [
@@ -45,9 +46,14 @@ export const ACTION_TYPE_OPTIONS = [
     description: "Hujjatga imzo qo'yish",
   },
   {
-    value: WorkflowActionType.NOTIFY,
-    label: "Xabarnoma",
-    description: "Foydalanuvchilarga xabar yuborish",
+    value: WorkflowActionType.QR_CODE,
+    label: "QR kod qo'shish",
+    description: "Hujjatga QR kod va izohlar qo'shish",
+  },
+  {
+    value: WorkflowActionType.ACKNOWLEDGE,
+    label: "Tanishish",
+    description: "Hujjat bilan tanishish",
   },
 ] as const;
 

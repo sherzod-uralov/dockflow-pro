@@ -1,5 +1,10 @@
 // endpoints.ts
 export const endpoints = {
+  auditLog: {
+    list: "audit-log",
+    create: "audit-log",
+    detail: (id: string | number) => `/audit-log/${id}`,
+  },
   workflow: {
     list: "workflow",
     create: "workflow",
@@ -28,6 +33,7 @@ export const endpoints = {
     detail: (id: string | number) => `/document/${id}`,
     update: (id: string | number) => `/document/${id}`,
     delete: (id: string | number) => `/document/${id}`,
+    savePdfAnnotations: (id: string | number) => `/document/${id}/pdf-url`,
   },
   deportament: {
     list: "/department",
@@ -90,9 +96,9 @@ export const endpoints = {
   wopi: {
     token: "/wopi/token",
   },
-  documents: {
-    qrData: "/api/documents/qr-data",
-    generateQR: "/api/documents/generate-qr",
+  pdf: {
+    list: (id: string | number) => `/document/${id}/pdf-url`,
+    create: (id: string | number) => `/document/${id}/pdf-url`,
   },
 } as const;
 

@@ -1,7 +1,6 @@
 "use client";
 
-import { useGetDocumentById } from "../hook/document.hook";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import SkeletonWrapper from "@/components/wrappers/skleton-wrapper";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -14,14 +13,10 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-const formatFileSize = (bytes: number): string => {
-  if (bytes === 0) return "0 Bytes";
-  const k = 1024;
-  const sizes = ["Bytes", "KB", "MB", "GB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i];
-};
+import { useGetDocumentById } from "@/features/document";
+import { Button } from "@/components/ui/button";
+import { useGetAllWorkflows } from "@/features/workflow";
+import DocumentStepper from "@/features/document/component/document.stepper";
 
 const formatDate = (dateString: string | undefined): string => {
   if (!dateString) return "Ma'lumot yo'q";
@@ -43,7 +38,6 @@ const formatDate = (dateString: string | undefined): string => {
   }
 };
 
-// Status badge
 const StatusBadge = ({ status }: { status: string }) => {
   const config = {
     PUBLISHED: {
@@ -87,7 +81,6 @@ const StatusBadge = ({ status }: { status: string }) => {
   );
 };
 
-// Priority badge
 const PriorityBadge = ({ priority }: { priority: string }) => {
   const config = {
     HIGH: {
@@ -120,11 +113,14 @@ const PriorityBadge = ({ priority }: { priority: string }) => {
   );
 };
 
-const DocumentView = () => {
-  const params = useSearchParams();
-  const documentId = params.get("documentId") || "";
+const DocumentView = ({ id }: { id: string }) => {
+  const router = useRouter();
+  const { data: workflow } = useGetAllWorkflows({
+    documentId: id,
+  });
+  const { data, isLoading, isFetching } = useGetDocumentById(id);
 
-  const { data, isLoading, isFetching } = useGetDocumentById(documentId);
+  (workflow);
 
   const handleDownload = (fileUrl: string) => {
     window.open(fileUrl, "_blank");
@@ -132,9 +128,11 @@ const DocumentView = () => {
 
   return (
     <SkeletonWrapper isLoading={isLoading || isFetching}>
+      {workflow?.data && workflow.data.length > 0 && (
+        <DocumentStepper workflow={workflow.data} />
+      )}
       {data && (
         <div className="space-y-8 animate-in fade-in duration-500">
-          {/* Header */}
           <div className="border-b pb-4">
             <h3 className="text-xl font-semibold">{data.title}</h3>
             {data.description && (
@@ -143,8 +141,6 @@ const DocumentView = () => {
               </p>
             )}
           </div>
-
-          {/* Info Grid */}
           <div className="grid grid-cols-2 md:grid-cols-3 gap-x-8 gap-y-6">
             <div className="group">
               <p className="text-xs text-muted-foreground mb-1.5 transition-colors group-hover:text-foreground">
@@ -193,8 +189,6 @@ const DocumentView = () => {
               </Badge>
             </div>
           </div>
-
-          {/* Created/Updated Info */}
           <div className="border-t pt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="flex items-start gap-3 p-3 rounded-lg hover:bg-accent/50 transition-colors">
               <div className="p-2 rounded-full bg-blue-100">
@@ -277,14 +271,25 @@ const DocumentView = () => {
                         </p>
                       </div>
                     </div>
-
-                    <button
-                      onClick={() => handleDownload(file.fileUrl)}
-                      className="flex items-center gap-2 hover:text-text-on-dark px-3 py-1.5 text-sm border rounded-md hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all duration-200 flex-shrink-0 group/btn"
-                    >
-                      <Download className="h-4 w-4 group-hover/btn:animate-bounce" />
-                      Yuklab olish
-                    </button>
+                    <div className="flex items-center gap-3">
+                      <Button
+                        className="text-text-on-dark"
+                        onClick={() =>
+                          router.push(
+                            `/document-edit?id=${file.id}&documentId=${data.id}`,
+                          )
+                        }
+                      >
+                        hujjatni tahrirlash
+                      </Button>
+                      <button
+                        onClick={() => handleDownload(file.fileUrl)}
+                        className="flex items-center gap-2 hover:text-text-on-dark px-3 py-1.5 text-sm border rounded-md hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all duration-200 flex-shrink-0 group/btn"
+                      >
+                        <Download className="h-4 w-4 group-hover/btn:animate-bounce" />
+                        Yuklab olish
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
