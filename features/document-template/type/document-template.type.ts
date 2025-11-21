@@ -8,6 +8,10 @@ export interface TemplateFile {
   mimeType: string;
 }
 
+export interface RequiredTags {
+  [key: string]: string;
+}
+
 export interface DocumentTemplateResponse {
   id: string;
   name: string;
@@ -23,6 +27,7 @@ export interface DocumentTemplateResponse {
     name: string;
   };
   templateFile?: TemplateFile;
+  requiredTags?: RequiredTags;
   isActive: boolean;
   isPublic: boolean;
   createdAt: string;
@@ -48,6 +53,7 @@ export interface DocumentTemplateCreatePayload {
   description: string;
   documentTypeId: string;
   templateFileId: string;
+  requiredTags?: RequiredTags;
   isActive?: boolean;
   isPublic?: boolean;
 }
@@ -63,6 +69,7 @@ export interface DocumentTemplateUpdatePayload {
   };
   documentTypeId?: string;
   templateFileId?: string;
+  requiredTags?: RequiredTags;
   isActive?: boolean;
   isPublic?: boolean;
 }

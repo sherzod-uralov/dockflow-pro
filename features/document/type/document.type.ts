@@ -1,5 +1,9 @@
 import { DataPagination } from "@/types/global.types";
 
+export interface DocumentTags {
+  [key: string]: string;
+}
+
 export interface DocumentGetResponse {
   id?: string;
   title: string;
@@ -16,6 +20,11 @@ export interface DocumentGetResponse {
     id: string;
     name: string;
   };
+  template?: {
+    id: string;
+    name: string;
+  };
+  tags?: DocumentTags;
   createdBy: {
     id: string;
     fullname: string;
