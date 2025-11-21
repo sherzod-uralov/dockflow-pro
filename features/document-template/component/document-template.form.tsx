@@ -217,7 +217,7 @@ const DocumentTemplateFormModal = ({
                 <FormLabel>Hujjat turi</FormLabel>
                 <Select value={field.value} onValueChange={field.onChange}>
                   <FormControl>
-                    <SelectTrigger>
+                    <SelectTrigger className="w-full">
                       <SelectValue placeholder="Hujjat turini tanlang" />
                     </SelectTrigger>
                   </FormControl>

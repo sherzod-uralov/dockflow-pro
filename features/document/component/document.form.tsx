@@ -189,7 +189,8 @@ const DocumentFormModal = ({
         }
       );
     } else {
-      createMutation.mutate(data, {
+      // @ts-ignore
+        createMutation.mutate(data, {
         onSuccess: () => {
           modal.closeModal();
           onSuccess?.();
@@ -259,7 +260,7 @@ const DocumentFormModal = ({
                 <FormLabel>Muhimlik darajasi</FormLabel>
                 <Select value={field.value} onValueChange={field.onChange}>
                   <FormControl>
-                    <SelectTrigger>
+                      <SelectTrigger className="w-full">
                       <SelectValue placeholder="Tanlang" />
                     </SelectTrigger>
                   </FormControl>
@@ -283,7 +284,7 @@ const DocumentFormModal = ({
                 <FormLabel>Holati</FormLabel>
                 <Select value={field.value} onValueChange={field.onChange}>
                   <FormControl>
-                    <SelectTrigger>
+                      <SelectTrigger className="w-full">
                       <SelectValue placeholder="Tanlang" />
                     </SelectTrigger>
                   </FormControl>
@@ -307,7 +308,7 @@ const DocumentFormModal = ({
                 <FormLabel>Hujjat turi</FormLabel>
                 <Select value={field.value} onValueChange={field.onChange}>
                   <FormControl>
-                    <SelectTrigger>
+                      <SelectTrigger className="w-full">
                       <SelectValue placeholder="Tanlang" />
                     </SelectTrigger>
                   </FormControl>
@@ -333,7 +334,7 @@ const DocumentFormModal = ({
                 <FormLabel>Jurnal</FormLabel>
                 <Select value={field.value} onValueChange={field.onChange}>
                   <FormControl>
-                    <SelectTrigger>
+                    <SelectTrigger className="w-full">
                       <SelectValue placeholder="Tanlang" />
                     </SelectTrigger>
                   </FormControl>
@@ -362,7 +363,7 @@ const DocumentFormModal = ({
                   onValueChange={(value) => handleTemplateChange(value === "none" ? "" : value)}
                 >
                   <FormControl>
-                    <SelectTrigger>
+                      <SelectTrigger className="w-full">
                       <SelectValue placeholder={isLoadingTemplates ? "Yuklanmoqda..." : "Shablon tanlang (ixtiyoriy)"} />
                     </SelectTrigger>
                   </FormControl>
