@@ -425,38 +425,40 @@ const DocumentFormModal = ({
           </Card>
         )}
 
-        {/* File Upload */}
-        <FormField
-          control={form.control}
-          name="attachments"
-          render={() => (
-            <FormItem>
-              <FormLabel>Fayllar</FormLabel>
-              <FormControl>
-                <FileUpload
-                  name="attachments"
-                  multiple={true}
-                  existingFiles={existingFiles.map((f) => ({
-                    ...f,
-                    fileSize: f.fileSize || 0,
-                  }))}
-                  onDeleteExisting={handleDeleteFile}
-                  onChange={async (files) => {
-                    if (!files) return;
-                    if (Array.isArray(files)) {
-                      for (const file of files) {
-                        await handleFileUpload(file);
+        {/* File Upload - only show when no template selected */}
+        {!selectedTemplateId && (
+          <FormField
+            control={form.control}
+            name="attachments"
+            render={() => (
+              <FormItem>
+                <FormLabel>Fayllar</FormLabel>
+                <FormControl>
+                  <FileUpload
+                    name="attachments"
+                    multiple={true}
+                    existingFiles={existingFiles.map((f) => ({
+                      ...f,
+                      fileSize: f.fileSize || 0,
+                    }))}
+                    onDeleteExisting={handleDeleteFile}
+                    onChange={async (files) => {
+                      if (!files) return;
+                      if (Array.isArray(files)) {
+                        for (const file of files) {
+                          await handleFileUpload(file);
+                        }
+                      } else {
+                        await handleFileUpload(files);
                       }
-                    } else {
-                      await handleFileUpload(files);
-                    }
-                  }}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
 
         {/* Actions */}
         <div className="flex justify-end gap-2 pt-4">
