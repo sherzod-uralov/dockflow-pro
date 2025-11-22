@@ -89,6 +89,11 @@ const menuItems: MenuItem[] = [
                 href: "/dashboard/workflow",
                 permission: "workflow:list",
             },
+            {
+                label: "Hujjatlar Aylanmasi Andozasi",
+                href: "/dashboard/workflow-template",
+                permission: "workflow:list",
+            },
         ],
     },
     {

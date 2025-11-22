@@ -12,6 +12,13 @@ export const endpoints = {
     update: (id: string | number) => `/workflow/${id}`,
     delete: (id: string | number) => `/workflow/${id}`,
   },
+  workflowTemplate: {
+    list: "/workflow-template",
+    create: "/workflow-template",
+    detail: (id: string | number) => `/workflow-template/${id}`,
+    update: (id: string | number) => `/workflow-template/${id}`,
+    delete: (id: string | number) => `/workflow-template/${id}`,
+  },
   workflowStep: {
     list: "/workflow-step",
     update: (id: string | number) => `/workflow-step/${id}`,

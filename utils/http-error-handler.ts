@@ -412,6 +412,7 @@ export const errorHandlers = {
   attachment: createErrorHandler("Fayl"),
   documentTemplate: createErrorHandler("DocumentTemplate"),
   workflow: createErrorHandler("Workflow"),
+  workflowTemplate: createErrorHandler("WorkflowTemplate"),
   handlePdfError: createErrorHandler("HandlePdf"),
 };
 
@@ -426,5 +427,6 @@ export const {
   attachment: handleAttachmentError,
   documentTemplate: handleDocumentTemplateError,
   workflow: handleWorkflowError,
+  workflowTemplate: handleWorkflowTemplateError,
   handlePdfError: handlePdfError,
 } = errorHandlers;

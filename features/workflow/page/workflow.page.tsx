@@ -1,7 +1,6 @@
 "use client";
 import React from "react";
 import { useRouter } from "next/navigation";
-import { UserToolbar } from "@/components/shared/ui/custom-dashboard-toolbar";
 import {
   ConfirmationModal,
   CustomModal,
@@ -10,7 +9,6 @@ import {
 import { useDebounce } from "@/hooks/use-debaunce";
 import { usePagination } from "@/hooks/use-pagination";
 import { ModalState } from "@/types/modal";
-import { handleCopyToClipboard } from "@/utils/copy-text";
 import { WorkflowApiResponse } from "@/features/workflow/type/workflow.type";
 
 import {
@@ -18,16 +16,17 @@ import {
   useGetAllWorkflows,
 } from "@/features/workflow/hook/workflow.hook";
 import WorkflowForm from "@/features/workflow/component/workflow.form";
+import WorkflowFromTemplateForm from "@/features/workflow/component/workflow-from-template.form";
 import TaskCard from "@/features/workflow/component/task-card";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Info, Inbox } from "lucide-react";
+import { Inbox, LayoutTemplate } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const WorkflowPage = () => {
   const router = useRouter();
   const createModal: ModalState = useModal();
+  const templateModal: ModalState = useModal();
   const editModal: ModalState = useModal();
   const deleteModal: ModalState = useModal();
 
@@ -90,14 +89,30 @@ const WorkflowPage = () => {
 
   return (
     <>
-      <UserToolbar
-        createLabel="Workflow yaratish"
-        onCreate={() => createModal.openModal()}
-        filterLabel="Filtrlash"
-        searchPlaceholder="Workflow qidirish"
-        searchQuery={search}
-        onSearch={setSearch}
-      />
+      <div className="flex flex-col md:flex-row-reverse md:items-center md:justify-between gap-4 mb-4">
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            onClick={() => templateModal.openModal()}
+          >
+            <LayoutTemplate className="mr-2 h-4 w-4" />
+            Shablon orqali
+          </Button>
+          <Button onClick={() => createModal.openModal()}>
+            Workflow yaratish
+          </Button>
+        </div>
+        <div className="flex items-center gap-3 w-full md:w-auto">
+          <div className="relative flex-1 md:flex-none md:w-80">
+            <input
+              placeholder="Workflow qidirish"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full pl-3 pr-3 py-2 bg-transparent border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
+            />
+          </div>
+        </div>
+      </div>
 
       {/* Create Modal */}
       <CustomModal
@@ -109,6 +124,18 @@ const WorkflowPage = () => {
         onClose={createModal.closeModal}
       >
         <WorkflowForm modal={createModal} mode="create" />
+      </CustomModal>
+
+      {/* Create from Template Modal */}
+      <CustomModal
+        size="lg"
+        closeOnOverlayClick={false}
+        title="Shablon orqali workflow yaratish"
+        description="Hujjat va workflow shablonini tanlang"
+        isOpen={templateModal.isOpen}
+        onClose={templateModal.closeModal}
+      >
+        <WorkflowFromTemplateForm modal={templateModal} />
       </CustomModal>
 
       {/* Edit Modal */}

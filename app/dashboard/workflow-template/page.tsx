@@ -1,0 +1,32 @@
+import WorkflowTemplatePage from "@/features/workflow-template/page/workflow-template.page";
+import { Home } from "lucide-react";
+import { PageHeader } from "@/components/shared/ui/custom-breadcrumb";
+
+const Page = () => {
+  return (
+    <>
+      <PageHeader
+        title="Workflow shablonlari"
+        description="Workflow shablonlarini boshqarish"
+        items={[
+          {
+            label: "Bosh sahifa",
+            href: "/dashboard",
+            icon: <Home size={16} />,
+          },
+          {
+            label: "Admin",
+            href: "/dashboard/admin",
+          },
+          {
+            label: "Workflow shablonlari",
+            href: "/dashboard/workflow-template",
+          },
+        ]}
+      />
+      <WorkflowTemplatePage />
+    </>
+  );
+};
+
+export default Page;

@@ -331,3 +331,12 @@ export interface Workflow {
 export interface GetAllWorkflows extends DataPagination {
   data: Workflow[];
 }
+
+// ============================================
+// CREATE FROM TEMPLATE
+// ============================================
+
+export interface WorkflowFromTemplatePayload {
+  documentId: string;
+  workflowTemplateId: string;
+}

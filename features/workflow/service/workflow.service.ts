@@ -8,6 +8,7 @@ import {
   WorkflowStepRejectPayload,
   MyTasksResponse,
   MyTasksQueryParams,
+  WorkflowFromTemplatePayload,
 } from "@/features/workflow/type/workflow.type";
 import { WorkflowCreateType } from "../schema/workflow.schema";
 import { workflowErrorHandler } from "../error/workflow.http.error";
@@ -32,6 +33,16 @@ export const workflowService = {
    * Backend автоматически создаст все steps за один запрос
    */
   createWorkflow: async (data: WorkflowCreateType) => {
+    return workflowErrorHandler(() =>
+      axiosInstance.post<WorkflowApiResponse>(endpoints.workflow.create, data),
+    );
+  },
+
+  /**
+   * Создать workflow из шаблона
+   * Backend автоматически создаст workflow на основе шаблона
+   */
+  createWorkflowFromTemplate: async (data: WorkflowFromTemplatePayload) => {
     return workflowErrorHandler(() =>
       axiosInstance.post<WorkflowApiResponse>(endpoints.workflow.create, data),
     );

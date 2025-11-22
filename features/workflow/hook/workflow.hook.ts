@@ -8,6 +8,7 @@ import {
   MyTasksResponse,
   MyTasksQueryParams,
   RollbackUser,
+  WorkflowFromTemplatePayload,
 } from "@/features/workflow/type/workflow.type";
 import { WorkflowCreateType } from "../schema/workflow.schema";
 import { toast } from "sonner";
@@ -25,6 +26,23 @@ export const useCreateWorkflow = () => {
       queryClient?.invalidateQueries(["workflows"]);
       queryClient?.invalidateQueries(["my-tasks"]);
       toast.success("Workflow muvaffaqiyatli yaratildi");
+    },
+    onError: (error: any) => {
+      toast.error(error.message || "Workflow yaratishda xatolik");
+    },
+  });
+};
+
+export const useCreateWorkflowFromTemplate = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (payload: WorkflowFromTemplatePayload) =>
+      workflowService.createWorkflowFromTemplate(payload),
+    onSuccess: () => {
+      queryClient?.invalidateQueries(["workflows"]);
+      queryClient?.invalidateQueries(["my-tasks"]);
+      toast.success("Workflow shablon asosida muvaffaqiyatli yaratildi");
     },
     onError: (error: any) => {
       toast.error(error.message || "Workflow yaratishda xatolik");
