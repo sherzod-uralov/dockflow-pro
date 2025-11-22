@@ -5,6 +5,7 @@ export const documentTemplateSchema = z.object({
   description: z.string().min(1, "Tavsif kiritilishi shart"),
   documentTypeId: z.string().min(1, "Hujjat turi tanlanishi shart"),
   templateFileId: z.string().min(1, "Shablon fayli yuklash shart"),
+  requiredTags: z.record(z.string(), z.string()).optional().default({}),
   isActive: z.boolean().optional().default(true),
   isPublic: z.boolean().optional().default(true),
 });

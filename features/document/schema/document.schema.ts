@@ -13,6 +13,8 @@ export const documentScheme = z.object({
   priority: z.enum(["LOW", "MEDIUM", "HIGH"]).default("LOW"),
   documentTypeId: z.string().uuid("Yaroqli UUID kiritilishi kerak").optional(),
   journalId: z.string().uuid("Yaroqli UUID kiritilishi kerak").optional(),
+  templateId: z.string().optional(),
+  tags: z.record(z.string(), z.string()).optional().default({}),
   attachments: z.array(z.string().uuid()).optional(),
 });
 
