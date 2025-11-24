@@ -52,4 +52,8 @@ export interface DocumentQueryParams {
   pageSize?: number;
   pageNumber?: number;
   documentTypeId?: string;
+  journalId?: string;
+  status?: string;
+  priority?: string;
+  templateId?: string;
 }

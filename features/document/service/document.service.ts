@@ -15,6 +15,10 @@ export const documentService = {
           pageSize: params?.pageSize,
           pageNumber: params?.pageNumber,
           documentTypeId: params?.documentTypeId,
+          journalId: params?.journalId,
+          status: params?.status,
+          priority: params?.priority,
+          templateId: params?.templateId,
         },
       }),
     );
