@@ -14,10 +14,11 @@ export const useGetUserQuery = ({
   pageNumber = 1,
   pageSize = 10,
   search = "",
+  departmentId,
 }: Partial<UserHookProps> = {}) => {
   return useQuery<UserGetRequest>({
-    queryKey: ["user", pageNumber, pageSize, search],
-    queryFn: () => userService.getAllUsers({ pageNumber, pageSize, search }),
+    queryKey: ["user", pageNumber, pageSize, search, departmentId],
+    queryFn: () => userService.getAllUsers({ pageNumber, pageSize, search, departmentId }),
     keepPreviousData: true,
   });
 };

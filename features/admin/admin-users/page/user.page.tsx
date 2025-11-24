@@ -130,16 +130,21 @@ const UserPage = () => {
       header: "Oxirgi kirish",
       cell: ({ row }) => {
         const lastLogin = row.original.lastLogin;
+        if (!lastLogin) {
+          return (
+            <span className="text-sm text-muted-foreground">Hech qachon</span>
+          );
+        }
+        const date = new Date(lastLogin);
         return (
           <span className="text-sm text-muted-foreground">
-            {lastLogin
-              ? new Date(lastLogin).toLocaleDateString("uz-UZ")
-              : "Hech qachon"}
+            {date.toLocaleDateString("uz-UZ")}{" "}
+            {date.toLocaleTimeString("uz-UZ", { hour: "2-digit", minute: "2-digit" })}
           </span>
         );
       },
       meta: {
-        width: 150,
+        width: 180,
       },
     },
     {

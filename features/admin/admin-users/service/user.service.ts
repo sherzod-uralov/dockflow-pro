@@ -14,7 +14,12 @@ export const userService = {
     try {
       const response: AxiosResponse<UserGetRequest> =
         await axiosInstance.get<UserGetRequest>(endpoints.user.list, {
-          params,
+          params: {
+            pageNumber: Number(params.pageNumber),
+            pageSize: Number(params.pageSize),
+            search: params.search || undefined,
+            departmentId: params.departmentId || undefined,
+          },
         });
       return response.data;
     } catch (error) {

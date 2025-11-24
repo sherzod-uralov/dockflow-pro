@@ -14,7 +14,7 @@ import {
 import { DataTable } from "@/components/shared/ui/custom-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Copy } from "lucide-react";
+import { Copy, Users } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
@@ -77,6 +77,10 @@ const DeportamentPage = () => {
     setSelectedDeportament(item);
     viewModal.openModal();
     router.push(`?deportamentId=${item.id}`, { scroll: false });
+  };
+
+  const handleViewUsers = (item: DepartmentResponse) => {
+    router.push(`/dashboard/department/${item.id}`);
   };
 
   const handleCloseViewModal = () => {
@@ -175,6 +179,12 @@ const DeportamentPage = () => {
               const item = row.original;
 
               const actions: ActionItem[] = [
+                {
+                  id: "users",
+                  label: "Foydalanuvchilarni ko'rish",
+                  icon: Users,
+                  onClick: () => handleViewUsers(item),
+                },
                 createViewAction(() => handleViewDeportament(item)),
                 createEditAction(() => handleEdit(item)),
                 createCopyAction(() =>
