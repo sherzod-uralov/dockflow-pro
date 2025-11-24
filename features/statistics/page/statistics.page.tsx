@@ -6,7 +6,6 @@ import { DocumentTypeChart } from "../component/document-type-chart";
 import { DocumentStatusChart } from "../component/document-status-chart";
 import { MonthlyTrendChart } from "../component/monthly-trend-chart";
 import { DepartmentStatsChart } from "../component/department-stats-chart";
-import { AnalyticsFiltersComponent } from "../component/analytics-filters";
 import {
   FileText,
   Users,
@@ -174,14 +173,14 @@ export default function StatisticsPage() {
                     href="document"
                   title="Jami Hujjatlar"
                   value={
-                    dashboardQuery.data?.totalDocuments.value.toLocaleString() ||
+                    dashboardQuery.data?.totalDocuments?.value?.toLocaleString() ||
                     0
                   }
                   icon={FileText}
                   iconColor="text-blue-600"
                   iconBgColor="bg-blue-50"
                   trend={formatTrend(
-                    dashboardQuery.data?.totalDocuments.changePercentage,
+                    dashboardQuery.data?.totalDocuments?.changePercentage,
                   )}
                   description="Tizimdagi barcha hujjatlar"
                 />
@@ -189,13 +188,13 @@ export default function StatisticsPage() {
                     href="admin/users"
                   title="Aktiv Foydalanuvchilar"
                   value={
-                    dashboardQuery.data?.activeUsers.value.toLocaleString() || 0
+                    dashboardQuery.data?.activeUsers?.value?.toLocaleString() || 0
                   }
                   icon={Users}
                   iconColor="text-green-600"
                   iconBgColor="bg-green-50"
                   trend={formatTrend(
-                    dashboardQuery.data?.activeUsers.changePercentage,
+                    dashboardQuery.data?.activeUsers?.changePercentage,
                   )}
                   description="Faol foydalanuvchilar soni"
                 />
@@ -445,7 +444,7 @@ export default function StatisticsPage() {
                 <StatCard
                   title="Rad etilgan"
                   value={
-                    workflowsQuery.data?.rejectedInPeriod.toLocaleString() || 0
+                    workflowsQuery.data?.rejectedInPeriod?.toLocaleString() || 0
                   }
                   icon={AlertCircle}
                   iconColor="text-red-600"
