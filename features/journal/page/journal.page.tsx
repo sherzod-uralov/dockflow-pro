@@ -23,6 +23,7 @@ import {
   createViewAction,
   CustomAction,
 } from "@/components/shared/ui/custom-action";
+import { FileText } from "lucide-react";
 import { handleCopyToClipboard } from "@/utils/copy-text";
 import { SingleJournalApiResponse } from "@/features/journal/types/journal.types";
 import { ColumnDef } from "@tanstack/react-table";
@@ -76,6 +77,10 @@ const JournalPage = () => {
     router.push(`?journalId=${journal.id}`, { scroll: false });
   };
 
+  const handleViewDocuments = (journal: SingleJournalApiResponse) => {
+    router.push(`/dashboard/journal/${journal.id}`);
+  };
+
   const handleCloseViewModal = () => {
     viewModal.closeModal();
     setSelectedJournal(null);
@@ -111,6 +116,12 @@ const JournalPage = () => {
       cell: ({ row }) => {
         const journal = row.original;
         const actions: ActionItem[] = [
+          {
+            id: "documents",
+            label: "Hujjatlarni ko'rish",
+            icon: FileText,
+            onClick: () => handleViewDocuments(journal),
+          },
           createViewAction(() => handleViewJournal(journal)),
           createEditAction(() => {
             setSelectedJournal(journal);
