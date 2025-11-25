@@ -78,9 +78,9 @@ const WorkflowPage = () => {
     <Card>
       <CardContent className="flex flex-col items-center justify-center py-12">
         <Inbox className="h-16 w-16 text-muted-foreground mb-4" />
-        <h3 className="text-lg font-semibold mb-2">Workflow topilmadi</h3>
+        <h3 className="text-lg font-semibold mb-2">Hujjat aylanmasi topilmadi</h3>
         <p className="text-muted-foreground text-center max-w-md">
-          Hozircha hech qanday workflow mavjud emas. Yangi workflow yaratish
+          Hozircha hech qanday hujjat aylanmasi mavjud emas. Yangi hujjat aylanmasi yaratish
           uchun yuqoridagi tugmani bosing.
         </p>
       </CardContent>
@@ -96,16 +96,16 @@ const WorkflowPage = () => {
             onClick={() => templateModal.openModal()}
           >
             <LayoutTemplate className="mr-2 h-4 w-4" />
-            Shablon orqali
+            Shablondan yaratish
           </Button>
           <Button onClick={() => createModal.openModal()}>
-            Workflow yaratish
+            Hujjat aylanmasi yaratish
           </Button>
         </div>
         <div className="flex items-center gap-3 w-full md:w-auto">
           <div className="relative flex-1 md:flex-none md:w-80">
             <input
-              placeholder="Workflow qidirish"
+              placeholder="Hujjat aylanmasi qidirish"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-3 pr-3 py-2 bg-transparent border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
@@ -118,8 +118,8 @@ const WorkflowPage = () => {
       <CustomModal
         size="3xl"
         closeOnOverlayClick={false}
-        title="Workflow yaratish"
-        description="Hujjat uchun workflow yarating va bosqichlarni belgilang"
+        title="Hujjat aylanmasi yaratish"
+        description="Hujjat uchun aylanma yarating va bosqichlarni belgilang"
         isOpen={createModal.isOpen}
         onClose={createModal.closeModal}
       >
@@ -130,8 +130,8 @@ const WorkflowPage = () => {
       <CustomModal
         size="lg"
         closeOnOverlayClick={false}
-        title="Shablon orqali workflow yaratish"
-        description="Hujjat va workflow shablonini tanlang"
+        title="Shablondan hujjat aylanmasi yaratish"
+        description="Hujjat va hujjat aylanmasi shablonini tanlang"
         isOpen={templateModal.isOpen}
         onClose={templateModal.closeModal}
       >
@@ -143,8 +143,8 @@ const WorkflowPage = () => {
         <CustomModal
           size="3xl"
           closeOnOverlayClick={false}
-          title="Workflow tahrirlash"
-          description="Workflow ma'lumotlarini o'zgartirish"
+          title="Hujjat aylanmasini tahrirlash"
+          description="Hujjat aylanmasi ma'lumotlarini o'zgartirish"
           isOpen={editModal.isOpen}
           onClose={editModal.closeModal}
         >
@@ -216,7 +216,7 @@ const WorkflowPage = () => {
           {data.count > pageSize && (
             <div className="flex items-center justify-between">
               <p className="text-sm text-muted-foreground">
-                Jami: {data.count} ta workflow
+                Jami: {data.count} ta hujjat aylanmasi
               </p>
               <div className="flex gap-2">
                 <Button

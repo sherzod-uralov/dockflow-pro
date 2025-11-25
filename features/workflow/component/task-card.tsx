@@ -494,7 +494,7 @@ const TaskCard = ({
               <div className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-2">
                   <Layers className="h-4 w-4 text-muted-foreground" />
-                  <span className="font-medium">Workflow jarayoni</span>
+                  <span className="font-medium">Hujjat aylanmasi jarayoni</span>
                 </div>
                 <span className="text-xs text-muted-foreground">
                   {Math.round(progress)}%

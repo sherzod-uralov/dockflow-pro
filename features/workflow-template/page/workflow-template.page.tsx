@@ -115,7 +115,7 @@ const WorkflowTemplatePage = () => {
         <div className="flex items-center gap-3 w-full md:w-auto">
           <div className="relative flex-1 md:flex-none md:w-64">
             <input
-              placeholder="Workflow shablonlarni qidirish..."
+              placeholder="Hujjat aylanmasi shablonlarni qidirish..."
               value={searchQuery}
               onChange={(e) => handleSearch(e.target.value)}
               className="w-full pl-3 pr-3 py-2 bg-transparent border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
@@ -178,7 +178,7 @@ const WorkflowTemplatePage = () => {
             cell: ({ row }) => row.original.documentType?.name || "-",
           },
           {
-            header: "Workflow turi",
+            header: "Turi",
             accessorKey: "type",
             cell: ({ row }) => (
               <Badge variant="outline">{getTypeLabel(row.original.type)}</Badge>
@@ -238,8 +238,8 @@ const WorkflowTemplatePage = () => {
       <CustomModal
         size="3xl"
         closeOnOverlayClick={false}
-        title="Workflow shablon qo'shish"
-        description="Yangi workflow shablonini yarating"
+        title="Hujjat aylanmasi shabloni qo'shish"
+        description="Yangi hujjat aylanmasi shablonini yarating"
         isOpen={createModal.isOpen}
         onClose={createModal.closeModal}
       >
@@ -250,8 +250,8 @@ const WorkflowTemplatePage = () => {
       <CustomModal
         size="3xl"
         closeOnOverlayClick={false}
-        title="Workflow shablonni yangilash"
-        description="Workflow shablon ma'lumotlarini tahrirlang"
+        title="Hujjat aylanmasi shablonini yangilash"
+        description="Hujjat aylanmasi shabloni ma'lumotlarini tahrirlang"
         isOpen={editModal.isOpen}
         onClose={handleEditModalClose}
       >
@@ -266,7 +266,7 @@ const WorkflowTemplatePage = () => {
       {/* Delete Confirmation Modal */}
       <ConfirmationModal
         closeOnOverlayClick={false}
-        title="Workflow shablonni o'chirish"
+        title="Hujjat aylanmasi shablonini o'chirish"
         description="Ushbu shablonni o'chirgandan so'ng qaytarib bo'lmaydi. Rozimisiz?"
         onClose={deleteModal.closeModal}
         isOpen={deleteModal.isOpen}
@@ -281,7 +281,7 @@ const WorkflowTemplatePage = () => {
         closeOnOverlayClick
         isOpen={viewModal.isOpen}
         onClose={handleCloseViewModal}
-        title="Workflow shablon ma'lumotlari"
+        title="Hujjat aylanmasi shabloni ma'lumotlari"
       >
         {selectedTemplate && (
           <div className="space-y-4">
@@ -302,7 +302,7 @@ const WorkflowTemplatePage = () => {
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">
-                  Workflow turi
+                  Turi
                 </p>
                 <Badge variant="outline">
                   {getTypeLabel(selectedTemplate.type)}
