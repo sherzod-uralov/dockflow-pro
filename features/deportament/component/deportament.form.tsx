@@ -13,7 +13,6 @@ import SimpleFormGenerator, {
 import {
   DepartmentResponse,
   useCreateDeportament,
-  useGetAllDeportaments,
   useUpdateDeportament,
 } from "@/features/deportament";
 
@@ -35,7 +34,6 @@ const DeportamentFormModal = ({
   const createDeportamentMutation = useCreateDeportament();
   const updateDeportamentMutation = useUpdateDeportament();
 
-  const { data: departments } = useGetAllDeportaments();
   const { data: users } = useGetUserQuery({
     pageNumber: 1,
     pageSize: 1000,
@@ -83,17 +81,6 @@ const DeportamentFormModal = ({
           label: u.fullname,
         })) || [],
     },
-    {
-      name: "parentId",
-      label: "Deportament biriktirish",
-      type: "select",
-      placeholder: "Deportamentni tanlang",
-      options:
-        departments?.data?.map((d) => ({
-          value: d.id,
-          label: d.name,
-        })) || [],
-    },
   ];
 
   const defaultValues: DeportamentFormType = isUpdate
@@ -103,7 +90,6 @@ const DeportamentFormModal = ({
         code: deportament?.code ?? "",
         location: deportament?.location ?? "",
         directorId: deportament?.director?.id ?? "",
-        parentId: deportament?.parent?.id ?? "",
       }
     : {
         name: "",
@@ -111,7 +97,6 @@ const DeportamentFormModal = ({
         code: "",
         location: "",
         directorId: "",
-        parentId: "",
       };
 
   const handleSubmit = (values: DeportamentFormType) => {

@@ -12,7 +12,6 @@ export const deportamentScheme = z.object({
   location: z
     .string()
     .min(3, "Manzil kamida 2 ta belgidan iborat bo'lishi kerak"),
-  parentId: z.string().nullable().optional(),
   directorId: z.string().nullable().optional(),
 });
 
