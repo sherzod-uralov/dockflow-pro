@@ -6,7 +6,7 @@ import {
   useModal,
 } from "@/components/shared/ui/custom-modal";
 import { ModalState } from "@/types/modal";
-import { Copy, FileEdit, ArrowLeft, Send, Trash2 } from "lucide-react";
+import { ArrowLeft, Send, Trash2 } from "lucide-react";
 import { useState, FC, ReactElement, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import {
@@ -62,7 +62,6 @@ const DocumentPage: FC<{ children: ReactElement }> = ({ children }) => {
     useGetDocumentById(documentId || "", {
       enabled: !!documentId,
     });
-  console.log(documentData, "Jonim");
   const deleteDocumentMutation = useDeleteDocument();
 
   useEffect(() => {
@@ -194,7 +193,7 @@ const DocumentPage: FC<{ children: ReactElement }> = ({ children }) => {
         size="3xl"
         closeOnOverlayClick={false}
         title="Hujjat qo'shish"
-        description="Hujjat qo'shish uchun maydonlar to'ldirilishi kerak"
+        description="Hujjat qo'shish uchun maydonlarni to'ldiring"
         isOpen={createModal.isOpen}
         onClose={createModal.closeModal}
       >

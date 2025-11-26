@@ -103,7 +103,7 @@ const menuItems: MenuItem[] = [
     },
     {
         icon: ClipboardList,
-        label: "Audit Loglar",
+        label: "Audit jurnallar",
         href: "/dashboard/audit-log",
         permission: "admin:view_audit_logs",
     },

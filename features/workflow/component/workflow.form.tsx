@@ -207,11 +207,11 @@ const WorkflowForm = ({
             name="workflowType"
             render={({ field }) => (
               <FormItem className="w-full">
-                <FormLabel>Workflow turi</FormLabel>
+                <FormLabel>Aylanma turi</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Workflow turini tanlang" />
+                      <SelectValue placeholder="Aylanma turini tanlang" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -241,7 +241,7 @@ const WorkflowForm = ({
               </>
             ) : (
               <>
-                Workflow bosqichlari ketma-ket bajariladi. Har bir bosqich uchun
+                Hujjat aylanmasi bosqichlari ketma-ket bajariladi. Har bir bosqich uchun
                 mas'ul shaxs va amal turini belgilang.
               </>
             )}
@@ -251,7 +251,7 @@ const WorkflowForm = ({
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-lg font-semibold">Workflow bosqichlari</h3>
+              <h3 className="text-lg font-semibold">Aylanma bosqichlari</h3>
               <p className="text-sm text-muted-foreground">
                 {isUpdate
                   ? "Bosqichlarni tahrirlang, qo'shing yoki o'chiring"

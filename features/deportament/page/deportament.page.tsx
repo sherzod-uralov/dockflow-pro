@@ -12,9 +12,7 @@ import {
   useGetAllDeportaments,
 } from "../hook/deportament.hook";
 import { DataTable } from "@/components/shared/ui/custom-table";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Copy, Users } from "lucide-react";
+import { Users } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
@@ -116,9 +114,9 @@ const DeportamentPage = () => {
     <>
       <UserToolbar
         searchQuery={searchQuery}
-        searchPlaceholder="Deportamentlarni qidirish..."
+        searchPlaceholder="Bo'limlarni qidirish..."
         onSearch={handleSearch}
-        createLabel="Deportament qo'shish"
+        createLabel="Bo'lim qo'shish"
         onCreate={createModal.openModal}
       />
 
@@ -206,8 +204,8 @@ const DeportamentPage = () => {
       <CustomModal
           size="3xl"
         closeOnOverlayClick={false}
-        title="Deportament qo'shish"
-        description="Deportament qo'shish uchun maydonlar to'ldirilishi kerak"
+        title="Bo'lim qo'shish"
+        description="Bo'lim qo'shish uchun maydonlarni to'ldiring"
         isOpen={createModal.isOpen}
         onClose={createModal.closeModal}
       >
@@ -217,8 +215,8 @@ const DeportamentPage = () => {
       <CustomModal
           size="3xl"
         closeOnOverlayClick={false}
-        title="Deportamentni yangilash"
-        description="Deportament ma'lumotlarini yangilang"
+        title="Bo'limni yangilash"
+        description="Bo'lim ma'lumotlarini yangilang"
         isOpen={editModal.isOpen}
         onClose={handleEditModalClose}
       >
@@ -234,15 +232,15 @@ const DeportamentPage = () => {
         size="2xl"
         isOpen={viewModal.isOpen}
         onClose={handleCloseViewModal}
-        title="Departament ma'lumotlari"
-        description="Departament haqida to'liq ma'lumot"
+        title="Bo'lim ma'lumotlari"
+        description="Bo'lim haqida to'liq ma'lumot"
       >
         <DeportamentView />
       </CustomModal>
 
       <ConfirmationModal
         closeOnOverlayClick={false}
-        title="Deportamentni o'chirish"
+        title="Bo'limni o'chirish"
         description="Ushbu ma'lumotni o'chirgandan so'ng qaytarib bo'lmaydi. Rozimisiz?"
         onClose={deleteModal.closeModal}
         isOpen={deleteModal.isOpen}

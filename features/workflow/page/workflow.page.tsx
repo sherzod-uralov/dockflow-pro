@@ -12,7 +12,6 @@ import { ModalState } from "@/types/modal";
 import {
   WorkflowApiResponse,
   WorkflowStatus,
-  WorkflowType,
 } from "@/features/workflow/type/workflow.type";
 
 import {
@@ -186,7 +185,7 @@ const WorkflowPage = () => {
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm text-muted-foreground">
-                    Workflow turi
+                    Aylanma turi
                   </label>
                   <Select value={workflowType} onValueChange={setWorkflowType}>
                     <SelectTrigger className="w-full">

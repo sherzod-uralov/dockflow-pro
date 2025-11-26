@@ -29,7 +29,7 @@ import { useCreateWorkflowFromTemplate } from "../hook/workflow.hook";
 const workflowFromTemplateSchema = z.object({
   documentTypeId: z.string().min(1, "Hujjat turini tanlang"),
   documentId: z.string().min(1, "Hujjatni tanlang"),
-  workflowTemplateId: z.string().min(1, "Workflow shablonini tanlang"),
+  workflowTemplateId: z.string().min(1, "Aylanma shablonini tanlang"),
 });
 
 type WorkflowFromTemplateFormType = z.infer<typeof workflowFromTemplateSchema>;
@@ -170,7 +170,7 @@ const WorkflowFromTemplateForm = ({
           name="workflowTemplateId"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Workflow shabloni</FormLabel>
+              <FormLabel>Aylanma shabloni</FormLabel>
               <Select
                 onValueChange={field.onChange}
                 value={field.value}

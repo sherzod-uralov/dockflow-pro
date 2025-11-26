@@ -12,9 +12,6 @@ import {
   useGetAllDocumentTypes,
 } from "../hook/document-type.hook";
 import { DataTable } from "@/components/shared/ui/custom-table";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Copy } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
@@ -162,7 +159,7 @@ const DocumentTypePage = () => {
       <CustomModal
         closeOnOverlayClick={false}
         title="Hujjat turini qo'shish"
-        description="Hujjat turini qo'shish uchun maydonlar to'ldirilishi kerak"
+        description="Hujjat turini qo'shish uchun maydonlarni to'ldiring"
         isOpen={createModal.isOpen}
         onClose={createModal.closeModal}
       >

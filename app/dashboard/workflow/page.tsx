@@ -6,8 +6,8 @@ const Page = () => {
   return (
     <>
       <PageHeader
-        title="Workflow"
-        description="Workflowlarni boshqarish"
+        title="Hujjat aylanmasi"
+        description="Hujjat aylanmalarini boshqarish"
         items={[
           {
             label: "Bosh sahifa",
@@ -15,12 +15,8 @@ const Page = () => {
             icon: <Home size={16} />,
           },
           {
-            label: "Admin",
-            href: "/dashboard/admin",
-          },
-          {
-            label: "Workflow",
-            href: "/dashboard/admin/workflow",
+            label: "Hujjat aylanmasi",
+            href: "/dashboard/workflow",
           },
         ]}
       />

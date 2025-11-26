@@ -6,7 +6,7 @@ const Page = () => {
   return (
     <>
       <PageHeader
-        title="Audit Loglar"
+        title="Audit jurnallari"
         description="Tizim harakatlari monitoringi"
         items={[
           {
@@ -15,11 +15,8 @@ const Page = () => {
             icon: <Home size={16} />,
           },
           {
-            label: "admin",
-          },
-          {
-            label: "Audit Loglar",
-            href: "/dashboard/admin/audit-logs",
+            label: "Audit jurnallari",
+            href: "/dashboard/audit-log",
           },
         ]}
       />

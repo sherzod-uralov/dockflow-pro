@@ -6,7 +6,6 @@ import { useDeleteRole, useGetRoles } from "../hook/role.hook";
 import { DataTable } from "@/components/shared/ui/custom-table";
 import {
   ActionItem,
-  createCopyAction,
   createDeleteAction,
   createEditAction,
   createViewAction,
@@ -15,8 +14,6 @@ import {
 import { useState, useEffect } from "react";
 import { RoleData } from "../type/role.type";
 import { usePagination } from "@/hooks/use-pagination";
-import { handleCopyToClipboard } from "@/utils/copy-text";
-import { Badge } from "@/components/ui/badge";
 import { ConfirmationModal } from "@/components/ui/custom-modal";
 import { useDebounce } from "@/hooks/use-debaunce";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -178,7 +175,7 @@ const RolesPage = () => {
       <ConfirmationModal
         closeOnOverlayClick={false}
         title="Rol o'chirish"
-        description="Ro'lni ochirgandan so'ng qaytarib bo'lmaydi rozimisiz?"
+        description="Ro'lni o'chirgandan so'ng qaytarib bo'lmaydi. Rozimisiz?"
         isOpen={deleteModal.isOpen}
         onClose={deleteModal.closeModal}
         onConfirm={() => {

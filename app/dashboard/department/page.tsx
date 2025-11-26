@@ -15,12 +15,8 @@ const Page = () => {
             icon: <Home size={16} />,
           },
           {
-            label: "Admin",
-            href: "/dashboard/admin",
-          },
-          {
             label: "Bo'limlar",
-            href: "/dashboard/admin/department",
+            href: "/dashboard/department",
           },
         ]}
       />

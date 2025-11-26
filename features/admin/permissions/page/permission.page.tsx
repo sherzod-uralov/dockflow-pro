@@ -13,8 +13,6 @@ import {
 } from "../hook/permission.hook";
 import { DataTable } from "@/components/shared/ui/custom-table";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Copy } from "lucide-react";
 import { useState, useEffect } from "react";
 import {
   CustomAction,
@@ -242,7 +240,7 @@ const PermissionPage = () => {
       <ConfirmationModal
         closeOnOverlayClick={false}
         title="Ruxsatlarni o'chirish"
-        description="Ushbu ruxsatni o'chirgandan so'ng qaytarib bo'lmaydi rozimisiz?"
+        description="Ushbu ruxsatni o'chirgandan so'ng qaytarib bo'lmaydi. Rozimisiz?"
         onClose={deleteModal.closeModal}
         isOpen={deleteModal.isOpen}
         onConfirm={() => {

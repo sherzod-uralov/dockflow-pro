@@ -153,7 +153,7 @@ const JournalPage = () => {
         size="xl"
         closeOnOverlayClick={false}
         title="Jurnal qo'shish"
-        description="Jurnal qo'shish uchun maydonlar to'ldirilishi kerak"
+        description="Jurnal qo'shish uchun maydonlarni to'ldiring"
         isOpen={createModal.isOpen}
         onClose={createModal.closeModal}
       >

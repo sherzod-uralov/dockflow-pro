@@ -224,7 +224,7 @@ const UserPage = () => {
         closeOnOverlayClick
         onClose={editModal.closeModal}
         isOpen={editModal.isOpen}
-        title="Foydalanuvchi tahrirlash"
+        title="Foydalanuvchini tahrirlash"
         description="Foydalanuvchi ma'lumotlarini tahrirlang"
       >
         <UserForm
@@ -235,7 +235,7 @@ const UserPage = () => {
       </CustomModal>
       <ConfirmationModal
         title="Foydalanuvchini o'chirish"
-        description="Foydalanuvchini o'chirgandan so'ng qaytarib bo'lmaydi rozimisiz?"
+        description="Foydalanuvchini o'chirgandan so'ng qaytarib bo'lmaydi. Rozimisiz?"
         isOpen={deleteModal.isOpen}
         onConfirm={() => deleteUserMutation.mutate(selectedUser?.id || "")}
         onClose={deleteModal.closeModal}
@@ -244,7 +244,7 @@ const UserPage = () => {
         closeOnOverlayClick
         isOpen={viewModal.isOpen}
         onClose={handleCloseViewModal}
-        title="Foydalanuvchi malumotlari"
+        title="Foydalanuvchi ma'lumotlari"
       >
         <UserView />
       </CustomModal>

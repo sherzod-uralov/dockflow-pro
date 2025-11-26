@@ -7,8 +7,8 @@ const Page = () => {
   return (
     <>
       <PageHeader
-        title={"Jurnallar"}
-        description="Jurnallar yaratish"
+        title="Jurnallar"
+        description="Jurnallarni boshqarish"
         items={[
           {
             label: "Bosh sahifa",
@@ -16,11 +16,11 @@ const Page = () => {
             icon: <Home size={16} />,
           },
           {
-            label: "Jurnal",
+            label: "Jurnallar",
             href: "/dashboard/journal",
           },
         ]}
-      ></PageHeader>
+      />
       <JournalPage />
     </>
   );

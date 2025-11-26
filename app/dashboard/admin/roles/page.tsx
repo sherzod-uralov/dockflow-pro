@@ -15,12 +15,12 @@ const RolePage = () => {
             icon: <Home size={16} />,
           },
           {
-            label: "admin",
+            label: "Boshqaruv",
             href: "/dashboard/admin",
           },
           {
             label: "Ro'llar",
-            href: "/dashboard/admin/permissions",
+            href: "/dashboard/admin/roles",
           },
         ]}
       />

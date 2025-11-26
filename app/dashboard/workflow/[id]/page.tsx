@@ -22,7 +22,7 @@ const WorkflowDetailPage = () => {
     return (
       <>
         <PageHeader
-          title="Workflow ma'lumotlari"
+          title="Hujjat aylanmasi ma'lumotlari"
           description="Yuklanmoqda..."
           items={[
             {
@@ -31,7 +31,7 @@ const WorkflowDetailPage = () => {
               icon: <Home size={16} />,
             },
             {
-              label: "Workflow",
+              label: "Hujjat aylanmasi",
               href: "/dashboard/workflow",
             },
             {
@@ -58,7 +58,7 @@ const WorkflowDetailPage = () => {
     return (
       <>
         <PageHeader
-          title="Workflow ma'lumotlari"
+          title="Hujjat aylanmasi ma'lumotlari"
           description="Xatolik yuz berdi"
           items={[
             {
@@ -67,7 +67,7 @@ const WorkflowDetailPage = () => {
               icon: <Home size={16} />,
             },
             {
-              label: "Workflow",
+              label: "Hujjat aylanmasi",
               href: "/dashboard/workflow",
             },
             {
@@ -80,7 +80,7 @@ const WorkflowDetailPage = () => {
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              Workflow topilmadi yoki yuklanishda xatolik yuz berdi.
+              Hujjat aylanmasi topilmadi yoki yuklanishda xatolik yuz berdi.
             </AlertDescription>
           </Alert>
           <Button
@@ -98,8 +98,8 @@ const WorkflowDetailPage = () => {
   return (
     <>
       <PageHeader
-        title={workflow.document?.title || "Workflow ma'lumotlari"}
-        description={workflow.document?.description || "Workflow haqida batafsil ma'lumotlar"}
+        title={workflow.document?.title || "Hujjat aylanmasi ma'lumotlari"}
+        description={workflow.document?.description || "Hujjat aylanmasi haqida batafsil ma'lumotlar"}
         items={[
           {
             label: "Bosh sahifa",
@@ -107,7 +107,7 @@ const WorkflowDetailPage = () => {
             icon: <Home size={16} />,
           },
           {
-            label: "Workflow",
+            label: "Hujjat aylanmasi",
             href: "/dashboard/workflow",
           },
           {

@@ -6,8 +6,8 @@ const Page = () => {
   return (
     <>
       <PageHeader
-        title="Hujjat turi"
-        description="Hujjat turilarni boshqarish"
+        title="Hujjat turlari"
+        description="Hujjat turlarini boshqarish"
         items={[
           {
             label: "Bosh sahifa",
@@ -15,12 +15,8 @@ const Page = () => {
             icon: <Home size={16} />,
           },
           {
-            label: "Admin",
-            href: "/dashboard/admin",
-          },
-          {
-            label: "Hujjat turi",
-            href: "/dashboard/admin/document-type",
+            label: "Hujjat turlari",
+            href: "/dashboard/document-type",
           },
         ]}
       />

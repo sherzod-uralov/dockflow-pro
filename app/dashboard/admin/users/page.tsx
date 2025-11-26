@@ -15,11 +15,11 @@ const Page = () => {
             icon: <Home size={16} />,
           },
           {
-            label: "admin",
+            label: "Boshqaruv",
             href: "/dashboard/admin",
           },
           {
-            label: "foydalanuvchilar",
+            label: "Foydalanuvchilar",
             href: "/dashboard/admin/users",
           },
         ]}
