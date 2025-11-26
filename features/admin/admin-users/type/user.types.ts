@@ -18,8 +18,7 @@ export interface userResponse {
   };
   department: {
     id: string;
-    fullname: string;
-    username: string;
+    name: string;
   };
   lastLogin: null;
 }
@@ -36,11 +35,10 @@ export interface User {
   };
   department: {
     id: string;
-    fullname: string;
-    username: string;
+    name: string;
   } | null;
   lastLogin: null | string;
-  createdAt?: string; // optional qilish
+  createdAt?: string;
 }
 
 export interface userCreateBody {

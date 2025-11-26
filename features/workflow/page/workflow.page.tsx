@@ -9,7 +9,11 @@ import {
 import { useDebounce } from "@/hooks/use-debaunce";
 import { usePagination } from "@/hooks/use-pagination";
 import { ModalState } from "@/types/modal";
-import { WorkflowApiResponse } from "@/features/workflow/type/workflow.type";
+import {
+  WorkflowApiResponse,
+  WorkflowStatus,
+  WorkflowType,
+} from "@/features/workflow/type/workflow.type";
 
 import {
   useDeleteWorkflow,
@@ -20,8 +24,35 @@ import WorkflowFromTemplateForm from "@/features/workflow/component/workflow-fro
 import TaskCard from "@/features/workflow/component/task-card";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Inbox, LayoutTemplate } from "lucide-react";
+import { Inbox, LayoutTemplate, Filter, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+const STATUS_TABS = [
+  { value: "", label: "Barchasi" },
+  { value: WorkflowStatus.ACTIVE, label: "Faol" },
+  { value: WorkflowStatus.COMPLETED, label: "Yakunlangan" },
+  { value: WorkflowStatus.CANCELLED, label: "Bekor qilingan" },
+  { value: WorkflowStatus.DRAFT, label: "Qoralama" },
+] as const;
+
+const WORKFLOW_TYPE_FILTER = [
+  { value: "", label: "Barcha turlar" },
+  { value: "CONSECUTIVE", label: "Ketma-ket" },
+  { value: "PARALLEL", label: "Parallel" },
+] as const;
 
 const WorkflowPage = () => {
   const router = useRouter();
@@ -37,14 +68,26 @@ const WorkflowPage = () => {
     React.useState<WorkflowApiResponse | null>(null);
 
   const [search, debouncedSearch, setSearch] = useDebounce("", 500);
+  const [activeStatus, setActiveStatus] = React.useState<string>("");
+  const [workflowType, setWorkflowType] = React.useState<string>("");
+  const [isFilterOpen, setIsFilterOpen] = React.useState(false);
 
   const { data, isLoading } = useGetAllWorkflows({
     documentId: debouncedSearch || undefined,
+    status: activeStatus ? (activeStatus as WorkflowStatus) : undefined,
+    type: workflowType || undefined,
     page: pageNumber,
     limit: pageSize,
   });
-  (data);
+
   const deleteMutation = useDeleteWorkflow();
+
+  const hasActiveFilters = workflowType !== "";
+
+  const clearFilters = () => {
+    setWorkflowType("");
+    setIsFilterOpen(false);
+  };
 
   const confirmDelete = () => {
     if (selectedWorkflow) {
@@ -93,6 +136,7 @@ const WorkflowPage = () => {
         <div className="flex items-center gap-2">
           <Button
             variant="outline"
+            className="hover:text-text-on-dark"
             onClick={() => templateModal.openModal()}
           >
             <LayoutTemplate className="mr-2 h-4 w-4" />
@@ -111,7 +155,76 @@ const WorkflowPage = () => {
               className="w-full pl-3 pr-3 py-2 bg-transparent border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
             />
           </div>
+          {/* Filter Button */}
+          <Popover open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+            <PopoverTrigger asChild>
+              <Button variant="outline" className="hover:text-text-on-dark relative py-4">
+                <Filter className="h-4 w-4 mr-2" />
+                Filter
+                {hasActiveFilters && (
+                  <span className="absolute -top-1 -right-1 h-4 w-4 bg-primary text-primary-foreground text-xs rounded-full flex items-center justify-center">
+                    1
+                  </span>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-72" align="end">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-medium">Filterlar</h4>
+                  {hasActiveFilters && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={clearFilters}
+                      className="h-8 px-2 text-muted-foreground"
+                    >
+                      <X className="h-4 w-4 mr-1" />
+                      Tozalash
+                    </Button>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm text-muted-foreground">
+                    Workflow turi
+                  </label>
+                  <Select value={workflowType} onValueChange={setWorkflowType}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Turni tanlang" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {WORKFLOW_TYPE_FILTER.map((type) => (
+                        <SelectItem key={type.value} value={type.value || "all"}>
+                          {type.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
+      </div>
+
+      {/* Status Tabs */}
+      <div className="flex flex-wrap gap-2 mb-6">
+        {STATUS_TABS.map((tab) => (
+          <Button
+            key={tab.value}
+            variant={activeStatus === tab.value ? "default" : "outline"}
+            size="sm"
+            onClick={() => {
+              setActiveStatus(tab.value);
+              handlePageChange(1);
+            }}
+            className={`${cn(
+                    activeStatus === tab.value && "text-primary-foreground"
+            )} hover:text-text-on-dark`}
+          >
+            {tab.label}
+          </Button>
+        ))}
       </div>
 
       {/* Create Modal */}

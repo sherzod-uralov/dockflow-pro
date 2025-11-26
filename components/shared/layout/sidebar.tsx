@@ -48,7 +48,6 @@ interface MenuItem {
     subItems?: SubItem[];
 }
 
-// Iconlarni yaxshilangan versiyasi
 const menuItems: MenuItem[] = [
     {
         icon: Home,
@@ -65,13 +64,13 @@ const menuItems: MenuItem[] = [
         icon: FolderOpen,
         label: "Hujjat Turlari",
         href: "/dashboard/document-type",
-        permission: "document_type:list",
+        permission: "document-type:list",
     },
     {
         icon: LayoutTemplate,
         label: "Hujjat Andozalari",
         href: "/dashboard/document-template",
-        permission: "document_template:list",
+        permission: "document-template:list",
     },
     {
         icon: Book,
@@ -106,7 +105,7 @@ const menuItems: MenuItem[] = [
         icon: ClipboardList,
         label: "Audit Loglar",
         href: "/dashboard/audit-log",
-        permission: "audit_log:list",
+        permission: "admin:view_audit_logs",
     },
     {
         icon: Settings,

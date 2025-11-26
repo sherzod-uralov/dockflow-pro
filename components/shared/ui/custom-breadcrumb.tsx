@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import type { ReactNode } from "react";
 import React from "react";
+import Link from "next/link";
 
 type BreadcrumbItemType = {
   label: string;
@@ -56,12 +57,12 @@ export function PageHeader({
                     )}
 
                     {!isLast && item.href ? (
-                      <BreadcrumbLink
+                      <Link
                         href={item.href}
                         className="hover:text-primary transition-colors duration-200"
                       >
                         {item.label}
-                      </BreadcrumbLink>
+                      </Link>
                     ) : (
                       <span className="text-muted-foreground font-medium">
                         {item.label}

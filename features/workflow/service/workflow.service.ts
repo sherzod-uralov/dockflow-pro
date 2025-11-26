@@ -21,8 +21,9 @@ export const workflowService = {
         params: {
           documentId: params?.documentId,
           status: params?.status,
-          page: params?.page, // ✨ ИЗМЕНЕНО: было pageNumber
-          limit: params?.limit, // ✨ ИЗМЕНЕНО: было pageSize
+          type: params?.type,
+          page: params?.page,
+          limit: params?.limit,
         },
       }),
     );

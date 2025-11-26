@@ -38,14 +38,8 @@ const formatDate = (dateString: string | undefined): string => {
   }
 };
 
-const StatusBadge = ({ status }: { status: string }) => {
+export const StatusBadge = ({ status }: { status: string }) => {
   const config = {
-    PUBLISHED: {
-      label: "Nashr qilingan",
-      className:
-        "bg-green-100 text-green-700 border-green-300 hover:bg-green-200",
-      icon: CheckCircle2,
-    },
     DRAFT: {
       label: "Qoralama",
       className:
@@ -56,6 +50,34 @@ const StatusBadge = ({ status }: { status: string }) => {
       label: "Kutilmoqda",
       className: "bg-blue-100 text-blue-700 border-blue-300 hover:bg-blue-200",
       icon: Clock,
+    },
+    IN_REVIEW: {
+      label: "Ko'rib chiqilmoqda",
+      className:
+        "bg-purple-100 text-purple-700 border-purple-300 hover:bg-purple-200",
+      icon: Clock,
+    },
+    APPROVED: {
+      label: "Tasdiqlandi",
+      className:
+        "bg-green-100 text-green-700 border-green-300 hover:bg-green-200",
+      icon: CheckCircle2,
+    },
+    REJECTED: {
+      label: "Rad etildi",
+      className: "bg-red-100 text-red-700 border-red-300 hover:bg-red-200",
+      icon: AlertCircle,
+    },
+    ARCHIVED: {
+      label: "Arxivlandi",
+      className: "bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200",
+      icon: AlertCircle,
+    },
+    PUBLISHED: {
+      label: "Nashr qilingan",
+      className:
+        "bg-green-100 text-green-700 border-green-300 hover:bg-green-200",
+      icon: CheckCircle2,
     },
   };
 
@@ -81,20 +103,25 @@ const StatusBadge = ({ status }: { status: string }) => {
   );
 };
 
-const PriorityBadge = ({ priority }: { priority: string }) => {
+export const PriorityBadge = ({ priority }: { priority: string }) => {
   const config = {
-    HIGH: {
-      label: "Yuqori",
-      className: "bg-red-100 text-red-700 border-red-300 hover:bg-red-200",
+    LOW: {
+      label: "Past",
+      className: "bg-sky-100 text-sky-700 border-sky-300 hover:bg-sky-200",
     },
     MEDIUM: {
       label: "O'rta",
       className:
         "bg-orange-100 text-orange-700 border-orange-300 hover:bg-orange-200",
     },
-    LOW: {
-      label: "Past",
-      className: "bg-sky-100 text-sky-700 border-sky-300 hover:bg-sky-200",
+    HIGH: {
+      label: "Yuqori",
+      className: "bg-red-100 text-red-700 border-red-300 hover:bg-red-200",
+    },
+    URGENT: {
+      label: "Shoshilinch",
+      className:
+        "bg-rose-100 text-rose-700 border-rose-300 hover:bg-rose-200",
     },
   };
 

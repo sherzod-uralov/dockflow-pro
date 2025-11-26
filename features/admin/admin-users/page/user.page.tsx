@@ -4,7 +4,6 @@ import React, { useState, useEffect } from "react";
 import {
   DataTable,
   DataTableColumn,
-  createSelectColumn,
 } from "@/components/shared/ui/custom-table";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -102,7 +101,7 @@ const UserPage = () => {
           cell: ({ row }) => {
               return (
                   <div className="flex items-center space-x-3">
-                      {row.original.role.name}
+                      {row?.original?.role?.name}
                   </div>
               )
           },
@@ -111,13 +110,13 @@ const UserPage = () => {
           }
       },
     {
-      accessorKey: "createdAt",
-      header: "Qo'shilgan sana",
+      accessorKey: "department",
+      header: "Bo'limi",
       cell: ({ row }) => {
-        const date = new Date(row.original.createdAt || "");
+        const department = row.original.department?.name;
         return (
           <span className="text-sm text-muted-foreground">
-            {date.toLocaleDateString("uz-UZ")}
+            {department}
           </span>
         );
       },
@@ -201,9 +200,11 @@ const UserPage = () => {
         columns={columns}
         data={data?.data ?? []}
         loading={isLoading}
-        pageSize={10}
+        pageSize={pageSize}
         onPageChange={handlePageChange}
         onPageSizeChange={handlePageSizeChange}
+        totalCount={data?.count || 0}
+        currentPage={pageNumber}
         pageSizeOptions={[5, 10, 20, 50]}
         emptyMessage="Hech qanday foydalanuvchi topilmadi"
         className="bg-transparent"

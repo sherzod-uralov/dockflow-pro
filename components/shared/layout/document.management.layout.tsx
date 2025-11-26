@@ -7,6 +7,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Search, FileEdit } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ReactNode } from "react";
+import {PriorityBadge, StatusBadge} from "@/features/document/component/document.view";
 
 interface Tab {
   value: string;
@@ -100,16 +101,8 @@ export const SplitLayoutWithTabs = ({
       </div>
 
       <div className="flex items-center gap-2 mt-3">
-        {item.status && (
-          <Badge variant="default" className="text-xs">
-            {item.status}
-          </Badge>
-        )}
-        {item.priority && (
-          <Badge variant="outline" className="text-xs">
-            {item.priority}
-          </Badge>
-        )}
+            <StatusBadge status={item?.status || "default"} />
+          <PriorityBadge priority={item?.priority || "default"} />
       </div>
     </div>
   );

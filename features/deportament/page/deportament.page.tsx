@@ -204,6 +204,7 @@ const DeportamentPage = () => {
       />
 
       <CustomModal
+          size="3xl"
         closeOnOverlayClick={false}
         title="Deportament qo'shish"
         description="Deportament qo'shish uchun maydonlar to'ldirilishi kerak"
@@ -214,6 +215,7 @@ const DeportamentPage = () => {
       </CustomModal>
 
       <CustomModal
+          size="3xl"
         closeOnOverlayClick={false}
         title="Deportamentni yangilash"
         description="Deportament ma'lumotlarini yangilang"

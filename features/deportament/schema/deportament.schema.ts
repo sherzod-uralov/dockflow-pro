@@ -2,13 +2,12 @@ import { z } from "zod";
 
 export const deportamentScheme = z.object({
   name: z
-    .string()
-    .min(2, "Deportament nomi kamida 2 ta belgidan iborat bo'lishi kerak"),
+    .string(),
   description: z
     .string()
-    .min(10, "Tavsif kamida 10 ta belgidan iborat bo'lishi kerak"),
+    .min(3, "Tavsif kamida 3 ta belgidan iborat bo'lishi kerak"),
 
-  code: z.string().min(3, "Kod kamida 2 ta belgidan iborat bo'lishi kerak"),
+  code: z.string(),
   location: z
     .string()
     .min(3, "Manzil kamida 2 ta belgidan iborat bo'lishi kerak"),

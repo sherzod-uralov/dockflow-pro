@@ -91,7 +91,6 @@ const DocumentFormModal = ({
           description: document?.description ?? "",
           documentNumber: document?.documentNumber ?? "",
           priority: document?.priority ?? "LOW",
-          status: document?.status ?? "DRAFT",
           documentTypeId: document?.documentType?.id ?? "",
           journalId: document?.journal?.id ?? "",
           templateId: document?.template?.id ?? "",
@@ -103,7 +102,6 @@ const DocumentFormModal = ({
           description: "",
           documentNumber: "",
           priority: "LOW",
-          status: "DRAFT",
           documentTypeId: "",
           journalId: "",
           templateId: "",
@@ -275,31 +273,6 @@ const DocumentFormModal = ({
             )}
           />
 
-          {/* Status */}
-          <FormField
-            control={form.control}
-            name="status"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Holati</FormLabel>
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <FormControl>
-                      <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Tanlang" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="DRAFT">Qoralama</SelectItem>
-                    <SelectItem value="PUBLISHED">E'lon qilingan</SelectItem>
-                    <SelectItem value="ARCHIVED">Arxivlangan</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Document Type */}
           <FormField
             control={form.control}
             name="documentTypeId"

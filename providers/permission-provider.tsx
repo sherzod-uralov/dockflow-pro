@@ -20,6 +20,7 @@ const PermissionContext = createContext<PermissionContextType | undefined>(
 export const PermissionProvider = ({ children }: { children: ReactNode }) => {
   const { data: profile, isLoading } = useGetProfileQuery();
 
+  console.log(profile)
   const hasPermission = (key: string): boolean => {
     if (!profile?.permissions?.raw) return false;
     return profile.permissions.raw.includes(key);
