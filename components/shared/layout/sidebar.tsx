@@ -80,16 +80,16 @@ const menuItems: MenuItem[] = [
     },
     {
         icon: Workflow,
-        label: "Hujjatlar Aylanmasi",
+        label: "Hujjat aylanmasi",
         permission: "workflow:list",
         subItems: [
             {
-                label: "Hujjatlar Aylanmasi",
+                label: "Hujjat aylanmasi",
                 href: "/dashboard/workflow",
                 permission: "workflow:list",
             },
             {
-                label: "Hujjatlar Aylanmasi Andozasi",
+                label: "Hujjat aylanmasi shablonlari",
                 href: "/dashboard/workflow-template",
                 permission: "workflow:list",
             },

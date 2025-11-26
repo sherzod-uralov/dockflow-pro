@@ -81,7 +81,7 @@ const MyTasks = () => {
       <Alert>
         <Info className="h-4 w-4" />
         <AlertDescription>
-          Bu yerda sizga tayinlangan workflow vazifalari ko'rsatilgan. Har bir
+          Bu yerda sizga tayinlangan hujjat aylanmasi vazifalari ko'rsatilgan. Har bir
           vazifani ko'rib chiqib, tasdiqlash yoki rad etish mumkin.
         </AlertDescription>
       </Alert>

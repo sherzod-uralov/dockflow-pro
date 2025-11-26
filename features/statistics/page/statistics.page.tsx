@@ -150,7 +150,7 @@ export default function StatisticsPage() {
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
           <TabsTrigger value="documents">Hujjatlar</TabsTrigger>
-          <TabsTrigger value="workflows">Workflow</TabsTrigger>
+          <TabsTrigger value="workflows">Hujjat aylanmasi</TabsTrigger>
           <TabsTrigger value="users">Foydalanuvchilar</TabsTrigger>
         </TabsList>
 
@@ -223,13 +223,13 @@ export default function StatisticsPage() {
                   description="Hujjat jurnallari"
                 />
                 <StatCard
-                  title="Aktiv Workflow"
+                  title="Aktiv hujjat aylanmasi"
                   href="workflow"
                   value={dashboardQuery.data?.activeWorkflows || 0}
                   icon={WorkflowIcon}
                   iconColor="text-pink-600"
                   iconBgColor="bg-pink-50"
-                  description="Jarayondagi workflowlar"
+                  description="Jarayondagi hujjat aylanmasi"
                 />
                 <StatCard
                     href="workflow"
@@ -395,7 +395,7 @@ export default function StatisticsPage() {
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                Workflow statistikasi ma'lumotlari hozircha mavjud emas. Backend
+                Hujjat aylanmasi statistikasi ma'lumotlari hozircha mavjud emas. Backend
                 xatolik yuz berdi.
               </AlertDescription>
             </Alert>
@@ -414,14 +414,14 @@ export default function StatisticsPage() {
             <>
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <StatCard
-                  title="Jami Workflowlar"
+                  title="Jami hujjat aylanmasi"
                   value={
                     workflowsQuery.data?.totalWorkflows.toLocaleString() || 0
                   }
                   icon={WorkflowIcon}
                   iconColor="text-blue-600"
                   iconBgColor="bg-blue-50"
-                  description="Barcha workflowlar"
+                  description="Barcha hujjat aylanmasi"
                 />
                 <StatCard
                   title="O'rtacha Bajarilish Vaqti"
@@ -609,7 +609,7 @@ export default function StatisticsPage() {
                   icon={Activity}
                   iconColor="text-purple-600"
                   iconBgColor="bg-purple-50"
-                  description="Workflow qadamlari"
+                  description="Hujjat aylanmasi qadamlari"
                 />
               </div>
 

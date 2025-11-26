@@ -700,7 +700,7 @@ const WorkflowView = ({ workflow, onClose }: WorkflowViewProps) => {
                 {workflow.document.title}
               </CardTitle>
               <CardDescription className="text-sm text-muted-foreground">
-                Workflow haqida batafsil ma'lumotlar
+                Hujjat aylanmasi haqida batafsil ma'lumotlar
               </CardDescription>
             </div>
             {workflow.id && (
@@ -915,7 +915,7 @@ const WorkflowView = ({ workflow, onClose }: WorkflowViewProps) => {
       {/* Workflow Steps Timeline */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Workflow bosqichlari</CardTitle>
+          <CardTitle className="text-lg">Hujjat aylanmasi bosqichlari</CardTitle>
           <CardDescription>
             Jami {workflow.workflowSteps.length} ta bosqich
           </CardDescription>
@@ -1098,7 +1098,7 @@ const WorkflowView = ({ workflow, onClose }: WorkflowViewProps) => {
                     </>
                   )}
                   <p className="text-xs text-muted-foreground">
-                    ⚠️ Workflow ushbu foydalanuvchining bosqichidan qayta
+                    ⚠️ Hujjat aylanmasi ushbu foydalanuvchining bosqichidan qayta
                     boshlanadi
                   </p>
                 </div>
