@@ -89,7 +89,7 @@ const menuItems: MenuItem[] = [
                 permission: "workflow:list",
             },
             {
-                label: "Hujjat aylanmasi shablonlari",
+                label: "Hujjat aylanmasi andozalari",
                 href: "/dashboard/workflow-template",
                 permission: "workflow:list",
             },
