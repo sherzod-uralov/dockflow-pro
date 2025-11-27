@@ -89,20 +89,25 @@ const DeportamentFormModal = ({
         description: deportament?.description ?? "",
         code: deportament?.code ?? "",
         location: deportament?.location ?? "",
-        directorId: deportament?.director?.id ?? "",
+        directorId: deportament?.director?.id ?? null,
       }
     : {
         name: "",
         description: "",
         code: "",
         location: "",
-        directorId: "",
+        directorId: null,
       };
 
   const handleSubmit = (values: DeportamentFormType) => {
+    const payload = {
+      ...values,
+      directorId: values.directorId || null,
+    };
+
     if (isUpdate && deportament) {
       updateDeportamentMutation.mutate(
-        { id: deportament.id, data: values },
+        { id: deportament.id, data: payload },
         {
           onSuccess: () => {
             modal.closeModal();
@@ -111,7 +116,7 @@ const DeportamentFormModal = ({
         },
       );
     } else {
-      createDeportamentMutation.mutate(values, {
+      createDeportamentMutation.mutate(payload, {
         onSuccess: () => {
           modal.closeModal();
           onSuccess?.();
