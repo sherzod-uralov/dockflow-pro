@@ -51,7 +51,7 @@ interface WorkflowTemplateFormProps {
   onSuccess?: () => void;
 }
 
-const createEmptyStep = (order: number = 0) => ({
+const createEmptyStep = (order: number = 1) => ({
   order,
   actionType: WorkflowTemplateActionType.APPROVAL as
     | "APPROVAL"
@@ -90,7 +90,7 @@ const WorkflowTemplateForm = ({
       type: WorkflowTemplateType.CONSECUTIVE as "CONSECUTIVE" | "PARALLEL",
       isActive: true,
       isPublic: true,
-      steps: [createEmptyStep(0)],
+      steps: [createEmptyStep(1)],
     },
   });
 
@@ -118,7 +118,7 @@ const WorkflowTemplateForm = ({
               | "QR_CODE"
               | "ACKNOWLEDGE",
             assignedToUserId: step.assignedToUser?.id || "",
-          })) || [createEmptyStep(0)],
+          })) || [createEmptyStep(1)],
       });
     } else if (!isUpdate) {
       form.reset({
@@ -128,14 +128,14 @@ const WorkflowTemplateForm = ({
         type: WorkflowTemplateType.CONSECUTIVE as "CONSECUTIVE" | "PARALLEL",
         isActive: true,
         isPublic: true,
-        steps: [createEmptyStep(0)],
+        steps: [createEmptyStep(1)],
       });
     }
   }, [workflowTemplate, isUpdate, form, modal.isOpen]);
 
   const handleSubmit = (values: WorkflowTemplateFormType) => {
     const steps = values.steps.map((step, index) => ({
-      order: index,
+      order: index + 1,
       actionType: step.actionType as WorkflowTemplateActionType,
       assignedToUserId: step.assignedToUserId || undefined,
     }));
@@ -185,7 +185,7 @@ const WorkflowTemplateForm = ({
   };
 
   const handleAddStep = () => {
-    append(createEmptyStep(fields.length));
+    append(createEmptyStep(fields.length + 1));
   };
 
   const handleCancel = () => {

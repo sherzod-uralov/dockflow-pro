@@ -125,7 +125,7 @@ const WorkflowForm = ({
 
       stepsToUpdate.forEach((step, index) => {
         const payload: WorkflowStepUpdateType = {
-          order: index,
+          order: index + 1,
           actionType: step.actionType as WorkflowActionType,
           assignedToUserId: step.assignedToUserId,
         };
