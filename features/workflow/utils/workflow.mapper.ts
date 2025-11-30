@@ -30,7 +30,7 @@ export const formToApiPayload = (
 ) => {
   const payload: any = {
     steps: formData.steps.map((step, index) => ({
-      order: index,
+      order: index + 1,
       actionType: step.actionType,
       assignedToUserId: step.assignedToUserId,
       isRejected: false,
@@ -39,7 +39,7 @@ export const formToApiPayload = (
 
   if (!isUpdate) {
     payload.documentId = formData.documentId;
-    payload.currentStepOrder = 0;
+    payload.currentStepOrder = 1;
     payload.status = "ACTIVE";
   }
   if (isUpdate && 'documentId' in payload) {

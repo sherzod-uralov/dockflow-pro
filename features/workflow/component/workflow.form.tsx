@@ -135,7 +135,7 @@ const WorkflowForm = ({
 
       const promises = stepsToUpdate.map((step, index) => {
         const payload: WorkflowStepUpdateType = {
-          order: index,
+          order: index + 1,
           actionType: step.actionType as WorkflowActionType,
           assignedToUserId: step.assignedToUserId,
         };
