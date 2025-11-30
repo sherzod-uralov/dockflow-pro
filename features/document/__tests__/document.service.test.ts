@@ -1,0 +1,106 @@
+import { documentService } from '../service/document.service'
+import axiosInstance from '@/api/axios.instance'
+import { endpoints } from '@/api/axios.endpoints'
+
+jest.mock('@/api/axios.instance')
+
+describe('documentService', () => {
+    beforeEach(() => {
+        jest.clearAllMocks()
+    })
+
+    describe('getAllDocuments', () => {
+        test('barcha hujjatlarni olib keladi', async () => {
+            const mockResponse = {
+                data: {
+                    data: [{ id: '1', title: 'Doc 1' }],
+                    total: 1
+                }
+            }
+                ; (axiosInstance.get as jest.Mock).mockResolvedValue(mockResponse)
+
+            const params = {
+                search: 'test',
+                pageNumber: 1,
+                pageSize: 10,
+                status: 'PUBLISHED'
+            }
+            const result = await documentService.getAllDocuments(params)
+
+            expect(result).toEqual(mockResponse.data)
+            expect(axiosInstance.get).toHaveBeenCalledWith(endpoints.document.list, {
+                params: {
+                    search: 'test',
+                    pageNumber: 1,
+                    pageSize: 10,
+                    status: 'PUBLISHED',
+                    documentTypeId: undefined,
+                    journalId: undefined,
+                    priority: undefined,
+                    templateId: undefined
+                }
+            })
+        })
+    })
+
+    describe('createDocument', () => {
+        test('yangi hujjat yaratadi', async () => {
+            const mockPayload = {
+                title: 'New Doc',
+                description: 'Desc',
+                documentNumber: 'DOC-001',
+                status: 'DRAFT' as const,
+                priority: 'LOW' as const,
+                documentTypeId: 'type1',
+                journalId: 'journal1',
+                templateId: 'temp1',
+                tags: {},
+                attachments: []
+            }
+            const mockResponse = { data: { id: '1', ...mockPayload } }
+                ; (axiosInstance.post as jest.Mock).mockResolvedValue(mockResponse)
+
+            const result = await documentService.createDocument(mockPayload)
+
+            expect(result).toEqual(mockResponse.data)
+            expect(axiosInstance.post).toHaveBeenCalledWith(endpoints.document.create, mockPayload)
+        })
+    })
+
+    describe('updateDocument', () => {
+        test('hujjatni yangilaydi', async () => {
+            const mockPayload = { title: 'Updated Doc' }
+            const mockResponse = { data: { id: '1', ...mockPayload } }
+                ; (axiosInstance.patch as jest.Mock).mockResolvedValue(mockResponse)
+
+            const result = await documentService.updateDocument('1', mockPayload)
+
+            expect(result).toEqual(mockResponse.data)
+            expect(axiosInstance.patch).toHaveBeenCalledWith(endpoints.document.update('1'), mockPayload)
+        })
+    })
+
+    describe('deleteDocument', () => {
+        test('hujjatni o\'chiradi', async () => {
+            const mockResponse = { data: { success: true } }
+                ; (axiosInstance.delete as jest.Mock).mockResolvedValue(mockResponse)
+
+            const result = await documentService.deleteDocument('1')
+
+            expect(result).toEqual(mockResponse.data)
+            expect(axiosInstance.delete).toHaveBeenCalledWith(endpoints.document.delete('1'))
+        })
+    })
+
+    describe('getDocumentById', () => {
+        test('hujjatni ID bo\'yicha olib keladi', async () => {
+            const mockResponse = { data: { id: '1', title: 'Doc 1' } }
+                ; (axiosInstance.get as jest.Mock).mockResolvedValue(mockResponse)
+
+            const result = await documentService.getDocumentById('1')
+
+            expect(result).toEqual(mockResponse.data)
+            expect(axiosInstance.get).toHaveBeenCalledWith(endpoints.document.detail('1'))
+        })
+    })
+})
