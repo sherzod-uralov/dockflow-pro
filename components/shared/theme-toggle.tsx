@@ -1,22 +1,42 @@
-"use client"
+"use client";
 
-import { Moon, Sun } from "lucide-react"
-import { useTheme } from "next-themes"
-import { Button } from "@/components/ui/button"
+import { ActionIcon, useMantineColorScheme } from "@mantine/core";
+import { IconSun, IconMoon } from "@tabler/icons-react";
+import { useTheme } from "next-themes";
 
 export function ThemeToggle() {
-  const { theme, setTheme } = useTheme()
+  const { theme, setTheme } = useTheme();
+  const { setColorScheme } = useMantineColorScheme();
+
+  const handleToggle = () => {
+    const newTheme = theme === "light" ? "dark" : "light";
+    setTheme(newTheme);
+    setColorScheme(newTheme);
+  };
 
   return (
-    <Button
-      variant="ghost"
-      size="icon"
-      onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-      className="h-9 w-9 rounded-xl hover:bg-sidebar-accent"
+    <ActionIcon
+      variant="subtle"
+      color="gray"
+      size="lg"
+      radius="sm"
+      onClick={handleToggle}
+      aria-label="Mavzuni o'zgartirish"
     >
-      <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-      <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-      <span className="sr-only">Toggle theme</span>
-    </Button>
-  )
+      <IconSun
+        size={20}
+        stroke={1.5}
+        style={{
+          display: theme === "dark" ? "none" : "block",
+        }}
+      />
+      <IconMoon
+        size={20}
+        stroke={1.5}
+        style={{
+          display: theme === "dark" ? "block" : "none",
+        }}
+      />
+    </ActionIcon>
+  );
 }

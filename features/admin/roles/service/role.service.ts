@@ -1,6 +1,5 @@
 import { endpoints } from "@/api/axios.endpoints";
 import axiosInstance from "@/api/axios.instance";
-import { handleRoleError } from "@/utils/http-error-handler";
 import { RoleZodType } from "../schema/role.schema";
 import { RoleResponse, RoleData } from "../type/role.type";
 
@@ -14,34 +13,29 @@ export const rolesService = {
     pageNumber?: number;
     search?: string;
   }): Promise<RoleResponse> => {
-    return await handleRoleError.executeList(() =>
-      axiosInstance.get<RoleResponse>(endpoints.role.list, {
-        params: {
-          pageSize,
-          pageNumber,
-          search,
-        },
-      }),
-    );
+    const { data } = await axiosInstance.get<RoleResponse>(endpoints.role.list, {
+      params: { pageSize, pageNumber, search },
+    });
+    return data;
   },
-  createRole: async (data: RoleZodType) => {
-    return await handleRoleError.executeCreate(() =>
-      axiosInstance.post(endpoints.role.create, data),
-    );
+
+  createRole: async (payload: RoleZodType) => {
+    const { data } = await axiosInstance.post(endpoints.role.create, payload);
+    return data;
   },
+
   deleteRole: async (id: string) => {
-    return await handleRoleError.executeDelete(() =>
-      axiosInstance.delete(endpoints.role.delete(id)),
-    );
+    const { data } = await axiosInstance.delete(endpoints.role.delete(id));
+    return data;
   },
-  updateRole: async (id: string, data: RoleZodType) => {
-    return await handleRoleError.executeUpdate(() =>
-      axiosInstance.patch(endpoints.role.update(id), data),
-    );
+
+  updateRole: async (id: string, payload: RoleZodType) => {
+    const { data } = await axiosInstance.patch(endpoints.role.update(id), payload);
+    return data;
   },
+
   getRoleById: async (id: string): Promise<RoleData> => {
-    return await handleRoleError.executeGet(() =>
-      axiosInstance.get(endpoints.role.detail(id)),
-    );
+    const { data } = await axiosInstance.get(endpoints.role.detail(id));
+    return data;
   },
 };

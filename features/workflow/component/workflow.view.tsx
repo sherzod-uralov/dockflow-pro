@@ -1,42 +1,46 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { memo, useState, useMemo, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Separator } from "@/components/ui/separator";
+  Box,
+  Text,
+  Paper,
+  Badge,
+  Button,
+  Group,
+  Stack,
+  Avatar,
+  Divider,
+  Modal,
+  Textarea,
+  Select,
+  Checkbox,
+  SimpleGrid,
+} from "@mantine/core";
+import {
+  IconCopy,
+  IconFileText,
+  IconCircleCheck,
+  IconFileSearch,
+  IconSignature,
+  IconClock,
+  IconUser,
+  IconAlertCircle,
+  IconCircleX,
+  IconMessage,
+  IconRotate,
+  IconArrowLeft,
+  IconArrowRight,
+  IconEdit,
+  IconPlayerPlay,
+  IconEye,
+} from "@tabler/icons-react";
 import { handleCopyToClipboard } from "@/utils/copy-text";
 import { formatDateTime, formatDate } from "@/lib/date-utils";
 import {
-  Copy,
-  FileText,
-  CheckCircle2,
-  FileSearch,
-  FileSignature,
-  Bell,
-  Clock,
-  User,
-  AlertCircle,
-  CheckCircle,
-  XCircle,
-  MessageSquare,
-  RotateCcw,
-  ArrowLeft,
-  ArrowRight,
-  FileEdit,
-  Play,
-  Eye,
-} from "lucide-react";
-import {
   WorkflowApiResponse,
   WorkflowStepApiResponse,
-  WorkflowType,
   WorkflowStepStatus,
   getAvailableRollbackUsers,
   RollbackUser,
@@ -46,33 +50,14 @@ import {
   useUpdateWorkflowStep,
   useCompleteWorkflowStep,
   useRejectWorkflowStep,
-  useEnrichedRollbackUsers,
+  useEnrichedRollbackUsers
 } from "../hook/workflow.hook";
-import { useState, useMemo } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { showError } from "@/utils/show-error";
 import { useGetDocumentById } from "@/features/document";
 import {
   createWorkflowDocumentEditUrl,
   createWorkflowDocumentViewUrl,
 } from "@/utils/url-helper";
-import { useRouter } from "next/navigation";
 import { useGetProfileQuery } from "@/features/login/hook/login.hook";
 
 interface WorkflowViewProps {
@@ -92,93 +77,121 @@ interface RollbackHistoryItem {
   comment?: string;
 }
 
-const WorkflowView = ({ workflow, onClose }: WorkflowViewProps) => {
+// Status configs
+const getWorkflowStatusConfig = (status: string) => {
+  const configs: Record<string, { label: string; bg: string; color: string }> = {
+    ACTIVE: { label: "Faol", bg: "#d0ebff", color: "#1971c2" },
+    COMPLETED: { label: "Tugallangan", bg: "#d3f9d8", color: "#2b8a3e" },
+    CANCELLED: { label: "Bekor qilingan", bg: "#ffe3e3", color: "#c92a2a" },
+    DRAFT: { label: "Tayyorlanmoqda", bg: "#f1f3f5", color: "#495057" },
+  };
+  return configs[status] || configs.DRAFT;
+};
+
+const getStepStatusConfig = (status: string) => {
+  const configs: Record<string, { label: string; bg: string; color: string; Icon: any }> = {
+    NOT_STARTED: { label: "Boshlanmagan", bg: "#f1f3f5", color: "#495057", Icon: IconClock },
+    PENDING: { label: "Kutilmoqda", bg: "#f1f3f5", color: "#495057", Icon: IconClock },
+    IN_PROGRESS: { label: "Jarayonda", bg: "#d0ebff", color: "#1971c2", Icon: IconPlayerPlay },
+    COMPLETED: { label: "Tugallangan", bg: "#d3f9d8", color: "#2b8a3e", Icon: IconCircleCheck },
+    REJECTED: { label: "Rad etilgan", bg: "#ffe3e3", color: "#c92a2a", Icon: IconCircleX },
+  };
+  return configs[status] || configs.NOT_STARTED;
+};
+
+const getActionTypeConfig = (actionType: string) => {
+  const configs: Record<string, { label: string; bg: string; color: string; Icon: any }> = {
+    APPROVAL: { label: "Tasdiqlash", bg: "#d3f9d8", color: "#2b8a3e", Icon: IconCircleCheck },
+    REVIEW: { label: "Ko'rib chiqish", bg: "#d0ebff", color: "#1971c2", Icon: IconFileSearch },
+    SIGN: { label: "Imzolash", bg: "#f3d9fa", color: "#9c36b5", Icon: IconSignature },
+  };
+  return configs[actionType] || configs.APPROVAL;
+};
+
+const WorkflowView = memo(({ workflow, onClose }: WorkflowViewProps) => {
   const router = useRouter();
   const updateStepMutation = useUpdateWorkflowStep();
   const completeMutation = useCompleteWorkflowStep();
   const rejectMutation = useRejectWorkflowStep();
+
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
-  const [selectedStep, setSelectedStep] =
-    useState<WorkflowStepApiResponse | null>(null);
+  const [selectedStep, setSelectedStep] = useState<WorkflowStepApiResponse | null>(null);
   const [rejectionReason, setRejectionReason] = useState("");
   const [comment, setComment] = useState("");
   const [enableRollback, setEnableRollback] = useState(false);
   const [selectedRollbackUserId, setSelectedRollbackUserId] = useState("");
 
-  // Получаем информацию о текущем пользователе
-  const { data: currentUserProfile, isLoading: isProfileLoading } =
-    useGetProfileQuery();
+  const { data: currentUserProfile } = useGetProfileQuery();
+  const { data: documentData } = useGetDocumentById(workflow.document?.id || "");
 
-  const { data: documentData } = useGetDocumentById(
-    workflow.document?.id || "",
-  );
   const isLoading =
     updateStepMutation.isLoading ||
     completeMutation.isLoading ||
     rejectMutation.isLoading;
 
-  // Функция для начала работы над шагом
-  const handleStartStep = (stepId: string) => {
-    updateStepMutation.mutate({
-      id: stepId,
-      data: {
-        status: WorkflowStepStatus.IN_PROGRESS,
-        startedAt: new Date().toISOString(),
+  // Start step
+  const handleStartStep = useCallback((stepId: string) => {
+    updateStepMutation.mutate(
+      {
+        id: stepId,
+        data: {
+          status: WorkflowStepStatus.IN_PROGRESS,
+          startedAt: new Date().toISOString(),
+        },
       },
-    });
-  };
+      {
+        onError: (error) => showError(error),
+      }
+    );
+  }, [updateStepMutation]);
 
-  // Функция для завершения шага
-  const handleCompleteStep = (stepId: string) => {
+  // Complete step
+  const handleCompleteStep = useCallback((stepId: string) => {
     completeMutation.mutate(stepId);
-  };
+  }, [completeMutation]);
 
-  // Функция для редактирования документа
-  const handleEditDocument = (actionType?: string) => {
+  // Edit document
+  const handleEditDocument = useCallback((actionType?: string) => {
     if (documentData?.attachments?.[0]?.id && workflow.documentId) {
       const editUrl = createWorkflowDocumentEditUrl(
         documentData.attachments[0].id,
         workflow.documentId,
-        actionType, // Pass actionType to determine which editor to use
+        actionType,
       );
       router.push(editUrl);
     }
-  };
+  }, [documentData, workflow.documentId, router]);
 
-  // Функция для просмотра документа (только чтение)
-  const handleViewDocument = (actionType?: string) => {
+  // View document
+  const handleViewDocument = useCallback((actionType?: string) => {
     if (documentData?.attachments?.[0]?.id && workflow.documentId) {
       const viewUrl = createWorkflowDocumentViewUrl(
         documentData.attachments[0].id,
         workflow.documentId,
-        actionType, // Pass actionType to determine which viewer to use
+        actionType,
       );
       router.push(viewUrl);
     }
-  };
+  }, [documentData, workflow.documentId, router]);
 
-  // Проверяем возможность редактирования документа
-  const canEditDocument =
-    documentData?.attachments && documentData.attachments.length > 0;
+  const canEditDocument = documentData?.attachments && documentData.attachments.length > 0;
 
-  // Валидация workflow steps
   const workflowValidation = useMemo(
     () => validateAndExtractUserIds(workflow),
     [workflow],
   );
 
-  // Получить доступных пользователей для rollback (создатель документа + участники workflow)
+  // Available rollback users
   const availableRollbackUsers = useMemo(() => {
     if (!selectedStep) return [];
 
     const users: RollbackUser[] = [];
 
-    // Добавляем создателя документа первым
     if (documentData?.createdBy) {
       users.push({
         userId: documentData.createdBy.id,
         userName: documentData.createdBy.fullname,
-        stepOrder: 0, // Специальное значение для создателя
+        stepOrder: 0,
         userEmail: undefined,
         userRole: "Yaratuvchi",
         stepActionType: "CREATOR",
@@ -186,7 +199,6 @@ const WorkflowView = ({ workflow, onClose }: WorkflowViewProps) => {
       });
     }
 
-    // Добавляем предыдущих участников workflow (без дубликатов создателя)
     const workflowUsers = getAvailableRollbackUsers(selectedStep, workflow);
     const filteredWorkflowUsers = workflowUsers.filter(
       (user) => user.userId !== documentData?.createdBy?.id,
@@ -196,38 +208,34 @@ const WorkflowView = ({ workflow, onClose }: WorkflowViewProps) => {
     return users;
   }, [selectedStep, workflow, documentData]);
 
-  // Загрузить расширенные данные о пользователях
   const { enrichedUsers, isLoading: isLoadingUsers } = useEnrichedRollbackUsers(
     availableRollbackUsers,
   );
 
-  // Открыть диалог отклонения
-  const handleRejectClick = (step: WorkflowStepApiResponse) => {
-    // Проверка валидности workflow
+  // Open reject dialog
+  const handleRejectClick = useCallback((step: WorkflowStepApiResponse) => {
     const validation = validateAndExtractUserIds(workflow);
     if (!validation.isValid) {
-      alert(validation.error || "Нет доступных шагов workflow для отклонения");
+      alert(validation.error || "Rad etish uchun mavjud bosqichlar yo'q");
       return;
     }
 
     setSelectedStep(step);
     setRejectionReason("");
     setComment("");
-    setEnableRollback(true); // Включаем rollback по умолчанию
-    // Устанавливаем создателя документа по умолчанию
+    setEnableRollback(true);
     if (documentData?.createdBy?.id) {
       setSelectedRollbackUserId(documentData.createdBy.id);
     } else {
       setSelectedRollbackUserId("");
     }
     setRejectDialogOpen(true);
-  };
+  }, [workflow, documentData]);
 
-  // Подтвердить отклонение
-  const handleConfirmReject = () => {
+  // Confirm reject
+  const handleConfirmReject = useCallback(() => {
     if (!selectedStep) return;
 
-    // Валидация причины отклонения (минимум 10 символов)
     if (!rejectionReason.trim()) {
       alert("Iltimos, rad etish sababini kiriting");
       return;
@@ -237,7 +245,6 @@ const WorkflowView = ({ workflow, onClose }: WorkflowViewProps) => {
       return;
     }
 
-    // Валидация выбора пользователя для rollback
     if (enableRollback && !selectedRollbackUserId) {
       alert("Iltimos, qaytarish uchun foydalanuvchini tanlang");
       return;
@@ -271,15 +278,13 @@ const WorkflowView = ({ workflow, onClose }: WorkflowViewProps) => {
         },
       },
     );
-  };
+  }, [selectedStep, rejectionReason, comment, enableRollback, selectedRollbackUserId, rejectMutation]);
 
-  // Получить историю rollback из workflow
-  const getRollbackHistory = (): RollbackHistoryItem[] => {
-    const rollbackHistory: RollbackHistoryItem[] = [];
+  // Rollback history
+  const rollbackHistory = useMemo((): RollbackHistoryItem[] => {
+    const history: RollbackHistoryItem[] = [];
 
-    // Проходим по всем шагам
     workflow.workflowSteps.forEach((step) => {
-      // Ищем действия типа REJECTED с metadata о rollback
       const rejectedActions =
         step.actions?.filter(
           (action: any) =>
@@ -289,13 +294,11 @@ const WorkflowView = ({ workflow, onClose }: WorkflowViewProps) => {
 
       rejectedActions.forEach((rejectedAction: any) => {
         const metadata = rejectedAction.metadata;
-
-        // Находим шаг, к которому произошел откат
         const targetStep = workflow.workflowSteps.find(
           (s) => s.id === metadata.rollbackToStepId,
         );
 
-        rollbackHistory.push({
+        history.push({
           id: rejectedAction.id,
           rejectedAt: rejectedAction.createdAt,
           rejectedBy: rejectedAction.performedBy,
@@ -309,328 +312,301 @@ const WorkflowView = ({ workflow, onClose }: WorkflowViewProps) => {
       });
     });
 
-    // Сортируем по дате (новые первые)
-    return rollbackHistory.sort((a, b) => {
+    return history.sort((a, b) => {
       const dateA = new Date(a.rejectedAt).getTime();
       const dateB = new Date(b.rejectedAt).getTime();
       return dateB - dateA;
     });
-  };
+  }, [workflow]);
 
-  const rollbackHistory = useMemo(() => getRollbackHistory(), [workflow]);
+  // Close dialog
+  const handleCloseDialog = useCallback(() => {
+    setRejectDialogOpen(false);
+    setRejectionReason("");
+    setComment("");
+    setEnableRollback(false);
+    setSelectedRollbackUserId("");
+    setSelectedStep(null);
+  }, []);
 
-  // Функция для получения badge статуса workflow
-  const getStatusBadge = (status: string) => {
-    const variants: Record<
-      string,
-      {
-        variant: "default" | "secondary" | "destructive" | "outline";
-        label: string;
-      }
-    > = {
-      ACTIVE: { variant: "default", label: "Faol" },
-      COMPLETED: { variant: "secondary", label: "Tugallangan" },
-      CANCELLED: { variant: "destructive", label: "Bekor qilingan" },
-      DRAFT: { variant: "outline", label: "Qoralama" },
-    };
-
-    const config = variants[status] || variants.DRAFT;
-    return <Badge variant={config.variant}>{config.label}</Badge>;
-  };
-
-  // Функция для получения badge статуса шага
-  const getStepStatusBadge = (status: string) => {
-    const config: Record<string, { color: string; label: string; icon: any }> =
-      {
-        NOT_STARTED: {
-          color: "bg-slate-100 text-slate-800 border-slate-300",
-          label: "Boshlanmagan",
-          icon: Clock,
-        },
-        PENDING: {
-          color: "bg-gray-100 text-gray-800 border-gray-300",
-          label: "Kutilmoqda",
-          icon: Clock,
-        },
-        IN_PROGRESS: {
-          color: "bg-blue-100 text-blue-800 border-blue-300",
-          label: "Jarayonda",
-          icon: Play,
-        },
-        COMPLETED: {
-          color: "bg-green-100 text-green-800 border-green-300",
-          label: "Tugallangan",
-          icon: CheckCircle,
-        },
-        REJECTED: {
-          color: "bg-red-100 text-red-800 border-red-300",
-          label: "Rad etilgan",
-          icon: XCircle,
-        },
-      };
-
-    const item = config[status] || config.NOT_STARTED;
-    const Icon = item.icon;
-
-    return (
-      <Badge
-        variant="outline"
-        className={`${item.color} flex items-center gap-1.5 w-fit`}
-      >
-        <Icon className="h-3 w-3" />
-        {item.label}
-      </Badge>
-    );
-  };
-
-  // Функция для получения badge типа действия
-  const getActionTypeBadge = (actionType: string) => {
-    const config: Record<string, { label: string; icon: any; color: string }> =
-      {
-        APPROVAL: {
-          label: "Tasdiqlash",
-          icon: CheckCircle2,
-          color: "bg-green-100 text-green-800 border-green-300",
-        },
-        REVIEW: {
-          label: "Ko'rib chiqish",
-          icon: FileSearch,
-          color: "bg-blue-100 text-blue-800 border-blue-300",
-        },
-        SIGN: {
-          label: "Imzolash",
-          icon: FileSignature,
-          color: "bg-purple-100 text-purple-800 border-purple-300",
-        },
-      };
-
-    const item = config[actionType] || config.APPROVAL;
-    const Icon = item.icon;
-
-    return (
-      <Badge
-        variant="outline"
-        className={`${item.color} flex items-center gap-1.5 w-fit`}
-      >
-        <Icon className="h-3 w-3" />
-        {item.label}
-      </Badge>
-    );
-  };
-
-  // Рендер одного шага
-  const renderStep = (
-    step: WorkflowStepApiResponse,
-    isCurrentStep: boolean,
-  ) => {
-    // Фильтруем действия: показываем только действия текущего пользователя этого шага
+  // Render step
+  const renderStep = (step: WorkflowStepApiResponse, isCurrentStep: boolean) => {
     const filteredActions =
       step.actions?.filter(
         (action) => action.performedBy?.id === step.assignedToUser?.id,
       ) || [];
 
-    // Проверяем, является ли текущий пользователь исполнителем этого шага
-    const isCurrentUserAssigned =
-      currentUserProfile?.id === step.assignedToUserId;
+    const isCurrentUserAssigned = currentUserProfile?.id === step.assignedToUserId;
+    const stepStatusConfig = getStepStatusConfig(step.status);
+    const StatusIcon = stepStatusConfig.Icon;
 
     return (
-      <div
+      <Box
         key={step.id}
-        className={`relative pl-8 pb-6 ${isCurrentStep ? "border-l-2 border-primary" : "border-l-2 border-gray-200"}`}
+        style={{
+          position: "relative",
+          paddingLeft: 32,
+          paddingBottom: 24,
+          borderLeft: `2px solid ${isCurrentStep ? "#1e3a5f" : "#e9ecef"}`,
+        }}
       >
-        {/* Круг на линии */}
-        <div
-          className={`absolute left-0 top-0 -translate-x-1/2 h-4 w-4 rounded-full border-2 ${
-            isCurrentStep
-              ? "bg-primary border-primary"
+        {/* Timeline dot */}
+        <Box
+          style={{
+            position: "absolute",
+            left: -8,
+            top: 0,
+            width: 14,
+            height: 14,
+            borderRadius: "50%",
+            border: "2px solid",
+            borderColor: isCurrentStep
+              ? "#1e3a5f"
               : step.status === "COMPLETED"
-                ? "bg-green-500 border-green-500"
+                ? "#2b8a3e"
                 : step.status === "REJECTED"
-                  ? "bg-red-500 border-red-500"
-                  : "bg-gray-300 border-gray-300"
-          }`}
+                  ? "#c92a2a"
+                  : "#dee2e6",
+            backgroundColor: isCurrentStep
+              ? "#1e3a5f"
+              : step.status === "COMPLETED"
+                ? "#2b8a3e"
+                : step.status === "REJECTED"
+                  ? "#c92a2a"
+                  : "#dee2e6",
+          }}
         />
 
-        <Card className={isCurrentStep ? "border-primary shadow-md" : ""}>
-          <CardContent className="p-4 space-y-3">
+        <Paper
+          p="md"
+          radius="sm"
+          withBorder
+          style={{
+            borderColor: isCurrentStep ? "#1e3a5f" : "#e9ecef",
+            boxShadow: isCurrentStep ? "0 2px 8px rgba(30, 58, 95, 0.15)" : undefined,
+          }}
+        >
+          <Stack gap="sm">
             {/* Header */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="font-semibold text-sm">
+            <Group justify="space-between">
+              <Group gap="xs">
+                <Text size="sm" fw={600} c="#212529">
                   Bosqich {step.order}
-                </span>
+                </Text>
                 {isCurrentStep && (
-                  <Badge variant="default" className="text-xs">
+                  <Badge
+                    size="sm"
+                    style={{ backgroundColor: "#1e3a5f" }}
+                  >
                     Joriy
                   </Badge>
                 )}
-              </div>
-              {getStepStatusBadge(step.status)}
-            </div>
+              </Group>
+              <Badge
+                size="sm"
+                leftSection={<StatusIcon size={12} />}
+                style={{
+                  backgroundColor: stepStatusConfig.bg,
+                  color: stepStatusConfig.color,
+                }}
+              >
+                {stepStatusConfig.label}
+              </Badge>
+            </Group>
 
-            {/* Mas'ul shaxs */}
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <User className="h-4 w-4 text-muted-foreground" />
-                <span className="font-medium text-sm">Mas'ul shaxs</span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage
-                    src=""
-                    alt={step.assignedToUser?.username || ""}
-                  />
-                  <AvatarFallback>
-                    {step.assignedToUser?.fullname
-                      ?.split(" ")
-                      .map((n) => n[0])
-                      .join("") || "??"}
-                  </AvatarFallback>
+            {/* Assigned user */}
+            <Box>
+              <Group gap="xs" mb={8}>
+                <IconUser size={16} color="#868e96" />
+                <Text size="sm" fw={500} c="#495057">
+                  Mas'ul shaxs
+                </Text>
+              </Group>
+              <Group gap="sm">
+                <Avatar size="sm" radius="xl" color="blue">
+                  {step.assignedToUser?.fullname
+                    ?.split(" ")
+                    .map((n) => n[0])
+                    .join("") || "??"}
                 </Avatar>
-                <div>
-                  <p className="font-medium text-sm">
+                <Box>
+                  <Text size="sm" fw={500} c="#212529">
                     {step.assignedToUser?.fullname || "N/A"}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
+                  </Text>
+                  <Text size="xs" c="dimmed">
                     @{step.assignedToUser?.username || "N/A"}
-                  </p>
-                </div>
-              </div>
-            </div>
+                  </Text>
+                </Box>
+              </Group>
+            </Box>
 
             {/* Dates */}
-            <div className="grid grid-cols-2 gap-3 text-sm">
+            <SimpleGrid cols={2} spacing="sm">
               {step.startedAt && (
-                <div>
-                  <p className="text-muted-foreground text-xs">Boshlangan</p>
-                  <p className="font-medium">
+                <Box>
+                  <Text size="xs" c="dimmed">Boshlangan</Text>
+                  <Text size="sm" fw={500} c="#212529">
                     {formatDateTime(step.startedAt)}
-                  </p>
-                </div>
+                  </Text>
+                </Box>
               )}
               {step.completedAt && (
-                <div>
-                  <p className="text-muted-foreground text-xs">Tugallangan</p>
-                  <p className="font-medium">
+                <Box>
+                  <Text size="xs" c="dimmed">Tugallangan</Text>
+                  <Text size="sm" fw={500} c="#212529">
                     {formatDateTime(step.completedAt)}
-                  </p>
-                </div>
+                  </Text>
+                </Box>
               )}
               {step.dueDate && (
-                <div>
-                  <p className="text-muted-foreground text-xs">Muddat</p>
-                  <p className="font-medium">{formatDate(step.dueDate)}</p>
-                </div>
+                <Box>
+                  <Text size="xs" c="dimmed">Muddat</Text>
+                  <Text size="sm" fw={500} c="#212529">
+                    {formatDate(step.dueDate)}
+                  </Text>
+                </Box>
               )}
-            </div>
+            </SimpleGrid>
 
             {/* Rejection Info */}
             {step.isRejected && step.rejectionReason && (
-              <div className="bg-red-50 border border-red-200 rounded-md p-3">
-                <div className="flex items-start gap-2">
-                  <AlertCircle className="h-4 w-4 text-red-600 mt-0.5" />
-                  <div>
-                    <p className="text-sm font-medium text-red-800">
+              <Box
+                p="sm"
+                style={{
+                  backgroundColor: "#fff5f5",
+                  border: "1px solid #ffe3e3",
+                  borderRadius: 4,
+                }}
+              >
+                <Group gap="xs" align="flex-start">
+                  <IconAlertCircle size={16} color="#c92a2a" style={{ marginTop: 2 }} />
+                  <Box style={{ flex: 1 }}>
+                    <Text size="sm" fw={500} c="#c92a2a">
                       Rad etilgan sabab:
-                    </p>
-                    <p className="text-sm text-red-700 mt-1">
+                    </Text>
+                    <Text size="sm" c="#862e2e" mt={4}>
                       {step.rejectionReason}
-                    </p>
+                    </Text>
                     {step.rejectedAt && (
-                      <p className="text-xs text-red-600 mt-1">
+                      <Text size="xs" c="#c92a2a" mt={4}>
                         {formatDateTime(step.rejectedAt)}
-                      </p>
+                      </Text>
                     )}
-                  </div>
-                </div>
-              </div>
+                  </Box>
+                </Group>
+              </Box>
             )}
 
-            {/* Actions History - только действия текущего пользователя */}
+            {/* Actions History */}
             {filteredActions.length > 0 && (
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <MessageSquare className="h-4 w-4 text-muted-foreground" />
-                  <span className="font-medium text-sm">Amallar tarixi</span>
-                </div>
-                <div className="space-y-2">
-                  {filteredActions.map((action) => (
-                    <div
-                      key={action.id}
-                      className={`border rounded-md p-3 ${
-                        action.actionType === "REJECTED"
-                          ? "bg-red-50 border-red-200"
-                          : action.actionType === "APPROVED"
-                            ? "bg-green-50 border-green-200"
-                            : "bg-blue-50 border-blue-200"
-                      }`}
-                    >
-                      <div className="flex items-start justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <Avatar className="h-6 w-6">
-                            <AvatarImage
-                              src=""
-                              alt={action.performedBy?.username || ""}
-                            />
-                            <AvatarFallback className="text-xs">
+              <Box>
+                <Group gap="xs" mb={8}>
+                  <IconMessage size={16} color="#868e96" />
+                  <Text size="sm" fw={500} c="#495057">
+                    Amallar tarixi
+                  </Text>
+                </Group>
+                <Stack gap="xs">
+                  {filteredActions.map((action) => {
+                    const actionBg =
+                      action.actionType === "REJECTED"
+                        ? "#fff5f5"
+                        : action.actionType === "APPROVED"
+                          ? "#ebfbee"
+                          : "#e7f5ff";
+                    const actionBorder =
+                      action.actionType === "REJECTED"
+                        ? "#ffe3e3"
+                        : action.actionType === "APPROVED"
+                          ? "#d3f9d8"
+                          : "#d0ebff";
+                    const actionColor =
+                      action.actionType === "REJECTED"
+                        ? "#c92a2a"
+                        : action.actionType === "APPROVED"
+                          ? "#2b8a3e"
+                          : "#1971c2";
+
+                    return (
+                      <Box
+                        key={action.id}
+                        p="sm"
+                        style={{
+                          backgroundColor: actionBg,
+                          border: `1px solid ${actionBorder}`,
+                          borderRadius: 4,
+                        }}
+                      >
+                        <Group justify="space-between" mb={8}>
+                          <Group gap="xs">
+                            <Avatar size="xs" radius="xl">
                               {action.performedBy?.fullname
                                 ?.split(" ")
                                 .map((n) => n[0])
                                 .join("") || "??"}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <p className="text-xs font-medium">
-                              {action.performedBy?.fullname || "N/A"}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              {formatDateTime(action.createdAt)}
-                            </p>
-                          </div>
-                        </div>
-                        <Badge
-                          variant="outline"
-                          className={`text-xs ${
-                            action.actionType === "REJECTED"
-                              ? "bg-red-100 text-red-800 border-red-300"
+                            </Avatar>
+                            <Box>
+                              <Text size="xs" fw={500}>
+                                {action.performedBy?.fullname || "N/A"}
+                              </Text>
+                              <Text size="xs" c="dimmed">
+                                {formatDateTime(action.createdAt)}
+                              </Text>
+                            </Box>
+                          </Group>
+                          <Badge
+                            size="xs"
+                            style={{
+                              backgroundColor: actionBorder,
+                              color: actionColor,
+                            }}
+                          >
+                            {action.actionType === "REJECTED"
+                              ? "Rad etildi"
                               : action.actionType === "APPROVED"
-                                ? "bg-green-100 text-green-800 border-green-300"
-                                : "bg-blue-100 text-blue-800 border-blue-300"
-                          }`}
-                        >
-                          {action.actionType === "REJECTED"
-                            ? "Rad etildi"
-                            : action.actionType === "APPROVED"
-                              ? "Tasdiqlandi"
-                              : action.actionType === "REVIEWED"
-                                ? "Ko'rildi"
-                                : action.actionType === "SIGNED"
-                                  ? "Imzolandi"
-                                  : "Xabarnoma"}
-                        </Badge>
-                      </div>
-                      {action.comment && (
-                        <p className="text-sm mt-2">{action.comment}</p>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
+                                ? "Tasdiqlandi"
+                                : action.actionType === "REVIEWED"
+                                  ? "Ko'rildi"
+                                  : action.actionType === "SIGNED"
+                                    ? "Imzolandi"
+                                    : "Xabarnoma"}
+                          </Badge>
+                        </Group>
+                        {action.comment && (
+                          <Text size="sm" c="#495057" mt={8}>
+                            {action.comment}
+                          </Text>
+                        )}
+                      </Box>
+                    );
+                  })}
+                </Stack>
+              </Box>
             )}
 
             {/* View button for completed steps */}
             {step.status === "COMPLETED" && canEditDocument && (
-              <div className="space-y-2 pt-2 border-t">
+              <Box pt="sm" style={{ borderTop: "1px solid #e9ecef" }}>
                 <Button
-                  size="sm"
-                  onClick={() => handleViewDocument(step.actionType)}
-                  className="w-full"
                   variant="outline"
+                  size="sm"
+                  radius="sm"
+                  fullWidth
+                  leftSection={<IconEye size={16} />}
+                  onClick={() => handleViewDocument(step.actionType)}
+                  styles={{
+                    root: {
+                      borderColor: "#e9ecef",
+                      color: "#495057",
+                      "&:hover": {
+                        backgroundColor: "#f8f9fa",
+                      },
+                    },
+                  }}
                 >
-                  <Eye className="h-4 w-4 mr-2" />
                   Hujjatni ko'rish
                 </Button>
-              </div>
+              </Box>
             )}
 
             {/* Action Buttons */}
@@ -638,512 +614,642 @@ const WorkflowView = ({ workflow, onClose }: WorkflowViewProps) => {
               isCurrentUserAssigned &&
               step.status !== "COMPLETED" &&
               step.status !== "REJECTED" && (
-                <div className="space-y-2 pt-2 border-t">
-                  {/* Кнопка редактирования документа */}
-                  {canEditDocument && (
-                    <Button
-                      size="sm"
-                      onClick={() => handleEditDocument(step.actionType)}
-                      disabled={isLoading}
-                      className="w-full"
-                      variant="outline"
-                    >
-                      <FileEdit className="h-4 w-4 mr-2" />
-                      {step.actionType === "QR_CODE"
-                        ? "QR kod qo'shish"
-                        : "Hujjatni tahrirlash"}
-                    </Button>
-                  )}
+                <Box pt="sm" style={{ borderTop: "1px solid #e9ecef" }}>
+                  <Stack gap="xs">
+                    {canEditDocument && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        radius="sm"
+                        fullWidth
+                        leftSection={<IconEdit size={16} />}
+                        onClick={() => handleEditDocument(step.actionType)}
+                        disabled={isLoading}
+                        styles={{
+                          root: {
+                            borderColor: "#e9ecef",
+                            color: "#495057",
+                            "&:hover": {
+                              backgroundColor: "#f8f9fa",
+                            },
+                          },
+                        }}
+                      >
+                        {step.actionType === "QR_CODE"
+                          ? "QR kod qo'shish"
+                          : "Hujjatni tahrirlash"}
+                      </Button>
+                    )}
 
-                  {/* Основные действия - показываем только когда статус IN_PROGRESS */}
-                  {step.status === "IN_PROGRESS" && (
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        variant="default"
-                        onClick={() => handleCompleteStep(step.id)}
-                        disabled={isLoading}
-                        className="flex-1"
-                      >
-                        <CheckCircle className="h-4 w-4 mr-2" />
-                        {isLoading ? "Yuklanmoqda..." : "Tasdiqlash"}
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        onClick={() => handleRejectClick(step)}
-                        disabled={isLoading}
-                        className="flex-1"
-                      >
-                        <XCircle className="h-4 w-4 mr-2" />
-                        Rad etish
-                      </Button>
-                    </div>
-                  )}
-                </div>
+                    {step.status === "IN_PROGRESS" && (
+                      <Group gap="xs" grow>
+                        <Button
+                          size="sm"
+                          radius="sm"
+                          onClick={() => handleCompleteStep(step.id)}
+                          disabled={isLoading}
+                          style={{ backgroundColor: "#2b8a3e" }}
+                          leftSection={<IconCircleCheck size={16} />}
+                        >
+                          {isLoading ? "Yuklanmoqda..." : "Tasdiqlash"}
+                        </Button>
+                        <Button
+                          size="sm"
+                          radius="sm"
+                          onClick={() => handleRejectClick(step)}
+                          disabled={isLoading}
+                          style={{ backgroundColor: "#c92a2a" }}
+                          leftSection={<IconCircleX size={16} />}
+                        >
+                          Rad etish
+                        </Button>
+                      </Group>
+                    )}
+                  </Stack>
+                </Box>
               )}
-          </CardContent>
-        </Card>
-      </div>
+          </Stack>
+        </Paper>
+      </Box>
     );
   };
 
+  const workflowStatusConfig = getWorkflowStatusConfig(workflow.status);
+  const firstStepActionConfig = workflow.workflowSteps[0]
+    ? getActionTypeConfig(workflow.workflowSteps[0].actionType)
+    : null;
+  const ActionIcon = firstStepActionConfig?.Icon;
+
   return (
-    <div className="space-y-6">
+    <Stack gap="lg">
       {/* Main Info Card */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-start justify-between">
-            <div className="space-y-1">
-              <CardTitle className="flex items-center gap-2 text-xl">
-                <FileText className="h-5 w-5 text-primary" />
+      <Paper p="lg" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+        <Group justify="space-between" align="flex-start" mb="md">
+          <Box>
+            <Group gap="xs" mb={4}>
+              <IconFileText size={20} color="#1e3a5f" />
+              <Text size="lg" fw={600} c="#212529">
                 {workflow.document.title}
-              </CardTitle>
-              <CardDescription className="text-sm text-muted-foreground">
-                Hujjat aylanmasi haqida batafsil ma'lumotlar
-              </CardDescription>
-            </div>
-            {workflow.id && (
+              </Text>
+            </Group>
+            <Text size="sm" c="dimmed">
+              Hujjat aylanmasi haqida batafsil ma'lumotlar
+            </Text>
+          </Box>
+          {workflow.id && (
+            <Badge
+              variant="outline"
+              size="sm"
+              style={{
+                cursor: "pointer",
+                borderColor: "#e9ecef",
+                color: "#495057",
+              }}
+              rightSection={<IconCopy size={12} />}
+              onClick={() => handleCopyToClipboard(workflow.id, "ID nusxalandi")}
+            >
+              ID: {workflow.id.slice(0, 8)}...
+            </Badge>
+          )}
+        </Group>
+
+        {/* Document Info */}
+        <Box mb="md">
+          <Group gap="xs" mb={8}>
+            <IconFileText size={16} color="#868e96" />
+            <Text size="sm" fw={500} c="#495057">
+              Hujjat ma'lumotlari
+            </Text>
+          </Group>
+          <Box
+            p="sm"
+            style={{
+              backgroundColor: "#f8f9fa",
+              borderRadius: 4,
+            }}
+          >
+            <Stack gap={4}>
+              <Text size="sm" c="#495057">
+                <Text span fw={500}>Raqam:</Text> {workflow.document.documentNumber}
+              </Text>
+              <Text size="sm" c="#495057">
+                <Text span fw={500}>Versiya:</Text> {workflow.document.version}
+              </Text>
+              {workflow.document.description && (
+                <Text size="sm" c="#495057">
+                  <Text span fw={500}>Tavsif:</Text> {workflow.document.description}
+                </Text>
+              )}
+            </Stack>
+          </Box>
+        </Box>
+
+        <Divider color="#e9ecef" mb="md" />
+
+        {/* Status and Type */}
+        <SimpleGrid cols={{ base: 1, md: 3 }} spacing="md" mb="md">
+          <Box>
+            <Text size="sm" c="dimmed" mb={4}>Holat</Text>
+            <Badge
+              size="md"
+              style={{
+                backgroundColor: workflowStatusConfig.bg,
+                color: workflowStatusConfig.color,
+              }}
+            >
+              {workflowStatusConfig.label}
+            </Badge>
+          </Box>
+          <Box>
+            <Text size="sm" c="dimmed" mb={4}>Amal turi</Text>
+            {firstStepActionConfig && ActionIcon && (
               <Badge
-                variant="outline"
-                className="font-mono cursor-pointer hover:bg-muted transition-colors"
-                onClick={() =>
-                  handleCopyToClipboard(workflow.id, "ID nusxalandi")
-                }
+                size="md"
+                leftSection={<ActionIcon size={12} />}
+                style={{
+                  backgroundColor: firstStepActionConfig.bg,
+                  color: firstStepActionConfig.color,
+                }}
               >
-                ID: {workflow.id.slice(0, 8)}...
-                <Copy className="ml-1 h-3 w-3" />
+                {firstStepActionConfig.label}
               </Badge>
             )}
-          </div>
-        </CardHeader>
+          </Box>
+          <Box>
+            <Text size="sm" c="dimmed" mb={4}>Jarayon</Text>
+            <Text size="sm" fw={600} c="#212529" style={{ fontFamily: "monospace" }}>
+              {workflow.currentStepOrder} / {workflow.workflowSteps.length}
+            </Text>
+          </Box>
+        </SimpleGrid>
 
-        <CardContent className="space-y-6">
-          {/* Document Info */}
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <FileText className="h-4 w-4 text-muted-foreground" />
-              <span className="font-medium text-sm">Hujjat ma'lumotlari</span>
-            </div>
-            <div className="bg-muted/50 p-3 rounded-md space-y-1">
-              <p className="text-sm">
-                <span className="font-medium">Raqam:</span>{" "}
-                {workflow.document.documentNumber}
-              </p>
-              <p className="text-sm">
-                <span className="font-medium">Versiya:</span>{" "}
-                {workflow.document.version}
-              </p>
-              {workflow.document.description && (
-                <p className="text-sm">
-                  <span className="font-medium">Tavsif:</span>{" "}
-                  {workflow.document.description}
-                </p>
-              )}
-            </div>
-          </div>
+        <Divider color="#e9ecef" mb="md" />
 
-          <Separator />
+        {/* Timestamps */}
+        <SimpleGrid cols={2} spacing="md">
+          <Box>
+            <Text size="sm" c="dimmed" mb={4}>Yaratilgan</Text>
+            <Text size="sm" fw={500} c="#212529">
+              {formatDateTime(workflow.createdAt)}
+            </Text>
+          </Box>
+          <Box>
+            <Text size="sm" c="dimmed" mb={4}>Yangilangan</Text>
+            <Text size="sm" fw={500} c="#212529">
+              {formatDateTime(workflow.updatedAt)}
+            </Text>
+          </Box>
+        </SimpleGrid>
+      </Paper>
 
-          {/* Workflow Status and Type */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <p className="text-sm text-muted-foreground mb-2">Holat</p>
-              {getStatusBadge(workflow.status)}
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground mb-2">Amal turi</p>
-              {workflow.workflowSteps[0] &&
-                getActionTypeBadge(workflow.workflowSteps[0].actionType)}
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground mb-2">Jarayon</p>
-              <span className="font-mono font-medium">
-                {workflow.currentStepOrder} / {workflow.workflowSteps.length}
-              </span>
-            </div>
-          </div>
-
-          <Separator />
-
-          {/* Timestamps */}
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <div>
-              <p className="text-muted-foreground mb-1">Yaratilgan</p>
-              <p className="font-medium">
-                {formatDateTime(workflow.createdAt)}
-              </p>
-            </div>
-            <div>
-              <p className="text-muted-foreground mb-1">Yangilangan</p>
-              <p className="font-medium">
-                {formatDateTime(workflow.updatedAt)}
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Rollback History Card - показываем если есть история */}
+      {/* Rollback History Card */}
       {rollbackHistory.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <RotateCcw className="h-5 w-5 text-orange-500" />
+        <Paper p="lg" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+          <Group gap="xs" mb={4}>
+            <IconRotate size={20} color="#e67700" />
+            <Text size="lg" fw={600} c="#212529">
               Qaytarishlar tarixi
-            </CardTitle>
-            <CardDescription>
-              Jami {rollbackHistory.length} ta qaytarish amalga oshirilgan
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {rollbackHistory.map((rollback, index) => (
-                <div
-                  key={rollback.id}
-                  className="bg-orange-50 border border-orange-200 rounded-lg p-4"
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0 mt-1">
-                      <div className="h-10 w-10 rounded-full bg-orange-100 flex items-center justify-center">
-                        <ArrowLeft className="h-5 w-5 text-orange-600" />
-                      </div>
-                    </div>
-                    <div className="flex-1 space-y-3">
-                      {/* Header */}
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-center gap-2">
-                          <Avatar className="h-7 w-7">
-                            <AvatarImage
-                              src={rollback.rejectedBy?.avatarUrl || ""}
-                              alt={rollback.rejectedBy?.username || ""}
-                            />
-                            <AvatarFallback className="text-xs">
-                              {rollback.rejectedBy?.fullname
-                                ?.split(" ")
-                                .map((n: string) => n[0])
-                                .join("") || "??"}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <p className="text-sm font-medium">
-                              {rollback.rejectedBy?.fullname || "N/A"}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              {formatDateTime(rollback.rejectedAt)}
-                            </p>
-                          </div>
-                        </div>
-                        <Badge
-                          variant="outline"
-                          className="bg-orange-100 text-orange-800 border-orange-300"
-                        >
-                          <RotateCcw className="h-3 w-3 mr-1" />
-                          Qaytarildi
-                        </Badge>
-                      </div>
+            </Text>
+          </Group>
+          <Text size="sm" c="dimmed" mb="md">
+            Jami {rollbackHistory.length} ta qaytarish amalga oshirilgan
+          </Text>
 
-                      {/* Rollback Flow */}
-                      <div className="bg-white rounded-md p-3 border border-orange-100">
-                        <div className="flex items-center gap-2 text-sm">
-                          <div className="flex items-center gap-2 flex-1">
-                            <Badge variant="secondary" className="text-xs">
-                              Bosqich {rollback.fromStepOrder}
-                            </Badge>
-                            <div className="text-xs">
-                              <p className="font-medium">
-                                {rollback.fromStepUser?.fullname}
-                              </p>
-                              <p className="text-muted-foreground">
-                                @{rollback.fromStepUser?.username}
-                              </p>
-                            </div>
-                          </div>
+          <Stack gap="sm">
+            {rollbackHistory.map((rollback) => (
+              <Box
+                key={rollback.id}
+                p="md"
+                style={{
+                  backgroundColor: "#fff8f1",
+                  border: "1px solid #ffe8cc",
+                  borderRadius: 4,
+                }}
+              >
+                <Group gap="sm" align="flex-start">
+                  <Box
+                    style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: "50%",
+                      backgroundColor: "#ffe8cc",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      flexShrink: 0,
+                    }}
+                  >
+                    <IconArrowLeft size={20} color="#e67700" />
+                  </Box>
+                  <Box style={{ flex: 1 }}>
+                    {/* Header */}
+                    <Group justify="space-between" mb="sm">
+                      <Group gap="xs">
+                        <Avatar size="sm" radius="xl">
+                          {rollback.rejectedBy?.fullname
+                            ?.split(" ")
+                            .map((n: string) => n[0])
+                            .join("") || "??"}
+                        </Avatar>
+                        <Box>
+                          <Text size="sm" fw={500}>
+                            {rollback.rejectedBy?.fullname || "N/A"}
+                          </Text>
+                          <Text size="xs" c="dimmed">
+                            {formatDateTime(rollback.rejectedAt)}
+                          </Text>
+                        </Box>
+                      </Group>
+                      <Badge
+                        size="sm"
+                        leftSection={<IconRotate size={12} />}
+                        style={{
+                          backgroundColor: "#ffe8cc",
+                          color: "#e67700",
+                        }}
+                      >
+                        Qaytarildi
+                      </Badge>
+                    </Group>
 
-                          <div className="flex items-center gap-1 text-orange-600">
-                            <span className="text-xs font-medium">
-                              qaytarildi
-                            </span>
-                            <ArrowRight className="h-4 w-4" />
-                          </div>
+                    {/* Rollback Flow */}
+                    <Box
+                      p="sm"
+                      mb="sm"
+                      style={{
+                        backgroundColor: "white",
+                        border: "1px solid #ffe8cc",
+                        borderRadius: 4,
+                      }}
+                    >
+                      <Group gap="xs" justify="space-between">
+                        <Group gap="xs">
+                          <Badge size="xs" variant="light" color="gray">
+                            Bosqich {rollback.fromStepOrder}
+                          </Badge>
+                          <Box>
+                            <Text size="xs" fw={500}>
+                              {rollback.fromStepUser?.fullname}
+                            </Text>
+                            <Text size="xs" c="dimmed">
+                              @{rollback.fromStepUser?.username}
+                            </Text>
+                          </Box>
+                        </Group>
 
-                          <div className="flex items-center gap-2 flex-1">
-                            <Badge variant="secondary" className="text-xs">
-                              Bosqich {rollback.toStepOrder}
-                            </Badge>
-                            <div className="text-xs">
-                              <p className="font-medium">
-                                {rollback.toStepUser?.fullname}
-                              </p>
-                              <p className="text-muted-foreground">
-                                @{rollback.toStepUser?.username}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
+                        <Group gap={4}>
+                          <Text size="xs" fw={500} c="#e67700">
+                            qaytarildi
+                          </Text>
+                          <IconArrowRight size={14} color="#e67700" />
+                        </Group>
 
-                      {/* Rollback Reason */}
-                      <div className="bg-white rounded-md p-3 border border-orange-100">
-                        <p className="text-xs font-medium text-orange-800 mb-1">
-                          Rad etish sababi:
-                        </p>
-                        <p className="text-sm text-gray-700">
-                          {rollback.rejectionReason}
-                        </p>
-                        {rollback.comment &&
-                          rollback.comment !== rollback.rejectionReason && (
-                            <>
-                              <p className="text-xs font-medium text-orange-800 mt-2 mb-1">
-                                Qo'shimcha izoh:
-                              </p>
-                              <p className="text-sm text-gray-700">
-                                {rollback.comment}
-                              </p>
-                            </>
-                          )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+                        <Group gap="xs">
+                          <Badge size="xs" variant="light" color="gray">
+                            Bosqich {rollback.toStepOrder}
+                          </Badge>
+                          <Box>
+                            <Text size="xs" fw={500}>
+                              {rollback.toStepUser?.fullname}
+                            </Text>
+                            <Text size="xs" c="dimmed">
+                              @{rollback.toStepUser?.username}
+                            </Text>
+                          </Box>
+                        </Group>
+                      </Group>
+                    </Box>
+
+                    {/* Rollback Reason */}
+                    <Box
+                      p="sm"
+                      style={{
+                        backgroundColor: "white",
+                        border: "1px solid #ffe8cc",
+                        borderRadius: 4,
+                      }}
+                    >
+                      <Text size="xs" fw={500} c="#e67700" mb={4}>
+                        Rad etish sababi:
+                      </Text>
+                      <Text size="sm" c="#495057">
+                        {rollback.rejectionReason}
+                      </Text>
+                      {rollback.comment && rollback.comment !== rollback.rejectionReason && (
+                        <>
+                          <Text size="xs" fw={500} c="#e67700" mt={8} mb={4}>
+                            Qo'shimcha izoh:
+                          </Text>
+                          <Text size="sm" c="#495057">
+                            {rollback.comment}
+                          </Text>
+                        </>
+                      )}
+                    </Box>
+                  </Box>
+                </Group>
+              </Box>
+            ))}
+          </Stack>
+        </Paper>
       )}
 
       {/* Workflow Steps Timeline */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Hujjat aylanmasi bosqichlari</CardTitle>
-          <CardDescription>
-            Jami {workflow.workflowSteps.length} ta bosqich
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-0">
-            {workflow.workflowSteps
-              .sort((a, b) => a.order - b.order)
-              .map((step) =>
-                renderStep(step, step.order === workflow.currentStepOrder),
-              )}
-          </div>
-        </CardContent>
-      </Card>
+      <Paper p="lg" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+        <Text size="lg" fw={600} c="#212529" mb={4}>
+          Hujjat aylanmasi bosqichlari
+        </Text>
+        <Text size="sm" c="dimmed" mb="lg">
+          Jami {workflow.workflowSteps.length} ta bosqich
+        </Text>
+
+        <Box>
+          {workflow.workflowSteps
+            .sort((a, b) => a.order - b.order)
+            .map((step) => renderStep(step, step.order === workflow.currentStepOrder))}
+        </Box>
+      </Paper>
 
       {/* Close Button */}
       {onClose && (
-        <div className="flex justify-end gap-3 pt-4">
-          <Button variant="outline" onClick={onClose}>
+        <Group justify="flex-end" pt="md">
+          <Button
+            variant="outline"
+            size="sm"
+            radius="sm"
+            onClick={onClose}
+            styles={{
+              root: {
+                borderColor: "#e9ecef",
+                color: "#495057",
+                "&:hover": {
+                  backgroundColor: "#f8f9fa",
+                },
+              },
+            }}
+          >
             Yopish
           </Button>
-        </div>
+        </Group>
       )}
 
       {/* Reject Dialog */}
-      <Dialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Bosqichni rad etish</DialogTitle>
-            <DialogDescription>
-              Iltimos, rad etish sababini kiriting va qaytarish (rollback)
-              parametrlarini sozlang.
-            </DialogDescription>
-          </DialogHeader>
+      <Modal
+        opened={rejectDialogOpen}
+        onClose={handleCloseDialog}
+        title={
+          <Text fw={600} c="#212529">
+            Bosqichni rad etish
+          </Text>
+        }
+        size="lg"
+        radius="sm"
+        centered
+        styles={{
+          header: {
+            borderBottom: "1px solid #e9ecef",
+            paddingBottom: 12,
+          },
+          body: {
+            paddingTop: 16,
+          },
+        }}
+      >
+        <Stack gap="md">
+          <Text size="sm" c="dimmed">
+            Iltimos, rad etish sababini kiriting va qaytarish (rollback) parametrlarini sozlang.
+          </Text>
 
-          <div className="space-y-4">
-            {/* Rejection Reason */}
-            <div className="space-y-2">
-              <Label htmlFor="rejection-reason">
-                Rad etish sababi <span className="text-destructive">*</span>
-                <span className="text-xs text-muted-foreground ml-2">
-                  (kamida 10 ta belgi)
-                </span>
-              </Label>
-              <Textarea
-                id="rejection-reason"
-                placeholder="Rad etish sababini batafsil yozing (kamida 10 ta belgi)..."
-                value={rejectionReason}
-                onChange={(e) => setRejectionReason(e.target.value)}
-                rows={3}
-                maxLength={500}
-                minLength={10}
-                required
-                className={`resize-none ${
-                  rejectionReason.length > 0 && rejectionReason.length < 10
-                    ? "border-destructive"
-                    : ""
-                }`}
-                disabled={isLoading}
-              />
-              <div className="flex justify-between text-xs">
-                {rejectionReason.length === 0 ? (
-                  <p className="text-destructive">
-                    Bu maydon majburiy (kamida 10 ta belgi)
-                  </p>
-                ) : rejectionReason.length < 10 ? (
-                  <p className="text-destructive">
-                    Yana {10 - rejectionReason.length} ta belgi kerak
-                  </p>
-                ) : (
-                  <p className="text-green-600">✓ Yetarli</p>
-                )}
-                <p className="text-muted-foreground">
-                  {rejectionReason.length}/500
-                </p>
-              </div>
-            </div>
-
-            {/* Additional Comment */}
-            <div className="space-y-2">
-              <Label htmlFor="comment">Qo'shimcha izoh</Label>
-              <Textarea
-                id="comment"
-                placeholder="Qo'shimcha ma'lumot kiriting..."
-                value={comment}
-                onChange={(e) => setComment(e.target.value)}
-                rows={2}
-                maxLength={1000}
-                className="resize-none"
-                disabled={isLoading}
-              />
-              <p className="text-xs text-muted-foreground">
-                {comment.length}/1000
-              </p>
-            </div>
-
-            {/* Rollback Option */}
-            <div className="space-y-3 pt-2 border-t">
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="enable-rollback"
-                  checked={enableRollback}
-                  onCheckedChange={(checked) => {
-                    setEnableRollback(checked === true);
-                    if (!checked) {
-                      setSelectedRollbackUserId("");
-                    } else if (documentData?.createdBy?.id) {
-                      // При включении чекбокса выбираем создателя по умолчанию
-                      setSelectedRollbackUserId(documentData.createdBy.id);
-                    }
-                  }}
-                  disabled={isLoading || isLoadingUsers}
-                />
-                <label
-                  htmlFor="enable-rollback"
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                >
-                  Hujjatni qaytarish (rollback)
-                </label>
-              </div>
-
-              {!enableRollback && (
-                <p className="text-xs text-muted-foreground pl-6">
-                  ℹ️ Hujjatni qaytarmasdan rad etish
-                </p>
+          {/* Rejection Reason */}
+          <Box>
+            <Group gap={4} mb={4}>
+              <Text size="sm" fw={500} c="#495057">
+                Rad etish sababi
+              </Text>
+              <Text size="sm" c="#c92a2a">*</Text>
+              <Text size="xs" c="dimmed">(kamida 10 ta belgi)</Text>
+            </Group>
+            <Textarea
+              placeholder="Rad etish sababini batafsil yozing (kamida 10 ta belgi)..."
+              value={rejectionReason}
+              onChange={(e) => setRejectionReason(e.target.value)}
+              rows={3}
+              maxLength={500}
+              disabled={isLoading}
+              error={
+                rejectionReason.length > 0 && rejectionReason.length < 10
+                  ? `Yana ${10 - rejectionReason.length} ta belgi kerak`
+                  : undefined
+              }
+              styles={{
+                input: {
+                  backgroundColor: "#f8f9fa",
+                  border: "1px solid #e9ecef",
+                  "&:focus": {
+                    borderColor: "#1e3a5f",
+                  },
+                },
+              }}
+            />
+            <Group justify="space-between" mt={4}>
+              {rejectionReason.length === 0 ? (
+                <Text size="xs" c="#c92a2a">
+                  Bu maydon majburiy (kamida 10 ta belgi)
+                </Text>
+              ) : rejectionReason.length < 10 ? (
+                <Text size="xs" c="#c92a2a">
+                  Yana {10 - rejectionReason.length} ta belgi kerak
+                </Text>
+              ) : (
+                <Text size="xs" c="#2b8a3e">✓ Yetarli</Text>
               )}
+              <Text size="xs" c="dimmed">
+                {rejectionReason.length}/500
+              </Text>
+            </Group>
+          </Box>
 
-              {enableRollback && (
-                <div className="space-y-2 pl-6">
-                  <Label htmlFor="rollback-user">
-                    Qaytarish uchun foydalanuvchi{" "}
-                    <span className="text-destructive">*</span>
-                  </Label>
-                  {isLoadingUsers ? (
-                    <div className="text-sm text-muted-foreground">
-                      Foydalanuvchilar yuklanmoqda...
-                    </div>
-                  ) : enrichedUsers.length === 0 ? (
-                    <div className="text-sm text-destructive">
-                      Avvalgi foydalanuvchilar topilmadi
-                    </div>
-                  ) : (
-                    <>
-                      <Select
-                        value={selectedRollbackUserId}
-                        onValueChange={setSelectedRollbackUserId}
-                        disabled={isLoading}
-                      >
-                        <SelectTrigger id="rollback-user">
-                          <SelectValue placeholder="Foydalanuvchini tanlang" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {enrichedUsers.map((user) => {
-                            // Формируем детальную строку для пользователя
-                            const isCreator = user.stepOrder === 0;
-                            const userDisplay = isCreator
-                              ? `🔖 ${user.userName} (Yaratuvchi)`
-                              : [
-                                  `Bosqich ${user.stepOrder}`,
-                                  user.userName,
-                                  user.username && `@${user.username}`,
-                                  user.userRole && `- ${user.userRole}`,
-                                ]
-                                  .filter(Boolean)
-                                  .join(" ");
+          {/* Additional Comment */}
+          <Box>
+            <Text size="sm" fw={500} c="#495057" mb={4}>
+              Qo'shimcha izoh
+            </Text>
+            <Textarea
+              placeholder="Qo'shimcha ma'lumot kiriting..."
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              rows={2}
+              maxLength={1000}
+              disabled={isLoading}
+              styles={{
+                input: {
+                  backgroundColor: "#f8f9fa",
+                  border: "1px solid #e9ecef",
+                  "&:focus": {
+                    borderColor: "#1e3a5f",
+                  },
+                },
+              }}
+            />
+            <Text size="xs" c="dimmed" ta="right" mt={4}>
+              {comment.length}/1000
+            </Text>
+          </Box>
 
-                            return (
-                              <SelectItem key={user.userId} value={user.userId}>
-                                {userDisplay}
-                              </SelectItem>
-                            );
-                          })}
-                        </SelectContent>
-                      </Select>
-                      {documentData?.createdBy && (
-                        <p className="text-xs text-muted-foreground">
-                          💡 Sukut bo'yicha hujjat yaratuvchiga qaytariladi
-                        </p>
-                      )}
-                    </>
-                  )}
-                  <p className="text-xs text-muted-foreground">
-                    ⚠️ Hujjat aylanmasi ushbu foydalanuvchining bosqichidan qayta
-                    boshlanadi
-                  </p>
-                </div>
-              )}
-            </div>
+          {/* Rollback Option */}
+          <Box pt="sm" style={{ borderTop: "1px solid #e9ecef" }}>
+            <Checkbox
+              label="Hujjatni qaytarish (rollback)"
+              checked={enableRollback}
+              onChange={(e) => {
+                setEnableRollback(e.currentTarget.checked);
+                if (!e.currentTarget.checked) {
+                  setSelectedRollbackUserId("");
+                } else if (documentData?.createdBy?.id) {
+                  setSelectedRollbackUserId(documentData.createdBy.id);
+                }
+              }}
+              disabled={isLoading || isLoadingUsers}
+              styles={{
+                label: {
+                  fontWeight: 500,
+                  color: "#495057",
+                },
+              }}
+            />
 
-            {/* Ошибка валидации workflow */}
-            {!workflowValidation.isValid && (
-              <div className="text-sm text-destructive bg-red-50 p-3 rounded-md border border-red-200">
-                ⚠️ {workflowValidation.error}
-              </div>
+            {!enableRollback && (
+              <Text size="xs" c="dimmed" ml={28} mt={4}>
+                ℹ️ Hujjatni qaytarmasdan rad etish
+              </Text>
             )}
-          </div>
 
-          <DialogFooter>
+            {enableRollback && (
+              <Box ml={28} mt="sm">
+                <Group gap={4} mb={4}>
+                  <Text size="sm" fw={500} c="#495057">
+                    Qaytarish uchun foydalanuvchi
+                  </Text>
+                  <Text size="sm" c="#c92a2a">*</Text>
+                </Group>
+
+                {isLoadingUsers ? (
+                  <Text size="sm" c="dimmed">
+                    Foydalanuvchilar yuklanmoqda...
+                  </Text>
+                ) : enrichedUsers.length === 0 ? (
+                  <Text size="sm" c="#c92a2a">
+                    Avvalgi foydalanuvchilar topilmadi
+                  </Text>
+                ) : (
+                  <>
+                    <Select
+                      value={selectedRollbackUserId}
+                      onChange={(value) => setSelectedRollbackUserId(value || "")}
+                      data={enrichedUsers.map((user) => {
+                        const isCreator = user.stepOrder === 0;
+                        const userDisplay = isCreator
+                          ? `🔖 ${user.userName} (Yaratuvchi)`
+                          : [
+                            `Bosqich ${user.stepOrder}`,
+                            user.userName,
+                            user.username && `@${user.username}`,
+                            user.userRole && `- ${user.userRole}`,
+                          ]
+                            .filter(Boolean)
+                            .join(" ");
+
+                        return {
+                          value: user.userId,
+                          label: userDisplay,
+                        };
+                      })}
+                      placeholder="Foydalanuvchini tanlang"
+                      disabled={isLoading}
+                      size="sm"
+                      radius="sm"
+                      styles={{
+                        input: {
+                          backgroundColor: "#f8f9fa",
+                          border: "1px solid #e9ecef",
+                          "&:focus": {
+                            borderColor: "#1e3a5f",
+                          },
+                        },
+                      }}
+                    />
+                    {documentData?.createdBy && (
+                      <Text size="xs" c="dimmed" mt={4}>
+                        💡 Sukut bo'yicha hujjat yaratuvchiga qaytariladi
+                      </Text>
+                    )}
+                  </>
+                )}
+                <Text size="xs" c="dimmed" mt={4}>
+                  ⚠️ Hujjat aylanmasi ushbu foydalanuvchining bosqichidan qayta boshlanadi
+                </Text>
+              </Box>
+            )}
+          </Box>
+
+          {/* Validation Error */}
+          {!workflowValidation.isValid && (
+            <Box
+              p="sm"
+              style={{
+                backgroundColor: "#fff5f5",
+                border: "1px solid #ffe3e3",
+                borderRadius: 4,
+              }}
+            >
+              <Text size="sm" c="#c92a2a">
+                ⚠️ {workflowValidation.error}
+              </Text>
+            </Box>
+          )}
+
+          {/* Footer */}
+          <Group justify="flex-end" gap="xs" pt="md" style={{ borderTop: "1px solid #e9ecef" }}>
             <Button
               variant="outline"
-              onClick={() => {
-                setRejectDialogOpen(false);
-                setRejectionReason("");
-                setComment("");
-                setEnableRollback(false);
-                setSelectedRollbackUserId("");
-                setSelectedStep(null);
-              }}
+              size="sm"
+              radius="sm"
+              onClick={handleCloseDialog}
               disabled={isLoading}
+              styles={{
+                root: {
+                  borderColor: "#e9ecef",
+                  color: "#495057",
+                  "&:hover": {
+                    backgroundColor: "#f8f9fa",
+                  },
+                },
+              }}
             >
               Bekor qilish
             </Button>
             <Button
-              variant="destructive"
+              size="sm"
+              radius="sm"
               onClick={handleConfirmReject}
               disabled={
                 isLoading ||
                 !rejectionReason.trim() ||
+                rejectionReason.trim().length < 10 ||
                 (enableRollback && !selectedRollbackUserId)
               }
+              loading={isLoading}
+              style={{ backgroundColor: "#c92a2a" }}
             >
               {isLoading ? "Rad etilmoqda..." : "Rad etish"}
             </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
+          </Group>
+        </Stack>
+      </Modal>
+    </Stack>
   );
-};
+});
+
+WorkflowView.displayName = "WorkflowView";
 
 export default WorkflowView;

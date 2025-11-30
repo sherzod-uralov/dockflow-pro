@@ -1,15 +1,48 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { PageHeader } from "@/components/shared/ui/custom-breadcrumb";
-import { Home, ArrowLeft } from "lucide-react";
+import {
+  Box,
+  Text,
+  Paper,
+  Group,
+  Button,
+  Skeleton,
+  Stack,
+  Badge,
+  Progress,
+  Avatar,
+  Divider,
+  SimpleGrid,
+  ActionIcon,
+  Tooltip,
+  Modal,
+  Textarea,
+  Select,
+  Checkbox,
+  Breadcrumbs,
+  Anchor,
+  Alert,
+} from "@mantine/core";
+import {
+  IconArrowLeft,
+  IconHome,
+  IconChevronRight,
+  IconFileText,
+  IconUser,
+  IconClock,
+  IconCircleCheck,
+  IconCircleX,
+  IconPlayerPlay,
+  IconHourglass,
+  IconEdit,
+  IconEye,
+  IconAlertCircle,
+  IconRotate,
+} from "@tabler/icons-react";
+import Link from "next/link";
 import { useGetWorkflowById } from "@/features/workflow/hook/workflow.hook";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
-import WorkflowView from "@/features/workflow/component/workflow.view";
+import WorkflowDetailView from "@/features/workflow/component/workflow-detail.view";
 
 const WorkflowDetailPage = () => {
   const params = useParams();
@@ -20,116 +53,85 @@ const WorkflowDetailPage = () => {
 
   if (isLoading) {
     return (
-      <>
-        <PageHeader
-          title="Hujjat aylanmasi ma'lumotlari"
-          description="Yuklanmoqda..."
-          items={[
-            {
-              label: "Bosh sahifa",
-              href: "/dashboard",
-              icon: <Home size={16} />,
-            },
-            {
-              label: "Hujjat aylanmasi",
-              href: "/dashboard/workflow",
-            },
-            {
-              label: "Ma'lumotlar",
-              href: "#",
-            },
-          ]}
-        />
-        <div className="space-y-6">
-          <Card>
-            <CardContent className="p-6 space-y-4">
-              <Skeleton className="h-8 w-3/4" />
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-2/3" />
-              <Skeleton className="h-32 w-full" />
-            </CardContent>
-          </Card>
-        </div>
-      </>
+      <Box>
+        <Group justify="space-between" mb="lg">
+          <Group gap="sm">
+            <Skeleton height={36} width={36} radius="sm" />
+            <Box>
+              <Skeleton height={24} width={300} mb={4} />
+              <Skeleton height={16} width={200} />
+            </Box>
+          </Group>
+        </Group>
+
+        {/* Content skeleton */}
+        <SimpleGrid cols={{ base: 1, lg: 3 }} spacing="md">
+          <Box style={{ gridColumn: "span 2" }}>
+            <Paper p="lg" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+              <Skeleton height={200} />
+            </Paper>
+          </Box>
+          <Paper p="lg" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+            <Skeleton height={200} />
+          </Paper>
+        </SimpleGrid>
+      </Box>
     );
   }
 
+  // Error state
   if (isError || !workflow) {
     return (
-      <>
-        <PageHeader
-          title="Hujjat aylanmasi ma'lumotlari"
-          description="Xatolik yuz berdi"
-          items={[
-            {
-              label: "Bosh sahifa",
-              href: "/dashboard",
-              icon: <Home size={16} />,
-            },
-            {
-              label: "Hujjat aylanmasi",
-              href: "/dashboard/workflow",
-            },
-            {
-              label: "Ma'lumotlar",
-              href: "#",
-            },
-          ]}
-        />
-        <div className="space-y-6">
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              Hujjat aylanmasi topilmadi yoki yuklanishda xatolik yuz berdi.
-            </AlertDescription>
-          </Alert>
-          <Button
-            variant="outline"
-            onClick={() => router.push("/dashboard/workflow")}
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Orqaga qaytish
-          </Button>
-        </div>
-      </>
+      <Box>
+        <Button
+          variant="subtle"
+          leftSection={<IconArrowLeft size={16} />}
+          onClick={() => router.push("/dashboard/workflow")}
+          mb="lg"
+          c="#495057"
+        >
+          Orqaga
+        </Button>
+
+        <Alert
+          icon={<IconAlertCircle size={20} />}
+          title="Xatolik"
+          color="red"
+          radius="sm"
+        >
+          Hujjat aylanmasi topilmadi yoki yuklanishda xatolik yuz berdi.
+        </Alert>
+      </Box>
     );
   }
 
   return (
-    <>
-      <PageHeader
-        title={workflow.document?.title || "Hujjat aylanmasi ma'lumotlari"}
-        description={workflow.document?.description || "Hujjat aylanmasi haqida batafsil ma'lumotlar"}
-        items={[
-          {
-            label: "Bosh sahifa",
-            href: "/dashboard",
-            icon: <Home size={16} />,
-          },
-          {
-            label: "Hujjat aylanmasi",
-            href: "/dashboard/workflow",
-          },
-          {
-            label: workflow.document?.title || "Ma'lumotlar",
-            href: "#",
-          },
-        ]}
-      />
-      <div className="space-y-6">
-        <div className="flex justify-start">
-          <Button
-              className="hover:text-text-on-dark"
-            variant="outline"
+    <Box>
+      <Group justify="space-between" mb="lg">
+        <Group gap="sm">
+          <ActionIcon
+            variant="light"
+            size="lg"
+            radius="sm"
             onClick={() => router.push("/dashboard/workflow")}
+            style={{ backgroundColor: "#f1f3f5" }}
           >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Orqaga qaytish
-          </Button>
-        </div>
-        <WorkflowView workflow={workflow} />
-      </div>
-    </>
+            <IconArrowLeft size={18} color="#495057" />
+          </ActionIcon>
+          <Box>
+            <Text size="xl" fw={700} c="#212529">
+              {workflow.document?.title || "Hujjat aylanmasi"}
+            </Text>
+            <Text size="sm" c="dimmed">
+              {workflow.document?.documentNumber || "—"}
+            </Text>
+          </Box>
+        </Group>
+      </Group>
+
+      {/* Content */}
+      <WorkflowDetailView workflow={workflow} />
+    </Box>
   );
 };
 

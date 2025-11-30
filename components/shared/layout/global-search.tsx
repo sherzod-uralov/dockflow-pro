@@ -1,22 +1,35 @@
+"use client";
+
 import React, { useState, useEffect, useRef } from "react";
 import {
-  Search,
-  FileText,
-  User,
-  Users,
-  Key,
-  ArrowRight,
-  Loader2,
-  X,
-  Building,
-  BookOpen,
-  File,
-  FileType,
-} from "lucide-react";
-import { Input } from "@/components/ui/input";
+  TextInput,
+  Paper,
+  Box,
+  Text,
+  Group,
+  ActionIcon,
+  Loader,
+  Avatar,
+  Kbd,
+  ScrollArea,
+  Divider,
+  UnstyledButton,
+} from "@mantine/core";
+import {
+  IconSearch,
+  IconArrowRight,
+  IconX,
+  IconUsers,
+  IconKey,
+  IconFileText,
+  IconFile,
+  IconBook,
+  IconBuilding,
+  IconCategory,
+  IconUser,
+} from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
 import { useGetUserQuery } from "@/features/admin/admin-users/hook/user.hook";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useGetRoles } from "@/features/admin/roles/hook/role.hook";
 import { useGetAllPermissions } from "@/features/admin/permissions/hook/permission.hook";
 import { useGetAllDocumentTemplates } from "@/features/document-template/hook/document-template.hook";
@@ -25,44 +38,17 @@ import { useGetAllJournals } from "@/features/journal/hook/journal.hook";
 import { useGetAllDeportaments } from "@/features/deportament/hook/deportament.hook";
 import { useGetAllDocumentTypes } from "@/features/document-type/hook/document-type.hook";
 
-// Static pages data
 const staticPages = [
-  { id: 1, title: "Statistika", path: "/dashboard", icon: "📊" },
-  {
-    id: 2,
-    title: "Xujjat turini",
-    path: "/dashboard/document-type",
-    icon: "📁",
-  },
-  { id: 3, title: "Bo'limlar", path: "/dashboard/department", icon: "🏢" },
-  { id: 4, title: "Jurnallar", path: "/dashboard/journal", icon: "📖" },
-  { id: 5, title: "Hujjatlar", path: "/dashboard/document", icon: "📄" },
-  {
-    id: 6,
-    title: "Hujjat Andozalari",
-    path: "/dashboard/document-template",
-    icon: "📋",
-  },
-  {
-    id: 7,
-    title: "Foydalanuvchilar",
-    path: "/dashboard/admin/users",
-    icon: "👥",
-  },
-  { id: 8, title: "Rollar", path: "/dashboard/admin/roles", icon: "🎭" },
-  {
-    id: 9,
-    title: "Ruxsatlar",
-    path: "/dashboard/admin/permissions",
-    icon: "🔐",
-  },
-  { id: 10, title: "Profil", path: "/dashboard/setting/profile", icon: "👤" },
-  {
-    id: 11,
-    title: "Tizim sozlamalari",
-    path: "/dashboard/setting/system-setting",
-    icon: "⚙️",
-  },
+  { id: 1, title: "Bosh sahifa", path: "/dashboard" },
+  { id: 2, title: "Hujjat turlari", path: "/dashboard/document-type" },
+  { id: 3, title: "Bo'limlar", path: "/dashboard/department" },
+  { id: 4, title: "Jurnallar", path: "/dashboard/journal" },
+  { id: 5, title: "Hujjatlar", path: "/dashboard/document" },
+  { id: 6, title: "Andozalar", path: "/dashboard/document-template" },
+  { id: 7, title: "Foydalanuvchilar", path: "/dashboard/admin/users" },
+  { id: 8, title: "Rollar", path: "/dashboard/admin/roles" },
+  { id: 9, title: "Ruxsatlar", path: "/dashboard/admin/permissions" },
+  { id: 10, title: "Profil", path: "/dashboard/setting/profile" },
 ];
 
 export function GlobalSearch() {
@@ -74,88 +60,68 @@ export function GlobalSearch() {
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
-  // Debounce search query
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedQuery(searchQuery);
-    }, 300);
-
+    const timer = setTimeout(() => setDebouncedQuery(searchQuery), 300);
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Fetch users when searching
   const { data: usersData, isLoading: usersLoading } = useGetUserQuery({
     pageNumber: 1,
     pageSize: 5,
     search: debouncedQuery,
   });
 
-  // Fetch roles when searching
   const { data: rolesData, isLoading: rolesLoading } = useGetRoles({
     pageSize: 5,
     pageNumber: 1,
     search: debouncedQuery,
   });
 
-  // Fetch permissions when searching
-  const { data: permissionsData, isLoading: permissionsLoading } =
-    useGetAllPermissions({
-      pageSize: 5,
-      pageNumber: 1,
-      search: debouncedQuery,
-    });
+  const { data: permissionsData, isLoading: permissionsLoading } = useGetAllPermissions({
+    pageSize: 5,
+    pageNumber: 1,
+    search: debouncedQuery,
+  });
 
-  // Fetch document templates when searching
-  const { data: documentTemplatesData, isLoading: documentTemplatesLoading } =
-    useGetAllDocumentTemplates({
-      pageSize: 5,
-      pageNumber: 1,
-      search: debouncedQuery,
-    });
+  const { data: documentTemplatesData, isLoading: documentTemplatesLoading } = useGetAllDocumentTemplates({
+    pageSize: 5,
+    pageNumber: 1,
+    search: debouncedQuery,
+  });
 
-  // Fetch documents when searching
-  const { data: documentsData, isLoading: documentsLoading } =
-    useGetAllDocuments({
-      pageSize: 5,
-      pageNumber: 1,
-      search: debouncedQuery,
-    });
+  const { data: documentsData, isLoading: documentsLoading } = useGetAllDocuments({
+    pageSize: 5,
+    pageNumber: 1,
+    search: debouncedQuery,
+  });
 
-  // Fetch journals when searching
   const { data: journalsData, isLoading: journalsLoading } = useGetAllJournals({
     pageSize: 5,
     pageNumber: 1,
     search: debouncedQuery,
   });
 
-  // Fetch deportaments when searching
-  const { data: deportamentsData, isLoading: deportamentsLoading } =
-    useGetAllDeportaments({
-      pageSize: 5,
-      pageNumber: 1,
-      search: debouncedQuery,
-    });
+  const { data: deportamentsData, isLoading: deportamentsLoading } = useGetAllDeportaments({
+    pageSize: 5,
+    pageNumber: 1,
+    search: debouncedQuery,
+  });
 
-  // Fetch document type when searching
-  const { data: documentTypesData, isLoading: documentTypesLoading } =
-    useGetAllDocumentTypes({
-      pageSize: 5,
-      pageNumber: 1,
-      search: debouncedQuery,
-    });
+  const { data: documentTypesData, isLoading: documentTypesLoading } = useGetAllDocumentTypes({
+    pageSize: 5,
+    pageNumber: 1,
+    search: debouncedQuery,
+  });
 
   const filteredPages = staticPages.filter((page) =>
-    page.title.toLowerCase().includes(searchQuery.toLowerCase()),
+    page.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const users = usersData?.data || [];
   const roles = rolesData?.data || [];
   const permissions = permissionsData?.data
     ? permissionsData.data.flatMap((item: any) =>
-        item.permissions.map((perm: any) => ({
-          ...perm,
-          module: item.module,
-        })),
+        item.permissions.map((perm: any) => ({ ...perm, module: item.module }))
       )
     : [];
   const documentTemplates = documentTemplatesData?.data || [];
@@ -165,25 +131,13 @@ export function GlobalSearch() {
   const documentTypes = documentTypesData?.data || [];
 
   const totalResults =
-    filteredPages.length +
-    roles.length +
-    permissions.length +
-    users.length +
-    documentTemplates.length +
-    documents.length +
-    journals.length +
-    deportaments.length +
-    documentTypes.length;
+    filteredPages.length + roles.length + permissions.length + users.length +
+    documentTemplates.length + documents.length + journals.length +
+    deportaments.length + documentTypes.length;
 
   const anyLoading =
-    usersLoading ||
-    rolesLoading ||
-    permissionsLoading ||
-    documentTemplatesLoading ||
-    documentsLoading ||
-    journalsLoading ||
-    deportamentsLoading ||
-    documentTypesLoading;
+    usersLoading || rolesLoading || permissionsLoading || documentTemplatesLoading ||
+    documentsLoading || journalsLoading || deportamentsLoading || documentTypesLoading;
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -192,13 +146,10 @@ export function GlobalSearch() {
         setIsOpen(true);
         setTimeout(() => inputRef.current?.focus(), 100);
       }
-
       if (e.key === "Escape") {
         setIsOpen(false);
         setSearchQuery("");
       }
-
-      // Navigate with arrow keys
       if (isOpen && totalResults > 0) {
         if (e.key === "ArrowDown") {
           e.preventDefault();
@@ -214,730 +165,405 @@ export function GlobalSearch() {
         }
       }
     };
-
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, totalResults, activeIndex]);
 
-  // Close on click outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
         setIsOpen(false);
       }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Reset active index when results change
   useEffect(() => {
     setActiveIndex(0);
   }, [searchQuery]);
 
   const handleSelect = (index: number) => {
     if (index < filteredPages.length) {
-      // Navigate to static page
-      const page = filteredPages[index];
-      router.push(page.path);
+      router.push(filteredPages[index].path);
     } else {
       const pagesOffset = filteredPages.length;
       const rolesOffset = pagesOffset + roles.length;
       const permissionsOffset = rolesOffset + permissions.length;
-      const documentTemplatesOffset =
-        permissionsOffset + documentTemplates.length;
+      const documentTemplatesOffset = permissionsOffset + documentTemplates.length;
       const documentsOffset = documentTemplatesOffset + documents.length;
       const journalsOffset = documentsOffset + journals.length;
       const deportamentsOffset = journalsOffset + deportaments.length;
       const documentTypesOffset = deportamentsOffset + documentTypes.length;
 
       if (index < rolesOffset) {
-        // Navigate to role
-        const roleIndex = index - pagesOffset;
-        const role = roles[roleIndex];
-        router.push(`/dashboard/admin/roles?roleId=${role.id}`);
+        router.push(`/dashboard/admin/roles?roleId=${roles[index - pagesOffset].id}`);
       } else if (index < permissionsOffset) {
-        // Navigate to permission
-        const permissionIndex = index - rolesOffset;
-        const permission = permissions[permissionIndex];
-        router.push(
-          `/dashboard/admin/permissions?permissionId=${permission.id}`,
-        );
+        router.push(`/dashboard/admin/permissions?permissionId=${permissions[index - rolesOffset].id}`);
       } else if (index < documentTemplatesOffset) {
-        // Navigate to document template
-        const templateIndex = index - permissionsOffset;
-        const template = documentTemplates[templateIndex];
-        router.push(`/dashboard/document-template?templateId=${template.id}`);
+        router.push(`/dashboard/document-template?templateId=${documentTemplates[index - permissionsOffset].id}`);
       } else if (index < documentsOffset) {
-        // Navigate to document
-        const documentIndex = index - documentTemplatesOffset;
-        const document = documents[documentIndex];
-        router.push(`/dashboard/document?documentId=${document.id}`);
+        router.push(`/dashboard/document?documentId=${documents[index - documentTemplatesOffset].id}`);
       } else if (index < journalsOffset) {
-        // Navigate to journal
-        const journalIndex = index - documentsOffset;
-        const journal = journals[journalIndex];
-        router.push(`/dashboard/journal?journalId=${journal.id}`);
+        router.push(`/dashboard/journal?journalId=${journals[index - documentsOffset].id}`);
       } else if (index < deportamentsOffset) {
-        // Navigate to department
-        const deportamentIndex = index - journalsOffset;
-        const deportament = deportaments[deportamentIndex];
-        router.push(`/dashboard/deportament?deportamentId=${deportament.id}`);
+        router.push(`/dashboard/deportament?deportamentId=${deportaments[index - journalsOffset].id}`);
       } else if (index < documentTypesOffset) {
-        // Navigate to document type
-        const documentTypeIndex = index - deportamentsOffset;
-        const documentType = documentTypes[documentTypeIndex];
-        router.push(
-          `/dashboard/document-type?documentTypeId=${documentType.id}`,
-        );
+        router.push(`/dashboard/document-type?documentTypeId=${documentTypes[index - deportamentsOffset].id}`);
       } else {
-        // Navigate to user
-        const userIndex = index - documentTypesOffset;
-        const user = users[userIndex];
-        router.push(`/dashboard/admin/users?userId=${user.id}`);
+        router.push(`/dashboard/admin/users?userId=${users[index - documentTypesOffset].id}`);
       }
     }
     setIsOpen(false);
     setSearchQuery("");
   };
 
-  const handleClear = () => {
-    setSearchQuery("");
-    inputRef.current?.focus();
-  };
+  const SearchItem = ({
+    icon,
+    title,
+    subtitle,
+    index,
+    avatar,
+  }: {
+    icon?: React.ReactNode;
+    title: string;
+    subtitle?: string;
+    index: number;
+    avatar?: React.ReactNode;
+  }) => (
+    <UnstyledButton
+      onClick={() => handleSelect(index)}
+      w="100%"
+      px="sm"
+      py={8}
+      style={{
+        borderRadius: 4,
+        backgroundColor: activeIndex === index ? "#1e3a5f" : "transparent",
+        color: activeIndex === index ? "white" : "inherit",
+      }}
+    >
+      <Group gap="sm" wrap="nowrap">
+        {avatar || (
+          <Box
+            w={28}
+            h={28}
+            style={{
+              borderRadius: 4,
+              backgroundColor: activeIndex === index ? "rgba(255,255,255,0.2)" : "#f1f3f5",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            {icon}
+          </Box>
+        )}
+        <Box style={{ flex: 1, minWidth: 0 }}>
+          <Text size="sm" truncate>
+            {title}
+          </Text>
+          {subtitle && (
+            <Text size="xs" c={activeIndex === index ? "white" : "dimmed"} truncate opacity={0.7}>
+              {subtitle}
+            </Text>
+          )}
+        </Box>
+        <IconArrowRight size={14} opacity={0.4} />
+      </Group>
+    </UnstyledButton>
+  );
 
   return (
-    <div className="relative w-96 max-w-sm" ref={searchRef}>
-      {/* Search Input */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-        <Input
-          ref={inputRef}
-          placeholder="Tizimli qidiruv... (Ctrl+K)"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          onFocus={() => setIsOpen(true)}
-          className="pl-10 pr-20 bg-input border-border rounded-xl"
-        />
-        <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center gap-1">
-          {searchQuery && (
-            <button
-              onClick={handleClear}
-              className="p-1 hover:bg-muted rounded-md transition-colors"
-            >
-              <X className="w-3 h-3 text-muted-foreground" />
-            </button>
-          )}
-          <kbd className="hidden sm:inline-flex h-5 select-none items-center gap-1 rounded border border-border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
-            <span className="text-xs">⌘</span>K
-          </kbd>
-        </div>
-      </div>
+    <Box pos="relative" w={320} maw="100%" ref={searchRef}>
+      <TextInput
+        ref={inputRef}
+        placeholder="Qidirish..."
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        onFocus={() => setIsOpen(true)}
+        leftSection={<IconSearch size={16} stroke={1.5} />}
+        rightSection={
+          <Group gap={4}>
+            {searchQuery && (
+              <ActionIcon
+                size="xs"
+                variant="subtle"
+                color="gray"
+                onClick={() => {
+                  setSearchQuery("");
+                  inputRef.current?.focus();
+                }}
+              >
+                <IconX size={12} />
+              </ActionIcon>
+            )}
+            <Kbd size="xs" style={{ fontSize: 10 }}>
+              Ctrl+K
+            </Kbd>
+          </Group>
+        }
+        rightSectionWidth={searchQuery ? 80 : 60}
+        radius="sm"
+        size="sm"
+        styles={{
+          input: {
+            backgroundColor: "#f8f9fa",
+            border: "1px solid #e9ecef",
+            "&:focus": {
+              borderColor: "#1e3a5f",
+            },
+          },
+        }}
+      />
 
-      {/* Search Results Dropdown */}
       {isOpen && (
-        <div className="absolute top-full mt-2 w-full bg-card border border-border rounded-xl shadow-xl z-50 max-h-[500px] overflow-hidden flex flex-col">
+        <Paper
+          shadow="md"
+          radius="sm"
+          pos="absolute"
+          top="100%"
+          left={0}
+          right={0}
+          mt={4}
+          style={{
+            zIndex: 100,
+            maxHeight: 400,
+            overflow: "hidden",
+            display: "flex",
+            flexDirection: "column",
+            border: "1px solid #e9ecef",
+          }}
+        >
           {searchQuery.length === 0 ? (
-            // Empty state
-            <div className="p-8 text-center">
-              <Search className="w-12 h-12 mx-auto text-muted-foreground/50 mb-3" />
-              <p className="text-sm text-muted-foreground">
-                Qidiruv uchun yozing...
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">
-                Sahifalar, hujjatlar, jurnallar, bo'limlar va foydalanuvchilarni
-                qidiring
-              </p>
-            </div>
+            <Box p="lg" ta="center">
+              <IconSearch size={32} color="#adb5bd" style={{ margin: "0 auto" }} />
+              <Text size="sm" c="dimmed" mt="xs">
+                Qidirish uchun yozing
+              </Text>
+            </Box>
           ) : (
-            <div className="overflow-y-auto">
-              {/* Loading State */}
+            <ScrollArea style={{ flex: 1 }}>
               {anyLoading && debouncedQuery === searchQuery && (
-                <div className="p-4 flex items-center justify-center gap-2 text-muted-foreground">
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span className="text-sm">Qidirilmoqda...</span>
-                </div>
+                <Group justify="center" p="sm" gap="xs">
+                  <Loader size="xs" color="#1e3a5f" />
+                  <Text size="xs" c="dimmed">
+                    Qidirilmoqda...
+                  </Text>
+                </Group>
               )}
 
-              {/* Static Pages Section */}
               {filteredPages.length > 0 && (
-                <div className="p-2">
-                  <div className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                <Box p="xs">
+                  <Text size="xs" fw={500} c="dimmed" tt="uppercase" px="sm" mb={4}>
                     Sahifalar
-                  </div>
+                  </Text>
                   {filteredPages.map((page, idx) => (
-                    <button
+                    <SearchItem
                       key={page.id}
-                      onClick={() => handleSelect(idx)}
-                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors ${
-                        activeIndex === idx
-                          ? "bg-primary text-primary-foreground"
-                          : "hover:bg-muted"
-                      }`}
-                    >
-                      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-lg">
-                        {page.icon}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p
-                          className={`text-sm font-medium truncate ${
-                            activeIndex === idx
-                              ? "text-primary-foreground"
-                              : "text-foreground"
-                          }`}
-                        >
-                          {page.title}
-                        </p>
-                        <p
-                          className={`text-xs truncate ${
-                            activeIndex === idx
-                              ? "text-primary-foreground/70"
-                              : "text-muted-foreground"
-                          }`}
-                        >
-                          {page.path}
-                        </p>
-                      </div>
-                      <ArrowRight
-                        className={`w-4 h-4 flex-shrink-0 ${
-                          activeIndex === idx
-                            ? "text-primary-foreground"
-                            : "text-muted-foreground"
-                        }`}
-                      />
-                    </button>
+                      icon={<IconFileText size={14} color="#868e96" />}
+                      title={page.title}
+                      subtitle={page.path}
+                      index={idx}
+                    />
                   ))}
-                </div>
+                </Box>
               )}
 
-              {/* Roles Section */}
               {roles.length > 0 && (
-                <div className="p-2 border-t border-border">
-                  <div className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                <Box p="xs">
+                  <Divider mb="xs" />
+                  <Text size="xs" fw={500} c="dimmed" tt="uppercase" px="sm" mb={4}>
                     Rollar
-                  </div>
-                  {roles.map((role, idx) => {
-                    const globalIdx = filteredPages.length + idx;
-                    return (
-                      <button
-                        key={role.id}
-                        onClick={() => handleSelect(globalIdx)}
-                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors ${
-                          activeIndex === globalIdx
-                            ? "bg-primary text-primary-foreground"
-                            : "hover:bg-muted"
-                        }`}
-                      >
-                        <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center">
-                          <Users className="w-4 h-4 text-muted-foreground" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p
-                            className={`text-sm font-medium truncate ${
-                              activeIndex === globalIdx
-                                ? "text-primary-foreground"
-                                : "text-foreground"
-                            }`}
-                          >
-                            {role.name}
-                          </p>
-                          <p
-                            className={`text-xs truncate ${
-                              activeIndex === globalIdx
-                                ? "text-primary-foreground/70"
-                                : "text-muted-foreground"
-                            }`}
-                          >
-                            {role.description || "Tavsif yo'q"}
-                          </p>
-                        </div>
-                        <ArrowRight
-                          className={`w-4 h-4 flex-shrink-0 ${
-                            activeIndex === globalIdx
-                              ? "text-primary-foreground"
-                              : "text-muted-foreground"
-                          }`}
-                        />
-                      </button>
-                    );
-                  })}
-                </div>
+                  </Text>
+                  {roles.map((role, idx) => (
+                    <SearchItem
+                      key={role.id}
+                      icon={<IconUsers size={14} color="#868e96" />}
+                      title={role.name}
+                      subtitle={role.description || "-"}
+                      index={filteredPages.length + idx}
+                    />
+                  ))}
+                </Box>
               )}
 
-              {/* Permissions Section */}
               {permissions.length > 0 && (
-                <div className="p-2 border-t border-border">
-                  <div className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                <Box p="xs">
+                  <Divider mb="xs" />
+                  <Text size="xs" fw={500} c="dimmed" tt="uppercase" px="sm" mb={4}>
                     Ruxsatlar
-                  </div>
-                  {permissions.map((permission, idx) => {
-                    const globalIdx = filteredPages.length + roles.length + idx;
-                    return (
-                      <button
-                        key={permission.id}
-                        onClick={() => handleSelect(globalIdx)}
-                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors ${
-                          activeIndex === globalIdx
-                            ? "bg-primary text-primary-foreground"
-                            : "hover:bg-muted"
-                        }`}
-                      >
-                        <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center">
-                          <Key className="w-4 h-4 text-muted-foreground" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p
-                            className={`text-sm font-medium truncate ${
-                              activeIndex === globalIdx
-                                ? "text-primary-foreground"
-                                : "text-foreground"
-                            }`}
-                          >
-                            {permission.name}
-                          </p>
-                          <p
-                            className={`text-xs truncate ${
-                              activeIndex === globalIdx
-                                ? "text-primary-foreground/70"
-                                : "text-muted-foreground"
-                            }`}
-                          >
-                            {permission.module}
-                          </p>
-                        </div>
-                        <ArrowRight
-                          className={`w-4 h-4 flex-shrink-0 ${
-                            activeIndex === globalIdx
-                              ? "text-primary-foreground"
-                              : "text-muted-foreground"
-                          }`}
-                        />
-                      </button>
-                    );
-                  })}
-                </div>
+                  </Text>
+                  {permissions.map((perm, idx) => (
+                    <SearchItem
+                      key={perm.id}
+                      icon={<IconKey size={14} color="#868e96" />}
+                      title={perm.name}
+                      subtitle={perm.module}
+                      index={filteredPages.length + roles.length + idx}
+                    />
+                  ))}
+                </Box>
               )}
 
-              {/* Document Templates Section */}
               {documentTemplates.length > 0 && (
-                <div className="p-2 border-t border-border">
-                  <div className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                    Hujjat Andozalari
-                  </div>
-                  {documentTemplates.map((template, idx) => {
-                    const globalIdx =
-                      filteredPages.length +
-                      roles.length +
-                      permissions.length +
-                      idx;
-                    return (
-                      <button
-                        key={template.id}
-                        onClick={() => handleSelect(globalIdx)}
-                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors ${
-                          activeIndex === globalIdx
-                            ? "bg-primary text-primary-foreground"
-                            : "hover:bg-muted"
-                        }`}
-                      >
-                        <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center">
-                          <FileText className="w-4 h-4 text-muted-foreground" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p
-                            className={`text-sm font-medium truncate ${
-                              activeIndex === globalIdx
-                                ? "text-primary-foreground"
-                                : "text-foreground"
-                            }`}
-                          >
-                            {template.name}
-                          </p>
-                          <p
-                            className={`text-xs truncate ${
-                              activeIndex === globalIdx
-                                ? "text-primary-foreground/70"
-                                : "text-muted-foreground"
-                            }`}
-                          >
-                            {template.description || "Tavsif yo'q"}
-                          </p>
-                        </div>
-                        <ArrowRight
-                          className={`w-4 h-4 flex-shrink-0 ${
-                            activeIndex === globalIdx
-                              ? "text-primary-foreground"
-                              : "text-muted-foreground"
-                          }`}
-                        />
-                      </button>
-                    );
-                  })}
-                </div>
+                <Box p="xs">
+                  <Divider mb="xs" />
+                  <Text size="xs" fw={500} c="dimmed" tt="uppercase" px="sm" mb={4}>
+                    Andozalar
+                  </Text>
+                  {documentTemplates.map((t, idx) => (
+                    <SearchItem
+                      key={t.id}
+                      icon={<IconFileText size={14} color="#868e96" />}
+                      title={t.name}
+                      subtitle={t.description || "-"}
+                      index={filteredPages.length + roles.length + permissions.length + idx}
+                    />
+                  ))}
+                </Box>
               )}
 
-              {/* Documents Section */}
               {documents.length > 0 && (
-                <div className="p-2 border-t border-border">
-                  <div className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                <Box p="xs">
+                  <Divider mb="xs" />
+                  <Text size="xs" fw={500} c="dimmed" tt="uppercase" px="sm" mb={4}>
                     Hujjatlar
-                  </div>
-                  {documents.map((document, idx) => {
-                    const globalIdx =
-                      filteredPages.length +
-                      roles.length +
-                      permissions.length +
-                      documentTemplates.length +
-                      idx;
-                    return (
-                      <button
-                        key={document.id}
-                        onClick={() => handleSelect(globalIdx)}
-                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors ${
-                          activeIndex === globalIdx
-                            ? "bg-primary text-primary-foreground"
-                            : "hover:bg-muted"
-                        }`}
-                      >
-                        <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center">
-                          <File className="w-4 h-4 text-muted-foreground" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p
-                            className={`text-sm font-medium truncate ${
-                              activeIndex === globalIdx
-                                ? "text-primary-foreground"
-                                : "text-foreground"
-                            }`}
-                          >
-                            {document.title}
-                          </p>
-                          <p
-                            className={`text-xs truncate ${
-                              activeIndex === globalIdx
-                                ? "text-primary-foreground/70"
-                                : "text-muted-foreground"
-                            }`}
-                          >
-                            {document.documentNumber || "Raqamsiz"}
-                          </p>
-                        </div>
-                        <ArrowRight
-                          className={`w-4 h-4 flex-shrink-0 ${
-                            activeIndex === globalIdx
-                              ? "text-primary-foreground"
-                              : "text-muted-foreground"
-                          }`}
-                        />
-                      </button>
-                    );
-                  })}
-                </div>
+                  </Text>
+                  {documents.map((doc, idx) => (
+                    <SearchItem
+                      key={doc.id}
+                      icon={<IconFile size={14} color="#868e96" />}
+                      title={doc.title}
+                      subtitle={doc.documentNumber || "-"}
+                      index={filteredPages.length + roles.length + permissions.length + documentTemplates.length + idx}
+                    />
+                  ))}
+                </Box>
               )}
 
-              {/* Journals Section */}
               {journals.length > 0 && (
-                <div className="p-2 border-t border-border">
-                  <div className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                <Box p="xs">
+                  <Divider mb="xs" />
+                  <Text size="xs" fw={500} c="dimmed" tt="uppercase" px="sm" mb={4}>
                     Jurnallar
-                  </div>
-                  {journals.map((journal, idx) => {
-                    const globalIdx =
-                      filteredPages.length +
-                      roles.length +
-                      permissions.length +
-                      documentTemplates.length +
-                      documents.length +
-                      idx;
-                    return (
-                      <button
-                        key={journal.id}
-                        onClick={() => handleSelect(globalIdx)}
-                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors ${
-                          activeIndex === globalIdx
-                            ? "bg-primary text-primary-foreground"
-                            : "hover:bg-muted"
-                        }`}
-                      >
-                        <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center">
-                          <BookOpen className="w-4 h-4 text-muted-foreground" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p
-                            className={`text-sm font-medium truncate ${
-                              activeIndex === globalIdx
-                                ? "text-primary-foreground"
-                                : "text-foreground"
-                            }`}
-                          >
-                            {journal.name}
-                          </p>
-                          <p
-                            className={`text-xs truncate ${
-                              activeIndex === globalIdx
-                                ? "text-primary-foreground/70"
-                                : "text-muted-foreground"
-                            }`}
-                          >
-                            {journal.prefix}
-                          </p>
-                        </div>
-                        <ArrowRight
-                          className={`w-4 h-4 flex-shrink-0 ${
-                            activeIndex === globalIdx
-                              ? "text-primary-foreground"
-                              : "text-muted-foreground"
-                          }`}
-                        />
-                      </button>
-                    );
-                  })}
-                </div>
+                  </Text>
+                  {journals.map((j, idx) => (
+                    <SearchItem
+                      key={j.id}
+                      icon={<IconBook size={14} color="#868e96" />}
+                      title={j.name}
+                      subtitle={j.prefix}
+                      index={filteredPages.length + roles.length + permissions.length + documentTemplates.length + documents.length + idx}
+                    />
+                  ))}
+                </Box>
               )}
 
-              {/* Deportaments Section */}
               {deportaments.length > 0 && (
-                <div className="p-2 border-t border-border">
-                  <div className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                <Box p="xs">
+                  <Divider mb="xs" />
+                  <Text size="xs" fw={500} c="dimmed" tt="uppercase" px="sm" mb={4}>
                     Bo'limlar
-                  </div>
-                  {deportaments.map((deportament, idx) => {
-                    const globalIdx =
-                      filteredPages.length +
-                      roles.length +
-                      permissions.length +
-                      documentTemplates.length +
-                      documents.length +
-                      journals.length +
-                      idx;
-                    return (
-                      <button
-                        key={deportament.id}
-                        onClick={() => handleSelect(globalIdx)}
-                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors ${
-                          activeIndex === globalIdx
-                            ? "bg-primary text-primary-foreground"
-                            : "hover:bg-muted"
-                        }`}
-                      >
-                        <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center">
-                          <Building className="w-4 h-4 text-muted-foreground" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p
-                            className={`text-sm font-medium truncate ${
-                              activeIndex === globalIdx
-                                ? "text-primary-foreground"
-                                : "text-foreground"
-                            }`}
-                          >
-                            {deportament.name}
-                          </p>
-                          <p
-                            className={`text-xs truncate ${
-                              activeIndex === globalIdx
-                                ? "text-primary-foreground/70"
-                                : "text-muted-foreground"
-                            }`}
-                          >
-                            {deportament.description || "Tavsif yo'q"}
-                          </p>
-                        </div>
-                        <ArrowRight
-                          className={`w-4 h-4 flex-shrink-0 ${
-                            activeIndex === globalIdx
-                              ? "text-primary-foreground"
-                              : "text-muted-foreground"
-                          }`}
-                        />
-                      </button>
-                    );
-                  })}
-                </div>
+                  </Text>
+                  {deportaments.map((d, idx) => (
+                    <SearchItem
+                      key={d.id}
+                      icon={<IconBuilding size={14} color="#868e96" />}
+                      title={d.name}
+                      subtitle={d.description || "-"}
+                      index={filteredPages.length + roles.length + permissions.length + documentTemplates.length + documents.length + journals.length + idx}
+                    />
+                  ))}
+                </Box>
               )}
 
-              {/* Document Types Section */}
               {documentTypes.length > 0 && (
-                <div className="p-2 border-t border-border">
-                  <div className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                    Hujjat Turlari
-                  </div>
-                  {documentTypes.map((documentType, idx) => {
-                    const globalIdx =
-                      filteredPages.length +
-                      roles.length +
-                      permissions.length +
-                      documentTemplates.length +
-                      documents.length +
-                      journals.length +
-                      deportaments.length +
-                      idx;
-                    return (
-                      <button
-                        key={documentType.id}
-                        onClick={() => handleSelect(globalIdx)}
-                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors ${
-                          activeIndex === globalIdx
-                            ? "bg-primary text-primary-foreground"
-                            : "hover:bg-muted"
-                        }`}
-                      >
-                        <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center">
-                          <FileType className="w-4 h-4 text-muted-foreground" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p
-                            className={`text-sm font-medium truncate ${
-                              activeIndex === globalIdx
-                                ? "text-primary-foreground"
-                                : "text-foreground"
-                            }`}
-                          >
-                            {documentType.name}
-                          </p>
-                          <p
-                            className={`text-xs truncate ${
-                              activeIndex === globalIdx
-                                ? "text-primary-foreground/70"
-                                : "text-muted-foreground"
-                            }`}
-                          >
-                            {documentType.description || "Tavsif yo'q"}
-                          </p>
-                        </div>
-                        <ArrowRight
-                          className={`w-4 h-4 flex-shrink-0 ${
-                            activeIndex === globalIdx
-                              ? "text-primary-foreground"
-                              : "text-muted-foreground"
-                          }`}
-                        />
-                      </button>
-                    );
-                  })}
-                </div>
+                <Box p="xs">
+                  <Divider mb="xs" />
+                  <Text size="xs" fw={500} c="dimmed" tt="uppercase" px="sm" mb={4}>
+                    Hujjat turlari
+                  </Text>
+                  {documentTypes.map((dt, idx) => (
+                    <SearchItem
+                      key={dt.id}
+                      icon={<IconCategory size={14} color="#868e96" />}
+                      title={dt.name}
+                      subtitle={dt.description || "-"}
+                      index={filteredPages.length + roles.length + permissions.length + documentTemplates.length + documents.length + journals.length + deportaments.length + idx}
+                    />
+                  ))}
+                </Box>
               )}
 
-              {/* Users Section */}
               {users.length > 0 && (
-                <div className="p-2 border-t border-border">
-                  <div className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                <Box p="xs">
+                  <Divider mb="xs" />
+                  <Text size="xs" fw={500} c="dimmed" tt="uppercase" px="sm" mb={4}>
                     Foydalanuvchilar
-                  </div>
+                  </Text>
                   {users.map((user, idx) => {
-                    const globalIdx =
-                      filteredPages.length +
-                      roles.length +
-                      permissions.length +
-                      idx;
+                    const globalIdx = filteredPages.length + roles.length + permissions.length + documentTemplates.length + documents.length + journals.length + deportaments.length + documentTypes.length + idx;
                     return (
-                      <button
+                      <SearchItem
                         key={user.id}
-                        onClick={() => handleSelect(globalIdx)}
-                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors ${
-                          activeIndex === globalIdx
-                            ? "bg-primary text-primary-foreground"
-                            : "hover:bg-muted"
-                        }`}
-                      >
-                        <Avatar className="h-8 w-8">
-                          <AvatarImage
-                            src={user.avatarUrl}
-                            alt={user.username}
-                          />
-                          <AvatarFallback className="bg-primary/20 text-primary text-xs">
-                            {user.username
-                              .split(" ")
-                              .map((n) => n[0])
-                              .join("")}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1 min-w-0">
-                          <p
-                            className={`text-sm font-medium truncate ${
-                              activeIndex === globalIdx
-                                ? "text-primary-foreground"
-                                : "text-foreground"
-                            }`}
-                          >
-                            {user.fullname}
-                          </p>
-                          <p
-                            className={`text-xs truncate ${
-                              activeIndex === globalIdx
-                                ? "text-primary-foreground/70"
-                                : "text-muted-foreground"
-                            }`}
-                          >
-                            @{user.username}
-                          </p>
-                        </div>
-                        <User
-                          className={`w-4 h-4 flex-shrink-0 ${
-                            activeIndex === globalIdx
-                              ? "text-primary-foreground"
-                              : "text-muted-foreground"
-                          }`}
-                        />
-                      </button>
+                        avatar={
+                          <Avatar size={28} radius="sm" src={user.avatarUrl} color="blue" style={{ backgroundColor: "#1e3a5f" }}>
+                            <Text size="xs" c="white">
+                              {user.username.slice(0, 2).toUpperCase()}
+                            </Text>
+                          </Avatar>
+                        }
+                        title={user.fullname}
+                        subtitle={`@${user.username}`}
+                        index={globalIdx}
+                      />
                     );
                   })}
-                </div>
+                </Box>
               )}
 
-              {/* No Results */}
-              {!anyLoading &&
-                debouncedQuery === searchQuery &&
-                filteredPages.length === 0 &&
-                roles.length === 0 &&
-                permissions.length === 0 &&
-                documentTemplates.length === 0 &&
-                documents.length === 0 &&
-                journals.length === 0 &&
-                deportaments.length === 0 &&
-                documentTypes.length === 0 &&
-                users.length === 0 && (
-                  <div className="p-8 text-center">
-                    <Search className="w-12 h-12 mx-auto text-muted-foreground/50 mb-3" />
-                    <p className="text-sm font-medium text-foreground">
-                      Hech narsa topilmadi
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      "{searchQuery}" bo'yicha natija yo'q
-                    </p>
-                  </div>
-                )}
-            </div>
+              {!anyLoading && debouncedQuery === searchQuery && totalResults === 0 && (
+                <Box p="lg" ta="center">
+                  <IconSearch size={32} color="#adb5bd" style={{ margin: "0 auto" }} />
+                  <Text size="sm" fw={500} mt="xs">
+                    Topilmadi
+                  </Text>
+                  <Text size="xs" c="dimmed">
+                    "{searchQuery}" bo'yicha natija yo'q
+                  </Text>
+                </Box>
+              )}
+            </ScrollArea>
           )}
 
-          {/* Footer */}
           {totalResults > 0 && (
-            <div className="border-t border-border p-2 bg-muted/30">
-              <div className="flex items-center justify-between px-3 py-1 text-xs text-muted-foreground">
-                <div className="flex items-center gap-4">
-                  <span className="flex items-center gap-1">
-                    <kbd className="px-1.5 py-0.5 bg-background border border-border rounded text-[10px]">
-                      ↑
-                    </kbd>
-                    <kbd className="px-1.5 py-0.5 bg-background border border-border rounded text-[10px]">
-                      ↓
-                    </kbd>
-                    <span>tanlash</span>
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <kbd className="px-1.5 py-0.5 bg-background border border-border rounded text-[10px]">
-                      ↵
-                    </kbd>
-                    <span>ochish</span>
-                  </span>
-                </div>
-                <span>{totalResults} natija</span>
-              </div>
-            </div>
+            <Box
+              px="sm"
+              py="xs"
+              style={{
+                borderTop: "1px solid #e9ecef",
+                backgroundColor: "#f8f9fa",
+              }}
+            >
+              <Group justify="space-between">
+                <Group gap="xs">
+                  <Kbd size="xs">↑↓</Kbd>
+                  <Text size="xs" c="dimmed">
+                    tanlash
+                  </Text>
+                  <Kbd size="xs">↵</Kbd>
+                  <Text size="xs" c="dimmed">
+                    ochish
+                  </Text>
+                </Group>
+                <Text size="xs" c="dimmed">
+                  {totalResults} natija
+                </Text>
+              </Group>
+            </Box>
           )}
-        </div>
+        </Paper>
       )}
-    </div>
+    </Box>
   );
 }

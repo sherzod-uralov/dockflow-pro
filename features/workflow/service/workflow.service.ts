@@ -11,118 +11,71 @@ import {
   WorkflowFromTemplatePayload,
 } from "@/features/workflow/type/workflow.type";
 import { WorkflowCreateType } from "../schema/workflow.schema";
-import { workflowErrorHandler } from "../error/workflow.http.error";
 import { endpoints } from "@/api/axios.endpoints";
 
 export const workflowService = {
   getAllWorkflows: async (params?: WorkflowQueryParams) => {
-    return workflowErrorHandler(() =>
-      axiosInstance.get<WorkflowListResponse>(endpoints.workflow.list, {
-        params: {
-          documentId: params?.documentId,
-          status: params?.status,
-          type: params?.type,
-          page: params?.page,
-          limit: params?.limit,
-        },
-      }),
-    );
+    const { data } = await axiosInstance.get<WorkflowListResponse>(endpoints.workflow.list, {
+      params: {
+        documentId: params?.documentId,
+        status: params?.status,
+        type: params?.type,
+        page: params?.page,
+        limit: params?.limit,
+      },
+    });
+    return data;
   },
 
-  /**
-   * Создать workflow с вложенными steps
-   * Backend автоматически создаст все steps за один запрос
-   */
-  createWorkflow: async (data: WorkflowCreateType) => {
-    return workflowErrorHandler(() =>
-      axiosInstance.post<WorkflowApiResponse>(endpoints.workflow.create, data),
-    );
+  createWorkflow: async (payload: WorkflowCreateType) => {
+    const { data } = await axiosInstance.post<WorkflowApiResponse>(endpoints.workflow.create, payload);
+    return data;
   },
 
-  /**
-   * Создать workflow из шаблона
-   * Backend автоматически создаст workflow на основе шаблона
-   */
-  createWorkflowFromTemplate: async (data: WorkflowFromTemplatePayload) => {
-    return workflowErrorHandler(() =>
-      axiosInstance.post<WorkflowApiResponse>(endpoints.workflow.create, data),
-    );
+  createWorkflowFromTemplate: async (payload: WorkflowFromTemplatePayload) => {
+    const { data } = await axiosInstance.post<WorkflowApiResponse>(endpoints.workflow.create, payload);
+    return data;
   },
 
-  /**
-   * Обновить workflow и его steps
-   * Можно обновить как сам workflow, так и его steps
-   */
-  updateWorkflow: async (id: string, data: Partial<WorkflowCreateType>) => {
-    return workflowErrorHandler(() =>
-      axiosInstance.patch<WorkflowApiResponse>(
-        endpoints.workflow.update(id),
-        data,
-      ),
-    );
+  updateWorkflow: async (id: string, payload: Partial<WorkflowCreateType>) => {
+    const { data } = await axiosInstance.patch<WorkflowApiResponse>(endpoints.workflow.update(id), payload);
+    return data;
   },
 
-  /**
-   * Удалить workflow (cascade удаление steps происходит на backend)
-   */
   deleteWorkflow: async (id: string) => {
-    return workflowErrorHandler(() =>
-      axiosInstance.delete(endpoints.workflow.delete(id)),
-    );
+    const { data } = await axiosInstance.delete(endpoints.workflow.delete(id));
+    return data;
   },
 
-  /**
-   * Получить один workflow по ID с полными данными
-   */
   getWorkflowById: async (id: string) => {
-    return workflowErrorHandler(() =>
-      axiosInstance.get<WorkflowApiResponse>(endpoints.workflow.detail(id)),
-    );
+    const { data } = await axiosInstance.get<WorkflowApiResponse>(endpoints.workflow.detail(id));
+    return data;
   },
 
-  /**
-   * Получить steps конкретного workflow
-   */
   getWorkflowSteps: async (workflowId: string) => {
-    return workflowErrorHandler(() =>
-      axiosInstance.get(`/api/v1/workflow-step/workflow/${workflowId}`),
-    );
+    const { data } = await axiosInstance.get(`/api/v1/workflow-step/workflow/${workflowId}`);
+    return data;
   },
 
-  /**
-   * Обновить конкретный workflow step
-   */
-  updateWorkflowStep: async (id: string, data: WorkflowStepUpdateType) => {
-    return workflowErrorHandler(() =>
-      axiosInstance.patch<WorkflowStepApiResponse>(
-        endpoints.workflowStep.update(id),
-        data,
-      ),
-    );
+  updateWorkflowStep: async (id: string, payload: WorkflowStepUpdateType) => {
+    const { data } = await axiosInstance.patch<WorkflowStepApiResponse>(endpoints.workflowStep.update(id), payload);
+    return data;
   },
 
-  /**
-   * Завершить (принять) workflow step
-   */
   completeWorkflowStep: async (id: string, comment?: string) => {
-    return workflowErrorHandler(() =>
-      axiosInstance.patch<WorkflowStepApiResponse>(
-        endpoints.workflowStep.complete(id),
-        comment ? { comment } : {},
-      ),
+    const { data } = await axiosInstance.patch<WorkflowStepApiResponse>(
+      endpoints.workflowStep.complete(id),
+      comment ? { comment } : {},
     );
+    return data;
   },
 
-  /**
-   * Отклонить workflow step
-   */
-  rejectWorkflowStep: async (id: string, data?: WorkflowStepRejectPayload) => {
-    return workflowErrorHandler(() =>
-      axiosInstance.patch<WorkflowStepApiResponse>(
-        endpoints.workflowStep.reject(id),
-        data || {},
-      ),
+  rejectWorkflowStep: async (id: string, payload?: WorkflowStepRejectPayload) => {
+    const { data } = await axiosInstance.patch<WorkflowStepApiResponse>(
+      endpoints.workflowStep.reject(id),
+      payload || {},
     );
+    return data;
   },
 
   getMyTasks: async (params?: MyTasksQueryParams) => {
@@ -134,10 +87,9 @@ export const workflowService = {
     if (params?.status) queryParams.status = params.status;
     if (params?.actionType) queryParams.actionType = params.actionType;
 
-    return workflowErrorHandler(() =>
-      axiosInstance.get<MyTasksResponse>(endpoints.workflowStep.list, {
-        params: queryParams,
-      }),
-    );
+    const { data } = await axiosInstance.get<MyTasksResponse>(endpoints.workflowStep.list, {
+      params: queryParams,
+    });
+    return data;
   },
 };

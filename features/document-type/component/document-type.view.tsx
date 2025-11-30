@@ -1,19 +1,19 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+  Box,
+  Text,
+  Paper,
+  Group,
+  Stack,
+  Badge,
+  Divider,
+  Skeleton,
+} from "@mantine/core";
+import { IconFileText, IconInfoCircle, IconCopy } from "@tabler/icons-react";
 import { handleCopyToClipboard } from "@/utils/copy-text";
 import { useSearchParams } from "next/navigation";
 import { useGetDocumentTypeById } from "../hook/document-type.hook";
-import SkeletonWrapper from "@/components/wrappers/skleton-wrapper";
-import { Copy, FileText, Info } from "lucide-react";
 
 const DocumentTypeView = () => {
   const params = useSearchParams();
@@ -25,68 +25,122 @@ const DocumentTypeView = () => {
     isFetching,
   } = useGetDocumentTypeById(documentTypeId);
 
+  if (isLoading || isFetching) {
+    return (
+      <Stack gap="md">
+        <Skeleton height={60} radius="sm" />
+        <Skeleton height={100} radius="sm" />
+        <Skeleton height={80} radius="sm" />
+      </Stack>
+    );
+  }
+
+  if (!documentType) {
+    return (
+      <Box ta="center" py="xl">
+        <IconFileText size={48} color="#dee2e6" />
+        <Text size="sm" c="dimmed" mt="md">
+          Ma'lumot topilmadi
+        </Text>
+      </Box>
+    );
+  }
+
   return (
-    <SkeletonWrapper isLoading={isLoading || isFetching}>
-      {documentType && (
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <div className="flex items-start justify-between">
-                <div className="space-y-1">
-                  <CardTitle className="flex items-center gap-2 text-xl">
-                    <FileText className="h-5 w-5 text-primary" />
-                    {documentType.name}
-                  </CardTitle>
-                  <CardDescription className="text-sm text-muted-foreground">
-                    Hujjat turi haqida batafsil ma'lumotlar
-                  </CardDescription>
-                </div>
-                {documentType.id && (
-                  <Badge
-                    variant="outline"
-                    className="font-mono cursor-pointer hover:bg-muted transition-colors"
-                    onClick={() =>
-                      handleCopyToClipboard(documentType.id, "ID nusxalandi")
-                    }
-                  >
-                    ID: {documentType.id.slice(0, 8)}...
-                    <Copy className="ml-1 h-3 w-3" />
-                  </Badge>
-                )}
-              </div>
-            </CardHeader>
+    <Stack gap="md">
+      {/* Header */}
+      <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+        <Group justify="space-between" align="flex-start">
+          <Group gap="sm">
+            <Box
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: 8,
+                backgroundColor: "#f1f3f5",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <IconFileText size={20} color="#1e3a5f" />
+            </Box>
+            <Box>
+              <Text size="lg" fw={600} c="#212529">
+                {documentType.name}
+              </Text>
+              <Text size="sm" c="dimmed">
+                Hujjat turi haqida batafsil ma'lumotlar
+              </Text>
+            </Box>
+          </Group>
 
-            <CardContent className="space-y-6">
-              {/* Nomi */}
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <FileText className="h-4 w-4 text-muted-foreground" />
-                  <span className="font-medium text-sm">Nomi</span>
-                </div>
-                <p className="text-sm text-foreground bg-muted/50 p-3 rounded-md">
-                  {documentType.name}
-                </p>
-              </div>
+          {documentType.id && (
+            <Badge
+              size="md"
+              radius="sm"
+              variant="outline"
+              style={{
+                borderColor: "#e9ecef",
+                color: "#495057",
+                cursor: "pointer",
+                fontFamily: "monospace",
+              }}
+              rightSection={<IconCopy size={12} />}
+              onClick={() =>
+                handleCopyToClipboard(documentType.id, "ID nusxalandi")
+              }
+            >
+              ID: {documentType.id.slice(0, 8)}...
+            </Badge>
+          )}
+        </Group>
+      </Paper>
 
-              {documentType.description && (
-                <>
-                  <Separator />
-                  <div>
-                    <div className="flex items-center gap-2 mb-2">
-                      <Info className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium text-sm">Tavsif</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-md">
-                      {documentType.description}
-                    </p>
-                  </div>
-                </>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+      {/* Nomi */}
+      <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+        <Group gap="xs" mb="sm">
+          <IconFileText size={16} color="#868e96" />
+          <Text size="sm" fw={600} c="#495057">
+            Nomi
+          </Text>
+        </Group>
+        <Box
+          p="sm"
+          style={{
+            backgroundColor: "#f8f9fa",
+            borderRadius: 4,
+          }}
+        >
+          <Text size="sm" c="#212529">
+            {documentType.name}
+          </Text>
+        </Box>
+      </Paper>
+
+      {/* Tavsif */}
+      {documentType.description && (
+        <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+          <Group gap="xs" mb="sm">
+            <IconInfoCircle size={16} color="#868e96" />
+            <Text size="sm" fw={600} c="#495057">
+              Tavsif
+            </Text>
+          </Group>
+          <Box
+            p="sm"
+            style={{
+              backgroundColor: "#f8f9fa",
+              borderRadius: 4,
+            }}
+          >
+            <Text size="sm" c="dimmed">
+              {documentType.description}
+            </Text>
+          </Box>
+        </Paper>
       )}
-    </SkeletonWrapper>
+    </Stack>
   );
 };
 

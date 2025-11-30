@@ -3,38 +3,32 @@ import axiosInstance from "@/api/axios.instance";
 import { endpoints } from "@/api/axios.endpoints";
 import { JournalListResponse } from "@/features/journal/types/journal.types";
 import { GlobalGetAllPaginationProps } from "@/types/global.types";
-import { handleJournalError } from "@/utils/http-error-handler";
 
 export const journalService = {
   getAllJournals: async (params: GlobalGetAllPaginationProps) => {
-    return await handleJournalError.executeList(() =>
-      axiosInstance.get<JournalListResponse>(endpoints.journal.list, {
-        params: {
-          ...params,
-        },
-      }),
-    );
+    const { data } = await axiosInstance.get<JournalListResponse>(endpoints.journal.list, {
+      params,
+    });
+    return data;
   },
 
-  createJournal: async (data: JournalCreateType) => {
-    return await handleJournalError.executeCreate(() =>
-      axiosInstance.post(endpoints.journal.create, data),
-    );
+  createJournal: async (payload: JournalCreateType) => {
+    const { data } = await axiosInstance.post(endpoints.journal.create, payload);
+    return data;
   },
-  updateJournal: async (id: string, data: Partial<JournalCreateType>) => {
-    return await handleJournalError.executeUpdate(() =>
-      axiosInstance.patch(endpoints.journal.update(id), data),
-    );
+
+  updateJournal: async (id: string, payload: Partial<JournalCreateType>) => {
+    const { data } = await axiosInstance.patch(endpoints.journal.update(id), payload);
+    return data;
   },
+
   deleteJournal: async (id: string) => {
-    return await handleJournalError.executeDelete(() =>
-      axiosInstance.delete(endpoints.journal.delete(id)),
-    );
+    const { data } = await axiosInstance.delete(endpoints.journal.delete(id));
+    return data;
   },
 
   getJournalById: async (id: string) => {
-    return await handleJournalError.executeGet(() =>
-      axiosInstance.get(endpoints.journal.detail(id)),
-    );
+    const { data } = await axiosInstance.get(endpoints.journal.detail(id));
+    return data;
   },
 };

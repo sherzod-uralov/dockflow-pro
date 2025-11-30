@@ -1,136 +1,211 @@
 "use client";
 
-import { useGetDocumentTemplateById } from "../hook/document-template.hook";
-import { useSearchParams } from "next/navigation";
-import SkeletonWrapper from "@/components/wrappers/skleton-wrapper";
-import { Badge } from "@/components/ui/badge";
-import { FileText, Download } from "lucide-react";
+import {
+    Box,
+    Text,
+    Group,
+    Badge,
+    Paper,
+    Stack,
+    Button,
+    SimpleGrid,
+    Divider,
+} from "@mantine/core";
+import {
+    IconDownload,
+    IconFileText,
+    IconCalendar,
+    IconTag,
+} from "@tabler/icons-react";
+import { DocumentTemplateResponse } from "@/features/document-template";
+
+interface DocumentTemplateViewProps {
+    template: DocumentTemplateResponse;
+}
 
 // Fayl hajmini formatlash
 const formatFileSize = (bytes: number): string => {
-  if (bytes === 0) return "0 Bytes";
-  const k = 1024;
-  const sizes = ["Bytes", "KB", "MB", "GB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i];
+    if (bytes === 0) return "0 Bytes";
+    const k = 1024;
+    const sizes = ["Bytes", "KB", "MB", "GB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i];
 };
 
 // Sanani formatlash
 const formatDate = (dateString: string | undefined): string => {
-  if (!dateString) return "Ma'lumot yo'q";
+    if (!dateString) return "—";
 
-  try {
-    const date = new Date(dateString);
+    try {
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return "—";
 
-    if (isNaN(date.getTime())) {
-      return "Ma'lumot yo'q";
+        return new Intl.DateTimeFormat("uz-UZ", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+        }).format(date);
+    } catch {
+        return "—";
     }
-
-    return new Intl.DateTimeFormat("uz-UZ", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    }).format(date);
-  } catch (error) {
-    return "Ma'lumot yo'q";
-  }
 };
 
-const DocumentTemplateView = () => {
-  const params = useSearchParams();
-  const templateId = params.get("templateId") || "";
+const DocumentTemplateView = ({ template }: DocumentTemplateViewProps) => {
+    const handleDownload = () => {
+        if (template.templateFile?.fileUrl) {
+            window.open(template.templateFile.fileUrl, "_blank");
+        }
+    };
 
-  const { data, isLoading, isFetching } =
-    useGetDocumentTemplateById(templateId);
+    const tagCount = template.requiredTags ? Object.keys(template.requiredTags).length : 0;
 
-  const handleDownload = () => {
-    if (data?.templateFile?.fileUrl) {
-      window.open(data.templateFile.fileUrl, "_blank");
-    }
-  };
+    return (
+        <Stack gap="lg">
+            {/* Header Info */}
+            <Box>
+                <Text size="xl" fw={600} c="#212529" mb={4}>
+                    {template.name}
+                </Text>
+                {template.description && (
+                    <Text size="sm" c="dimmed">
+                        {template.description}
+                    </Text>
+                )}
+            </Box>
 
-  return (
-    <SkeletonWrapper isLoading={isLoading || isFetching}>
-      {data && (
-        <div className="space-y-8">
-          {/* Header */}
-          <div className="border-b pb-4">
-            <h3 className="text-xl font-semibold">{data.name}</h3>
-            {data.description && (
-              <p className="text-sm text-muted-foreground mt-1">
-                {data.description}
-              </p>
+            <Divider />
+
+            {/* Main Info */}
+            <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
+                {/* Hujjat turi */}
+                <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+                    <Text size="xs" c="dimmed" tt="uppercase" fw={600} mb={4}>
+                        Hujjat turi
+                    </Text>
+                    <Text size="md" fw={500} c="#212529">
+                        {template.documentType?.name || "—"}
+                    </Text>
+                </Paper>
+
+                {/* Holat */}
+                <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+                    <Text size="xs" c="dimmed" tt="uppercase" fw={600} mb={4}>
+                        Holati
+                    </Text>
+                    <Group gap="sm">
+                        <Badge
+                            variant="light"
+                            color={template.isActive ? "green" : "gray"}
+                            size="lg"
+                            radius="sm"
+                        >
+                            {template.isActive ? "Faol" : "Nofaol"}
+                        </Badge>
+                        <Badge
+                            variant="light"
+                            color={template.isPublic ? "blue" : "gray"}
+                            size="lg"
+                            radius="sm"
+                        >
+                            {template.isPublic ? "Ommaviy" : "Shaxsiy"}
+                        </Badge>
+                    </Group>
+                </Paper>
+
+                {/* Yaratilgan */}
+                <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+                    <Text size="xs" c="dimmed" tt="uppercase" fw={600} mb={4}>
+                        Yaratilgan
+                    </Text>
+                    <Group gap="xs">
+                        <IconCalendar size={16} color="#868e96" />
+                        <Text size="md" c="#495057">
+                            {formatDate(template.createdAt)}
+                        </Text>
+                    </Group>
+                </Paper>
+
+                {/* Yangilangan */}
+                <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+                    <Text size="xs" c="dimmed" tt="uppercase" fw={600} mb={4}>
+                        Yangilangan
+                    </Text>
+                    <Group gap="xs">
+                        <IconCalendar size={16} color="#868e96" />
+                        <Text size="md" c="#495057">
+                            {formatDate(template.updatedAt)}
+                        </Text>
+                    </Group>
+                </Paper>
+            </SimpleGrid>
+
+            {/* File */}
+            {template.templateFile && (
+                <Paper p="lg" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+                    <Group justify="space-between" wrap="nowrap">
+                        <Group gap="md" wrap="nowrap">
+                            <Box
+                                p={12}
+                                style={{
+                                    backgroundColor: "#f1f3f5",
+                                    borderRadius: 8,
+                                }}
+                            >
+                                <IconFileText size={24} color="#495057" stroke={1.5} />
+                            </Box>
+                            <Box>
+                                <Text size="md" fw={500} c="#212529">
+                                    {template.templateFile.fileName}
+                                </Text>
+                                <Text size="sm" c="dimmed">
+                                    {formatFileSize(template.templateFile.fileSize)} •{" "}
+                                    {template.templateFile.mimeType.includes("word")
+                                        ? "Word hujjati"
+                                        : template.templateFile.mimeType.split("/").pop()?.toUpperCase()}
+                                </Text>
+                            </Box>
+                        </Group>
+                        <Button
+                            variant="light"
+                            leftSection={<IconDownload size={16} />}
+                            onClick={handleDownload}
+                            radius="sm"
+                        >
+                            Yuklab olish
+                        </Button>
+                    </Group>
+                </Paper>
             )}
-          </div>
 
-          {/* Info Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-x-8 gap-y-6">
-            <div>
-              <p className="text-xs text-muted-foreground mb-1">Hujjat turi</p>
-              <p className="font-medium">{data.documentType?.name || "—"}</p>
-            </div>
-
-            <div>
-              <p className="text-xs text-muted-foreground mb-1">Holati</p>
-              <Badge variant={data.isActive ? "default" : "secondary"}>
-                {data.isActive ? "Faol" : "Nofaol"}
-              </Badge>
-            </div>
-
-            <div>
-              <p className="text-xs text-muted-foreground mb-1">Ommaviy</p>
-              <Badge variant={data.isPublic ? "default" : "outline"}>
-                {data.isPublic ? "Ha" : "Yo'q"}
-              </Badge>
-            </div>
-
-            <div>
-              <p className="text-xs text-muted-foreground mb-1">Yaratilgan</p>
-              <p className="text-sm">{formatDate(data.createdAt)}</p>
-            </div>
-
-            <div>
-              <p className="text-xs text-muted-foreground mb-1">Yangilangan</p>
-              <p className="text-sm">{formatDate(data.updatedAt)}</p>
-            </div>
-          </div>
-
-          {/* File Info */}
-          {data.templateFile && (
-            <div className="border-t pt-6">
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex items-start gap-3 flex-1 min-w-0">
-                  <FileText className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
-                  <div className="min-w-0 flex-1">
-                    <p className="font-medium truncate">
-                      {data.templateFile.fileName}
-                    </p>
-                    <p className="text-sm text-muted-foreground mt-0.5">
-                      {formatFileSize(data.templateFile.fileSize)} •{" "}
-                      {data.templateFile.mimeType.includes("word")
-                        ? "Word"
-                        : data.templateFile.mimeType
-                            .split("/")
-                            .pop()
-                            ?.toUpperCase()}
-                    </p>
-                  </div>
-                </div>
-
-                <button
-                  onClick={handleDownload}
-                  className="flex items-center hover:text-text-on-dark gap-2 px-3 py-1.5 text-sm border rounded-md hover:bg-accent transition-colors flex-shrink-0"
-                >
-                  <Download className="h-4 w-4" />
-                  Yuklab olish
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-    </SkeletonWrapper>
-  );
+            {/* Tags */}
+            {tagCount > 0 && (
+                <Paper p="lg" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+                    <Group gap="xs" mb="md">
+                        <IconTag size={18} color="#495057" />
+                        <Text fw={600} size="sm" c="#212529">
+                            Taglar ({tagCount})
+                        </Text>
+                    </Group>
+                    <Text size="xs" c="dimmed" mb="md">
+                        Bu taglar hujjat yaratishda avtomatik to'ldiriladi
+                    </Text>
+                    <Group gap="xs">
+                        {Object.entries(template.requiredTags || {}).map(([tagName, tagType]) => (
+                            <Badge
+                                key={tagName}
+                                variant="light"
+                                color="blue"
+                                radius="sm"
+                                size="lg"
+                            >
+                                {`{${tagName}}`}
+                            </Badge>
+                        ))}
+                    </Group>
+                </Paper>
+            )}
+        </Stack>
+    );
 };
 
 export default DocumentTemplateView;

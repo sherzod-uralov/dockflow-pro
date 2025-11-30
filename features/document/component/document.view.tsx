@@ -1,20 +1,29 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
-import SkeletonWrapper from "@/components/wrappers/skleton-wrapper";
-import { Badge } from "@/components/ui/badge";
+import { memo } from "react";
+import { useRouter } from "next/navigation";
 import {
-  FileText,
-  Download,
-  User,
-  Calendar,
-  CheckCircle2,
-  Clock,
-  AlertCircle,
-} from "lucide-react";
-import { cn } from "@/lib/utils";
+  Box,
+  Text,
+  Badge,
+  Paper,
+  Group,
+  Stack,
+  SimpleGrid,
+  Skeleton,
+  Button,
+  ThemeIcon,
+} from "@mantine/core";
+import {
+  IconFileText,
+  IconDownload,
+  IconUser,
+  IconCalendar,
+  IconCheck,
+  IconClock,
+  IconAlertCircle,
+} from "@tabler/icons-react";
 import { useGetDocumentById } from "@/features/document";
-import { Button } from "@/components/ui/button";
 import { useGetAllWorkflows } from "@/features/workflow";
 import DocumentStepper from "@/features/document/component/document.stepper";
 
@@ -33,112 +42,205 @@ const formatDate = (dateString: string | undefined): string => {
       month: "long",
       day: "numeric",
     }).format(date);
-  } catch (error) {
+  } catch {
     return "Ma'lumot yo'q";
   }
 };
 
-export const StatusBadge = ({ status }: { status: string }) => {
-  const config = {
+// Status Badge - memo bilan optimizatsiya
+export const StatusBadge = memo(({ status }: { status: string }) => {
+  const config: Record<string, { label: string; bg: string; color: string; icon: typeof IconClock }> = {
     DRAFT: {
-      label: "Qoralama",
-      className:
-        "bg-amber-100 text-amber-700 border-amber-300 hover:bg-amber-200",
-      icon: Clock,
+      label: "Tayyorlanmoqda",
+      bg: "#f1f3f5",
+      color: "#495057",
+      icon: IconClock
     },
     PENDING: {
-      label: "Kutilmoqda",
-      className: "bg-blue-100 text-blue-700 border-blue-300 hover:bg-blue-200",
-      icon: Clock,
+      label: "Jarayonda",
+      bg: "#fff3bf",
+      color: "#e67700",
+      icon: IconClock
     },
     IN_REVIEW: {
-      label: "Ko'rib chiqilmoqda",
-      className:
-        "bg-purple-100 text-purple-700 border-purple-300 hover:bg-purple-200",
-      icon: Clock,
+      label: "Tekshiruvda",
+      bg: "#d0ebff",
+      color: "#1971c2",
+      icon: IconClock
     },
     APPROVED: {
-      label: "Tasdiqlandi",
-      className:
-        "bg-green-100 text-green-700 border-green-300 hover:bg-green-200",
-      icon: CheckCircle2,
+      label: "Tasdiqlangan",
+      bg: "#d3f9d8",
+      color: "#2b8a3e",
+      icon: IconCheck
     },
     REJECTED: {
-      label: "Rad etildi",
-      className: "bg-red-100 text-red-700 border-red-300 hover:bg-red-200",
-      icon: AlertCircle,
+      label: "Bekor qilingan",
+      bg: "#ffe3e3",
+      color: "#c92a2a",
+      icon: IconAlertCircle
     },
     ARCHIVED: {
-      label: "Arxivlandi",
-      className: "bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200",
-      icon: AlertCircle,
+      label: "Arxiv",
+      bg: "#e9ecef",
+      color: "#868e96",
+      icon: IconAlertCircle
     },
     PUBLISHED: {
-      label: "Nashr qilingan",
-      className:
-        "bg-green-100 text-green-700 border-green-300 hover:bg-green-200",
-      icon: CheckCircle2,
+      label: "Chop etilgan",
+      bg: "#d3f9d8",
+      color: "#2b8a3e",
+      icon: IconCheck
     },
   };
 
-  const currentConfig = config[status as keyof typeof config] || {
-    label: status,
-    className: "bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200",
-    icon: AlertCircle,
-  };
-
-  const Icon = currentConfig.icon;
+  const cfg = config[status] || { label: status, bg: "#f1f3f5", color: "#495057", icon: IconAlertCircle };
+  const Icon = cfg.icon;
 
   return (
     <Badge
-      variant="outline"
-      className={cn(
-        "transition-all duration-200 flex items-center gap-1.5",
-        currentConfig.className,
-      )}
+      size="md"
+      radius="sm"
+      variant="filled"
+      leftSection={<Icon size={12} />}
+      style={{
+        backgroundColor: cfg.bg,
+        color: cfg.color,
+        fontWeight: 600,
+        textTransform: "none",
+      }}
     >
-      <Icon className="h-3 w-3" />
-      {currentConfig.label}
+      {cfg.label}
     </Badge>
   );
-};
+});
 
-export const PriorityBadge = ({ priority }: { priority: string }) => {
-  const config = {
+StatusBadge.displayName = "StatusBadge";
+
+// Priority Badge - memo bilan optimizatsiya
+export const PriorityBadge = memo(({ priority }: { priority: string }) => {
+  const config: Record<string, { label: string; bg: string; color: string }> = {
     LOW: {
-      label: "Past",
-      className: "bg-sky-100 text-sky-700 border-sky-300 hover:bg-sky-200",
+      label: "Oddiy",
+      bg: "#f1f3f5",
+      color: "#495057"
     },
     MEDIUM: {
-      label: "O'rta",
-      className:
-        "bg-orange-100 text-orange-700 border-orange-300 hover:bg-orange-200",
+      label: "O'rtacha",
+      bg: "#fff3bf",
+      color: "#e67700"
     },
     HIGH: {
-      label: "Yuqori",
-      className: "bg-red-100 text-red-700 border-red-300 hover:bg-red-200",
+      label: "Muhim",
+      bg: "#ffe8cc",
+      color: "#d9480f"
     },
     URGENT: {
-      label: "Shoshilinch",
-      className:
-        "bg-rose-100 text-rose-700 border-rose-300 hover:bg-rose-200",
+      label: "Juda muhim",
+      bg: "#ffe3e3",
+      color: "#c92a2a"
     },
   };
 
-  const currentConfig = config[priority as keyof typeof config] || {
-    label: priority,
-    className: "bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200",
-  };
+  const cfg = config[priority] || { label: priority, bg: "#f1f3f5", color: "#495057" };
 
   return (
     <Badge
-      variant="outline"
-      className={cn("transition-all duration-200", currentConfig.className)}
+      size="md"
+      radius="sm"
+      variant="filled"
+      style={{
+        backgroundColor: cfg.bg,
+        color: cfg.color,
+        fontWeight: 600,
+        textTransform: "none",
+      }}
     >
-      {currentConfig.label}
+      {cfg.label}
     </Badge>
   );
-};
+});
+
+PriorityBadge.displayName = "PriorityBadge";
+
+// Info Field komponenti
+const InfoField = ({ label, value, style = {} }: { label: string; value: any; style?: any }) => (
+    <Box style={{ minWidth: 0, ...style }}>
+        <Text size="xs" c="dimmed" tt="uppercase" fw={700} mb={4}>
+            {label}
+        </Text>
+        <Text
+            size="sm"
+            fw={500}
+            style={{
+                color: "#1F3A5F",
+                wordBreak: "break-word",
+                overflowWrap: "break-word",
+                whiteSpace: "normal"
+            }}
+        >
+            {value}
+        </Text>
+    </Box>
+);
+
+InfoField.displayName = "InfoField";
+
+// Info Card komponenti
+const InfoCard = memo(({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+}) => (
+  <Group
+    gap="sm"
+    p="sm"
+    style={{
+      backgroundColor: "#f8f9fa",
+      borderRadius: 4,
+    }}
+  >
+    <ThemeIcon
+      size="md"
+      radius="xl"
+      variant="light"
+      style={{ backgroundColor: "#e9ecef", color: "#495057" }}
+    >
+      {icon}
+    </ThemeIcon>
+    <Box style={{ flex: 1, minWidth: 0 }}>
+      <Text size="xs" c="dimmed">
+        {label}
+      </Text>
+      <Text size="sm" fw={500} c="#212529" lineClamp={1}>
+        {value || "—"}
+      </Text>
+    </Box>
+  </Group>
+));
+
+InfoCard.displayName = "InfoCard";
+
+// Loading skeleton
+const DocumentViewSkeleton = () => (
+  <Stack gap="lg">
+    <Skeleton height={60} radius="sm" />
+    <SimpleGrid cols={{ base: 2, md: 3 }} spacing="md">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <Skeleton key={i} height={50} radius="sm" />
+      ))}
+    </SimpleGrid>
+    <SimpleGrid cols={{ base: 1, md: 2 }} spacing="md">
+      {Array.from({ length: 4 }).map((_, i) => (
+        <Skeleton key={i} height={60} radius="sm" />
+      ))}
+    </SimpleGrid>
+  </Stack>
+);
 
 const DocumentView = ({ id }: { id: string }) => {
   const router = useRouter();
@@ -147,184 +249,169 @@ const DocumentView = ({ id }: { id: string }) => {
   });
   const { data, isLoading, isFetching } = useGetDocumentById(id);
 
-  (workflow);
-
   const handleDownload = (fileUrl: string) => {
     window.open(fileUrl, "_blank");
   };
 
+  if (isLoading || isFetching) {
+    return <DocumentViewSkeleton />;
+  }
+
   return (
-    <SkeletonWrapper isLoading={isLoading || isFetching}>
+    <Stack gap="lg">
       {workflow?.data && workflow.data.length > 0 && (
         <DocumentStepper workflow={workflow.data} />
       )}
+
       {data && (
-        <div className="space-y-8 animate-in fade-in duration-500">
-          <div className="border-b pb-4">
-            <h3 className="text-xl font-semibold">{data.title}</h3>
+        <>
+          <Box pb="md" style={{ borderBottom: "1px solid #e9ecef" }}>
+            <Text size="lg" fw={600} c="#212529" mb={4}>
+              {data.title}
+            </Text>
             {data.description && (
-              <p className="text-sm text-muted-foreground mt-1">
+              <Text size="sm" c="dimmed">
                 {data.description}
-              </p>
+              </Text>
             )}
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-x-8 gap-y-6">
-            <div className="group">
-              <p className="text-xs text-muted-foreground mb-1.5 transition-colors group-hover:text-foreground">
-                Hujjat raqami
-              </p>
-              <p className="font-medium">{data.documentNumber || "—"}</p>
-            </div>
-
-            <div className="group">
-              <p className="text-xs text-muted-foreground mb-1.5 transition-colors group-hover:text-foreground">
-                Hujjat turi
-              </p>
-              <p className="font-medium">{data.documentType?.name || "—"}</p>
-            </div>
-
-            <div className="group">
-              <p className="text-xs text-muted-foreground mb-1.5 transition-colors group-hover:text-foreground">
-                Jurnal
-              </p>
-              <p className="font-medium">{data.journal?.name || "—"}</p>
-            </div>
-
-            <div className="group">
-              <p className="text-xs text-muted-foreground mb-1.5 transition-colors group-hover:text-foreground">
-                Holati
-              </p>
-              <StatusBadge status={data.status} />
-            </div>
-
-            <div className="group">
-              <p className="text-xs text-muted-foreground mb-1.5 transition-colors group-hover:text-foreground">
-                Muhimlik
-              </p>
-              <PriorityBadge priority={data.priority} />
-            </div>
-
-            <div className="group">
-              <p className="text-xs text-muted-foreground mb-1.5 transition-colors group-hover:text-foreground">
-                Versiya
-              </p>
-              <Badge
-                variant="outline"
-                className="font-mono bg-indigo-50 text-indigo-700 border-indigo-300"
-              >
-                v{data.versions || 0}
-              </Badge>
-            </div>
-          </div>
-          <div className="border-t pt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="flex items-start gap-3 p-3 rounded-lg hover:bg-accent/50 transition-colors">
-              <div className="p-2 rounded-full bg-blue-100">
-                <User className="h-4 w-4 text-blue-600" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-xs text-muted-foreground mb-1">Yaratuvchi</p>
-                <p className="font-medium">{data.createdBy?.fullname || "—"}</p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3 p-3 rounded-lg hover:bg-accent/50 transition-colors">
-              <div className="p-2 rounded-full bg-green-100">
-                <Calendar className="h-4 w-4 text-green-600" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-xs text-muted-foreground mb-1">
-                  Yaratilgan sana
-                </p>
-                <p className="text-sm">{formatDate(data.createdAt)}</p>
-              </div>
-            </div>
-
-            {data.updatedAtBy && (
-              <div className="flex items-start gap-3 p-3 rounded-lg hover:bg-accent/50 transition-colors">
-                <div className="p-2 rounded-full bg-purple-100">
-                  <User className="h-4 w-4 text-purple-600" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs text-muted-foreground mb-1">
-                    Oxirgi o'zgartiruvchi
-                  </p>
-                  <p className="font-medium">
-                    {data.updatedAtBy?.fullname || "—"}
-                  </p>
-                </div>
-              </div>
-            )}
-
-            <div className="flex items-start gap-3 p-3 rounded-lg hover:bg-accent/50 transition-colors">
-              <div className="p-2 rounded-full bg-amber-100">
-                <Calendar className="h-4 w-4 text-amber-600" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-xs text-muted-foreground mb-1">
-                  Yangilangan sana
-                </p>
-                <p className="text-sm">{formatDate(data.updatedAt)}</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Attachments */}
-          {data.attachments && data.attachments.length > 0 && (
-            <div className="border-t pt-6">
-              <div className="flex items-center gap-2 mb-4">
-                <FileText className="h-4 w-4 text-muted-foreground" />
-                <p className="text-sm font-semibold">Biriktirilgan fayllar</p>
+          </Box>
+          <SimpleGrid cols={{ base: 2, md: 3 }} spacing="md">
+            <InfoField label="Hujjat raqami" value={data.documentNumber || "—"} />
+            <InfoField label="Hujjat turi" value={data.documentType?.name || "—"} />
+            <InfoField label="Jurnal" value={data.journal?.name || "—"} />
+            <InfoField label="Holati" value={<StatusBadge status={data.status} />} />
+            <InfoField label="Muhimlik" value={<PriorityBadge priority={data.priority} />} />
+            <InfoField
+              label="Versiya"
+              value={
                 <Badge
-                  variant="secondary"
-                  className="ml-auto text-text-on-dark"
+                  size="md"
+                  radius="sm"
+                  variant="light"
+                  style={{
+                    backgroundColor: "#e9ecef",
+                    color: "#1e3a5f",
+                    fontFamily: "monospace",
+                  }}
+                >
+                  v{data.versions || 0}
+                </Badge>
+              }
+            />
+          </SimpleGrid>
+
+          {/* Yaratuvchi va sanalar */}
+          <Box pt="md" style={{ borderTop: "1px solid #e9ecef" }}>
+            <SimpleGrid cols={{ base: 1, md: 2 }} spacing="sm">
+              <InfoCard
+                icon={<IconUser size={14} />}
+                label="Yaratuvchi"
+                value={data.createdBy?.fullname || "—"}
+              />
+              <InfoCard
+                icon={<IconCalendar size={14} />}
+                label="Yaratilgan sana"
+                value={formatDate(data.createdAt)}
+              />
+              {data.updatedAtBy && (
+                <InfoCard
+                  icon={<IconUser size={14} />}
+                  label="Oxirgi o'zgartiruvchi"
+                  value={data.updatedAtBy?.fullname || "—"}
+                />
+              )}
+              <InfoCard
+                icon={<IconCalendar size={14} />}
+                label="Yangilangan sana"
+                value={formatDate(data.updatedAt)}
+              />
+            </SimpleGrid>
+          </Box>
+
+          {/* Biriktirilgan fayllar */}
+          {data.attachments && data.attachments.length > 0 && (
+            <Box pt="md" style={{ borderTop: "1px solid #e9ecef" }}>
+              <Group gap="xs" mb="sm">
+                <IconFileText size={16} color="#868e96" />
+                <Text size="sm" fw={600} c="#212529">
+                  Biriktirilgan fayllar
+                </Text>
+                <Badge
+                  size="sm"
+                  radius="sm"
+                  variant="light"
+                  style={{ backgroundColor: "#e9ecef", color: "#495057" }}
                 >
                   {data.attachments.length}
                 </Badge>
-              </div>
-              <div className="space-y-2">
-                {data.attachments.map((file: any, index: number) => (
-                  <div
+              </Group>
+
+              <Stack gap="xs">
+                {data.attachments.map((file: any) => (
+                  <Paper
                     key={file.id}
-                    className="flex items-center justify-between gap-4 p-3 border rounded-lg transition-all duration-200 group"
-                    style={{ animationDelay: `${index * 50}ms` }}
+                    p="sm"
+                    radius="sm"
+                    withBorder
+                    style={{ borderColor: "#e9ecef" }}
                   >
-                    <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <div className="p-2 rounded-lg bg-blue-50 group-hover:bg-blue-100 transition-colors">
-                        <FileText className="h-4 w-4 text-blue-600" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="font-medium truncate group-hover:text-primary transition-colors">
+                    <Group justify="space-between" wrap="nowrap">
+                      <Group gap="sm" style={{ flex: 1, minWidth: 0 }}>
+                        <ThemeIcon
+                          size="sm"
+                          radius="sm"
+                          variant="light"
+                          style={{ backgroundColor: "#e9ecef", color: "#1e3a5f" }}
+                        >
+                          <IconFileText size={14} />
+                        </ThemeIcon>
+                        <Text size="sm" fw={500} c="#212529" lineClamp={1}>
                           {file.fileName}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <Button
-                        className="text-text-on-dark"
-                        onClick={() =>
-                          router.push(
-                            `/document-edit?id=${file.id}&documentId=${data.id}`,
-                          )
-                        }
-                      >
-                        hujjatni tahrirlash
-                      </Button>
-                      <button
-                        onClick={() => handleDownload(file.fileUrl)}
-                        className="flex items-center gap-2 hover:text-text-on-dark px-3 py-1.5 text-sm border rounded-md hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all duration-200 flex-shrink-0 group/btn"
-                      >
-                        <Download className="h-4 w-4 group-hover/btn:animate-bounce" />
-                        Yuklab olish
-                      </button>
-                    </div>
-                  </div>
+                        </Text>
+                      </Group>
+
+                      <Group gap="xs" wrap="nowrap">
+                        <Button
+                          size="xs"
+                          radius="sm"
+                          variant="filled"
+                          style={{ backgroundColor: "#1e3a5f" }}
+                          onClick={() =>
+                            router.push(
+                              `/document-edit?id=${file.id}&documentId=${data.id}`
+                            )
+                          }
+                        >
+                          Tahrirlash
+                        </Button>
+                        <Button
+                          size="xs"
+                          radius="sm"
+                          variant="outline"
+                          leftSection={<IconDownload size={14} />}
+                          onClick={() => handleDownload(file.fileUrl)}
+                          styles={{
+                            root: {
+                              borderColor: "#e9ecef",
+                              color: "#495057",
+                              "&:hover": {
+                                backgroundColor: "#f8f9fa",
+                              },
+                            },
+                          }}
+                        >
+                          Yuklab olish
+                        </Button>
+                      </Group>
+                    </Group>
+                  </Paper>
                 ))}
-              </div>
-            </div>
+              </Stack>
+            </Box>
           )}
-        </div>
+        </>
       )}
-    </SkeletonWrapper>
+    </Stack>
   );
 };
 

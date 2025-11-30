@@ -1,27 +1,36 @@
 "use client";
 
 import { useState } from "react";
+import {
+  Box,
+  SimpleGrid,
+  Tabs,
+  Alert,
+  Skeleton,
+  Paper,
+  Text,
+  Group,
+  Table,
+  Progress,
+  Stack,
+} from "@mantine/core";
+import {
+  IconFileText,
+  IconUsers,
+  IconBuilding,
+  IconBook,
+  IconArrowsExchange,
+  IconChecklist,
+  IconTrendingUp,
+  IconClock,
+  IconAlertCircle,
+  IconActivity,
+} from "@tabler/icons-react";
 import { StatCard } from "../component/stat-card";
 import { DocumentTypeChart } from "../component/document-type-chart";
 import { DocumentStatusChart } from "../component/document-status-chart";
 import { MonthlyTrendChart } from "../component/monthly-trend-chart";
 import { DepartmentStatsChart } from "../component/department-stats-chart";
-import {
-  FileText,
-  Users,
-  Building2,
-  BookOpen,
-  Workflow as WorkflowIcon,
-  CheckSquare,
-  TrendingUp,
-  Clock,
-  AlertCircle,
-  Activity,
-} from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   useDashboardAnalytics,
   useDocumentAnalytics,
@@ -29,25 +38,20 @@ import {
   useUserAnalytics,
 } from "../hook/statistics.hook";
 import { AnalyticsFilters, TimeRange } from "../type/statistics.type";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { useOnboarding, TourButton } from "@/hooks/use-onboarding";
 
 export default function StatisticsPage() {
-  const [filters, setFilters] = useState<AnalyticsFilters>({
+  const [filters] = useState<AnalyticsFilters>({
     timeRange: TimeRange.MONTH,
   });
+
+  // Onboarding
+  useOnboarding("dashboard");
 
   const dashboardQuery = useDashboardAnalytics(filters);
   const documentsQuery = useDocumentAnalytics(filters);
   const workflowsQuery = useWorkflowAnalytics(filters);
   const usersQuery = useUserAnalytics(filters);
-
 
   const allFailed =
     dashboardQuery.isError &&
@@ -57,15 +61,14 @@ export default function StatisticsPage() {
 
   if (allFailed) {
     return (
-      <div className="space-y-6">
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            Statistika ma'lumotlarini yuklashda xatolik yuz berdi. Iltimos,
-            qayta urinib ko'ring.
-          </AlertDescription>
-        </Alert>
-      </div>
+      <Alert
+        icon={<IconAlertCircle size={18} />}
+        title="Xatolik"
+        color="red"
+        radius="sm"
+      >
+        Statistika ma'lumotlarini yuklashda xatolik yuz berdi.
+      </Alert>
     );
   }
 
@@ -81,30 +84,29 @@ export default function StatisticsPage() {
     if (!documentsQuery.data?.documentsByStatus) return [];
 
     const statusMap: Record<string, { label: string; color: string }> = {
-      draft: { label: "Qoralama", color: "#6b7280" },
-      pending: { label: "Kutilmoqda", color: "#f59e0b" },
-      inReview: { label: "Ko'rib chiqilmoqda", color: "#3b82f6" },
-      approved: { label: "Tasdiqlangan", color: "#10b981" },
-      rejected: { label: "Rad etilgan", color: "#ef4444" },
-      archived: { label: "Arxivlangan", color: "#8b5cf6" },
+      draft: { label: "Qoralama", color: "#868e96" },
+      pending: { label: "Kutilmoqda", color: "#495057" },
+      inReview: { label: "Ko'rib chiqilmoqda", color: "#1e3a5f" },
+      approved: { label: "Tasdiqlangan", color: "#2b8a3e" },
+      rejected: { label: "Rad etilgan", color: "#c92a2a" },
+      archived: { label: "Arxivlangan", color: "#5c7a99" },
     };
 
     return Object.entries(documentsQuery.data.documentsByStatus).map(
       ([key, value]) => ({
         status: statusMap[key]?.label || key,
         count: value,
-        color: statusMap[key]?.color || "#6b7280",
-      }),
+        color: statusMap[key]?.color || "#868e96",
+      })
     );
   };
 
-  // Transform document type data for chart
   const transformDocumentTypeData = () => {
     if (!documentsQuery.data?.documentsByType) return [];
 
     const total = documentsQuery.data.documentsByType.reduce(
       (sum, item) => sum + item.count,
-      0,
+      0
     );
 
     return documentsQuery.data.documentsByType.map((item) => ({
@@ -114,7 +116,6 @@ export default function StatisticsPage() {
     }));
   };
 
-  // Transform department data for chart
   const transformDepartmentData = () => {
     if (!usersQuery.data?.departmentActivity) return [];
 
@@ -125,543 +126,493 @@ export default function StatisticsPage() {
     }));
   };
 
-  // Transform trend data for monthly chart
   const transformTrendData = () => {
     if (!documentsQuery.data?.creationTrend) return [];
 
     return documentsQuery.data.creationTrend.map((item) => ({
       month: item.period,
       documents: item.count,
-      users: 0, // We don't have this data in document analytics
+      users: 0,
     }));
   };
 
-  return (
-    <div className="space-y-6">
-      {/*/!* Filters *!/*/}
-      {/*<AnalyticsFiltersComponent*/}
-      {/*  filters={filters}*/}
-      {/*  onFiltersChange={setFilters}*/}
-      {/*  showDepartmentFilter={true}*/}
-      {/*  showUserFilter={false}*/}
-      {/*/>*/}
+  const LoadingSkeleton = () => (
+    <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <Paper key={i} p="lg" radius="sm" withBorder>
+          <Skeleton height={80} radius="sm" />
+        </Paper>
+      ))}
+    </SimpleGrid>
+  );
 
-      <Tabs defaultValue="dashboard" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-          <TabsTrigger value="documents">Hujjatlar</TabsTrigger>
-          <TabsTrigger value="workflows">Hujjat aylanmasi</TabsTrigger>
-          <TabsTrigger value="users">Foydalanuvchilar</TabsTrigger>
-        </TabsList>
+  return (
+    <Box>
+      <Group justify="space-between" mb={4}>
+        <Text size="lg" fw={600} c="var(--mantine-color-text)">
+          Statistika
+        </Text>
+        <TourButton tourKey="dashboard" variant="subtle" size="xs" />
+      </Group>
+      <Text size="sm" c="dimmed" mb="xl">
+        Tizim ko'rsatkichlari va tahlil
+      </Text>
+
+      <Tabs defaultValue="dashboard" radius="sm">
+        <Tabs.List mb="lg" style={{ borderBottom: "1px solid var(--mantine-color-default-border)" }}>
+          <Tabs.Tab value="dashboard" fz="sm" fw={500} px="md" c="#495057">
+            Umumiy
+          </Tabs.Tab>
+          <Tabs.Tab value="documents" fz="sm" fw={500} px="md" c="#495057">
+            Hujjatlar
+          </Tabs.Tab>
+          <Tabs.Tab value="workflows" fz="sm" fw={500} px="md" c="#495057">
+            Hujjat aylanmasi
+          </Tabs.Tab>
+          <Tabs.Tab value="users" fz="sm" fw={500} px="md" c="#495057">
+            Foydalanuvchilar
+          </Tabs.Tab>
+        </Tabs.List>
 
         {/* Dashboard Tab */}
-        <TabsContent value="dashboard" className="space-y-6">
-          {dashboardQuery.isLoading ? (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <Card key={i}>
-                  <CardContent className="pt-6">
-                    <Skeleton className="h-20 w-full" />
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <>
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                <StatCard
+        <Tabs.Panel value="dashboard">
+          <Stack gap="lg">
+            {dashboardQuery.isLoading ? (
+              <LoadingSkeleton />
+            ) : (
+              <>
+                <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md" data-tour="stats-cards">
+                  <StatCard
                     href="document"
-                  title="Jami Hujjatlar"
-                  value={
-                    dashboardQuery.data?.totalDocuments?.value?.toLocaleString() ||
-                    0
-                  }
-                  icon={FileText}
-                  iconColor="text-blue-600"
-                  iconBgColor="bg-blue-50"
-                  trend={formatTrend(
-                    dashboardQuery.data?.totalDocuments?.changePercentage,
-                  )}
-                  description="Tizimdagi barcha hujjatlar"
-                />
-                <StatCard
+                    title="Jami hujjatlar"
+                    value={dashboardQuery.data?.totalDocuments?.value?.toLocaleString() || 0}
+                    icon={IconFileText}
+                    trend={formatTrend(dashboardQuery.data?.totalDocuments?.changePercentage)}
+                    description="Tizimdagi barcha hujjatlar"
+                  />
+                  <StatCard
                     href="admin/users"
-                  title="Aktiv Foydalanuvchilar"
-                  value={
-                    dashboardQuery.data?.activeUsers?.value?.toLocaleString() || 0
-                  }
-                  icon={Users}
-                  iconColor="text-green-600"
-                  iconBgColor="bg-green-50"
-                  trend={formatTrend(
-                    dashboardQuery.data?.activeUsers?.changePercentage,
-                  )}
-                  description="Faol foydalanuvchilar soni"
-                />
-                <StatCard
-                  title="Bo'limlar"
-                  href="/department"
-                  value={dashboardQuery.data?.totalDepartments || 0}
-                  icon={Building2}
-                  iconColor="text-purple-600"
-                  iconBgColor="bg-purple-50"
-                  description="Tashkilot bo'limlari"
-                />
-                <StatCard
-                  title="Jurnallar"
-                  href="journal"
-                  value={
-                    dashboardQuery.data?.totalJournals.value.toLocaleString() ||
-                    0
-                  }
-                  icon={BookOpen}
-                  iconColor="text-orange-600"
-                  iconBgColor="bg-orange-50"
-                  trend={formatTrend(
-                    dashboardQuery.data?.totalJournals.changePercentage,
-                  )}
-                  description="Hujjat jurnallari"
-                />
-                <StatCard
-                  title="Aktiv hujjat aylanmasi"
-                  href="workflow"
-                  value={dashboardQuery.data?.activeWorkflows || 0}
-                  icon={WorkflowIcon}
-                  iconColor="text-pink-600"
-                  iconBgColor="bg-pink-50"
-                  description="Jarayondagi hujjat aylanmasi"
-                />
-                <StatCard
+                    title="Aktiv foydalanuvchilar"
+                    value={dashboardQuery.data?.activeUsers?.value?.toLocaleString() || 0}
+                    icon={IconUsers}
+                    trend={formatTrend(dashboardQuery.data?.activeUsers?.changePercentage)}
+                    description="Faol foydalanuvchilar"
+                  />
+                  <StatCard
+                    href="department"
+                    title="Bo'limlar"
+                    value={dashboardQuery.data?.totalDepartments || 0}
+                    icon={IconBuilding}
+                    description="Tashkilot bo'limlari"
+                  />
+                  <StatCard
+                    href="journal"
+                    title="Jurnallar"
+                    value={dashboardQuery.data?.totalJournals?.value?.toLocaleString() || 0}
+                    icon={IconBook}
+                    trend={formatTrend(dashboardQuery.data?.totalJournals?.changePercentage)}
+                    description="Hujjat jurnallari"
+                  />
+                  <StatCard
                     href="workflow"
-                  title="Kutilayotgan Vazifalar"
-                  value={
-                    dashboardQuery.data?.pendingTasks.value.toLocaleString() ||
-                    0
-                  }
-                  icon={CheckSquare}
-                  iconColor="text-yellow-600"
-                  iconBgColor="bg-yellow-50"
-                  trend={formatTrend(
-                    dashboardQuery.data?.pendingTasks.changePercentage,
-                  )}
-                  description="Bajarilishi kerak vazifalar"
-                />
-              </div>
+                    title="Aktiv jarayonlar"
+                    value={dashboardQuery.data?.activeWorkflows || 0}
+                    icon={IconArrowsExchange}
+                    description="Jarayondagi hujjat aylanmasi"
+                  />
+                  <StatCard
+                    href="workflow"
+                    title="Kutilayotgan vazifalar"
+                    value={dashboardQuery.data?.pendingTasks?.value?.toLocaleString() || 0}
+                    icon={IconChecklist}
+                    trend={formatTrend(dashboardQuery.data?.pendingTasks?.changePercentage)}
+                    description="Bajarilishi kerak"
+                  />
+                </SimpleGrid>
 
-              {/* Charts */}
-              {!documentsQuery.isLoading && !documentsQuery.isError && (
-                <>
-                  <div className="grid gap-6 lg:grid-cols-2">
-                    <DocumentTypeChart data={transformDocumentTypeData()} />
-                    <DocumentStatusChart data={transformDocumentStatusData()} />
-                  </div>
+                {!documentsQuery.isLoading && !documentsQuery.isError && (
+                  <>
+                    <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="md">
+                      <Box data-tour="stats-chart-type">
+                        <DocumentTypeChart data={transformDocumentTypeData()} />
+                      </Box>
+                      <Box data-tour="stats-chart-status">
+                        <DocumentStatusChart data={transformDocumentStatusData()} />
+                      </Box>
+                    </SimpleGrid>
 
-                  <div className="grid gap-6">
-                    <MonthlyTrendChart data={transformTrendData()} />
-                  </div>
-                </>
-              )}
+                    <Box data-tour="stats-chart-trend">
+                      <MonthlyTrendChart data={transformTrendData()} />
+                    </Box>
+                  </>
+                )}
 
-              {!usersQuery.isLoading && !usersQuery.isError && (
-                <div className="grid gap-6">
-                  <DepartmentStatsChart data={transformDepartmentData()} />
-                </div>
-              )}
-            </>
-          )}
-        </TabsContent>
+                {!usersQuery.isLoading && !usersQuery.isError && (
+                  <Box data-tour="stats-chart-department">
+                    <DepartmentStatsChart data={transformDepartmentData()} />
+                  </Box>
+                )}
+              </>
+            )}
+          </Stack>
+        </Tabs.Panel>
 
         {/* Documents Tab */}
-        <TabsContent value="documents" className="space-y-6">
-          {documentsQuery.isError && (
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>
-                Hujjat statistikasi ma'lumotlari hozircha mavjud emas. Backend
-                xatolik yuz berdi.
-              </AlertDescription>
-            </Alert>
-          )}
-          {documentsQuery.isLoading ? (
-            <div className="grid gap-4 md:grid-cols-2">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <Card key={i}>
-                  <CardContent className="pt-6">
-                    <Skeleton className="h-40 w-full" />
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : !documentsQuery.isError ? (
-            <>
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <StatCard
-                  title="Jami Hujjatlar"
-                  value={
-                    documentsQuery.data?.totalDocuments.toLocaleString() || 0
-                  }
-                  icon={FileText}
-                  iconColor="text-blue-600"
-                  iconBgColor="bg-blue-50"
-                  description="Barcha hujjatlar"
-                />
-                <StatCard
-                  title="Kunlik O'rtacha"
-                  value={
-                    documentsQuery.data?.averageDocumentsPerDay.toFixed(1) || 0
-                  }
-                  icon={TrendingUp}
-                  iconColor="text-green-600"
-                  iconBgColor="bg-green-50"
-                  description="Hujjatlar soni (kunlik)"
-                />
-                <StatCard
-                  title="Ilovalar bilan"
-                  value={
-                    documentsQuery.data?.documentsWithAttachments.toLocaleString() ||
-                    0
-                  }
-                  icon={FileText}
-                  iconColor="text-purple-600"
-                  iconBgColor="bg-purple-50"
-                  description="Ilovalar mavjud"
-                />
-                <StatCard
-                  title="Jami Versiyalar"
-                  value={
-                    documentsQuery.data?.totalVersions.toLocaleString() || 0
-                  }
-                  icon={Activity}
-                  iconColor="text-orange-600"
-                  iconBgColor="bg-orange-50"
-                  description="Barcha versiyalar"
-                />
-              </div>
+        <Tabs.Panel value="documents">
+          <Stack gap="lg">
+            {documentsQuery.isError && (
+              <Alert icon={<IconAlertCircle size={18} />} color="red" radius="sm">
+                Hujjat statistikasi ma'lumotlari hozircha mavjud emas.
+              </Alert>
+            )}
 
-              <div className="grid gap-6 lg:grid-cols-2">
-                <DocumentStatusChart data={transformDocumentStatusData()} />
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Muhimlik darajasi bo'yicha</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {documentsQuery.data?.documentsByPriority && (
-                        <>
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm">Yuqori</span>
-                            <span className="font-bold text-red-600">
-                              {documentsQuery.data.documentsByPriority.urgent}
-                            </span>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm">O'rtacha yuqori</span>
-                            <span className="font-bold text-orange-600">
-                              {documentsQuery.data.documentsByPriority.high}
-                            </span>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm">O'rtacha</span>
-                            <span className="font-bold text-yellow-600">
-                              {documentsQuery.data.documentsByPriority.medium}
-                            </span>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm">Past</span>
-                            <span className="font-bold text-green-600">
-                              {documentsQuery.data.documentsByPriority.low}
-                            </span>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
+            {documentsQuery.isLoading ? (
+              <LoadingSkeleton />
+            ) : !documentsQuery.isError ? (
+              <>
+                <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} spacing="md">
+                  <StatCard
+                    title="Jami hujjatlar"
+                    value={documentsQuery.data?.totalDocuments?.toLocaleString() || 0}
+                    icon={IconFileText}
+                    description="Barcha hujjatlar"
+                  />
+                  <StatCard
+                    title="Kunlik o'rtacha"
+                    value={documentsQuery.data?.averageDocumentsPerDay?.toFixed(1) || 0}
+                    icon={IconTrendingUp}
+                    description="Kuniga yaratilgan"
+                  />
+                  <StatCard
+                    title="Ilovalar bilan"
+                    value={documentsQuery.data?.documentsWithAttachments?.toLocaleString() || 0}
+                    icon={IconFileText}
+                    description="Ilovalar mavjud"
+                  />
+                  <StatCard
+                    title="Jami versiyalar"
+                    value={documentsQuery.data?.totalVersions?.toLocaleString() || 0}
+                    icon={IconActivity}
+                    description="Barcha versiyalar"
+                  />
+                </SimpleGrid>
 
-              <div className="grid gap-6 lg:grid-cols-2">
-                <DocumentTypeChart data={transformDocumentTypeData()} />
-                <DepartmentStatsChart data={transformDepartmentData()} />
-              </div>
+                <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="md">
+                  <DocumentStatusChart data={transformDocumentStatusData()} />
 
-              <MonthlyTrendChart data={transformTrendData()} />
-            </>
-          ) : null}
-        </TabsContent>
+                  <Paper p="lg" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+                    <Text size="md" fw={600} c="#212529" mb={4}>
+                      Muhimlik darajasi
+                    </Text>
+                    <Text size="sm" c="dimmed" mb="lg">
+                      Hujjatlar muhimligi bo'yicha
+                    </Text>
+
+                    {documentsQuery.data?.documentsByPriority && (
+                      <Stack gap="sm">
+                        <PriorityItem
+                          label="Yuqori"
+                          value={documentsQuery.data.documentsByPriority.urgent}
+                          color="#c92a2a"
+                        />
+                        <PriorityItem
+                          label="O'rtacha yuqori"
+                          value={documentsQuery.data.documentsByPriority.high}
+                          color="#495057"
+                        />
+                        <PriorityItem
+                          label="O'rtacha"
+                          value={documentsQuery.data.documentsByPriority.medium}
+                          color="#868e96"
+                        />
+                        <PriorityItem
+                          label="Past"
+                          value={documentsQuery.data.documentsByPriority.low}
+                          color="#2b8a3e"
+                        />
+                      </Stack>
+                    )}
+                  </Paper>
+                </SimpleGrid>
+
+                <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="md">
+                  <DocumentTypeChart data={transformDocumentTypeData()} />
+                  <DepartmentStatsChart data={transformDepartmentData()} />
+                </SimpleGrid>
+
+                <MonthlyTrendChart data={transformTrendData()} />
+              </>
+            ) : null}
+          </Stack>
+        </Tabs.Panel>
 
         {/* Workflows Tab */}
-        <TabsContent value="workflows" className="space-y-6">
-          {workflowsQuery.isError && (
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>
-                Hujjat aylanmasi statistikasi ma'lumotlari hozircha mavjud emas. Backend
-                xatolik yuz berdi.
-              </AlertDescription>
-            </Alert>
-          )}
-          {workflowsQuery.isLoading ? (
-            <div className="grid gap-4 md:grid-cols-2">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <Card key={i}>
-                  <CardContent className="pt-6">
-                    <Skeleton className="h-40 w-full" />
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : !workflowsQuery.isError ? (
-            <>
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <StatCard
-                  title="Jami hujjat aylanmasi"
-                  value={
-                    workflowsQuery.data?.totalWorkflows.toLocaleString() || 0
-                  }
-                  icon={WorkflowIcon}
-                  iconColor="text-blue-600"
-                  iconBgColor="bg-blue-50"
-                  description="Barcha hujjat aylanmasi"
-                />
-                <StatCard
-                  title="O'rtacha Bajarilish Vaqti"
-                  value={`${workflowsQuery.data?.averageCompletionTime.toFixed(1) || 0}h`}
-                  icon={Clock}
-                  iconColor="text-green-600"
-                  iconBgColor="bg-green-50"
-                  description="Soatlarda"
-                />
-                <StatCard
-                  title="Yakunlangan"
-                  value={
-                    workflowsQuery.data?.completedInPeriod.toLocaleString() || 0
-                  }
-                  icon={CheckSquare}
-                  iconColor="text-green-600"
-                  iconBgColor="bg-green-50"
-                  description="Tanlangan davrda"
-                />
-                <StatCard
-                  title="Rad etilgan"
-                  value={
-                    workflowsQuery.data?.rejectedInPeriod?.toLocaleString() || 0
-                  }
-                  icon={AlertCircle}
-                  iconColor="text-red-600"
-                  iconBgColor="bg-red-50"
-                  description="Tanlangan davrda"
-                />
-              </div>
+        <Tabs.Panel value="workflows">
+          <Stack gap="lg">
+            {workflowsQuery.isError && (
+              <Alert icon={<IconAlertCircle size={18} />} color="red" radius="sm">
+                Hujjat aylanmasi statistikasi ma'lumotlari hozircha mavjud emas.
+              </Alert>
+            )}
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Status bo'yicha</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                    {workflowsQuery.data?.workflowsByStatus && (
-                      <>
-                        <div className="p-4 border rounded-lg">
-                          <div className="text-2xl font-bold text-yellow-600">
-                            {workflowsQuery.data.workflowsByStatus.pending}
-                          </div>
-                          <div className="text-sm text-muted-foreground">
-                            Kutilmoqda
-                          </div>
-                        </div>
-                        <div className="p-4 border rounded-lg">
-                          <div className="text-2xl font-bold text-blue-600">
-                            {workflowsQuery.data.workflowsByStatus.inProgress}
-                          </div>
-                          <div className="text-sm text-muted-foreground">
-                            Jarayonda
-                          </div>
-                        </div>
-                        <div className="p-4 border rounded-lg">
-                          <div className="text-2xl font-bold text-green-600">
-                            {workflowsQuery.data.workflowsByStatus.completed}
-                          </div>
-                          <div className="text-sm text-muted-foreground">
-                            Yakunlangan
-                          </div>
-                        </div>
-                        <div className="p-4 border rounded-lg">
-                          <div className="text-2xl font-bold text-red-600">
-                            {workflowsQuery.data.workflowsByStatus.rejected}
-                          </div>
-                          <div className="text-sm text-muted-foreground">
-                            Rad etilgan
-                          </div>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
+            {workflowsQuery.isLoading ? (
+              <LoadingSkeleton />
+            ) : !workflowsQuery.isError ? (
+              <>
+                <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} spacing="md">
+                  <StatCard
+                    title="Jami jarayonlar"
+                    value={workflowsQuery.data?.totalWorkflows?.toLocaleString() || 0}
+                    icon={IconArrowsExchange}
+                    description="Barcha hujjat aylanmasi"
+                  />
+                  <StatCard
+                    title="O'rtacha vaqt"
+                    value={`${workflowsQuery.data?.averageCompletionTime?.toFixed(1) || 0} soat`}
+                    icon={IconClock}
+                    description="Bajarilish vaqti"
+                  />
+                  <StatCard
+                    title="Yakunlangan"
+                    value={workflowsQuery.data?.completedInPeriod?.toLocaleString() || 0}
+                    icon={IconChecklist}
+                    description="Tanlangan davrda"
+                  />
+                  <StatCard
+                    title="Rad etilgan"
+                    value={workflowsQuery.data?.rejectedInPeriod?.toLocaleString() || 0}
+                    icon={IconAlertCircle}
+                    description="Tanlangan davrda"
+                  />
+                </SimpleGrid>
 
-              {/* Step Completion Rates */}
-              {workflowsQuery.data?.stepCompletionRates &&
-                workflowsQuery.data.stepCompletionRates.length > 0 && (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Qadam bajarilish darajasi</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>Qadam</TableHead>
-                            <TableHead>Bajarilish %</TableHead>
-                            <TableHead>O'rtacha vaqt (soat)</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {workflowsQuery.data.stepCompletionRates.map(
-                            (step) => (
-                              <TableRow key={step.stepOrder}>
-                                <TableCell>
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-muted-foreground">
-                                      #{step.stepOrder}
-                                    </span>
+                <Paper p="lg" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+                  <Text size="md" fw={600} c="#212529" mb="lg">
+                    Status bo'yicha
+                  </Text>
+
+                  {workflowsQuery.data?.workflowsByStatus && (
+                    <SimpleGrid cols={{ base: 2, lg: 4 }} spacing="md">
+                      <StatusBox
+                        label="Kutilmoqda"
+                        value={workflowsQuery.data.workflowsByStatus.pending}
+                        color="#495057"
+                      />
+                      <StatusBox
+                        label="Jarayonda"
+                        value={workflowsQuery.data.workflowsByStatus.inProgress}
+                        color="#1e3a5f"
+                      />
+                      <StatusBox
+                        label="Yakunlangan"
+                        value={workflowsQuery.data.workflowsByStatus.completed}
+                        color="#2b8a3e"
+                      />
+                      <StatusBox
+                        label="Rad etilgan"
+                        value={workflowsQuery.data.workflowsByStatus.rejected}
+                        color="#c92a2a"
+                      />
+                    </SimpleGrid>
+                  )}
+                </Paper>
+
+                {workflowsQuery.data?.stepCompletionRates &&
+                  workflowsQuery.data.stepCompletionRates.length > 0 && (
+                    <Paper p="lg" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+                      <Text size="md" fw={600} c="#212529" mb="lg">
+                        Qadam bajarilish darajasi
+                      </Text>
+
+                      <Table striped highlightOnHover>
+                        <Table.Thead>
+                          <Table.Tr>
+                            <Table.Th style={{ color: "#495057" }}>Qadam</Table.Th>
+                            <Table.Th style={{ color: "#495057" }}>Bajarilish</Table.Th>
+                            <Table.Th style={{ color: "#495057" }}>O'rtacha vaqt</Table.Th>
+                          </Table.Tr>
+                        </Table.Thead>
+                        <Table.Tbody>
+                          {workflowsQuery.data.stepCompletionRates.map((step) => (
+                            <Table.Tr key={step.stepOrder}>
+                              <Table.Td>
+                                <Group gap="xs">
+                                  <Text size="sm" c="dimmed">
+                                    #{step.stepOrder}
+                                  </Text>
+                                  <Text size="sm" c="#212529">
                                     {step.stepName}
-                                  </div>
-                                </TableCell>
-                                <TableCell>
-                                  <div className="flex items-center gap-2">
-                                    <div className="w-20 h-2 bg-gray-200 rounded-full">
-                                      <div
-                                        className="h-2 bg-green-600 rounded-full"
-                                        style={{
-                                          width: `${step.completionRate}%`,
-                                        }}
-                                      />
-                                    </div>
-                                    <span className="font-medium">
-                                      {step.completionRate}%
-                                    </span>
-                                  </div>
-                                </TableCell>
-                                <TableCell>
-                                  {step.averageCompletionTime.toFixed(1)}h
-                                </TableCell>
-                              </TableRow>
-                            ),
-                          )}
-                        </TableBody>
+                                  </Text>
+                                </Group>
+                              </Table.Td>
+                              <Table.Td>
+                                <Group gap="sm">
+                                  <Progress
+                                    value={step.completionRate}
+                                    size="md"
+                                    radius="sm"
+                                    w={80}
+                                    color="#1e3a5f"
+                                  />
+                                  <Text size="sm" fw={500} c="#212529">
+                                    {step.completionRate}%
+                                  </Text>
+                                </Group>
+                              </Table.Td>
+                              <Table.Td>
+                                <Text size="sm" c="#495057">
+                                  {step.averageCompletionTime.toFixed(1)} soat
+                                </Text>
+                              </Table.Td>
+                            </Table.Tr>
+                          ))}
+                        </Table.Tbody>
                       </Table>
-                    </CardContent>
-                  </Card>
-                )}
-            </>
-          ) : null}
-        </TabsContent>
+                    </Paper>
+                  )}
+              </>
+            ) : null}
+          </Stack>
+        </Tabs.Panel>
 
         {/* Users Tab */}
-        <TabsContent value="users" className="space-y-6">
-          {usersQuery.isError && (
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>
+        <Tabs.Panel value="users">
+          <Stack gap="lg">
+            {usersQuery.isError && (
+              <Alert icon={<IconAlertCircle size={18} />} color="red" radius="sm">
                 Foydalanuvchi statistikasi ma'lumotlari hozircha mavjud emas.
-                Backend xatolik yuz berdi.
-              </AlertDescription>
-            </Alert>
-          )}
-          {usersQuery.isLoading ? (
-            <div className="grid gap-4 md:grid-cols-2">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <Card key={i}>
-                  <CardContent className="pt-6">
-                    <Skeleton className="h-40 w-full" />
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : !usersQuery.isError ? (
-            <>
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                <StatCard
-                  title="Aktiv Foydalanuvchilar"
-                  value={
-                    usersQuery.data?.totalActiveUsers.toLocaleString() || 0
-                  }
-                  icon={Users}
-                  iconColor="text-blue-600"
-                  iconBgColor="bg-blue-50"
-                  description="Faol foydalanuvchilar"
-                />
-                <StatCard
-                  title="O'rtacha Hujjatlar"
-                  value={
-                    usersQuery.data?.averageDocumentsPerUser.toFixed(1) || 0
-                  }
-                  icon={FileText}
-                  iconColor="text-green-600"
-                  iconBgColor="bg-green-50"
-                  description="Har bir foydalanuvchiga"
-                />
-                <StatCard
-                  title="O'rtacha Qadam"
-                  value={
-                    usersQuery.data?.averageWorkflowStepsPerUser.toFixed(1) || 0
-                  }
-                  icon={Activity}
-                  iconColor="text-purple-600"
-                  iconBgColor="bg-purple-50"
-                  description="Hujjat aylanmasi qadamlari"
-                />
-              </div>
+              </Alert>
+            )}
 
-              {/* Top Active Users */}
-              {usersQuery.data?.topActiveUsers &&
-                usersQuery.data.topActiveUsers.length > 0 && (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Eng faol foydalanuvchilar</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>Foydalanuvchi</TableHead>
-                            <TableHead>Yaratilgan hujjatlar</TableHead>
-                            <TableHead>Bajarilgan qadam</TableHead>
-                            <TableHead>Kutilayotgan qadam</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
+            {usersQuery.isLoading ? (
+              <LoadingSkeleton />
+            ) : !usersQuery.isError ? (
+              <>
+                <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="md">
+                  <StatCard
+                    title="Aktiv foydalanuvchilar"
+                    value={usersQuery.data?.totalActiveUsers?.toLocaleString() || 0}
+                    icon={IconUsers}
+                    description="Faol foydalanuvchilar"
+                  />
+                  <StatCard
+                    title="O'rtacha hujjatlar"
+                    value={usersQuery.data?.averageDocumentsPerUser?.toFixed(1) || 0}
+                    icon={IconFileText}
+                    description="Har bir foydalanuvchiga"
+                  />
+                  <StatCard
+                    title="O'rtacha qadam"
+                    value={usersQuery.data?.averageWorkflowStepsPerUser?.toFixed(1) || 0}
+                    icon={IconActivity}
+                    description="Hujjat aylanmasi qadamlari"
+                  />
+                </SimpleGrid>
+
+                {usersQuery.data?.topActiveUsers &&
+                  usersQuery.data.topActiveUsers.length > 0 && (
+                    <Paper p="lg" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+                      <Text size="md" fw={600} c="#212529" mb="lg">
+                        Eng faol foydalanuvchilar
+                      </Text>
+
+                      <Table striped highlightOnHover>
+                        <Table.Thead>
+                          <Table.Tr>
+                            <Table.Th style={{ color: "#495057" }}>Foydalanuvchi</Table.Th>
+                            <Table.Th style={{ color: "#495057" }}>Yaratilgan</Table.Th>
+                            <Table.Th style={{ color: "#495057" }}>Bajarilgan</Table.Th>
+                            <Table.Th style={{ color: "#495057" }}>Kutilayotgan</Table.Th>
+                          </Table.Tr>
+                        </Table.Thead>
+                        <Table.Tbody>
                           {usersQuery.data.topActiveUsers.map((user) => (
-                            <TableRow key={user.userId}>
-                              <TableCell>
-                                <div>
-                                  <div className="font-medium">
+                            <Table.Tr key={user.userId}>
+                              <Table.Td>
+                                <Box>
+                                  <Text size="sm" fw={500} c="#212529">
                                     {user.fullName}
-                                  </div>
-                                  <div className="text-sm text-muted-foreground">
+                                  </Text>
+                                  <Text size="xs" c="dimmed">
                                     @{user.username}
-                                  </div>
-                                </div>
-                              </TableCell>
-                              <TableCell>{user.documentsCreated}</TableCell>
-                              <TableCell>
-                                {user.workflowStepsCompleted}
-                              </TableCell>
-                              <TableCell>{user.workflowStepsPending}</TableCell>
-                            </TableRow>
+                                  </Text>
+                                </Box>
+                              </Table.Td>
+                              <Table.Td>
+                                <Text size="sm" fw={500} c="#212529">
+                                  {user.documentsCreated}
+                                </Text>
+                              </Table.Td>
+                              <Table.Td>
+                                <Text size="sm" fw={500} c="#2b8a3e">
+                                  {user.workflowStepsCompleted}
+                                </Text>
+                              </Table.Td>
+                              <Table.Td>
+                                <Text size="sm" fw={500} c="#495057">
+                                  {user.workflowStepsPending}
+                                </Text>
+                              </Table.Td>
+                            </Table.Tr>
                           ))}
-                        </TableBody>
+                        </Table.Tbody>
                       </Table>
-                    </CardContent>
-                  </Card>
-                )}
+                    </Paper>
+                  )}
 
-              {/* Department Activity */}
-              <DepartmentStatsChart data={transformDepartmentData()} />
-            </>
-          ) : null}
-        </TabsContent>
+                <DepartmentStatsChart data={transformDepartmentData()} />
+              </>
+            ) : null}
+          </Stack>
+        </Tabs.Panel>
       </Tabs>
-    </div>
+    </Box>
+  );
+}
+
+function PriorityItem({
+  label,
+  value,
+  color,
+}: {
+  label: string;
+  value: number;
+  color: string;
+}) {
+  return (
+    <Group
+      justify="space-between"
+      py={8}
+      px="sm"
+      style={{ backgroundColor: "#f8f9fa", borderRadius: 4 }}
+    >
+      <Text size="sm" c="#495057">
+        {label}
+      </Text>
+      <Text size="sm" fw={600} style={{ color }}>
+        {value}
+      </Text>
+    </Group>
+  );
+}
+
+function StatusBox({
+  label,
+  value,
+  color,
+}: {
+  label: string;
+  value: number;
+  color: string;
+}) {
+  return (
+    <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+      <Text size="xl" fw={700} style={{ color }}>
+        {value}
+      </Text>
+      <Text size="sm" c="dimmed">
+        {label}
+      </Text>
+    </Paper>
   );
 }

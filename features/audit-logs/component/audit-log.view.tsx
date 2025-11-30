@@ -1,20 +1,29 @@
-// audit-log.view.tsx
 "use client";
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { useSearchParams } from "next/navigation";
-import SkeletonWrapper from "@/components/wrappers/skleton-wrapper";
-import { Copy, User, Calendar, Globe, FileText, Activity } from "lucide-react";
-import { handleCopyToClipboard } from "@/utils/copy-text";
+import {
+  Box,
+  Text,
+  Badge,
+  Paper,
+  Group,
+  Stack,
+  Divider,
+  Code,
+  Skeleton,
+  CopyButton,
+  ActionIcon,
+  Tooltip,
+} from "@mantine/core";
+import {
+  IconUser,
+  IconCalendar,
+  IconWorld,
+  IconFileText,
+  IconActivity,
+  IconCopy,
+  IconCheck,
+} from "@tabler/icons-react";
 import { useGetAuditLogById } from "@/features/audit-logs/hook/audit-log.hook";
 import { format } from "date-fns";
 import { AuditAction } from "../type/audit-log.type";
@@ -25,184 +34,263 @@ const AuditLogView = () => {
 
   const { data, isLoading, isFetching } = useGetAuditLogById(auditLogId);
 
-  const getActionColor = (action: AuditAction) => {
+  const getActionColor = (action: AuditAction): string => {
     switch (action) {
       case AuditAction.CREATE:
-        return "bg-green-100 text-green-700 border-green-200";
+        return "green";
       case AuditAction.UPDATE:
-        return "bg-blue-100 text-blue-700 border-blue-200";
+        return "blue";
       case AuditAction.DELETE:
-        return "bg-red-100 text-red-700 border-red-200";
+        return "red";
       case AuditAction.RESTORE:
-        return "bg-yellow-100 text-yellow-700 border-yellow-200";
+        return "yellow";
       case AuditAction.LOGIN:
-        return "bg-purple-100 text-purple-700 border-purple-200";
+        return "violet";
       case AuditAction.LOGOUT:
-        return "bg-gray-100 text-gray-700 border-gray-200";
+        return "gray";
+      case AuditAction.APPROVE:
+        return "teal";
+      case AuditAction.REJECT:
+        return "orange";
+      case AuditAction.ARCHIVE:
+        return "indigo";
       default:
-        return "bg-gray-100 text-gray-700 border-gray-200";
+        return "gray";
     }
   };
 
+  if (isLoading || isFetching) {
+    return (
+      <Stack gap="md">
+        <Skeleton height={100} radius="sm" />
+        <Skeleton height={200} radius="sm" />
+        <Skeleton height={100} radius="sm" />
+      </Stack>
+    );
+  }
+
+  if (!data) {
+    return (
+      <Text c="dimmed" ta="center" py="xl">
+        Ma'lumot topilmadi
+      </Text>
+    );
+  }
+
   return (
-    <SkeletonWrapper isLoading={isLoading || isFetching}>
-      {data && (
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <div className="flex items-start justify-between">
-                <div className="space-y-1">
-                  <CardTitle className="flex items-center gap-2 text-xl">
-                    <Activity className="h-5 w-5 text-primary" />
-                    Audit Log #{data.id.slice(0, 8)}...
-                  </CardTitle>
-                  <CardDescription className="text-sm text-muted-foreground">
-                    Tizim harakati haqida batafsil ma'lumotlar
-                  </CardDescription>
-                </div>
-                {data.id && (
-                  <Badge
-                    variant="outline"
-                    className="font-mono cursor-pointer hover:bg-muted transition-colors"
-                    onClick={() => handleCopyToClipboard(data.id!, "ID")}
-                  >
-                    ID: {data.id.slice(0, 8)}...
-                    <Copy className="ml-1 h-3 w-3" />
-                  </Badge>
-                )}
-              </div>
-            </CardHeader>
-
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <div>
-                    <div className="flex items-center gap-2 mb-2">
-                      <FileText className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium text-sm">Entity</span>
-                    </div>
-                    <div className="p-3 bg-muted/50 rounded-md">
-                      <span className="text-sm font-medium">{data.entity}</span>
-                    </div>
-                  </div>
-
-                  <div>
-                    <div className="flex items-center gap-2 mb-2">
-                      <Activity className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium text-sm">Action</span>
-                    </div>
-                    <Badge
-                      variant="outline"
-                      className={getActionColor(data.action)}
-                    >
-                      {data.action}
-                    </Badge>
-                  </div>
-
-                  <div>
-                    <div className="flex items-center gap-2 mb-2">
-                      <Calendar className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium text-sm">Vaqt</span>
-                    </div>
-                    <div className="p-3 bg-muted/50 rounded-md">
-                      <div className="text-sm">
-                        {format(
-                          new Date(data.performedAt),
-                          "dd.MM.yyyy HH:mm:ss",
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <div>
-                    <div className="flex items-center gap-2 mb-2">
-                      <User className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium text-sm">Foydalanuvchi</span>
-                    </div>
-                    <div className="p-3 bg-muted/50 rounded-md space-y-1">
-                      <div className="text-sm font-medium">
-                        {data.performedBy?.fullname}
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        @{data.performedBy?.username}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <div className="flex items-center gap-2 mb-2">
-                      <Globe className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium text-sm">IP Address</span>
-                    </div>
-                    <div
-                      className="p-3 bg-blue-50 rounded-md border border-blue-200 cursor-pointer hover:bg-blue-100 transition-colors flex items-center justify-between"
-                      onClick={() =>
-                        handleCopyToClipboard(data.ipAddress, "IP Address")
-                      }
-                    >
-                      <code className="text-sm font-mono text-blue-700">
-                        {data.ipAddress}
-                      </code>
-                      <Copy className="h-4 w-4 text-blue-600" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {data.entityId && (
-                <>
-                  <Separator />
-                  <div>
-                    <div className="flex items-center gap-2 mb-3">
-                      <FileText className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">Entity ID</span>
-                    </div>
-                    <div
-                      className="p-3 bg-muted/30 rounded-lg border cursor-pointer hover:bg-muted/50 transition-colors flex items-center justify-between"
-                      onClick={() =>
-                        handleCopyToClipboard(data.entityId, "Entity ID")
-                      }
-                    >
-                      <code className="text-sm font-mono">{data.entityId}</code>
-                      <Copy className="h-4 w-4 text-muted-foreground" />
-                    </div>
-                  </div>
-                </>
-              )}
-
-              {data.changes && Object.keys(data.changes).length > 0 && (
-                <>
-                  <Separator />
-                  <div>
-                    <div className="flex items-center gap-2 mb-3">
-                      <Activity className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">O'zgarishlar</span>
-                    </div>
-                    <div className="p-4 bg-muted/30 rounded-lg border">
-                      <pre className="text-sm whitespace-pre-wrap">
-                        {JSON.stringify(data.changes, null, 2)}
-                      </pre>
-                    </div>
-                  </div>
-                </>
-              )}
-            </CardContent>
-          </Card>
-
-          <div className="flex justify-end gap-3 pt-4">
-            <Button
-              className="hover:text-text-on-dark"
-              variant="outline"
-              onClick={() => window.history.back()}
+    <Stack gap="md">
+      {/* Header Card */}
+      <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+        <Group justify="space-between" align="flex-start">
+          <Group gap="sm">
+            <Box
+              p={8}
+              style={{
+                backgroundColor: "#f1f3f5",
+                borderRadius: 8,
+              }}
             >
-              Yopish
-            </Button>
-          </div>
-        </div>
+              <IconActivity size={20} color="#1e3a5f" />
+            </Box>
+            <Box>
+              <Text size="md" fw={600} c="#212529">
+                Audit Log #{data.id.slice(0, 8)}...
+              </Text>
+              <Text size="sm" c="dimmed">
+                Tizim harakati haqida batafsil ma'lumotlar
+              </Text>
+            </Box>
+          </Group>
+          <CopyButton value={data.id}>
+            {({ copied, copy }) => (
+              <Tooltip label={copied ? "Nusxalandi!" : "ID nusxalash"}>
+                <Badge
+                  variant="light"
+                  color={copied ? "green" : "gray"}
+                  radius="sm"
+                  style={{ cursor: "pointer" }}
+                  onClick={copy}
+                  rightSection={
+                    copied ? <IconCheck size={12} /> : <IconCopy size={12} />
+                  }
+                >
+                  ID: {data.id.slice(0, 8)}...
+                </Badge>
+              </Tooltip>
+            )}
+          </CopyButton>
+        </Group>
+      </Paper>
+
+      {/* Main Info */}
+      <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+        <Box
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(2, 1fr)",
+            gap: 16,
+          }}
+        >
+          {/* Entity */}
+          <Box>
+            <Group gap="xs" mb={8}>
+              <IconFileText size={16} color="#868e96" />
+              <Text size="sm" fw={500} c="#495057">
+                Entity
+              </Text>
+            </Group>
+            <Paper p="sm" radius="sm" style={{ backgroundColor: "#f8f9fa" }}>
+              <Text size="sm" fw={500} c="#212529">
+                {data.entity}
+              </Text>
+            </Paper>
+          </Box>
+
+          {/* Action */}
+          <Box>
+            <Group gap="xs" mb={8}>
+              <IconActivity size={16} color="#868e96" />
+              <Text size="sm" fw={500} c="#495057">
+                Amal
+              </Text>
+            </Group>
+            <Badge variant="light" color={getActionColor(data.action)} radius="sm" size="lg">
+              {data.action}
+            </Badge>
+          </Box>
+
+          {/* User */}
+          <Box>
+            <Group gap="xs" mb={8}>
+              <IconUser size={16} color="#868e96" />
+              <Text size="sm" fw={500} c="#495057">
+                Foydalanuvchi
+              </Text>
+            </Group>
+            <Paper p="sm" radius="sm" style={{ backgroundColor: "#f8f9fa" }}>
+              <Text size="sm" fw={500} c="#212529">
+                {data.performedBy?.fullname || "—"}
+              </Text>
+              <Text size="xs" c="dimmed">
+                @{data.performedBy?.username || "—"}
+              </Text>
+            </Paper>
+          </Box>
+
+          {/* Time */}
+          <Box>
+            <Group gap="xs" mb={8}>
+              <IconCalendar size={16} color="#868e96" />
+              <Text size="sm" fw={500} c="#495057">
+                Vaqt
+              </Text>
+            </Group>
+            <Paper p="sm" radius="sm" style={{ backgroundColor: "#f8f9fa" }}>
+              <Text size="sm" c="#212529">
+                {format(new Date(data.performedAt), "dd.MM.yyyy HH:mm:ss")}
+              </Text>
+            </Paper>
+          </Box>
+
+          {/* IP Address */}
+          <Box style={{ gridColumn: "span 2" }}>
+            <Group gap="xs" mb={8}>
+              <IconWorld size={16} color="#868e96" />
+              <Text size="sm" fw={500} c="#495057">
+                IP Address
+              </Text>
+            </Group>
+            <CopyButton value={data.ipAddress}>
+              {({ copied, copy }) => (
+                <Paper
+                  p="sm"
+                  radius="sm"
+                  style={{
+                    backgroundColor: "#e7f5ff",
+                    border: "1px solid #a5d8ff",
+                    cursor: "pointer",
+                  }}
+                  onClick={copy}
+                >
+                  <Group justify="space-between">
+                    <Code
+                      style={{
+                        backgroundColor: "transparent",
+                        color: "#1971c2",
+                      }}
+                    >
+                      {data.ipAddress}
+                    </Code>
+                    <ActionIcon variant="subtle" color={copied ? "green" : "blue"} size="sm">
+                      {copied ? <IconCheck size={14} /> : <IconCopy size={14} />}
+                    </ActionIcon>
+                  </Group>
+                </Paper>
+              )}
+            </CopyButton>
+          </Box>
+        </Box>
+      </Paper>
+
+      {/* Entity ID */}
+      {data.entityId && (
+        <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+          <Group gap="xs" mb={8}>
+            <IconFileText size={16} color="#868e96" />
+            <Text size="sm" fw={500} c="#495057">
+              Entity ID
+            </Text>
+          </Group>
+          <CopyButton value={data.entityId}>
+            {({ copied, copy }) => (
+              <Paper
+                p="sm"
+                radius="sm"
+                style={{
+                  backgroundColor: "#f8f9fa",
+                  cursor: "pointer",
+                }}
+                onClick={copy}
+              >
+                <Group justify="space-between">
+                  <Code style={{ backgroundColor: "transparent" }}>
+                    {data.entityId}
+                  </Code>
+                  <ActionIcon variant="subtle" color={copied ? "green" : "gray"} size="sm">
+                    {copied ? <IconCheck size={14} /> : <IconCopy size={14} />}
+                  </ActionIcon>
+                </Group>
+              </Paper>
+            )}
+          </CopyButton>
+        </Paper>
       )}
-    </SkeletonWrapper>
+
+      {/* Changes */}
+      {data.changes && Object.keys(data.changes).length > 0 && (
+        <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+          <Group gap="xs" mb={8}>
+            <IconActivity size={16} color="#868e96" />
+            <Text size="sm" fw={500} c="#495057">
+              O'zgarishlar
+            </Text>
+          </Group>
+          <Paper
+            p="sm"
+            radius="sm"
+            style={{
+              backgroundColor: "#f8f9fa",
+              maxHeight: 300,
+              overflow: "auto",
+            }}
+          >
+            <Code block style={{ backgroundColor: "transparent" }}>
+              {JSON.stringify(data.changes, null, 2)}
+            </Code>
+          </Paper>
+        </Paper>
+      )}
+    </Stack>
   );
 };
 

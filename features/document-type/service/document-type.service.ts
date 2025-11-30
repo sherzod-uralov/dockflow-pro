@@ -1,39 +1,36 @@
 import axiosInstance from "@/api/axios.instance";
-import { handleDocumentTypeError } from "@/utils/http-error-handler";
 import { endpoints } from "@/api/axios.endpoints";
 import { DocumentTypeQueryParams, DocumentType as DocumentTypeModel } from "@/features/document-type";
 
-const documentTypeHandler = handleDocumentTypeError;
 export const documentTypeService = {
   getAllDocumentTypes: async (params?: DocumentTypeQueryParams) => {
-    return await documentTypeHandler.executeList(() =>
-      axiosInstance.get(endpoints.documentType.list, {
-        params: {
-          search: params?.search,
-          pageSize: params?.pageSize,
-          pageNumber: params?.pageNumber,
-        },
-      }),
-    );
+    const { data } = await axiosInstance.get(endpoints.documentType.list, {
+      params: {
+        search: params?.search,
+        pageSize: params?.pageSize,
+        pageNumber: params?.pageNumber,
+      },
+    });
+    return data;
   },
-  createDocumentType: async (data: DocumentTypeModel) => {
-    return await documentTypeHandler.executeCreate(() =>
-      axiosInstance.post(endpoints.documentType.create, data),
-    );
+
+  createDocumentType: async (payload: DocumentTypeModel) => {
+    const { data } = await axiosInstance.post(endpoints.documentType.create, payload);
+    return data;
   },
-  updateDocumentType: async (id: string, data: Partial<DocumentTypeModel>) => {
-    return await documentTypeHandler.executeUpdate(() =>
-      axiosInstance.patch(endpoints.documentType.update(id), data),
-    );
+
+  updateDocumentType: async (id: string, payload: Partial<DocumentTypeModel>) => {
+    const { data } = await axiosInstance.patch(endpoints.documentType.update(id), payload);
+    return data;
   },
+
   deleteDocumentType: async (id: string) => {
-    return await documentTypeHandler.executeDelete(() =>
-      axiosInstance.delete(endpoints.documentType.delete(id)),
-    );
+    const { data } = await axiosInstance.delete(endpoints.documentType.delete(id));
+    return data;
   },
+
   getDocumentTypeById: async (id: string) => {
-    return await documentTypeHandler.executeGet(() =>
-      axiosInstance.get(endpoints.documentType.detail(id)),
-    );
+    const { data } = await axiosInstance.get(endpoints.documentType.detail(id));
+    return data;
   },
 };

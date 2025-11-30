@@ -24,7 +24,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
+import { notifications } from "@mantine/notifications";
 import { FileUpload } from "@/components/shared/ui/custom-file-upload";
 import { useCreateAttachment } from "@/features/attachment/hook/attachment.hook";
 import { Accept } from "react-dropzone";
@@ -156,7 +156,10 @@ export default function SimpleFormGenerator({
         }
       }
     } catch (error: any) {
-      toast.error(error.message);
+      notifications.show({
+        message: error.message || "Xatolik yuz berdi",
+        color: "red",
+      });
     }
   };
 

@@ -1,287 +1,337 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
 import {
-  ConfirmationModal,
-  CustomModal,
-  useModal,
-} from "@/components/shared/ui/custom-modal";
-import { UserToolbar } from "@/components/shared/ui/custom-dashboard-toolbar";
-import { ModalState } from "@/types/modal";
+  Box,
+  Text,
+  Group,
+  Button,
+  TextInput,
+  Paper,
+  Badge,
+  ActionIcon,
+  Menu,
+  Stack,
+  Center,
+} from "@mantine/core";
 import {
-  useDeleteDocumentTemplate,
+  IconPlus,
+  IconSearch,
+  IconDotsVertical,
+  IconEye,
+  IconEdit,
+  IconTrash,
+  IconFileText,
+  IconTemplate,
+} from "@tabler/icons-react";
+import {
   useGetAllDocumentTemplates,
+  useDeleteDocumentTemplate,
   DocumentTemplateResponse,
-  DocumentTemplateFilter,
-  DocumentTemplateFilterValues,
 } from "@/features/document-template";
-import { DataTable } from "@/components/shared/ui/custom-table";
-import { Badge } from "@/components/ui/badge";
-import { FileEdit } from "lucide-react";
-import {
-  CustomAction,
-  ActionItem,
-  createEditAction,
-  createDeleteAction,
-  createCopyAction,
-  createViewAction,
-} from "@/components/shared/ui/custom-action";
+import { useDebounce } from "@/hooks/use-debaunce";
 import DocumentTemplateFormModal from "../component/document-template.form";
 import DocumentTemplateView from "../component/document-template.view";
-import { useDebounce } from "@/hooks/use-debaunce";
-import { handleCopyToClipboard } from "@/utils/copy-text";
-import { usePagination } from "@/hooks/use-pagination";
+import { DataTable, DataTableColumn } from "@/components/shared/ui/custom-table";
+import { CustomModal, ConfirmationModal, useModal } from "@/components/shared/ui/custom-modal";
 
 const DocumentTemplatePage = () => {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const createModal: ModalState = useModal();
-  const editModal: ModalState = useModal();
-  const deleteModal: ModalState = useModal();
-  const viewModal: ModalState = useModal();
-  const { handlePageChange, handlePageSizeChange, pageNumber, pageSize } =
-    usePagination();
-  const [selectedTemplate, setSelectedTemplate] =
-    useState<DocumentTemplateResponse | null>(null);
-  const [searchQuery, debouncedSearch, setSearchQuery] = useDebounce("", 500);
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [filters, setFilters] = useState<DocumentTemplateFilterValues>({
-    documentTypeId: undefined,
-    isActive: undefined,
-    isPublic: undefined,
-  });
+  // Modals
+  const createModal = useModal();
+  const editModal = useModal();
+  const viewModal = useModal();
+  const deleteModal = useModal();
 
+  // State
+  const [selectedTemplate, setSelectedTemplate] = useState<DocumentTemplateResponse | null>(null);
+  const [searchQuery, debouncedSearch, setSearchQuery] = useDebounce("", 500);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
+  // Query
   const { data, isLoading } = useGetAllDocumentTemplates({
     search: debouncedSearch,
-    pageSize: pageSize,
-    pageNumber: pageNumber,
-    documentTypeId: filters.documentTypeId,
-    isActive: filters.isActive,
-    isPublic: filters.isPublic,
+    pageSize,
+    pageNumber: page,
   });
 
   const deleteMutation = useDeleteDocumentTemplate();
 
-  useEffect(() => {
-    const templateId = searchParams.get("templateId");
+  // Handlers
+  const handleView = (template: DocumentTemplateResponse) => {
+    setSelectedTemplate(template);
+    viewModal.openModal();
+  };
 
-    if (templateId) {
-      const template = data?.data?.find(
-        (t: DocumentTemplateResponse) => t.id === templateId,
-      );
-
-      if (template) {
-        setSelectedTemplate(template);
-        viewModal.openModal();
-      }
-    } else {
-      if (viewModal.isOpen) {
-        viewModal.closeModal();
-      }
-    }
-  }, [searchParams, data]);
-
-  const handleEdit = (item: DocumentTemplateResponse) => {
-    setSelectedTemplate(item);
+  const handleEdit = (template: DocumentTemplateResponse) => {
+    setSelectedTemplate(template);
     editModal.openModal();
   };
 
-  const handleDelete = (id: string) => {
-    deleteMutation.mutate(id);
-    deleteModal.closeModal();
+  const handleDeleteClick = (template: DocumentTemplateResponse) => {
+    setSelectedTemplate(template);
+    deleteModal.openModal();
   };
 
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
+  const handleDeleteConfirm = () => {
+    if (selectedTemplate) {
+      deleteMutation.mutate(selectedTemplate.id, {
+        onSuccess: () => {
+          deleteModal.closeModal();
+          setSelectedTemplate(null);
+        },
+      });
+    }
   };
 
-  const handleEditSuccess = () => {
-    setSelectedTemplate(null);
-  };
-
-  const handleEditModalClose = () => {
-    setSelectedTemplate(null);
+  const handleEditClose = () => {
     editModal.closeModal();
-  };
-
-  const handleEditDocument = (item: DocumentTemplateResponse) => {
-    router.push(`/document-edit?id=${item.templateFile?.id}`);
-  };
-
-  const handleViewTemplate = (item: DocumentTemplateResponse) => {
-    setSelectedTemplate(item);
-    viewModal.openModal();
-    router.push(`?templateId=${item.id}`, { scroll: false });
-  };
-
-  const handleCloseViewModal = () => {
-    viewModal.closeModal();
     setSelectedTemplate(null);
-    router.push(window.location.pathname, { scroll: false });
   };
 
-  const handleApplyFilters = (newFilters: DocumentTemplateFilterValues) => {
-    setFilters(newFilters);
-  };
+  // Table columns
+  const columns: DataTableColumn<DocumentTemplateResponse>[] = [
+    {
+      accessorKey: "name",
+      header: "Nomi",
+      cell: ({ row }) => (
+        <Box>
+          <Text size="sm" fw={500} c="#212529" lineClamp={1}>
+            {row.original.name}
+          </Text>
+          {row.original.description && (
+            <Text size="xs" c="dimmed" lineClamp={1}>
+              {row.original.description}
+            </Text>
+          )}
+        </Box>
+      ),
+      meta: { minWidth: 200 },
+    },
+    {
+      accessorKey: "documentType",
+      header: "Hujjat turi",
+      cell: ({ row }) => (
+        <Text size="sm" c="#495057">
+          {row.original.documentType?.name || "—"}
+        </Text>
+      ),
+      meta: { minWidth: 150 },
+    },
+    {
+      accessorKey: "templateFile",
+      header: "Fayl",
+      cell: ({ row }) =>
+        row.original.templateFile ? (
+          <Group gap="xs" wrap="nowrap">
+            <IconFileText size={16} color="#868e96" style={{ flexShrink: 0 }} />
+            <Text size="sm" c="#495057" lineClamp={1}>
+              {row.original.templateFile.fileName}
+            </Text>
+          </Group>
+        ) : (
+          <Text size="sm" c="dimmed">
+            Fayl yo'q
+          </Text>
+        ),
+      meta: { minWidth: 150 },
+    },
+    {
+      accessorKey: "isActive",
+      header: "Holati",
+      cell: ({ row }) => (
+        <Badge
+          variant="light"
+          color={row.original.isActive ? "green" : "gray"}
+          radius="sm"
+        >
+          {row.original.isActive ? "Faol" : "Nofaol"}
+        </Badge>
+      ),
+      meta: { width: 100, truncate: false },
+    },
+    {
+      id: "actions",
+      header: "Amallar",
+      cell: ({ row }) => (
+        <Menu shadow="md" width={160} position="bottom-end">
+          <Menu.Target>
+            <ActionIcon variant="subtle" color="gray" radius="sm">
+              <IconDotsVertical size={18} />
+            </ActionIcon>
+          </Menu.Target>
+          <Menu.Dropdown>
+            <Menu.Item
+              leftSection={<IconEye size={16} />}
+              onClick={() => handleView(row.original)}
+            >
+              Ko'rish
+            </Menu.Item>
+            <Menu.Item
+              leftSection={<IconEdit size={16} />}
+              onClick={() => handleEdit(row.original)}
+            >
+              Tahrirlash
+            </Menu.Item>
+            <Menu.Divider />
+            <Menu.Item
+              color="red"
+              leftSection={<IconTrash size={16} />}
+              onClick={() => handleDeleteClick(row.original)}
+            >
+              O'chirish
+            </Menu.Item>
+          </Menu.Dropdown>
+        </Menu>
+      ),
+      meta: { width: 80, truncate: false },
+    },
+  ];
 
-  const handleToggleFilter = () => {
-    setIsFilterOpen((prev) => !prev);
-  };
+  // Empty state
+  const EmptyState = () => (
+    <Center py={60}>
+      <Stack align="center" gap="md">
+        <Box
+          p={16}
+          style={{
+            backgroundColor: "#f1f3f5",
+            borderRadius: 12,
+          }}
+        >
+          <IconTemplate size={40} color="#868e96" stroke={1.5} />
+        </Box>
+        <Text size="lg" fw={500} c="#495057">
+          Shablon topilmadi
+        </Text>
+        <Text size="sm" c="dimmed" ta="center">
+          Yangi shablon qo'shish uchun yuqoridagi tugmani bosing
+        </Text>
+      </Stack>
+    </Center>
+  );
 
   return (
-    <>
-      <UserToolbar
-        searchQuery={searchQuery}
-        searchPlaceholder="Shablonlarni qidirish..."
-        onSearch={handleSearch}
-        createLabel="Shablon qo'shish"
-        onCreate={createModal.openModal}
-        filterLabel="Filtrlash"
-        onFilter={() => handleToggleFilter()}
-      />
-
-      <DocumentTemplateFilter
-        isOpen={isFilterOpen}
-        onToggle={handleToggleFilter}
-        filters={filters}
-        onApplyFilters={handleApplyFilters}
-      />
-
-      <DataTable
-        loading={isLoading}
-        pageSize={pageSize}
-        onPageChange={handlePageChange}
-        onPageSizeChange={handlePageSizeChange}
-        totalCount={data?.count || 0}
-        currentPage={pageNumber}
-        columns={[
-          {
-            header: "Nomi",
-            accessorKey: "name",
-          },
-          {
-            header: "Tavsif",
-            accessorKey: "description",
-          },
-          {
-            header: "Hujjat turi",
-            accessorKey: "documentType",
-            cell: ({ row }) => row.original.documentType.name,
-          },
-          {
-            header: "Fayl",
-            accessorKey: "templateFile",
-            cell: ({ row }) => {
-              const file = row.original.templateFile;
-              return file ? (
-                <div className="flex flex-col gap-1">
-                  <span className="text-sm font-medium">{file.fileName}</span>
-                  <span className="text-xs text-muted-foreground">
-                    {file.fileSize}
-                  </span>
-                </div>
-              ) : (
-                <Badge variant="secondary">Fayl yo'q</Badge>
-              );
+    <Box>
+      {/* Header */}
+      <Group justify="space-between" mb="md">
+        <Box>
+          <Text size="lg" fw={600} c="#212529">
+            Hujjat shablonlari
+          </Text>
+          <Text size="sm" c="dimmed">
+            Hujjatlar uchun tayyor shablonlar
+          </Text>
+        </Box>
+        <Button
+          leftSection={<IconPlus size={18} />}
+          onClick={createModal.openModal}
+          radius="sm"
+          styles={{
+            root: {
+              backgroundColor: "#1e3a5f",
+              "&:hover": { backgroundColor: "#162d4a" },
             },
-          },
-          {
-            header: "Holati",
-            accessorKey: "isActive",
-            cell: ({ row }) => (
-              <Badge variant={row.original.isActive ? "default" : "secondary"}>
-                {row.original.isActive ? "Faol" : "Nofaol"}
-              </Badge>
-            ),
-          },
-          {
-            header: "Ommaviy",
-            accessorKey: "isPublic",
-            cell: ({ row }) => (
-              <Badge variant={row.original.isPublic ? "default" : "outline"}>
-                {row.original.isPublic ? "Ha" : "Yo'q"}
-              </Badge>
-            ),
-          },
-          {
-            header: "Harakatlar",
-            accessorKey: "actions",
-            cell: ({ row }) => {
-              const item = row.original;
+          }}
+        >
+          Shablon qo'shish
+        </Button>
+      </Group>
 
-              const actions: ActionItem[] = [
-                createViewAction(() => handleViewTemplate(item)),
-                {
-                  label: "Hujjatni tahrirlash",
-                  icon: FileEdit,
-                  onClick: () => handleEditDocument(item),
-                  variant: "default",
-                  disabled: !item.templateFile?.fileUrl,
-                  id: "",
-                },
-                createEditAction(() => handleEdit(item)),
-                createCopyAction(() => handleCopyToClipboard(item.id, "ID")),
-                createDeleteAction(() => {
-                  setSelectedTemplate(item);
-                  deleteModal.openModal();
-                }),
-              ];
-
-              return <CustomAction actions={actions} />;
+      {/* Search */}
+      <Paper p="md" radius="sm" withBorder mb="md" style={{ borderColor: "#e9ecef" }}>
+        <TextInput
+          placeholder="Shablonlarni qidirish..."
+          leftSection={<IconSearch size={18} color="#868e96" />}
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          radius="sm"
+          size="md"
+          styles={{
+            input: {
+              fontSize: 15,
             },
-          },
-        ]}
-        data={data?.data || []}
-      />
+          }}
+        />
+      </Paper>
 
+      {/* Table */}
+      {!isLoading && data?.data?.length === 0 ? (
+        <Paper radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+          <EmptyState />
+        </Paper>
+      ) : (
+        <DataTable
+          columns={columns}
+          data={data?.data || []}
+          loading={isLoading}
+          totalCount={data?.count || 0}
+          currentPage={page}
+          pageSize={pageSize}
+          onPageChange={setPage}
+          onPageSizeChange={(size) => {
+            setPageSize(size);
+            setPage(1);
+          }}
+          emptyMessage="Shablon topilmadi"
+        />
+      )}
+
+      {/* Create Modal */}
       <CustomModal
-        size="3xl"
-        closeOnOverlayClick={false}
-        title="Shablon qo'shish"
-        description="Yangi hujjat shablonini yarating"
         isOpen={createModal.isOpen}
         onClose={createModal.closeModal}
-      >
-        <DocumentTemplateFormModal modal={createModal} mode="create" />
-      </CustomModal>
-
-      <CustomModal
-        size="3xl"
+        title="Yangi shablon qo'shish"
+        size="lg"
         closeOnOverlayClick={false}
-        title="Shablonni yangilash"
-        description="Shablon ma'lumotlarini tahrirlang"
-        isOpen={editModal.isOpen}
-        onClose={handleEditModalClose}
       >
         <DocumentTemplateFormModal
-          modal={editModal}
-          mode="update"
-          documentTemplate={selectedTemplate as any}
-          onSuccess={handleEditSuccess}
+          mode="create"
+          onClose={createModal.closeModal}
+          onSuccess={createModal.closeModal}
         />
       </CustomModal>
 
-      <ConfirmationModal
-        closeOnOverlayClick={false}
-        title="Shablonni o'chirish"
-        description="Ushbu shablonni o'chirgandan so'ng qaytarib bo'lmaydi. Rozimisiz?"
-        onClose={deleteModal.closeModal}
-        isOpen={deleteModal.isOpen}
-        onConfirm={() => {
-          handleDelete(selectedTemplate?.id as string);
-        }}
-      />
-
+      {/* Edit Modal */}
       <CustomModal
-        closeOnOverlayClick
-        isOpen={viewModal.isOpen}
-        onClose={handleCloseViewModal}
-        title="Shablon ma'lumotlari"
+        isOpen={editModal.isOpen}
+        onClose={handleEditClose}
+        title="Shablonni tahrirlash"
+        size="lg"
+        closeOnOverlayClick={false}
       >
-        <DocumentTemplateView />
+        <DocumentTemplateFormModal
+          mode="update"
+          documentTemplate={selectedTemplate}
+          onClose={handleEditClose}
+          onSuccess={handleEditClose}
+        />
       </CustomModal>
-    </>
+
+      {/* View Modal */}
+      <CustomModal
+        isOpen={viewModal.isOpen}
+        onClose={viewModal.closeModal}
+        title="Shablon ma'lumotlari"
+        size="lg"
+      >
+        {selectedTemplate && (
+          <DocumentTemplateView template={selectedTemplate} />
+        )}
+      </CustomModal>
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={deleteModal.isOpen}
+        onClose={deleteModal.closeModal}
+        onConfirm={handleDeleteConfirm}
+        title="Shablonni o'chirish"
+        description={`"${selectedTemplate?.name}" shablonini o'chirmoqchimisiz? Bu amalni qaytarib bo'lmaydi.`}
+        confirmText="O'chirish"
+        cancelText="Bekor qilish"
+        variant="destructive"
+      />
+    </Box>
   );
 };
 

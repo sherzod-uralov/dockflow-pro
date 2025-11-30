@@ -1,83 +1,84 @@
 "use client";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  PieChart,
-  Pie,
-  Cell,
-  ResponsiveContainer,
-  Legend,
-  Tooltip,
-} from "recharts";
+import { Paper, Text, Box, Group, Stack, Progress } from "@mantine/core";
 import type { DocumentStatusChartData } from "../type/statistics.type";
 
 interface DocumentStatusChartProps {
   data: DocumentStatusChartData[];
 }
 
+// Status ranglari - tushunarli va jiddiy
+const STATUS_COLORS: Record<string, string> = {
+  "Tayyorlanmoqda": "#495057",
+  "Jarayonda": "#e67700",
+  "Tekshiruvda": "#1971c2",
+  "Tasdiqlangan": "#2b8a3e",
+  "Bekor qilingan": "#c92a2a",
+  "Arxiv": "#868e96",
+  "Chop etilgan": "#2b8a3e",
+};
+
 export function DocumentStatusChart({ data }: DocumentStatusChartProps) {
-  const chartData = data.map((item) => ({
-    name: item.status,
-    value: item.count,
-    color: item.color,
-  }));
+  const total = data.reduce((sum, item) => sum + item.count, 0);
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Hujjatlar Holati</CardTitle>
-        <CardDescription>
-          Hujjatlar holatiga ko'ra taqsimot
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <ResponsiveContainer width="100%" height={300}>
-          <PieChart>
-            <Pie
-              data={chartData}
-              cx="50%"
-              cy="50%"
-              innerRadius={60}
-              outerRadius={90}
-              fill="#8884d8"
-              paddingAngle={5}
-              dataKey="value"
-              label={({ name, percent }) =>
-                `${name}: ${(percent * 100).toFixed(0)}%`
-              }
-            >
-              {chartData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.color} />
-              ))}
-            </Pie>
-            <Tooltip />
-            <Legend />
-          </PieChart>
-        </ResponsiveContainer>
-        <div className="mt-4 grid grid-cols-2 gap-4">
-          {data.map((item, index) => (
-            <div
-              key={index}
-              className="flex items-center gap-2 p-2 rounded-lg bg-muted/50"
-            >
-              <div
-                className="w-3 h-3 rounded-full"
-                style={{ backgroundColor: item.color }}
+    <Paper p="lg" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+      <Text size="md" fw={600} c="#212529" mb={4}>
+        Hujjatlar holati
+      </Text>
+      <Text size="sm" c="dimmed" mb="lg">
+        Holatlar bo'yicha taqsimot
+      </Text>
+
+      <Stack gap="md">
+        {data.map((item) => {
+          const percentage = total > 0 ? Math.round((item.count / total) * 100) : 0;
+          const color = STATUS_COLORS[item.status] || "#868e96";
+          return (
+            <Box key={item.status}>
+              <Group justify="space-between" mb={6}>
+                <Text size="sm" c="#495057">
+                  {item.status}
+                </Text>
+                <Group gap={6}>
+                  <Text size="sm" fw={600} c="#212529">
+                    {item.count}
+                  </Text>
+                  <Text size="sm" c="dimmed">
+                    ({percentage}%)
+                  </Text>
+                </Group>
+              </Group>
+              <Progress
+                value={percentage}
+                size="md"
+                radius="sm"
+                color={color}
               />
-              <div className="flex-1">
-                <p className="text-xs text-muted-foreground">{item.status}</p>
-                <p className="text-sm font-semibold">{item.count}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
+            </Box>
+          );
+        })}
+      </Stack>
+
+      {total > 0 && (
+        <Box
+          mt="lg"
+          p="md"
+          style={{
+            backgroundColor: "#f8f9fa",
+            borderRadius: 4,
+          }}
+        >
+          <Group justify="space-between">
+            <Text size="sm" c="dimmed">
+              Jami hujjatlar
+            </Text>
+            <Text size="md" fw={700} c="#212529">
+              {total.toLocaleString()}
+            </Text>
+          </Group>
+        </Box>
+      )}
+    </Paper>
   );
 }

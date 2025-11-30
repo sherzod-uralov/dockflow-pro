@@ -7,6 +7,7 @@ import {
   DocumentTemplateCreatePayload,
   DocumentTemplateUpdatePayload,
 } from "../type/document-template.type";
+import {showSuccess} from "@/utils/show-error";
 
 export const useGetAllDocumentTemplates = (
   params?: DocumentTemplateQueryParams,
@@ -25,7 +26,7 @@ export const useCreateDocumentTemplate = () => {
       documentTemplateService.createDocumentTemplate(payload),
     onSuccess: () => {
       queryClient.invalidateQueries(["documentTemplates"]);
-      toast.success("Shablon muvaffaqiyatli yaratildi");
+      showSuccess("Shablon muvaffaqiyatli yaratildi");
     },
     onError: (error: any) => {
       toast.error(error.message);

@@ -1,67 +1,87 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { LucideIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
-import Link from "next/link";
+import { Paper, Group, Text, Box } from "@mantine/core";
+import { useRouter } from "next/navigation";
+import type { Icon } from "@tabler/icons-react";
 
 interface StatCardProps {
   title: string;
   value: string | number;
-  icon: LucideIcon;
+  icon: Icon;
   href?: string;
   description?: string;
   trend?: {
     value: number;
     isPositive: boolean;
   };
-  iconColor?: string;
-  iconBgColor?: string;
 }
 
 export function StatCard({
   title,
   value,
   icon: Icon,
-    href,
+  href,
   description,
   trend,
-  iconColor = "text-primary",
-  iconBgColor = "bg-primary/10",
 }: StatCardProps) {
+  const router = useRouter();
+
+  const handleClick = () => {
+    if (href) {
+      router.push(`/dashboard/${href}`);
+    }
+  };
+
   return (
-    <Link href={`/dashboard/${href}`}>
-        <Card className="hover:shadow-lg transition-shadow duration-300">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                    {title}
-                </CardTitle>
-                <div className={cn("p-2 rounded-lg", iconBgColor)}>
-                    <Icon className={cn("h-5 w-5", iconColor)} />
-                </div>
-            </CardHeader>
-            <CardContent>
-                <div className="text-3xl font-bold">{value}</div>
-                {description && (
-                    <p className="text-xs text-muted-foreground mt-1">{description}</p>
-                )}
-                {trend && (
-                    <div className="flex items-center gap-1 mt-2">
-            <span
-                className={cn(
-                    "text-xs font-medium",
-                    trend.isPositive ? "text-green-600" : "text-red-600",
-                )}
-            >
-              {trend.isPositive ? "↑" : "↓"} {Math.abs(trend.value)}%
-            </span>
-                        <span className="text-xs text-muted-foreground">
-              oldingi oydan
-            </span>
-                    </div>
-                )}
-            </CardContent>
-        </Card>
-    </Link>
+    <Paper
+      p="lg"
+      radius="sm"
+      withBorder
+      style={{
+        cursor: href ? "pointer" : "default",
+        borderColor: "#e9ecef",
+      }}
+      onClick={handleClick}
+    >
+      <Group justify="space-between" align="flex-start" mb="md">
+        <Text size="sm" c="dimmed" fw={500}>
+          {title}
+        </Text>
+        <Box
+          p={8}
+          style={{
+            backgroundColor: "#f1f3f5",
+            borderRadius: 6,
+          }}
+        >
+          <Icon size={20} color="#495057" stroke={1.5} />
+        </Box>
+      </Group>
+
+      <Text fw={700} style={{ fontSize: 28, lineHeight: 1.2, color: "#212529" }}>
+        {value}
+      </Text>
+
+      {description && (
+        <Text size="sm" c="dimmed" mt={6}>
+          {description}
+        </Text>
+      )}
+
+      {trend && (
+        <Group gap={6} mt="sm">
+          <Text
+            size="sm"
+            fw={500}
+            c={trend.isPositive ? "#2b8a3e" : "#c92a2a"}
+          >
+            {trend.isPositive ? "+" : "-"}{Math.abs(trend.value)}%
+          </Text>
+          <Text size="sm" c="dimmed">
+            oldingi oydan
+          </Text>
+        </Group>
+      )}
+    </Paper>
   );
 }

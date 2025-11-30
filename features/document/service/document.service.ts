@@ -1,46 +1,42 @@
 import axiosInstance from "@/api/axios.instance";
-import { errorHandlers } from "@/utils/http-error-handler";
 import { endpoints } from "@/api/axios.endpoints";
 import { DocumentQueryParams, GetAllDocuments } from "@/features/document";
 import { DocumentFormType } from "@/features/document/schema/document.schema";
 
-const documentHandler = errorHandlers.document;
-
 export const documentService = {
   getAllDocuments: async (params?: DocumentQueryParams) => {
-    return await documentHandler.executeList(() =>
-      axiosInstance.get<GetAllDocuments>(endpoints.document.list, {
-        params: {
-          search: params?.search,
-          pageSize: params?.pageSize,
-          pageNumber: params?.pageNumber,
-          documentTypeId: params?.documentTypeId,
-          journalId: params?.journalId,
-          status: params?.status,
-          priority: params?.priority,
-          templateId: params?.templateId,
-        },
-      }),
-    );
+    const { data } = await axiosInstance.get<GetAllDocuments>(endpoints.document.list, {
+      params: {
+        search: params?.search,
+        pageSize: params?.pageSize,
+        pageNumber: params?.pageNumber,
+        documentTypeId: params?.documentTypeId,
+        journalId: params?.journalId,
+        status: params?.status,
+        priority: params?.priority,
+        templateId: params?.templateId,
+      },
+    });
+    return data;
   },
-  createDocument: async (data: DocumentFormType) => {
-    return await documentHandler.executeCreate(() =>
-      axiosInstance.post(endpoints.document.create, data),
-    );
+
+  createDocument: async (payload: DocumentFormType) => {
+    const { data } = await axiosInstance.post(endpoints.document.create, payload);
+    return data;
   },
-  updateDocument: async (id: string, data: Partial<DocumentFormType>) => {
-    return await documentHandler.executeUpdate(() =>
-      axiosInstance.patch(endpoints.document.update(id), data),
-    );
+
+  updateDocument: async (id: string, payload: Partial<DocumentFormType>) => {
+    const { data } = await axiosInstance.patch(endpoints.document.update(id), payload);
+    return data;
   },
+
   deleteDocument: async (id: string) => {
-    return await documentHandler.executeDelete(() =>
-      axiosInstance.delete(endpoints.document.delete(id)),
-    );
+    const { data } = await axiosInstance.delete(endpoints.document.delete(id));
+    return data;
   },
+
   getDocumentById: async (id: string) => {
-    return await documentHandler.executeGet(() =>
-      axiosInstance.get(endpoints.document.detail(id)),
-    );
+    const { data } = await axiosInstance.get(endpoints.document.detail(id));
+    return data;
   },
 };

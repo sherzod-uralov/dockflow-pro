@@ -1,6 +1,48 @@
 "use client";
-import React from "react";
+
+import React, { useCallback, memo, useState } from "react";
 import { useRouter } from "next/navigation";
+import {
+  Box,
+  Text,
+  Button,
+  TextInput,
+  Select,
+  Group,
+  Paper,
+  Skeleton,
+  Stack,
+  Badge,
+  ActionIcon,
+  Tabs,
+  Pagination,
+  Progress,
+  Tooltip,
+  Menu,
+  Collapse,
+  SimpleGrid,
+} from "@mantine/core";
+import {
+  IconPlus,
+  IconSearch,
+  IconTemplate,
+  IconInbox,
+  IconDotsVertical,
+  IconPencil,
+  IconTrash,
+  IconEye,
+  IconFileText,
+  IconUser,
+  IconClock,
+  IconChevronRight,
+  IconCircleCheck,
+  IconCircleX,
+  IconPlayerPlay,
+  IconHourglass,
+  IconFilter,
+  IconFilterOff,
+  IconPlayerPause,
+} from "@tabler/icons-react";
 import {
   ConfirmationModal,
   CustomModal,
@@ -12,251 +54,610 @@ import { ModalState } from "@/types/modal";
 import {
   WorkflowApiResponse,
   WorkflowStatus,
+  WorkflowType,
 } from "@/features/workflow/type/workflow.type";
-
 import {
   useDeleteWorkflow,
   useGetAllWorkflows,
 } from "@/features/workflow/hook/workflow.hook";
 import WorkflowForm from "@/features/workflow/component/workflow.form";
 import WorkflowFromTemplateForm from "@/features/workflow/component/workflow-from-template.form";
-import TaskCard from "@/features/workflow/component/task-card";
-import { Card, CardContent } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Inbox, LayoutTemplate, Filter, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { formatDate } from "@/lib/date-utils";
+import { useGetAllDocuments } from "@/features/document";
+import { useOnboarding, TourButton } from "@/hooks/use-onboarding";
 
-const STATUS_TABS = [
-  { value: "", label: "Barchasi" },
-  { value: WorkflowStatus.ACTIVE, label: "Faol" },
-  { value: WorkflowStatus.COMPLETED, label: "Yakunlangan" },
-  { value: WorkflowStatus.CANCELLED, label: "Bekor qilingan" },
-  { value: WorkflowStatus.DRAFT, label: "Qoralama" },
-] as const;
+// Status konfiguratsiyasi
+const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; icon: any }> = {
+  ACTIVE: { label: "Faol", color: "#1971c2", bg: "#e7f5ff", icon: IconPlayerPlay },
+  COMPLETED: { label: "Tugallangan", color: "#2b8a3e", bg: "#ebfbee", icon: IconCircleCheck },
+  CANCELLED: { label: "Bekor qilingan", color: "#c92a2a", bg: "#fff5f5", icon: IconCircleX },
+  PAUSED: { label: "To'xtatilgan", color: "#e67700", bg: "#fff4e6", icon: IconPlayerPause },
+  DRAFT: { label: "Tayyorlanmoqda", color: "#868e96", bg: "#f8f9fa", icon: IconHourglass },
+};
 
-const WORKFLOW_TYPE_FILTER = [
-  { value: "", label: "Barcha turlar" },
+// Type options
+const TYPE_OPTIONS = [
   { value: "CONSECUTIVE", label: "Ketma-ket" },
   { value: "PARALLEL", label: "Parallel" },
-] as const;
+];
+
+// Workflow item komponenti
+const WorkflowItem = memo(({
+  workflow,
+  onView,
+  onEdit,
+  onDelete,
+}: {
+  workflow: WorkflowApiResponse;
+  onView: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
+}) => {
+  const status = STATUS_CONFIG[workflow.status] || STATUS_CONFIG.DRAFT;
+  const StatusIcon = status.icon;
+
+  const totalSteps = workflow.workflowSteps?.length || 0;
+  const completedSteps = workflow.workflowSteps?.filter(s => s.status === "COMPLETED").length || 0;
+  const progress = totalSteps > 0 ? (completedSteps / totalSteps) * 100 : 0;
+
+  const currentStep = workflow.workflowSteps?.find(
+    step => step.order === workflow.currentStepOrder
+  );
+
+  return (
+    <Paper
+      p="md"
+      radius="sm"
+      withBorder
+      style={{
+        borderColor: "#e9ecef",
+        borderLeft: `3px solid ${status.color}`,
+        cursor: "pointer",
+        transition: "all 0.15s ease",
+      }}
+      onClick={onView}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.backgroundColor = "#f8f9fa";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.backgroundColor = "white";
+      }}
+    >
+      <Group justify="space-between" wrap="nowrap">
+        {/* Asosiy ma'lumot */}
+        <Box style={{ flex: 1, minWidth: 0 }}>
+          <Group gap="sm" mb={8} wrap="nowrap">
+            <Text size="md" fw={600} c="#212529" lineClamp={1}>
+              {workflow.document?.title || "Nomsiz hujjat"}
+            </Text>
+            <Badge
+              size="sm"
+              variant="light"
+              leftSection={<StatusIcon size={12} />}
+              style={{ backgroundColor: status.bg, color: status.color, flexShrink: 0 }}
+            >
+              {status.label}
+            </Badge>
+          </Group>
+
+          <Group gap="lg" wrap="nowrap">
+            {/* Hujjat raqami */}
+            <Group gap={6} wrap="nowrap">
+              <IconFileText size={14} color="#868e96" />
+              <Text size="sm" c="#495057" style={{ fontFamily: "monospace" }}>
+                {workflow.document?.documentNumber || "—"}
+              </Text>
+            </Group>
+
+            {/* Joriy bosqich */}
+            <Group gap={6} wrap="nowrap">
+              <IconUser size={14} color="#868e96" />
+              <Text size="sm" c="#495057" lineClamp={1}>
+                {currentStep?.assignedToUser?.fullname || "Tayinlanmagan"}
+              </Text>
+            </Group>
+
+            {/* Sana */}
+            <Group gap={6} wrap="nowrap">
+              <IconClock size={14} color="#868e96" />
+              <Text size="sm" c="#868e96">
+                {formatDate(workflow.createdAt)}
+              </Text>
+            </Group>
+          </Group>
+        </Box>
+
+        {/* Progress */}
+        <Box w={120} style={{ flexShrink: 0 }}>
+          <Group justify="space-between" mb={4}>
+            <Text size="xs" c="#868e96">Jarayon</Text>
+            <Text size="xs" fw={500} c="#495057">{completedSteps}/{totalSteps}</Text>
+          </Group>
+          <Progress
+            value={progress}
+            size="sm"
+            radius="xl"
+            color={workflow.status === "COMPLETED" ? "green" : "blue"}
+          />
+        </Box>
+
+        {/* Amallar */}
+        <Group gap="xs" style={{ flexShrink: 0 }}>
+          <Tooltip label="Ko'rish" position="top">
+            <ActionIcon
+              variant="subtle"
+              color="gray"
+              size="lg"
+              onClick={(e) => {
+                e.stopPropagation();
+                onView();
+              }}
+            >
+              <IconEye size={18} />
+            </ActionIcon>
+          </Tooltip>
+
+          <Menu position="bottom-end" withArrow>
+            <Menu.Target>
+              <ActionIcon
+                variant="subtle"
+                color="gray"
+                size="lg"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <IconDotsVertical size={18} />
+              </ActionIcon>
+            </Menu.Target>
+            <Menu.Dropdown>
+              <Menu.Item
+                leftSection={<IconPencil size={16} />}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit();
+                }}
+              >
+                Tahrirlash
+              </Menu.Item>
+              <Menu.Item
+                leftSection={<IconTrash size={16} />}
+                color="red"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete();
+                }}
+              >
+                O'chirish
+              </Menu.Item>
+            </Menu.Dropdown>
+          </Menu>
+
+          <IconChevronRight size={18} color="#868e96" />
+        </Group>
+      </Group>
+    </Paper>
+  );
+});
+
+WorkflowItem.displayName = "WorkflowItem";
+
+// Loading skeleton
+const LoadingSkeleton = () => (
+  <Stack gap="sm">
+    {[1, 2, 3, 4, 5].map((i) => (
+      <Paper key={i} p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+        <Group justify="space-between">
+          <Box style={{ flex: 1 }}>
+            <Skeleton height={20} width="60%" mb={8} />
+            <Group gap="lg">
+              <Skeleton height={14} width={100} />
+              <Skeleton height={14} width={120} />
+              <Skeleton height={14} width={80} />
+            </Group>
+          </Box>
+          <Skeleton height={24} width={120} />
+        </Group>
+      </Paper>
+    ))}
+  </Stack>
+);
+
+// Empty state
+const EmptyState = ({ onCreateNew }: { onCreateNew: () => void }) => (
+  <Paper p="xl" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+    <Stack align="center" gap="md" py="xl">
+      <Box
+        style={{
+          width: 80,
+          height: 80,
+          borderRadius: "50%",
+          backgroundColor: "#f1f3f5",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <IconInbox size={40} color="#adb5bd" stroke={1.5} />
+      </Box>
+      <Text size="lg" fw={600} c="#495057">
+        Hujjat aylanmasi topilmadi
+      </Text>
+      <Text size="sm" c="dimmed" ta="center" maw={400}>
+        Hozircha hech qanday hujjat aylanmasi mavjud emas
+      </Text>
+      <Button
+        size="md"
+        radius="sm"
+        leftSection={<IconPlus size={18} />}
+        onClick={onCreateNew}
+        style={{ backgroundColor: "#1e3a5f" }}
+      >
+        Yangi aylanma yaratish
+      </Button>
+    </Stack>
+  </Paper>
+);
 
 const WorkflowPage = () => {
   const router = useRouter();
+
+  // Onboarding tour
+  useOnboarding("workflow");
+
   const createModal: ModalState = useModal();
   const templateModal: ModalState = useModal();
   const editModal: ModalState = useModal();
   const deleteModal: ModalState = useModal();
 
-  const { pageNumber, pageSize, handlePageSizeChange, handlePageChange } =
-    usePagination();
+  const { pageNumber, pageSize, handlePageChange } = usePagination();
 
   const [selectedWorkflow, setSelectedWorkflow] =
     React.useState<WorkflowApiResponse | null>(null);
 
   const [search, debouncedSearch, setSearch] = useDebounce("", 500);
-  const [activeStatus, setActiveStatus] = React.useState<string>("");
-  const [workflowType, setWorkflowType] = React.useState<string>("");
-  const [isFilterOpen, setIsFilterOpen] = React.useState(false);
+  const [activeStatus, setActiveStatus] = useState<string>("all");
+  const [filtersOpen, setFiltersOpen] = useState(false);
+
+  // Filter states
+  const [documentFilter, setDocumentFilter] = useState<string | null>(null);
+  const [typeFilter, setTypeFilter] = useState<string | null>(null);
+
+  // Get documents for filter
+  const { data: documentsData } = useGetAllDocuments({
+    pageNumber: 1,
+    pageSize: 100,
+  });
 
   const { data, isLoading } = useGetAllWorkflows({
-    documentId: debouncedSearch || undefined,
-    status: activeStatus ? (activeStatus as WorkflowStatus) : undefined,
-    type: workflowType || undefined,
+    documentId: documentFilter || debouncedSearch || undefined,
+    status: activeStatus !== "all" ? (activeStatus as WorkflowStatus) : undefined,
+    type: typeFilter || undefined,
     page: pageNumber,
     limit: pageSize,
   });
 
   const deleteMutation = useDeleteWorkflow();
 
-  const hasActiveFilters = workflowType !== "";
-
-  const clearFilters = () => {
-    setWorkflowType("");
-    setIsFilterOpen(false);
-  };
-
-  const confirmDelete = () => {
+  const confirmDelete = useCallback(() => {
     if (selectedWorkflow) {
       deleteMutation.mutate(selectedWorkflow.id, {
         onSuccess: () => {
           deleteModal.closeModal();
+          setSelectedWorkflow(null);
         },
       });
     }
+  }, [selectedWorkflow, deleteMutation, deleteModal]);
+
+  const handleView = useCallback((workflow: WorkflowApiResponse) => {
+    router.push(`/dashboard/workflow/${workflow.id}`);
+  }, [router]);
+
+  const handleEdit = useCallback((workflow: WorkflowApiResponse) => {
+    setSelectedWorkflow(workflow);
+    editModal.openModal();
+  }, [editModal]);
+
+  const handleDelete = useCallback((workflow: WorkflowApiResponse) => {
+    setSelectedWorkflow(workflow);
+    deleteModal.openModal();
+  }, [deleteModal]);
+
+  const totalPages = Math.ceil((data?.count || 0) / pageSize);
+
+  // Active filter count
+  const activeFilterCount = [documentFilter, typeFilter].filter(Boolean).length;
+
+  // Clear all filters
+  const clearAllFilters = () => {
+    setDocumentFilter(null);
+    setTypeFilter(null);
   };
 
-  const renderSkeleton = () => (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {[1, 2, 3, 4, 5, 6].map((i) => (
-        <Card key={i}>
-          <CardContent className="p-6 space-y-4">
-            <Skeleton className="h-6 w-3/4" />
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-2/3" />
-            <div className="flex gap-2">
-              <Skeleton className="h-9 flex-1" />
-              <Skeleton className="h-9 flex-1" />
-            </div>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
-  );
-
-  const renderEmptyState = () => (
-    <Card>
-      <CardContent className="flex flex-col items-center justify-center py-12">
-        <Inbox className="h-16 w-16 text-muted-foreground mb-4" />
-        <h3 className="text-lg font-semibold mb-2">Hujjat aylanmasi topilmadi</h3>
-        <p className="text-muted-foreground text-center max-w-md">
-          Hozircha hech qanday hujjat aylanmasi mavjud emas. Yangi hujjat aylanmasi yaratish
-          uchun yuqoridagi tugmani bosing.
-        </p>
-      </CardContent>
-    </Card>
-  );
-
   return (
-    <>
-      <div className="flex flex-col md:flex-row-reverse md:items-center md:justify-between gap-4 mb-4">
-        <div className="flex items-center gap-2">
+    <Box>
+      {/* Header */}
+      <Group justify="space-between" mb="lg">
+        <Box>
+          <Text size="xl" fw={700} c="#212529">
+            Hujjat aylanmalari
+          </Text>
+          <Text size="sm" c="dimmed">
+            Barcha hujjat aylanmalarini boshqaring
+          </Text>
+        </Box>
+
+        <Group gap="sm">
+          <TourButton tourKey="workflow" variant="icon" size="md" />
           <Button
             variant="outline"
-            className="hover:text-text-on-dark"
+            size="sm"
+            radius="sm"
+            leftSection={<IconTemplate size={16} />}
             onClick={() => templateModal.openModal()}
+            data-tour="workflow-template"
+            styles={{
+              root: {
+                borderColor: "#dee2e6",
+                color: "#495057",
+                "&:hover": {
+                  backgroundColor: "#f8f9fa",
+                },
+              },
+            }}
           >
-            <LayoutTemplate className="mr-2 h-4 w-4" />
-            Shablondan yaratish
+            Shablondan
           </Button>
-          <Button onClick={() => createModal.openModal()}>
-            Hujjat aylanmasi yaratish
+          <Button
+            size="sm"
+            radius="sm"
+            leftSection={<IconPlus size={16} />}
+            onClick={() => createModal.openModal()}
+            style={{ backgroundColor: "#1e3a5f" }}
+            data-tour="workflow-create"
+          >
+            Yangi aylanma
           </Button>
-        </div>
-        <div className="flex items-center gap-3 w-full md:w-auto">
-          <div className="relative flex-1 md:flex-none md:w-80">
-            <input
-              placeholder="Hujjat aylanmasi qidirish"
+        </Group>
+      </Group>
+
+      {/* Filters */}
+      <Paper p="md" radius="sm" mb="md" withBorder style={{ borderColor: "#e9ecef" }}>
+        <Group justify="space-between" mb={filtersOpen ? "sm" : 0}>
+          <Group gap="sm">
+            <TextInput
+              placeholder="Qidirish..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-3 pr-3 py-2 bg-transparent border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
+              leftSection={<IconSearch size={16} color="#868e96" />}
+              size="sm"
+              radius="sm"
+              w={250}
+              data-tour="workflow-search"
+              styles={{
+                input: {
+                  backgroundColor: "#f8f9fa",
+                  border: "1px solid #e9ecef",
+                  "&:focus": {
+                    borderColor: "#1e3a5f",
+                  },
+                },
+              }}
             />
-          </div>
-          {/* Filter Button */}
-          <Popover open={isFilterOpen} onOpenChange={setIsFilterOpen}>
-            <PopoverTrigger asChild>
-              <Button variant="outline" className="hover:text-text-on-dark relative py-4">
-                <Filter className="h-4 w-4 mr-2" />
-                Filter
-                {hasActiveFilters && (
-                  <span className="absolute -top-1 -right-1 h-4 w-4 bg-primary text-primary-foreground text-xs rounded-full flex items-center justify-center">
-                    1
-                  </span>
-                )}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-72" align="end">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h4 className="font-medium">Filterlar</h4>
-                  {hasActiveFilters && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={clearFilters}
-                      className="h-8 px-2 text-muted-foreground"
-                    >
-                      <X className="h-4 w-4 mr-1" />
-                      Tozalash
-                    </Button>
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm text-muted-foreground">
-                    Aylanma turi
-                  </label>
-                  <Select value={workflowType} onValueChange={setWorkflowType}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Turni tanlang" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {WORKFLOW_TYPE_FILTER.map((type) => (
-                        <SelectItem key={type.value} value={type.value || "all"}>
-                          {type.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </PopoverContent>
-          </Popover>
-        </div>
-      </div>
+            <ActionIcon
+              variant={filtersOpen ? "filled" : "light"}
+              size="lg"
+              radius="sm"
+              onClick={() => setFiltersOpen(!filtersOpen)}
+              data-tour="workflow-filter"
+              style={{
+                backgroundColor: filtersOpen ? "#1e3a5f" : "#f1f3f5",
+                color: filtersOpen ? "#fff" : "#495057",
+                position: "relative",
+              }}
+            >
+              {activeFilterCount > 0 && (
+                <Badge
+                  size="xs"
+                  circle
+                  color="red"
+                  style={{ position: "absolute", top: -4, right: -4 }}
+                >
+                  {activeFilterCount}
+                </Badge>
+              )}
+              <IconFilter size={18} />
+            </ActionIcon>
+          </Group>
 
-      {/* Status Tabs */}
-      <div className="flex flex-wrap gap-2 mb-6">
-        {STATUS_TABS.map((tab) => (
-          <Button
-            key={tab.value}
-            variant={activeStatus === tab.value ? "default" : "outline"}
-            size="sm"
-            onClick={() => {
-              setActiveStatus(tab.value);
+          <Tabs
+            value={activeStatus}
+            onChange={(value) => {
+              setActiveStatus(value || "all");
               handlePageChange(1);
             }}
-            className={`${cn(
-                    activeStatus === tab.value && "text-primary-foreground"
-            )} hover:text-text-on-dark`}
+            variant="pills"
+            radius="sm"
+            data-tour="workflow-tabs"
           >
-            {tab.label}
-          </Button>
-        ))}
-      </div>
+            <Tabs.List>
+              <Tabs.Tab value="all" style={{ fontWeight: 500 }}>
+                Barchasi
+              </Tabs.Tab>
+              <Tabs.Tab
+                value={WorkflowStatus.ACTIVE}
+                leftSection={<IconPlayerPlay size={14} />}
+                style={{ fontWeight: 500 }}
+              >
+                Faol
+              </Tabs.Tab>
+              <Tabs.Tab
+                value={WorkflowStatus.COMPLETED}
+                leftSection={<IconCircleCheck size={14} />}
+                style={{ fontWeight: 500 }}
+              >
+                Tugallangan
+              </Tabs.Tab>
+              <Tabs.Tab
+                value={WorkflowStatus.CANCELLED}
+                leftSection={<IconCircleX size={14} />}
+                style={{ fontWeight: 500 }}
+              >
+                Bekor qilingan
+              </Tabs.Tab>
+              <Tabs.Tab
+                value={WorkflowStatus.PAUSED}
+                leftSection={<IconPlayerPause size={14} />}
+                style={{ fontWeight: 500 }}
+              >
+                To'xtatilgan
+              </Tabs.Tab>
+            </Tabs.List>
+          </Tabs>
+        </Group>
 
-      {/* Create Modal */}
+        {/* Expanded Filters */}
+        <Collapse in={filtersOpen}>
+          <Box
+            mt="sm"
+            p="sm"
+            style={{
+              backgroundColor: "#f8f9fa",
+              borderRadius: 8,
+              border: "1px solid #e9ecef",
+            }}
+          >
+            <Group justify="space-between" mb="xs">
+              <Text size="xs" fw={600} c="#495057" tt="uppercase">
+                Qo'shimcha filterlar
+              </Text>
+              {activeFilterCount > 0 && (
+                <Button
+                  variant="subtle"
+                  size="compact-xs"
+                  color="red"
+                  leftSection={<IconFilterOff size={12} />}
+                  onClick={clearAllFilters}
+                >
+                  Tozalash
+                </Button>
+              )}
+            </Group>
+            <SimpleGrid cols={2} spacing="sm">
+              <Select
+                size="sm"
+                radius="sm"
+                placeholder="Hujjat bo'yicha"
+                label="Hujjat"
+                clearable
+                searchable
+                value={documentFilter}
+                onChange={setDocumentFilter}
+                data={
+                  documentsData?.data?.map((doc) => ({
+                    value: doc.id || "",
+                    label: `${doc.documentNumber} - ${doc.title}`,
+                  })) || []
+                }
+                styles={{
+                  label: { fontSize: 12, fontWeight: 500, marginBottom: 4 },
+                  input: { backgroundColor: "#fff" },
+                }}
+              />
+              <Select
+                size="sm"
+                radius="sm"
+                placeholder="Turi bo'yicha"
+                label="Aylanma turi"
+                clearable
+                value={typeFilter}
+                onChange={setTypeFilter}
+                data={TYPE_OPTIONS}
+                styles={{
+                  label: { fontSize: 12, fontWeight: 500, marginBottom: 4 },
+                  input: { backgroundColor: "#fff" },
+                }}
+              />
+            </SimpleGrid>
+          </Box>
+        </Collapse>
+      </Paper>
+
+      {/* Content */}
+      {isLoading ? (
+        <LoadingSkeleton />
+      ) : !data || data.data.length === 0 ? (
+        <EmptyState onCreateNew={() => createModal.openModal()} />
+      ) : (
+        <>
+          <Stack gap="sm" mb="lg" data-tour="workflow-list">
+            {data.data.map((workflow) => (
+              <WorkflowItem
+                key={workflow.id}
+                workflow={workflow}
+                onView={() => handleView(workflow)}
+                onEdit={() => handleEdit(workflow)}
+                onDelete={() => handleDelete(workflow)}
+              />
+            ))}
+          </Stack>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <Group justify="space-between">
+              <Text size="sm" c="dimmed">
+                Jami: <Text span fw={600} c="#212529">{data.count}</Text> ta
+              </Text>
+              <Pagination
+                value={pageNumber}
+                onChange={handlePageChange}
+                total={totalPages}
+                size="sm"
+                radius="sm"
+                withEdges
+                styles={{
+                  control: {
+                    borderColor: "#e9ecef",
+                    "&[data-active]": {
+                      backgroundColor: "#1e3a5f",
+                      borderColor: "#1e3a5f",
+                    },
+                  },
+                }}
+              />
+            </Group>
+          )}
+        </>
+      )}
+
+      {/* Modals */}
       <CustomModal
         size="3xl"
         closeOnOverlayClick={false}
-        title="Hujjat aylanmasi yaratish"
-        description="Hujjat uchun aylanma yarating va bosqichlarni belgilang"
+        title="Yangi hujjat aylanmasi"
+        description="Hujjat uchun aylanma yarating"
         isOpen={createModal.isOpen}
         onClose={createModal.closeModal}
       >
         <WorkflowForm modal={createModal} mode="create" />
       </CustomModal>
 
-      {/* Create from Template Modal */}
       <CustomModal
         size="lg"
         closeOnOverlayClick={false}
-        title="Shablondan hujjat aylanmasi yaratish"
-        description="Hujjat va hujjat aylanmasi shablonini tanlang"
+        title="Shablondan yaratish"
+        description="Hujjat va shablonni tanlang"
         isOpen={templateModal.isOpen}
         onClose={templateModal.closeModal}
       >
         <WorkflowFromTemplateForm modal={templateModal} />
       </CustomModal>
 
-      {/* Edit Modal */}
       {selectedWorkflow && (
         <CustomModal
           size="3xl"
           closeOnOverlayClick={false}
-          title="Hujjat aylanmasini tahrirlash"
-          description="Hujjat aylanmasi ma'lumotlarini o'zgartirish"
+          title="Aylanmani tahrirlash"
+          description="Aylanma ma'lumotlarini o'zgartiring"
           isOpen={editModal.isOpen}
           onClose={editModal.closeModal}
         >
@@ -267,92 +668,16 @@ const WorkflowPage = () => {
           />
         </CustomModal>
       )}
+
       <ConfirmationModal
         isOpen={deleteModal.isOpen}
         onClose={deleteModal.closeModal}
         onConfirm={confirmDelete}
+        title="O'chirishni tasdiqlang"
+        description="Bu aylanmani o'chirishni xohlaysizmi? Bu amalni qaytarib bo'lmaydi."
+        variant="destructive"
       />
-      {isLoading ? (
-        renderSkeleton()
-      ) : !data || data.data.length === 0 ? (
-        renderEmptyState()
-      ) : (
-        <>
-          <div className="grid grid-cols-1 gap-4">
-            {data?.data?.map((workflow) => {
-              const currentStep = workflow.workflowSteps.find(
-                (step) => step.order === workflow.currentStepOrder,
-              );
-              if (!currentStep) return null;
-              const taskData = {
-                ...currentStep,
-                workflow: {
-                  id: workflow.id,
-                  documentId: workflow.document?.id || "",
-                  currentStepOrder: workflow.currentStepOrder,
-                  status: workflow.status,
-                  document: workflow.document
-                    ? {
-                        id: workflow.document.id,
-                        title: workflow.document.title,
-                        documentNumber: workflow.document.documentNumber,
-                        description: workflow.document.description || "",
-                        status: workflow.status,
-                        priority: "MEDIUM",
-                      }
-                    : undefined,
-                },
-              };
-
-              return (
-                <TaskCard
-                  key={workflow.id}
-                  task={taskData}
-                  onCardClick={() => {
-                    router.push(`/dashboard/workflow/${workflow.id}`);
-                  }}
-                  onEdit={() => {
-                    setSelectedWorkflow(workflow);
-                    editModal.openModal();
-                  }}
-                  onDelete={() => {
-                    setSelectedWorkflow(workflow);
-                    deleteModal.openModal();
-                  }}
-                  showActions={true}
-                />
-              );
-            })}
-          </div>
-
-          {data.count > pageSize && (
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">
-                Jami: {data.count} ta hujjat aylanmasi
-              </p>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handlePageChange(pageNumber - 1)}
-                  disabled={pageNumber === 1}
-                >
-                  Oldingi
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handlePageChange(pageNumber + 1)}
-                  disabled={pageNumber * pageSize >= data.count}
-                >
-                  Keyingi
-                </Button>
-              </div>
-            </div>
-          )}
-        </>
-      )}
-    </>
+    </Box>
   );
 };
 

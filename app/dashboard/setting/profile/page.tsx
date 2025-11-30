@@ -6,21 +6,6 @@ import ProfilePage from "@/features/setting/profile/page/profile.page";
 const Page = () => {
   return (
     <>
-      <PageHeader
-        title="Profil"
-        description="Profil sozlamasi"
-        items={[
-          {
-            label: "Bosh sahifa",
-            href: "/dashboard",
-            icon: <Home size={16} />,
-          },
-          {
-            label: "Profil",
-            href: "/dashboard/profile",
-          },
-        ]}
-      ></PageHeader>
       <ProfilePage />
     </>
   );

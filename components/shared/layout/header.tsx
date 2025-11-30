@@ -1,22 +1,31 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Menu, Settings, User, LogOut } from "lucide-react";
+  Group,
+  Box,
+  ActionIcon,
+  Menu,
+  Avatar,
+  Text,
+  Divider,
+  Skeleton,
+  Indicator,
+  Tooltip,
+} from "@mantine/core";
+import {
+  IconMenu2,
+  IconSettings,
+  IconUser,
+  IconLogout,
+  IconBell,
+  IconHelp,
+} from "@tabler/icons-react";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
-import {useGetProfileQuery, useLogoutMutation} from "@/features/login/hook/login.hook";
-import { useRouter } from "next/navigation";
+import { useGetProfileQuery, useLogoutMutation } from "@/features/login/hook/login.hook";
+import { useRouter, usePathname } from "next/navigation";
 import { GlobalSearch } from "@/components/shared/layout/global-search";
-import { NotificationDropdown } from "@/components/shared/ui/custom-notification-dropdown";
 import Cookie from "js-cookie";
+import { TourSettingsButton } from "@/hooks/use-onboarding";
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -26,98 +35,152 @@ export function Header({ onMenuClick }: HeaderProps) {
   const { data, isLoading } = useGetProfileQuery();
   const router = useRouter();
   const logOutMutation = useLogoutMutation();
+
   if (isLoading || !data) {
     return (
-      <header className="bg-card border-b border-border px-6 py-4">
-        <div className="flex items-center justify-between">
-          <div>Loading...</div>
-        </div>
-      </header>
+      <Box
+        component="header"
+        px="md"
+        py="sm"
+        style={{
+          borderBottom: "1px solid #e9ecef",
+          backgroundColor: "#fff",
+        }}
+      >
+        <Group justify="space-between">
+          <Skeleton height={36} width={280} radius="sm" />
+          <Group gap="sm">
+            <Skeleton height={32} width={32} radius="sm" />
+            <Skeleton height={32} width={32} radius="sm" />
+          </Group>
+        </Group>
+      </Box>
     );
   }
 
   const fullName = data.fullname;
-  const email = `username: ${data.username}`;
-  const initials = "AD";
+  const email = `@${data.username}`;
+  const initials = fullName
+    ? fullName
+        .split(" ")
+        .map((n: string) => n[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2)
+    : "FN";
 
   const handleProfileClick = () => {
-    router.push("/setting/profile");
+    router.push("/dashboard/setting/profile");
+  };
+
+  const handleLogout = () => {
+    logOutMutation.mutate();
+    Cookie.remove("accessToken");
+    router.push("/login");
   };
 
   return (
-    <header className="bg-card border-b border-border px-6 py-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Button
-            variant="ghost"
-            size="sm"
+    <Box
+      component="header"
+      px="md"
+      py="sm"
+      style={{
+        borderBottom: "1px solid var(--mantine-color-default-border)",
+        backgroundColor: "var(--mantine-color-body)",
+      }}
+      data-tour="header"
+    >
+      <Group justify="space-between">
+        <Group gap="md">
+          <ActionIcon
+            variant="subtle"
+            color="gray"
+            size="lg"
+            radius="sm"
             onClick={onMenuClick}
-            className="lg:hidden text-foreground hover:bg-accent"
+            hiddenFrom="lg"
           >
-            <Menu className="w-5 h-5" />
-          </Button>
+            <IconMenu2 size={20} stroke={1.5} />
+          </ActionIcon>
 
-          <GlobalSearch />
-        </div>
+          <Box data-tour="global-search">
+            <GlobalSearch />
+          </Box>
+        </Group>
 
-        <div className="flex items-center space-x-4">
-          {/*/!* Notification Dropdown *!/*/}
-          {/*<NotificationDropdown />*/}
+        <Group gap="xs">
+          {/* Bildirishnomalar */}
+          <Indicator size={8} color="red" offset={4} disabled>
+            <ActionIcon variant="subtle" color="gray" size="lg" radius="sm">
+              <IconBell size={20} stroke={1.5} />
+            </ActionIcon>
+          </Indicator>
 
-          <ThemeToggle />
+          {/* Tanishuv sozlamalari */}
+          <TourSettingsButton />
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-10 w-10 rounded-xl">
-                <Avatar className="h-9 w-9">
-                  {data.avatarUrl && (
-                    //@ts-ignore
-                    <AvatarImage src={data?.avatarUrl || ""} alt="User" />
-                  )}
-                  <AvatarFallback className="bg-primary text-primary-foreground">
+          <Box data-tour="theme-toggle">
+            <ThemeToggle />
+          </Box>
+
+          <Menu shadow="sm" width={200} position="bottom-end" radius="sm">
+            <Menu.Target>
+              <ActionIcon variant="subtle" color="gray" size="lg" radius="sm" p={4}>
+                <Avatar
+                  size={28}
+                  radius="sm"
+                  src={data.avatarUrl}
+                  alt={fullName}
+                  color="blue"
+                  styles={{
+                    root: {
+                      backgroundColor: "#1e3a5f",
+                    },
+                  }}
+                >
+                  <Text size="xs" c="white" fw={500}>
                     {initials}
-                  </AvatarFallback>
+                  </Text>
                 </Avatar>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              className="w-56 rounded-xl bg-background"
-              align="end"
-              forceMount
-            >
-              <DropdownMenuLabel className="font-normal">
-                <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">{fullName}</p>
-                  <p className="text-xs leading-none text-muted-foreground">
-                    {email}
-                  </p>
-                </div>
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                className="rounded-lg group hover:bg-accent cursor-pointer"
+              </ActionIcon>
+            </Menu.Target>
+
+            <Menu.Dropdown>
+              <Box px="sm" py="xs">
+                <Text size="sm" fw={500} c="dark">
+                  {fullName}
+                </Text>
+                <Text size="xs" c="dimmed">
+                  {email}
+                </Text>
+              </Box>
+
+              <Divider my={4} />
+
+              <Menu.Item
+                leftSection={<IconUser size={16} stroke={1.5} />}
                 onClick={handleProfileClick}
               >
-                <User className="mr-2 group-hover:text-white h-4 w-4" />
-                <span className="group-hover:text-white">Profil</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem className="rounded-lg group hover:bg-accent cursor-pointer">
-                <Settings className="mr-2 group-hover:text-white h-4 w-4" />
-                <span className="group-hover:text-white">Tizimni Sozlash</span>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => {
-                  logOutMutation.mutate();
-                  Cookie.remove("accessToken");
-                  router.push("/login");
-              }} className="rounded-lg group hover:bg-accent cursor-pointer">
-                <LogOut className="mr-2 group-hover:text-white h-4 w-4" />
-                <span className="group-hover:text-white">Tizimdan Chiqish</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </div>
-    </header>
+                Profil
+              </Menu.Item>
+
+              <Menu.Item leftSection={<IconSettings size={16} stroke={1.5} />}>
+                Sozlamalar
+              </Menu.Item>
+
+              <Divider my={4} />
+
+              <Menu.Item
+                leftSection={<IconLogout size={16} stroke={1.5} />}
+                color="red"
+                onClick={handleLogout}
+              >
+                Chiqish
+              </Menu.Item>
+            </Menu.Dropdown>
+          </Menu>
+        </Group>
+      </Group>
+    </Box>
   );
 }

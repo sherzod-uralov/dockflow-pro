@@ -1,25 +1,20 @@
-import { Button } from "@/components/ui/button";
+"use client";
+
+import { Menu, ActionIcon, Divider } from "@mantine/core";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  EllipsisVertical,
-  LucideIcon,
-  Eye,
-  Pencil,
-  Trash,
-  Copy,
-  Download,
-} from "lucide-react";
+  IconDotsVertical,
+  IconEye,
+  IconPencil,
+  IconTrash,
+  IconCopy,
+  IconDownload,
+} from "@tabler/icons-react";
+import { ComponentType } from "react";
 
 export interface ActionItem {
   id: string;
   label: string;
-  icon: LucideIcon;
+  icon: ComponentType<any>;
   onClick: () => void;
   className?: string;
   variant?: "default" | "destructive";
@@ -41,30 +36,28 @@ interface CustomActionProps {
 
 export const CustomAction = ({
   actions,
-  triggerClassName = "h-8 w-8 p-0",
   contentAlign = "end",
-  triggerVariant = "ghost",
   disabled = false,
 }: CustomActionProps) => {
   const renderActionItem = (action: ActionItem) => {
     const Icon = action.icon;
-    const baseClassName =
-      "group cursor-pointer hover:text-white focus:text-white";
-    const variantClassName =
-      action.variant === "destructive"
-        ? "text-red-600 hover:bg-red-600 focus:bg-red-600"
-        : "";
+    const isDestructive = action.variant === "destructive";
 
     return (
-      <DropdownMenuItem
+      <Menu.Item
         key={action.id}
-        className={`${baseClassName} ${variantClassName} ${action.className || ""}`}
+        leftSection={<Icon size={16} />}
         onClick={action.onClick}
         disabled={action.disabled}
+        color={isDestructive ? "red" : undefined}
+        styles={{
+          item: {
+            fontSize: 13,
+          },
+        }}
       >
-        <Icon className="mr-2 h-4 w-4 group-hover:text-text-on-dark" />
         {action.label}
-      </DropdownMenuItem>
+      </Menu.Item>
     );
   };
 
@@ -75,7 +68,7 @@ export const CustomAction = ({
         return (
           <div key={`group-${index}`}>
             {group.items.map(renderActionItem)}
-            {group.separator && <DropdownMenuSeparator />}
+            {group.separator && <Divider my={4} />}
           </div>
         );
       }
@@ -84,42 +77,61 @@ export const CustomAction = ({
   };
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant={triggerVariant}
-          className={`group ${triggerClassName}`}
+    <Menu
+      shadow="sm"
+      position={contentAlign === "end" ? "bottom-end" : "bottom-start"}
+      withArrow
+      arrowPosition="center"
+    >
+      <Menu.Target>
+        <ActionIcon
+          variant="subtle"
+          size="sm"
+          color="gray"
           disabled={disabled}
+          styles={{
+            root: {
+              "&:hover": {
+                backgroundColor: "#f8f9fa",
+              },
+            },
+          }}
         >
-          <span className="sr-only">Amallar menyusini ochish</span>
-          <EllipsisVertical className="h-4 w-4 group-hover:text-white transition-colors" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align={contentAlign}>
+          <IconDotsVertical size={16} />
+        </ActionIcon>
+      </Menu.Target>
+      <Menu.Dropdown
+        styles={{
+          dropdown: {
+            border: "1px solid #e9ecef",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+          },
+        }}
+      >
         {renderActions()}
-      </DropdownMenuContent>
-    </DropdownMenu>
+      </Menu.Dropdown>
+    </Menu>
   );
 };
 
 export const createViewAction = (onClick: () => void): ActionItem => ({
   id: "view",
   label: "To'liq ma'lumotlarni ko'rish",
-  icon: Eye,
+  icon: IconEye,
   onClick,
 });
 
 export const createEditAction = (onClick: () => void): ActionItem => ({
   id: "edit",
   label: "Tahrirlash",
-  icon: Pencil,
+  icon: IconPencil,
   onClick,
 });
 
 export const createDeleteAction = (onClick: () => void): ActionItem => ({
   id: "delete",
   label: "O'chirish",
-  icon: Trash,
+  icon: IconTrash,
   onClick,
   variant: "destructive",
 });
@@ -127,13 +139,13 @@ export const createDeleteAction = (onClick: () => void): ActionItem => ({
 export const createCopyAction = (onClick: () => void): ActionItem => ({
   id: "copy",
   label: "Nusxalash",
-  icon: Copy,
+  icon: IconCopy,
   onClick,
 });
 
 export const createDownloadAction = (onClick: () => void): ActionItem => ({
   id: "download",
   label: "Yuklab olish",
-  icon: Download,
+  icon: IconDownload,
   onClick,
 });

@@ -2,7 +2,6 @@ import { LoginBody } from "@/features/login/type/login.type";
 import { endpoints } from "@/api/axios.endpoints";
 import axiosInstance from "@/api/axios.instance";
 import { AxiosResponse } from "axios";
-import { handleAuthError } from "@/utils/http-error-handler";
 import Cookies from "js-cookie";
 
 interface LoginResponse {
@@ -19,28 +18,24 @@ interface RefreshTokenResponse {
   accessToken: string;
 }
 
-// Token saqlash va o'qish uchun utility funksiyalar
 const tokenUtils = {
   ACCESS_TOKEN_KEY: "accessToken",
   REFRESH_TOKEN_KEY: "refreshToken",
   USER_KEY: "user",
 
   setTokens(accessToken: string, refreshToken: string, user: any): void {
-    // Access token - qisqa muddatli (15 daqiqa)
     Cookies.set(this.ACCESS_TOKEN_KEY, accessToken, {
-      expires: 15 / (24 * 60), // 15 daqiqa
+      expires: 15 / (24 * 60),
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
     });
 
-    // Refresh token - uzoq muddatli (7 kun)
     Cookies.set(this.REFRESH_TOKEN_KEY, refreshToken, {
-      expires: 7, // 7 kun
+      expires: 7,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
     });
 
-    // User ma'lumotlari
     if (user) {
       localStorage.setItem(this.USER_KEY, JSON.stringify(user));
     }
@@ -82,33 +77,31 @@ const tokenUtils = {
 };
 
 export const authService = {
-  // Login qilish
   login: async (data: LoginBody): Promise<LoginResponse> => {
     try {
       const response: AxiosResponse<LoginResponse> = await axiosInstance.post(
         endpoints.auth.login,
-        data,
+        data
       );
 
       if (response.data.accessToken && response.data.refreshToken) {
         tokenUtils.setTokens(
           response.data.accessToken,
           response.data.refreshToken,
-          response.data.user,
+          response.data.user
         );
       }
 
       return response.data;
     } catch (error: any) {
-      tokenUtils.clearTokens();
+      // Don't clear tokens on login failure - there are no tokens to clear yet
       if (error.response?.status === 401) {
-        throw new Error("Login yoki parol noto'g'ri kiritilgan");
+        throw new Error("Login yoki parol noto'g'ri");
       }
       throw error;
     }
   },
 
-  // Token yangilash
   refreshToken: async (): Promise<string> => {
     try {
       const refreshToken = tokenUtils.getRefreshToken();
@@ -118,8 +111,8 @@ export const authService = {
       }
 
       const response = await axiosInstance.post<RefreshTokenResponse>(
-        endpoints.auth.refreshToken, // endpointsga qo'shing
-        { refreshToken },
+        endpoints.auth.refreshToken,
+        { refreshToken }
       );
 
       if (response.data.accessToken) {
@@ -134,41 +127,29 @@ export const authService = {
     }
   },
 
-  // Profil ma'lumotlarini olish
   getProfile: async () => {
-    try {
-      const response = await axiosInstance.get(endpoints.auth.profile.list);
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
+    const { data } = await axiosInstance.get(endpoints.auth.profile.list);
+    return data;
   },
 
-  // Logout qilish
   logout: async (): Promise<void> => {
     try {
-      await handleAuthError.executeCreate(() =>
-        axiosInstance.post(endpoints.auth.logout),
-      );
+      await axiosInstance.post(endpoints.auth.logout);
     } catch (error) {
       console.error("Logout error:", error);
     } finally {
       tokenUtils.clearTokens();
-      // Login sahifasiga yo'naltirish
       if (typeof window !== "undefined") {
         window.location.href = "/login";
       }
     }
   },
 
-  // Profilni yangilash
-  updateProfile: async (data: any): Promise<any> => {
-    return await handleAuthError.executeUpdate(() =>
-      axiosInstance.patch(endpoints.auth.profile.update, data),
-    );
+  updateProfile: async (payload: any): Promise<any> => {
+    const { data } = await axiosInstance.patch(endpoints.auth.profile.update, payload);
+    return data;
   },
 
-  // Token va autentifikatsiya utility funksiyalari
   getAccessToken: (): string | undefined => {
     return tokenUtils.getAccessToken();
   },
@@ -190,4 +171,4 @@ export const authService = {
   },
 };
 
-export interface ProfileBody {}
+export interface ProfileBody { }

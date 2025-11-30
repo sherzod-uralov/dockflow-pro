@@ -6,21 +6,6 @@ import { Home } from "lucide-react";
 const Page = () => {
   return (
     <>
-      <PageHeader
-        title="Jurnallar"
-        description="Jurnallarni boshqarish"
-        items={[
-          {
-            label: "Bosh sahifa",
-            href: "/dashboard",
-            icon: <Home size={16} />,
-          },
-          {
-            label: "Jurnallar",
-            href: "/dashboard/journal",
-          },
-        ]}
-      />
       <JournalPage />
     </>
   );

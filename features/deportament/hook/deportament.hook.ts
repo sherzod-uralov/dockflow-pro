@@ -2,24 +2,20 @@ import { useMutation, useQuery, useQueryClient } from "react-query";
 import { deportamentService } from "../service/deportament.service";
 import {
   GetAllDeportaments,
-  Deportament,
   DeportamentQueryParams,
 } from "../type/deportament.type";
-import { toast } from "sonner";
 import { DeportamentInferType } from "../schema/deportament.schema";
+import { showError, showSuccess } from "@/utils/show-error";
 
 export const useCreateDeportament = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (payload: DeportamentInferType) =>
-      deportamentService.createDeportament(payload),
+    mutationFn: (payload: DeportamentInferType) => deportamentService.createDeportament(payload),
     onSuccess: () => {
       queryClient.invalidateQueries(["deportaments"]);
-      toast.success("Deportament muvaffaqiyatli yaratildi");
+      showSuccess("Bo'lim yaratildi");
     },
-    onError: (error: any) => {
-      toast.error(error.message);
-    },
+    onError: showError,
   });
 };
 
@@ -38,11 +34,9 @@ export const useUpdateDeportament = () => {
       deportamentService.updateDeportament(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries(["deportaments"]);
-      toast.success("Deportament muvaffaqiyatli yangilandi");
+      showSuccess("Bo'lim yangilandi");
     },
-    onError: (error: any) => {
-      toast.error(error.message);
-    },
+    onError: showError,
   });
 };
 
@@ -52,15 +46,9 @@ export const useDeleteDeportament = () => {
     mutationFn: (id: string) => deportamentService.deleteDeportament(id),
     onSuccess: () => {
       queryClient.invalidateQueries(["deportaments"]);
-      toast.success("Deportament muvaffaqiyatli o'chirildi");
+      showSuccess("Bo'lim o'chirildi");
     },
-    onError: (error: any) => {
-      toast.error(
-        error?.response?.data?.message ||
-          error.message ||
-          "O'chirishda xatolik yuz berdi",
-      );
-    },
+    onError: showError,
   });
 };
 
@@ -69,12 +57,5 @@ export const useGetDeportamentById = (id: string) => {
     queryKey: ["deportament", id],
     queryFn: () => deportamentService.getDeportamentById(id),
     enabled: !!id,
-    onError: (error: any) => {
-      toast.error(
-        error?.response?.data?.message ||
-          error.message ||
-          "Ma'lumotni olishda xatolik",
-      );
-    },
   });
 };

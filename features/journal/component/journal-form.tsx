@@ -1,146 +1,220 @@
 "use client";
 
-import React, { useMemo } from "react";
-import { Button } from "@/components/ui/button";
-import { journalCreate } from "../scheme/journal-create";
 import {
-  useJournalCreateMutation,
-  useUpdateJournal,
+    TextInput,
+    Select,
+    Button,
+    Group,
+    Stack,
+    SimpleGrid,
+} from "@mantine/core";
+import { useForm } from "@mantine/form";
+import {
+    IconBook,
+    IconHash,
+    IconTemplate,
+    IconBuilding,
+    IconUser,
+} from "@tabler/icons-react";
+import {
+    useJournalCreateMutation,
+    useUpdateJournal,
 } from "../hook/journal.hook";
 import { useGetAllDeportaments } from "@/features/deportament/hook/deportament.hook";
-import { useGetUserQuery } from "../../admin/admin-users/hook/user.hook";
-import SimpleFormGenerator, {
-  Field,
-} from "@/components/shared/ui/custom-form-generator";
-import { JournalFormProps } from "../types/journal.types";
+import { useGetUserQuery } from "@/features/admin/admin-users/hook/user.hook";
+import { SingleJournalApiResponse } from "../types/journal.types";
 
-const journalSchema = journalCreate();
+interface JournalFormProps {
+    mode: "create" | "edit";
+    journal?: SingleJournalApiResponse | null;
+    onClose: () => void;
+    onSuccess?: () => void;
+}
 
-const JournalForm = ({ modal, mode, journal }: JournalFormProps) => {
-  const { data: departmentsData } = useGetAllDeportaments({
-    pageNumber: 1,
-    pageSize: 100,
-    search: "",
-  });
-  const { data: usersData } = useGetUserQuery({
-    pageNumber: 1,
-    pageSize: 100,
-    search: "",
-  });
+interface JournalFormValues {
+    name: string;
+    prefix: string;
+    format: string;
+    departmentId: string;
+    responsibleUserId: string;
+}
 
-  const journalCreateMutation = useJournalCreateMutation();
-  const journalUpdateMutation = useUpdateJournal();
+const JournalForm = ({ mode, journal, onClose, onSuccess }: JournalFormProps) => {
+    const isUpdate = mode === "edit";
 
-  const isUpdate = mode === "edit";
-  const isLoading =
-    journalCreateMutation.isLoading || journalUpdateMutation.isLoading;
+    // Hooks
+    const createMutation = useJournalCreateMutation();
+    const updateMutation = useUpdateJournal();
 
-  const defaultValues = useMemo(() => {
-    return {
-      name: journal?.name ?? "",
-      prefix: journal?.prefix ?? "",
-      format: journal?.format ?? "",
-      departmentId: journal?.department?.id ?? "",
-      responsibleUserId: journal?.responsibleUser?.id ?? "",
+    const { data: departmentsData, isLoading: isLoadingDepartments } = useGetAllDeportaments({
+        pageNumber: 1,
+        pageSize: 100,
+        search: "",
+    });
+
+    const { data: usersData, isLoading: isLoadingUsers } = useGetUserQuery({
+        pageNumber: 1,
+        pageSize: 100,
+        search: "",
+    });
+
+    // Form
+    const form = useForm<JournalFormValues>({
+        initialValues: {
+            name: journal?.name || "",
+            prefix: journal?.prefix || "",
+            format: journal?.format || "",
+            departmentId: journal?.department?.id || "",
+            responsibleUserId: journal?.responsibleUser?.id || "",
+        },
+        validate: {
+            name: (value) => (!value ? "Jurnal nomi kiritilishi shart" : null),
+            prefix: (value) => (!value ? "Prefiks kiritilishi shart" : null),
+            format: (value) => (!value ? "Format kiritilishi shart" : null),
+            departmentId: (value) => (!value ? "Bo'lim tanlanishi shart" : null),
+            responsibleUserId: (value) => (!value ? "Mas'ul shaxs tanlanishi shart" : null),
+        },
+    });
+
+    const handleSubmit = (values: JournalFormValues) => {
+        if (isUpdate && journal?.id) {
+            updateMutation.mutate(
+                { id: journal.id, data: values },
+                {
+                    onSuccess: () => {
+                        onSuccess?.();
+                    },
+                }
+            );
+        } else {
+            createMutation.mutate(values, {
+                onSuccess: () => {
+                    onSuccess?.();
+                },
+            });
+        }
     };
-  }, [journal]);
 
-  const fields: Field[] = useMemo(() => {
-    return [
-      {
-        type: "text",
-        name: "name",
-        label: "Jurnal nomi",
-        placeholder: "Jurnal nomini kiriting...",
-        colSpan: 2,
-      },
-      {
-        type: "text",
-        name: "prefix",
-        label: "Prefiks",
-        placeholder: "Masalan, KHM",
-      },
-      {
-        type: "text",
-        name: "format",
-        label: "Format",
-        placeholder: "Format kiriting...",
-      },
-      {
-        type: "select",
-        name: "departmentId",
-        label: "Departament",
-        placeholder: "Departamentni tanlang",
-        options:
-          departmentsData?.data?.map((department) => ({
-            label: department.name,
-            value: department.id,
-          })) ?? [],
-        colSpan: 2,
-      },
-      {
-        type: "select",
-        name: "responsibleUserId",
-        label: "Mas'ul shaxs",
-        placeholder: "Foydalanuvchini tanlang",
-        options:
-          usersData?.data?.map((user) => ({
-            label: user.username,
-            value: user.id,
-          })) ?? [],
-        colSpan: 2,
-      },
-    ];
-  }, [departmentsData, usersData]);
+    const isSubmitting = createMutation.isLoading || updateMutation.isLoading;
 
-  const handleSubmit = (values: any) => {
-    if (isUpdate && journal?.id) {
-      journalUpdateMutation.mutate(
-        { id: journal.id, data: values },
-        {
-          onSuccess: () => {
-            modal.closeModal();
-          },
-        },
-      );
-    } else {
-      journalCreateMutation.mutate(values, {
-        onSuccess: () => {
-          modal.closeModal();
-        },
-      });
-    }
-  };
+    return (
+        <form onSubmit={form.onSubmit(handleSubmit)}>
+            <Stack gap="lg">
+                {/* Name */}
+                <TextInput
+                    label="Jurnal nomi"
+                    placeholder="Masalan: Kiruvchi hujjatlar jurnali"
+                    size="md"
+                    radius="sm"
+                    required
+                    leftSection={<IconBook size={18} color="#868e96" />}
+                    {...form.getInputProps("name")}
+                    styles={{
+                        label: { fontWeight: 500, marginBottom: 6 },
+                    }}
+                />
 
-  return (
-    <SimpleFormGenerator
-      schema={journalSchema}
-      fields={fields}
-      defaultValues={defaultValues}
-      onSubmit={handleSubmit}
-      submitLabel={isUpdate ? "Yangilash" : "Qo'shish"}
-      renderActions={({ isSubmitting }) => (
-        <div className="flex gap-2 justify-end">
-          <Button
-            variant="outline"
-            onClick={() => modal.closeModal()}
-            disabled={isLoading}
-          >
-            Bekor qilish
-          </Button>
-          <Button type="submit" disabled={isSubmitting || isLoading}>
-            {isSubmitting || isLoading
-              ? isUpdate
-                ? "Yangilanmoqda..."
-                : "Qo'shilmoqda..."
-              : isUpdate
-                ? "Yangilash"
-                : "Qo'shish"}
-          </Button>
-        </div>
-      )}
-    />
-  );
+                {/* Prefix and Format */}
+                <SimpleGrid cols={2}>
+                    <TextInput
+                        label="Prefiks"
+                        placeholder="Masalan: KHM"
+                        size="md"
+                        radius="sm"
+                        required
+                        leftSection={<IconHash size={18} color="#868e96" />}
+                        {...form.getInputProps("prefix")}
+                        styles={{
+                            label: { fontWeight: 500, marginBottom: 6 },
+                        }}
+                    />
+                    <TextInput
+                        label="Format"
+                        placeholder="Masalan: {PREFIX}-{YEAR}-{NUMBER}"
+                        size="md"
+                        radius="sm"
+                        required
+                        leftSection={<IconTemplate size={18} color="#868e96" />}
+                        {...form.getInputProps("format")}
+                        styles={{
+                            label: { fontWeight: 500, marginBottom: 6 },
+                        }}
+                    />
+                </SimpleGrid>
+
+                {/* Department */}
+                <Select
+                    label="Bo'lim"
+                    placeholder="Bo'limni tanlang"
+                    size="md"
+                    radius="sm"
+                    required
+                    searchable
+                    leftSection={<IconBuilding size={18} color="#868e96" />}
+                    data={
+                        departmentsData?.data?.map((dept) => ({
+                            value: dept.id,
+                            label: dept.name,
+                        })) || []
+                    }
+                    {...form.getInputProps("departmentId")}
+                    styles={{
+                        label: { fontWeight: 500, marginBottom: 6 },
+                    }}
+                    disabled={isLoadingDepartments}
+                />
+
+                {/* Responsible User */}
+                <Select
+                    label="Mas'ul shaxs"
+                    placeholder="Foydalanuvchini tanlang"
+                    size="md"
+                    radius="sm"
+                    required
+                    searchable
+                    leftSection={<IconUser size={18} color="#868e96" />}
+                    data={
+                        usersData?.data?.map((user) => ({
+                            value: user.id,
+                            label: user.username,
+                        })) || []
+                    }
+                    {...form.getInputProps("responsibleUserId")}
+                    styles={{
+                        label: { fontWeight: 500, marginBottom: 6 },
+                    }}
+                    disabled={isLoadingUsers}
+                />
+
+                {/* Actions */}
+                <Group justify="flex-end" gap="sm" pt="md">
+                    <Button
+                        variant="default"
+                        onClick={onClose}
+                        radius="sm"
+                        size="md"
+                        disabled={isSubmitting}
+                    >
+                        Bekor qilish
+                    </Button>
+                    <Button
+                        type="submit"
+                        radius="sm"
+                        size="md"
+                        loading={isSubmitting}
+                        styles={{
+                            root: {
+                                backgroundColor: "#1e3a5f",
+                                "&:hover": { backgroundColor: "#162d4a" },
+                            },
+                        }}
+                    >
+                        {isUpdate ? "Yangilash" : "Qo'shish"}
+                    </Button>
+                </Group>
+            </Stack>
+        </form>
+    );
 };
 
 export default JournalForm;

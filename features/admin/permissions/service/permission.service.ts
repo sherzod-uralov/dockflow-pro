@@ -1,49 +1,36 @@
 import axiosInstance from "@/api/axios.instance";
 import { endpoints } from "@/api/axios.endpoints";
-import { Permission } from "../type/permission.type";
-import { PermissionQueryParams } from "../type/permission.type";
-import { handlePermissionError } from "@/utils/http-error-handler";
-
-const permissionHandler = handlePermissionError;
+import { Permission, PermissionQueryParams } from "../type/permission.type";
 
 export const permissionService = {
   getAllPermissions: async (params?: PermissionQueryParams) => {
-    return await permissionHandler.executeList(() =>
-      axiosInstance.get(endpoints.permission.list, {
-        params: {
-          search: params?.search,
-          pageSize: params?.pageSize,
-          pageNumber: params?.pageNumber,
-        },
-      }),
-    );
+    const { data } = await axiosInstance.get(endpoints.permission.list, {
+      params: {
+        search: params?.search,
+        pageSize: params?.pageSize,
+        pageNumber: params?.pageNumber,
+      },
+    });
+    return data;
   },
 
-  createPermission: async (data: Permission) => {
-    return await permissionHandler.executeCreate(() =>
-      axiosInstance.post(endpoints.permission.create, data),
-    );
+  createPermission: async (payload: Permission) => {
+    const { data } = await axiosInstance.post(endpoints.permission.create, payload);
+    return data;
   },
 
   deletePermission: async (id: string) => {
-    return await permissionHandler.executeDelete(() =>
-      axiosInstance.delete(endpoints.permission.delete(id)),
-    );
+    const { data } = await axiosInstance.delete(endpoints.permission.delete(id));
+    return data;
   },
 
-  updatePermission: async (id: string, data: Partial<Permission>) => {
-    return await permissionHandler.executeUpdate(() =>
-      axiosInstance.patch(endpoints.permission.update(id), data),
-    );
+  updatePermission: async (id: string, payload: Partial<Permission>) => {
+    const { data } = await axiosInstance.patch(endpoints.permission.update(id), payload);
+    return data;
   },
-  getPermission: async (id: string) => {
-    return await permissionHandler.executeGet(() =>
-      axiosInstance.get(endpoints.permission.detail(id)),
-    );
-  },
+
   getPermissionById: async (id: string) => {
-    return await permissionHandler.executeGet(() =>
-      axiosInstance.get(endpoints.permission.detail(id)),
-    );
+    const { data } = await axiosInstance.get(endpoints.permission.detail(id));
+    return data;
   },
 };

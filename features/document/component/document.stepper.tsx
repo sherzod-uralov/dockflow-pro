@@ -1,28 +1,34 @@
 "use client";
 
-import React from "react";
-import { Steps, Badge, Avatar, Tag, Divider } from "antd";
+import React, { memo } from "react";
+import {
+  Paper,
+  Text,
+  Group,
+  Box,
+  Badge,
+  Avatar,
+  Stack,
+  Divider,
+  ScrollArea,
+  Tooltip,
+  ThemeIcon,
+} from "@mantine/core";
+import {
+  IconCheck,
+  IconX,
+  IconClock,
+  IconUser,
+  IconQrcode,
+  IconEye,
+  IconEdit,
+  IconUsers,
+  IconWritingSign,
+} from "@tabler/icons-react";
 import dayjs from "dayjs";
 import "dayjs/locale/uz";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
-import { Card } from "@/components/ui/card";
-import {
-  Tooltip,
-  TooltipTrigger,
-  TooltipContent,
-} from "@/components/ui/tooltip";
-
-import {
-  CheckCircleFilled,
-  CloseCircleFilled,
-  ClockCircleFilled,
-  UserOutlined,
-  QrcodeOutlined,
-  EyeOutlined,
-  EditOutlined,
-  TeamOutlined,
-} from "@ant-design/icons";
 import Link from "next/link";
 
 dayjs.extend(utc);
@@ -49,251 +55,302 @@ interface WorkflowStep {
   }>;
 }
 
+const getActionTypeName = (actionType: string) => {
+  switch (actionType) {
+    case "QR_CODE":
+      return "QR kod qo'shish";
+    case "APPROVAL":
+      return "Tasdiqlash";
+    case "VIEW":
+    case "REVIEW":
+      return "Ko'rib chiqish";
+    case "EDIT":
+      return "Tahrirlash";
+    case "SIGN":
+      return "Imzolash";
+    case "ACKNOWLEDGE":
+      return "Tasdiqlash";
+    default:
+      return "Tasdiqlash";
+  }
+};
+
+const getActionIcon = (step: WorkflowStep) => {
+  const { isRejected, status, actionType } = step;
+
+  if (isRejected) {
+    return <IconX size={16} />;
+  }
+
+  if (status !== "COMPLETED") {
+    return <IconClock size={16} />;
+  }
+
+  switch (actionType) {
+    case "QR_CODE":
+      return <IconQrcode size={16} />;
+    case "SIGN":
+      return <IconWritingSign size={16} />;
+    case "ACKNOWLEDGE":
+      return <IconCheck size={16} />;
+    case "VIEW":
+    case "REVIEW":
+      return <IconEye size={16} />;
+    case "EDIT":
+      return <IconEdit size={16} />;
+    default:
+      return <IconCheck size={16} />;
+  }
+};
+
+const getStatusColor = (status: string, isRejected: boolean): string => {
+  if (isRejected) return "#c92a2a";
+  if (status === "COMPLETED") return "#2b8a3e";
+  return "#868e96";
+};
+
+const getStatusBgColor = (status: string, isRejected: boolean): string => {
+  if (isRejected) return "#ffe3e3";
+  if (status === "COMPLETED") return "#d3f9d8";
+  return "#f1f3f5";
+};
+
+// Step Card komponenti
+const StepCard = memo(({ step, isLast }: { step: WorkflowStep; isLast: boolean }) => {
+  const statusColor = getStatusColor(step.status, step.isRejected);
+  const statusBgColor = getStatusBgColor(step.status, step.isRejected);
+
+  const tooltipContent = (
+    <Stack gap="xs" p="xs">
+      <Box>
+        <Text size="xs" c="dimmed" fw={600}>Foydalanuvchi</Text>
+        <Text size="sm" fw={500}>{step.assignedToUser.fullname}</Text>
+        {step.assignedToUser.username && (
+          <Text size="xs" c="dimmed">@{step.assignedToUser.username}</Text>
+        )}
+      </Box>
+
+      <Divider />
+
+      <Box>
+        <Text size="xs" c="dimmed" fw={600}>Harakat turi</Text>
+        <Text size="sm">{getActionTypeName(step.actionType)}</Text>
+      </Box>
+
+      <Divider />
+
+      <Box>
+        <Text size="xs" c="dimmed" fw={600}>Holati</Text>
+        <Group gap={6} mt={4}>
+          <Box
+            style={{
+              width: 8,
+              height: 8,
+              borderRadius: "50%",
+              backgroundColor: statusColor,
+            }}
+          />
+          <Text size="sm" style={{ color: statusColor }}>
+            {step.isRejected ? "Rad etildi" : step.status === "COMPLETED" ? "Tugallandi" : "Kutilmoqda"}
+          </Text>
+        </Group>
+      </Box>
+
+      {step.startedAt && (
+        <>
+          <Divider />
+          <Box>
+            <Text size="xs" c="dimmed" fw={600}>Boshlandi</Text>
+            <Text size="sm">
+              {dayjs(step.startedAt).tz("Asia/Tashkent").format("DD MMM, HH:mm")}
+            </Text>
+          </Box>
+        </>
+      )}
+
+      {step.completedAt && (
+        <>
+          <Divider />
+          <Box>
+            <Text size="xs" c="dimmed" fw={600}>Tugallandi</Text>
+            <Text size="sm">
+              {dayjs(step.completedAt).tz("Asia/Tashkent").format("DD MMM, HH:mm")}
+            </Text>
+          </Box>
+        </>
+      )}
+
+      {step.isRejected && step.rejectionReason && (
+        <>
+          <Divider />
+          <Box>
+            <Text size="xs" c="dimmed" fw={600}>Rad etish sababi</Text>
+            <Text size="sm" c="#c92a2a" fs="italic">{step.rejectionReason}</Text>
+          </Box>
+        </>
+      )}
+
+      {step.actions?.[0]?.comment && (
+        <>
+          <Divider />
+          <Box>
+            <Text size="xs" c="dimmed" fw={600}>Izoh</Text>
+            <Text size="sm" fs="italic">"{step.actions[0].comment}"</Text>
+          </Box>
+        </>
+      )}
+    </Stack>
+  );
+
+  return (
+    <Group gap={0} wrap="nowrap" align="flex-start">
+      {/* Step content */}
+      <Box style={{ minWidth: 120, maxWidth: 150 }}>
+        <Tooltip
+          label={tooltipContent}
+          position="top"
+          withArrow
+          multiline
+          w={280}
+          styles={{
+            tooltip: {
+              backgroundColor: "#fff",
+              color: "#212529",
+              border: "1px solid #e9ecef",
+              boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+            },
+          }}
+        >
+          <Link
+            href={`/dashboard/workflow/43204a7f-adb8-4e21-8e2e-fd6ead0a4da9#${step.id}`}
+            style={{ textDecoration: "none" }}
+          >
+            <Stack gap="xs" align="center">
+              {/* Icon */}
+              <ThemeIcon
+                size="lg"
+                radius="xl"
+                style={{
+                  backgroundColor: statusBgColor,
+                  color: statusColor,
+                }}
+              >
+                {getActionIcon(step)}
+              </ThemeIcon>
+
+              {/* User info */}
+              <Stack gap={4} align="center">
+                <Group gap={4}>
+                  <Avatar
+                    size="xs"
+                    radius="xl"
+                    src={step.assignedToUser.avatarUrl}
+                    style={{ backgroundColor: "#1e3a5f" }}
+                  >
+                    <IconUser size={10} />
+                  </Avatar>
+                  <Text size="xs" fw={500} c="#212529" lineClamp={1}>
+                    {step.assignedToUser.fullname.split(" ")[0]}
+                  </Text>
+                </Group>
+
+                {step.isRejected && (
+                  <Badge size="xs" radius="sm" color="red" variant="light">
+                    Rad etildi
+                  </Badge>
+                )}
+
+                <Text size="xs" c="dimmed">
+                  {getActionTypeName(step.actionType)}
+                </Text>
+
+                {step.completedAt && (
+                  <Text size="xs" c="dimmed">
+                    {dayjs(step.completedAt).tz("Asia/Tashkent").format("DD MMM, HH:mm")}
+                  </Text>
+                )}
+              </Stack>
+            </Stack>
+          </Link>
+        </Tooltip>
+      </Box>
+
+      {/* Connector line */}
+      {!isLast && (
+        <Box
+          style={{
+            flex: 1,
+            height: 2,
+            backgroundColor: "#e9ecef",
+            marginTop: 18,
+            minWidth: 24,
+          }}
+        />
+      )}
+    </Group>
+  );
+});
+
+StepCard.displayName = "StepCard";
+
 const WorkflowTracker = ({ workflow }: { workflow: any }) => {
   if (!workflow || workflow.length === 0) return null;
 
   const workflowData = workflow[0];
   const steps: WorkflowStep[] = workflowData?.workflowSteps || [];
 
-  const getActionTypeName = (actionType: string) => {
-    switch (actionType) {
-      case "QR_CODE":
-        return "QR kod qo'shish";
-      case "APPROVAL":
-        return "Tasdiqlash";
-      case "VIEW":
-      case "REVIEW":
-        return "Ko'rib chiqish";
-      case "EDIT":
-        return "Tahrirlash";
-      case "SIGN":
-        return "Imzolash";
-      case "ACKNOWLEDGE":
-        return "Tasdiqlash";
-      default:
-        return "Tasdiqlash";
-    }
-  };
-
-  const getActionIcon = (step: WorkflowStep) => {
-    const { isRejected, status, actionType } = step;
-
-    if (isRejected) {
-      return <CloseCircleFilled style={{ color: "#ef4444", fontSize: 20 }} />;
-    }
-
-    if (status !== "COMPLETED") {
-      return <ClockCircleFilled style={{ color: "#f59e0b", fontSize: 20 }} />;
-    }
-
-    switch (actionType) {
-      case "QR_CODE":
-        return <QrcodeOutlined style={{ color: "#10b981", fontSize: 20 }} />;
-      case "SIGN":
-        return <EditOutlined style={{ color: "#06b6d4", fontSize: 20 }} />;
-      case "ACKNOWLEDGE":
-        return <CheckCircleFilled style={{ color: "#10b981", fontSize: 20 }} />;
-      case "VIEW":
-      case "REVIEW":
-        return <EyeOutlined style={{ color: "#3b82f6", fontSize: 20 }} />;
-      case "EDIT":
-        return <EditOutlined style={{ color: "#a855f7", fontSize: 20 }} />;
-      default:
-        return <CheckCircleFilled style={{ color: "#10b981", fontSize: 20 }} />;
-    }
-  };
-
-  const getStatusColor = (status: string, isRejected: boolean) => {
-    if (isRejected) return "error";
-    if (status === "COMPLETED") return "success";
-    return "process";
-  };
-
-  const createUserTooltipContent = (step: WorkflowStep) => (
-    <div className="space-y-3 w-72 bg-gray-50 text-gray-800 p-4 rounded-md">
-      <div>
-        <p className="text-xs font-semibold text-gray-500">Foydalanuvchi</p>
-        <p className="text-sm font-medium">{step.assignedToUser.fullname}</p>
-        {step.assignedToUser.username && (
-          <p className="text-xs text-gray-400">
-            @{step.assignedToUser.username}
-          </p>
-        )}
-      </div>
-
-      <div className="border-t border-gray-200 pt-3">
-        <p className="text-xs font-semibold text-gray-500">Harakat turi</p>
-        <p className="text-sm text-text-on-dark">{getActionTypeName(step.actionType)}</p>
-      </div>
-
-      <div className="border-t border-gray-200 pt-3">
-        <p className="text-xs font-semibold text-gray-500">Holati</p>
-        <div className="flex items-center gap-2 mt-1">
-          {step.isRejected ? (
-            <>
-              <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-              <span className="text-sm text-red-600">Rad etildi</span>
-            </>
-          ) : step.status === "COMPLETED" ? (
-            <>
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <span className="text-sm text-green-600">Tugallandi</span>
-            </>
-          ) : (
-            <>
-              <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
-              <span className="text-sm text-yellow-600">Kutilmoqda</span>
-            </>
-          )}
-        </div>
-      </div>
-
-      {step.startedAt && (
-        <div className="border-t border-gray-200 pt-3">
-          <p className="text-xs font-semibold text-gray-500">Boshlandi</p>
-          <p className="text-sm">
-            {dayjs(step.startedAt).tz("Asia/Tashkent").format("DD MMM, HH:mm")}
-          </p>
-        </div>
-      )}
-
-      {step.completedAt && (
-        <div className="border-t border-gray-200 pt-3">
-          <p className="text-xs font-semibold text-gray-500">Tugallandi</p>
-          <p className="text-sm">
-            {dayjs(step.completedAt)
-              .tz("Asia/Tashkent")
-              .format("DD MMM, HH:mm")}
-          </p>
-        </div>
-      )}
-
-      {step.isRejected && step.rejectionReason && (
-        <div className="border-t border-gray-200 pt-3">
-          <p className="text-xs font-semibold text-gray-500">
-            Rad etish sababi
-          </p>
-          <p className="text-sm italic text-red-600">{step.rejectionReason}</p>
-        </div>
-      )}
-
-      {step.actions?.[0]?.comment && (
-        <div className="border-t border-gray-200 pt-3">
-          <p className="text-xs font-semibold text-gray-500">Izoh</p>
-          <p className="text-sm italic text-gray-700">
-            "{step.actions[0].comment}"
-          </p>
-        </div>
-      )}
-    </div>
-  );
-
-  const items: {
-    title: React.JSX.Element;
-    description: React.JSX.Element;
-    icon: React.JSX.Element;
-    status: string;
-  }[] = steps.map((step) => {
-    const titleWithTooltip = (
-      <Link
-        href={`/dashboard/workflow/43204a7f-adb8-4e21-8e2e-fd6ead0a4da9#${step.id}`}
-      >
-        <Tooltip>
-          <TooltipTrigger>
-            <div className="flex items-center gap-2 cursor-help">
-              <Avatar
-                size="small"
-                icon={<UserOutlined />}
-                src={step.assignedToUser.avatarUrl}
-                className="bg-blue-500"
-              />
-              <span className="font-medium text-sm">
-                {step.assignedToUser.fullname.split(" ")[0]}
-              </span>
-              {step.isRejected && (
-                <Tag color="red" className="text-xs">
-                  Rad etildi
-                </Tag>
-              )}
-            </div>
-          </TooltipTrigger>
-          <TooltipContent
-            side="top"
-            className="bg-card text-text-on-light p-3 rounded-lg shadow-lg"
-          >
-            {createUserTooltipContent(step)}
-          </TooltipContent>
-        </Tooltip>
-      </Link>
-    );
-
-    const description = (
-      <div className="space-y-1 mt-2">
-        <p className="text-xs text-text-on-dark font-medium">
-          {getActionTypeName(step.actionType)}
-        </p>
-        {step.completedAt && (
-          <p className="text-xs text-muted-foreground">
-            {dayjs(step.completedAt)
-              .tz("Asia/Tashkent")
-              .format("DD MMM, HH:mm")}
-          </p>
-        )}
-      </div>
-    );
-
-    return {
-      title: titleWithTooltip,
-      description,
-      icon: getActionIcon(step),
-      status: getStatusColor(step.status, step.isRejected),
-    };
-  });
-
   const totalTime = dayjs(steps[steps.length - 1]?.completedAt).diff(
     dayjs(steps[0]?.createdAt),
-    "minute",
+    "minute"
   );
 
   return (
-    <div className="mb-5">
-      <div>
-        <Card className="p-6 bg-card">
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
-                  <TeamOutlined className="text-lg" />
-                  Jarayon Tarixi
-                </h2>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {steps.length} bosqich • Jami {totalTime} daqiqa
-                </p>
-              </div>
-              <Badge
-                count={steps.length}
-                style={{ backgroundColor: "#f0f0f0", color: "#666" }}
+    <Paper
+      p="md"
+      radius="sm"
+      withBorder
+      style={{ borderColor: "#e9ecef", marginBottom: 16 }}
+    >
+      <Stack gap="md">
+        {/* Header */}
+        <Group justify="space-between">
+          <Box>
+            <Group gap="xs">
+              <IconUsers size={18} color="#1e3a5f" />
+              <Text size="md" fw={600} c="#212529">
+                Jarayon Tarixi
+              </Text>
+            </Group>
+            <Text size="sm" c="dimmed" mt={4}>
+              {steps.length} bosqich • Jami {totalTime} daqiqa
+            </Text>
+          </Box>
+          <Badge
+            size="md"
+            radius="sm"
+            variant="light"
+            style={{ backgroundColor: "#f1f3f5", color: "#495057" }}
+          >
+            {steps.length}
+          </Badge>
+        </Group>
+
+        <Divider />
+
+        {/* Steps */}
+        <ScrollArea type="auto" scrollbarSize={6}>
+          <Group gap={0} wrap="nowrap" py="sm">
+            {steps.map((step, index) => (
+              <StepCard
+                key={step.id || index}
+                step={step}
+                isLast={index === steps.length - 1}
               />
-            </div>
-
-            <Divider className="my-4" />
-
-            <div className="overflow-x-auto pb-4">
-              <div className="min-w-max">
-                <Steps
-                  current={steps.length - 1}
-                  //@ts-ignore
-                  items={items}
-                  size="small"
-                  labelPlacement="vertical"
-                  style={{ padding: "8px 0" }}
-                />
-              </div>
-            </div>
-          </div>
-        </Card>
-      </div>
-    </div>
+            ))}
+          </Group>
+        </ScrollArea>
+      </Stack>
+    </Paper>
   );
 };
 

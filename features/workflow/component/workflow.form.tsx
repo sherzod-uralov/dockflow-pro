@@ -1,9 +1,29 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Plus, Info, Trash2, Search } from "lucide-react";
+import {
+  Box,
+  Text,
+  Button,
+  Select,
+  TextInput,
+  Paper,
+  Group,
+  Stack,
+  Alert,
+  ActionIcon,
+  ScrollArea,
+} from "@mantine/core";
+import {
+  IconPlus,
+  IconInfoCircle,
+  IconTrash,
+  IconGripVertical,
+  IconArrowUp,
+  IconArrowDown,
+} from "@tabler/icons-react";
 import {
   workflowCreateSchema,
   workflowUpdateSchema,
@@ -19,26 +39,6 @@ import {
 } from "@/features/workflow/type/workflow.type";
 import { useGetUserQuery } from "@/features/admin/admin-users/hook/user.hook";
 import { useGetAllDocuments } from "@/features/document";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-  FormDescription,
-} from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
 import {
   apiToFormData,
   formToApiPayload,
@@ -46,6 +46,7 @@ import {
 } from "../utils/workflow.mapper";
 import { useCreateWorkflow, useUpdateWorkflowStep } from "@/features/workflow";
 import { useSearchParams } from "next/navigation";
+import { showError } from "@/utils/show-error";
 
 const WorkflowForm = ({
   modal,
@@ -58,7 +59,7 @@ const WorkflowForm = ({
   const { data: usersData, isLoading: isLoadingUsers } = useGetUserQuery();
   const { data: documentsData } = useGetAllDocuments();
   const [searchQueries, setSearchQueries] = useState<{ [key: number]: string }>(
-    {},
+    {}
   );
   const searchParams = useSearchParams();
   const queryDocumentId = searchParams.get("documentId");
@@ -69,7 +70,7 @@ const WorkflowForm = ({
 
   const validationSchema = useMemo(
     () => (isUpdate ? workflowUpdateSchema : workflowCreateSchema),
-    [isUpdate],
+    [isUpdate]
   );
 
   const form = useForm<WorkflowFormType>({
@@ -82,10 +83,22 @@ const WorkflowForm = ({
     },
   });
 
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, remove, move } = useFieldArray({
     control: form.control,
     name: "steps",
   });
+
+  const handleMoveUp = useCallback((index: number) => {
+    if (index > 0) {
+      move(index, index - 1);
+    }
+  }, [move]);
+
+  const handleMoveDown = useCallback((index: number) => {
+    if (index < fields.length - 1) {
+      move(index, index + 1);
+    }
+  }, [move, fields.length]);
 
   useEffect(() => {
     if (isUpdate && workflow) {
@@ -103,7 +116,7 @@ const WorkflowForm = ({
   useEffect(() => {
     if (!isUpdate && queryDocumentId && documentsData) {
       const exists = documentsData.data.some(
-        (d: any) => d.id === queryDocumentId,
+        (d: any) => d.id === queryDocumentId
       );
 
       if (exists) {
@@ -120,33 +133,30 @@ const WorkflowForm = ({
         return;
       }
 
-      let completed = 0;
-      const total = stepsToUpdate.length;
-
-      stepsToUpdate.forEach((step, index) => {
+      const promises = stepsToUpdate.map((step, index) => {
         const payload: WorkflowStepUpdateType = {
           order: index,
           actionType: step.actionType as WorkflowActionType,
           assignedToUserId: step.assignedToUserId,
         };
 
-        updateStepMutation.mutate(
+        return updateStepMutation.mutateAsync(
           {
             id: step.id!,
             data: payload,
           },
-          {
-            onSuccess: () => {
-              completed++;
-              if (completed === total) {
-                modal.closeModal();
-                form.reset();
-                onSuccess?.();
-              }
-            },
-          },
         );
       });
+
+      Promise.all(promises)
+        .then(() => {
+          modal.closeModal();
+          form.reset();
+          onSuccess?.();
+        })
+        .catch((error) => {
+          showError(error);
+        });
     } else {
       const payload = formToApiPayload(values, isUpdate);
 
@@ -160,316 +170,348 @@ const WorkflowForm = ({
     }
   };
 
-  const handleAddStep = () => {
+  const handleAddStep = useCallback(() => {
     append(createEmptyStep());
-  };
+  }, [append]);
 
-  const handleCancel = () => {
+  const handleCancel = useCallback(() => {
     modal.closeModal();
     form.reset();
-  };
+  }, [modal, form]);
+
+  // Document options
+  const documentOptions =
+    documentsData?.data.map((doc: any) => ({
+      value: doc.id,
+      label: `${doc.title} - ${doc.documentNumber}`,
+    })) || [];
+
+  // Workflow type options
+  const workflowTypeOptions = WORKFLOW_TYPE_OPTIONS.map((option) => ({
+    value: option.value,
+    label: option.label,
+  }));
+
+  // Action type options
+  const actionTypeOptions = ACTION_TYPE_OPTIONS.map((option) => ({
+    value: option.value,
+    label: option.label,
+  }));
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        <div className="flex items-center gap-3">
-          <FormField
-            control={form.control}
-            name="documentId"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel>Hujjat</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  value={field.value}
-                  disabled={isUpdate}
-                >
-                  <FormControl>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Hujjatni tanlang" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {documentsData?.data.map((doc: any) => (
-                      <SelectItem key={doc.id} value={doc.id}>
-                        {doc.title} - {doc.documentNumber}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
+    <form onSubmit={form.handleSubmit(handleSubmit)}>
+      <Stack gap="md">
+        {/* Document and Workflow Type */}
+        <Group grow>
+          <Select
+            label="Hujjat"
+            placeholder="Hujjatni tanlang"
+            data={documentOptions}
+            value={form.watch("documentId")}
+            onChange={(value) =>
+              form.setValue("documentId", value || "", { shouldValidate: true })
+            }
+            disabled={isUpdate}
+            error={form.formState.errors.documentId?.message}
+            searchable
+            size="sm"
+            radius="sm"
+            styles={{
+              input: {
+                backgroundColor: "#f8f9fa",
+                border: "1px solid #e9ecef",
+                "&:focus": {
+                  borderColor: "#1e3a5f",
+                },
+              },
+              label: {
+                color: "#495057",
+                fontWeight: 500,
+                marginBottom: 4,
+              },
+            }}
           />
 
-          <FormField
-            control={form.control}
-            name="workflowType"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel>Aylanma turi</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Aylanma turini tanlang" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {WORKFLOW_TYPE_OPTIONS.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        <div className="flex flex-col">
-                          <span className="font-medium">{option.label}</span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
+          <Select
+            label="Aylanma turi"
+            placeholder="Aylanma turini tanlang"
+            data={workflowTypeOptions}
+            value={form.watch("workflowType")}
+            onChange={(value) =>
+              form.setValue("workflowType", (value as WorkflowType) || WorkflowType.CONSECUTIVE, {
+                shouldValidate: true,
+              })
+            }
+            size="sm"
+            radius="sm"
+            styles={{
+              input: {
+                backgroundColor: "#f8f9fa",
+                border: "1px solid #e9ecef",
+                "&:focus": {
+                  borderColor: "#1e3a5f",
+                },
+              },
+              label: {
+                color: "#495057",
+                fontWeight: 500,
+                marginBottom: 4,
+              },
+            }}
           />
-        </div>
+        </Group>
 
-        <Alert>
-          <Info className="h-4 w-4" />
-          <AlertDescription>
-            {isUpdate ? (
-              <>
-                <strong>Tahrirlash rejimi:</strong> Siz yangi bosqichlar
-                qo'shishingiz yoki mavjudlarini o'chirishingiz mumkin. Hujjatni
-                o'zgartirish mumkin emas.
-              </>
-            ) : (
-              <>
-                Hujjat aylanmasi bosqichlari ketma-ket bajariladi. Har bir bosqich uchun
-                mas'ul shaxs va amal turini belgilang.
-              </>
-            )}
-          </AlertDescription>
+        {/* Info Alert */}
+        <Alert
+          icon={<IconInfoCircle size={18} />}
+          radius="sm"
+          styles={{
+            root: {
+              backgroundColor: "#f8f9fa",
+              border: "1px solid #e9ecef",
+            },
+            message: {
+              color: "#495057",
+            },
+          }}
+        >
+          {isUpdate ? (
+            <>
+              <Text size="sm" fw={500} c="#212529">
+                Tahrirlash rejimi:
+              </Text>
+              <Text size="sm" c="#495057">
+                Siz yangi bosqichlar qo'shishingiz yoki mavjudlarini
+                o'chirishingiz mumkin. Hujjatni o'zgartirish mumkin emas.
+              </Text>
+            </>
+          ) : (
+            <Text size="sm" c="#495057">
+              Hujjat aylanmasi bosqichlari ketma-ket bajariladi. Har bir bosqich
+              uchun mas'ul shaxs va amal turini belgilang.
+            </Text>
+          )}
         </Alert>
 
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-lg font-semibold">Aylanma bosqichlari</h3>
-              <p className="text-sm text-muted-foreground">
+        {/* Steps Section */}
+        <Box>
+          <Group justify="space-between" mb="sm">
+            <Box>
+              <Text size="md" fw={600} c="#212529">
+                Aylanma bosqichlari
+              </Text>
+              <Text size="sm" c="dimmed">
                 {isUpdate
                   ? "Bosqichlarni tahrirlang, qo'shing yoki o'chiring"
                   : "Har bir bosqich uchun mas'ul shaxsni tanlang"}
-              </p>
-            </div>
+              </Text>
+            </Box>
             <Button
-              type="button"
-              variant="default"
-              size="sm"
+              size="xs"
+              radius="sm"
+              leftSection={<IconPlus size={14} />}
               onClick={handleAddStep}
               disabled={fields.length >= 20}
+              style={{ backgroundColor: "#1e3a5f" }}
             >
-              <Plus className="h-4 w-4 mr-2" />
               Bosqich qo'shish
             </Button>
-          </div>
+          </Group>
 
           {form.formState.errors.steps?.root && (
-            <Alert variant="destructive">
-              <AlertDescription>
-                {form.formState.errors.steps.root.message}
-              </AlertDescription>
+            <Alert color="red" radius="sm" mb="sm">
+              {form.formState.errors.steps.root.message}
             </Alert>
           )}
 
-          <div className="space-y-3 max-h-[400px] overflow-y-auto pr-1">
-            {fields.map((field, index) => (
-              <Card key={field.id}>
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-base">
-                      Bosqich {index + 1}
-                    </CardTitle>
-                    {fields.length > 1 && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => remove(index)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    )}
-                  </div>
-                </CardHeader>
-                <CardContent className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name={`steps.${index}.assignedToUserId`}
-                    render={({ field: formField }) => {
-                      const allSteps =
-                        useWatch({
-                          control: form.control,
-                          name: "steps",
-                        }) || [];
-                      const selectedUserIds = allSteps
-                        .map((step, idx) =>
-                          idx !== index ? step?.assignedToUserId : null,
-                        )
-                        .filter(Boolean) as string[];
-                      const availableUsers =
-                        usersData?.data.filter(
-                          (user: any) => !selectedUserIds.includes(user.id),
-                        ) || [];
+          <ScrollArea h={300} type="auto" scrollbarSize={6}>
+            <Stack gap="sm">
+              {fields.map((field, index) => {
+                const allSteps = form.watch("steps") || [];
+                const selectedUserIds = allSteps
+                  .map((step, idx) =>
+                    idx !== index ? step?.assignedToUserId : null
+                  )
+                  .filter(Boolean) as string[];
+                const availableUsers =
+                  usersData?.data.filter(
+                    (user: any) => !selectedUserIds.includes(user.id)
+                  ) || [];
 
-                      const searchQuery = searchQueries[index] || "";
-                      const filteredUsers = availableUsers.filter(
-                        (user: any) => {
-                          const query = searchQuery.toLowerCase();
-                          return (
-                            user.fullname.toLowerCase().includes(query) ||
-                            user.username.toLowerCase().includes(query)
-                          );
-                        },
-                      );
+                const userOptions = availableUsers.map((user: any) => ({
+                  value: user.id,
+                  label: `${user.fullname} (@${user.username})`,
+                }));
 
-                      return (
-                        <FormItem className="w-full">
-                          <FormLabel>Mas'ul shaxs</FormLabel>
-                          <Select
-                            onValueChange={formField.onChange}
-                            value={formField.value}
-                            disabled={isLoadingUsers}
-                            onOpenChange={(open) => {
-                              if (!open) {
-                                setSearchQueries((prev) => ({
-                                  ...prev,
-                                  [index]: "",
-                                }));
-                              }
-                            }}
-                          >
-                            <FormControl>
-                              <SelectTrigger
-                                className={
-                                  formField.value &&
-                                  !availableUsers.find(
-                                    (u: any) => u.id === formField.value,
-                                  )
-                                    ? "border-destructive w-full"
-                                    : "w-full"
-                                }
-                              >
-                                <SelectValue placeholder="Foydalanuvchini tanlang" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent className="p-0">
-                              <div className="sticky top-0 z-10 bg-background border-b">
-                                <div className="flex items-center gap-2 px-2 py-2">
-                                  <Search className="h-4 w-4 text-muted-foreground shrink-0" />
-                                  <Input
-                                    placeholder="Qidirish..."
-                                    value={searchQuery}
-                                    onChange={(e) => {
-                                      setSearchQueries((prev) => ({
-                                        ...prev,
-                                        [index]: e.target.value,
-                                      }));
-                                    }}
-                                    className="h-8 border-0 focus-visible:ring-0 focus-visible:ring-offset-0 px-0"
-                                    onClick={(e) => e.stopPropagation()}
-                                    onKeyDown={(e) => e.stopPropagation()}
-                                  />
-                                </div>
-                              </div>
-                              <div className="max-h-[200px] overflow-y-auto p-1">
-                                {formField.value &&
-                                  !availableUsers.find(
-                                    (u: any) => u.id === formField.value,
-                                  ) && (
-                                    <SelectItem
-                                      value={formField.value}
-                                      className="text-muted-foreground"
-                                    >
-                                      {usersData?.data.find(
-                                        (u: any) => u.id === formField.value,
-                                      )?.fullname ||
-                                        "Tanlangan foydalanuvchi"}{" "}
-                                      (allaqachon tanlangan)
-                                    </SelectItem>
-                                  )}
-                                {filteredUsers.length > 0 ? (
-                                  filteredUsers.map((user: any) => (
-                                    <SelectItem key={user.id} value={user.id}>
-                                      {user.fullname} (@{user.username})
-                                    </SelectItem>
-                                  ))
-                                ) : (
-                                  <div className="px-2 py-6 text-sm text-center text-muted-foreground">
-                                    {searchQuery
-                                      ? "Foydalanuvchi topilmadi"
-                                      : "Barcha foydalanuvchilar tanlangan"}
-                                  </div>
-                                )}
-                              </div>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      );
-                    }}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name={`steps.${index}.actionType`}
-                    render={({ field: formField }) => (
-                      <FormItem className="w-full">
-                        <FormLabel>Amal turi</FormLabel>
-                        <Select
-                          onValueChange={formField.onChange}
-                          value={formField.value}
+                return (
+                  <Paper
+                    key={field.id}
+                    p="md"
+                    radius="sm"
+                    withBorder
+                    style={{ borderColor: "#e9ecef" }}
+                  >
+                    <Group justify="space-between" mb="sm">
+                      <Group gap="xs">
+                        <IconGripVertical size={16} color="#adb5bd" style={{ cursor: "grab" }} />
+                        <Text size="sm" fw={600} c="#212529">
+                          Bosqich {index + 1}
+                        </Text>
+                      </Group>
+                      <Group gap={4}>
+                        {/* Move Up */}
+                        <ActionIcon
+                          variant="subtle"
+                          color="gray"
+                          size="sm"
+                          onClick={() => handleMoveUp(index)}
+                          disabled={index === 0}
+                          title="Yuqoriga ko'chirish"
                         >
-                          <FormControl>
-                            <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Amal turini tanlang" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {ACTION_TYPE_OPTIONS.map((option) => (
-                              <SelectItem
-                                key={option.value}
-                                value={option.value}
-                              >
-                                {option.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                          <IconArrowUp size={16} />
+                        </ActionIcon>
+                        {/* Move Down */}
+                        <ActionIcon
+                          variant="subtle"
+                          color="gray"
+                          size="sm"
+                          onClick={() => handleMoveDown(index)}
+                          disabled={index === fields.length - 1}
+                          title="Pastga ko'chirish"
+                        >
+                          <IconArrowDown size={16} />
+                        </ActionIcon>
+                        {/* Delete */}
+                        {fields.length > 1 && (
+                          <ActionIcon
+                            variant="subtle"
+                            color="red"
+                            size="sm"
+                            onClick={() => remove(index)}
+                            title="O'chirish"
+                          >
+                            <IconTrash size={16} />
+                          </ActionIcon>
+                        )}
+                      </Group>
+                    </Group>
+
+                    <Group grow>
+                      <Select
+                        label="Mas'ul shaxs"
+                        placeholder="Foydalanuvchini tanlang"
+                        data={userOptions}
+                        value={form.watch(`steps.${index}.assignedToUserId`)}
+                        onChange={(value) =>
+                          form.setValue(
+                            `steps.${index}.assignedToUserId`,
+                            value || "",
+                            { shouldValidate: true }
+                          )
+                        }
+                        disabled={isLoadingUsers}
+                        searchable
+                        size="sm"
+                        radius="sm"
+                        error={
+                          form.formState.errors.steps?.[index]?.assignedToUserId
+                            ?.message
+                        }
+                        styles={{
+                          input: {
+                            backgroundColor: "#f8f9fa",
+                            border: "1px solid #e9ecef",
+                            "&:focus": {
+                              borderColor: "#1e3a5f",
+                            },
+                          },
+                          label: {
+                            color: "#495057",
+                            fontWeight: 500,
+                            marginBottom: 4,
+                          },
+                        }}
+                      />
+
+                      <Select
+                        label="Amal turi"
+                        placeholder="Amal turini tanlang"
+                        data={actionTypeOptions}
+                        value={form.watch(`steps.${index}.actionType`)}
+                        onChange={(value) =>
+                          form.setValue(
+                            `steps.${index}.actionType`,
+                            (value as WorkflowActionType) || "",
+                            { shouldValidate: true }
+                          )
+                        }
+                        size="sm"
+                        radius="sm"
+                        error={
+                          form.formState.errors.steps?.[index]?.actionType
+                            ?.message
+                        }
+                        styles={{
+                          input: {
+                            backgroundColor: "#f8f9fa",
+                            border: "1px solid #e9ecef",
+                            "&:focus": {
+                              borderColor: "#1e3a5f",
+                            },
+                          },
+                          label: {
+                            color: "#495057",
+                            fontWeight: 500,
+                            marginBottom: 4,
+                          },
+                        }}
+                      />
+                    </Group>
+                  </Paper>
+                );
+              })}
+            </Stack>
+          </ScrollArea>
 
           {fields.length === 0 && (
-            <Alert>
-              <AlertDescription>
-                Kamida bitta bosqich qo'shishingiz kerak
-              </AlertDescription>
+            <Alert color="yellow" radius="sm" mt="sm">
+              Kamida bitta bosqich qo'shishingiz kerak
             </Alert>
           )}
-        </div>
+        </Box>
 
-        <div className="flex justify-end gap-2 pt-4 border-t">
+        {/* Actions */}
+        <Group
+          justify="flex-end"
+          gap="xs"
+          pt="md"
+          style={{ borderTop: "1px solid #e9ecef" }}
+        >
           <Button
-            type="button"
-            variant="destructive"
+            variant="outline"
+            size="sm"
+            radius="sm"
             onClick={handleCancel}
             disabled={isLoading}
+            styles={{
+              root: {
+                borderColor: "#e9ecef",
+                color: "#495057",
+                "&:hover": {
+                  backgroundColor: "#f8f9fa",
+                },
+              },
+            }}
           >
             Bekor qilish
           </Button>
-          <Button type="submit" disabled={isLoading}>
+          <Button
+            type="submit"
+            size="sm"
+            radius="sm"
+            loading={isLoading}
+            style={{ backgroundColor: "#1e3a5f" }}
+          >
             {isLoading
               ? isUpdate
                 ? "Yangilanmoqda..."
@@ -478,9 +520,9 @@ const WorkflowForm = ({
                 ? "Yangilash"
                 : "Yaratish"}
           </Button>
-        </div>
-      </form>
-    </Form>
+        </Group>
+      </Stack>
+    </form>
   );
 };
 

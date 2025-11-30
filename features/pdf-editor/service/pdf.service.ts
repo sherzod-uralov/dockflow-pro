@@ -5,7 +5,6 @@ import type {
 } from "../type";
 import axiosInstance from "@/api/axios.instance";
 import { endpoints } from "@/api/axios.endpoints";
-import { handlePdfError } from "@/utils/http-error-handler";
 
 const DEFAULT_PDF_URL =
   "https://apryse.s3.amazonaws.com/public/files/samples/WebviewerDemoDoc.pdf";
@@ -16,21 +15,15 @@ export const pdfService = {
       return { pdfUrl: DEFAULT_PDF_URL };
     }
 
-    return await handlePdfError.executeGet(() =>
-      axiosInstance.get<GetDocumentResponse>(endpoints.pdf.list(documentId)),
-    );
+    const { data } = await axiosInstance.get<GetDocumentResponse>(endpoints.pdf.list(documentId));
+    return data;
   },
 
-  saveAnnotations: async (
-    data: SaveAnnotationsRequest,
-  ): Promise<SaveAnnotationsResponse> => {
-    return await handlePdfError.executeCreate(() =>
-      axiosInstance.post<SaveAnnotationsResponse>(
-        endpoints.pdf.create(data.documentId),
-        {
-          xfdfUrl: data.xfdf,
-        },
-      ),
+  saveAnnotations: async (payload: SaveAnnotationsRequest): Promise<SaveAnnotationsResponse> => {
+    const { data } = await axiosInstance.post<SaveAnnotationsResponse>(
+      endpoints.pdf.create(payload.documentId),
+      { xfdfUrl: payload.xfdf }
     );
+    return data;
   },
 };

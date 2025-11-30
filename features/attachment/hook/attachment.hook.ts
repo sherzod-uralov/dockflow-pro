@@ -4,8 +4,8 @@ import {
   GetAllAttachments,
   AttachmentQueryParams,
 } from "../type/attachment.type";
-import { toast } from "sonner";
 import { AttachmentInferType } from "@/features/attachment/schema/attachment.schema";
+import { showError, showSuccess } from "@/utils/show-error";
 
 export const useCreateAttachment = () => {
   const queryClient = useQueryClient();
@@ -13,9 +13,9 @@ export const useCreateAttachment = () => {
     mutationFn: (file: File) => attachmentService.createAttachment(file),
     onSuccess: () => {
       queryClient?.invalidateQueries(["attachments"]);
-      toast.success("Fayl muvaffaqiyatli yuklandi");
+      showSuccess("Fayl yuklandi");
     },
-    onError: (error: any) => {},
+    onError: showError,
   });
 };
 
@@ -30,20 +30,13 @@ export const useGetAllAttachments = (params?: AttachmentQueryParams) => {
 export const useUpdateAttachment = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({
-      id,
-      data,
-    }: {
-      id: string;
-      data: Partial<AttachmentInferType>;
-    }) => attachmentService.updateAttachment(id, data),
+    mutationFn: ({ id, data }: { id: string; data: Partial<AttachmentInferType> }) =>
+      attachmentService.updateAttachment(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries(["attachments"]);
-      toast.success("Fayl ma'lumotlari muvaffaqiyatli yangilandi");
+      showSuccess("Fayl yangilandi");
     },
-    onError: (error: any) => {
-      toast.error(error.message);
-    },
+    onError: showError,
   });
 };
 
@@ -53,15 +46,9 @@ export const useDeleteAttachment = () => {
     mutationFn: (id: string) => attachmentService.deleteAttachment(id),
     onSuccess: () => {
       queryClient?.invalidateQueries(["attachments"]);
-      toast.success("Fayl muvaffaqiyatli o'chirildi");
+      showSuccess("Fayl o'chirildi");
     },
-    onError: (error: any) => {
-      toast.error(
-        error?.response?.data?.message ||
-          error.message ||
-          "Faylni o'chirishda xatolik yuz berdi",
-      );
-    },
+    onError: showError,
   });
 };
 
@@ -70,12 +57,5 @@ export const useGetAttachmentById = (id: string) => {
     queryKey: ["attachment", id],
     queryFn: () => attachmentService.getAttachmentById(id),
     enabled: !!id,
-    onError: (error: any) => {
-      toast.error(
-        error?.response?.data?.message ||
-          error.message ||
-          "Fayl ma'lumotini olishda xatolik",
-      );
-    },
   });
 };

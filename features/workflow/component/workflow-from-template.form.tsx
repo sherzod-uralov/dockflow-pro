@@ -1,25 +1,10 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Stack, Select, Button, Group, Text } from "@mantine/core";
 import { ModalState } from "@/types/modal";
 import { useGetAllDocuments } from "@/features/document";
 import { useGetAllWorkflowTemplates } from "@/features/workflow-template";
@@ -61,20 +46,17 @@ const WorkflowFromTemplateForm = ({
     name: "documentTypeId",
   });
 
-  // Fetch documents filtered by document type
   const { data: documentsData, isLoading: isLoadingDocuments } =
     useGetAllDocuments({
       documentTypeId: selectedDocumentTypeId || undefined,
     });
 
-  // Fetch templates filtered by document type
   const { data: templatesData, isLoading: isLoadingTemplates } =
     useGetAllWorkflowTemplates({
       isActive: true,
       documentTypeId: selectedDocumentTypeId || undefined,
     });
 
-  // Reset dependent fields when document type changes
   useEffect(() => {
     if (selectedDocumentTypeId) {
       form.setValue("documentId", "");
@@ -83,7 +65,6 @@ const WorkflowFromTemplateForm = ({
   }, [selectedDocumentTypeId, form]);
 
   const handleSubmit = (values: WorkflowFromTemplateFormType) => {
-    // Only send documentId and workflowTemplateId to API
     createMutation.mutate(
       {
         documentId: values.documentId,
@@ -95,125 +76,172 @@ const WorkflowFromTemplateForm = ({
           form.reset();
           onSuccess?.();
         },
-      },
+      }
     );
   };
 
-  const handleCancel = () => {
+  const handleCancel = useCallback(() => {
     modal.closeModal();
     form.reset();
-  };
+  }, [modal, form]);
+
+  const documentTypeOptions =
+    documentTypesData?.data?.map((type: any) => ({
+      value: type.id,
+      label: type.name,
+    })) || [];
+
+  const documentOptions =
+    documentsData?.data?.map((doc: any) => ({
+      value: doc.id,
+      label: `${doc.title} - ${doc.documentNumber}`,
+    })) || [];
+
+  const templateOptions =
+    templatesData?.data?.map((template: any) => ({
+      value: template.id,
+      label: template.name,
+      description: `${template.steps?.length || 0} ta bosqich`,
+    })) || [];
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        <FormField
-          control={form.control}
-          name="documentTypeId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Hujjat turi</FormLabel>
-              <Select
-                onValueChange={field.onChange}
-                value={field.value}
-                disabled={isLoadingDocumentTypes}
-              >
-                <FormControl>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Hujjat turini tanlang" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {documentTypesData?.data?.map((type: any) => (
-                    <SelectItem key={type.id} value={type.id}>
-                      {type.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
+    <form onSubmit={form.handleSubmit(handleSubmit)}>
+      <Stack gap="md">
+        <Select
+          label="Hujjat turi"
+          placeholder={isLoadingDocumentTypes ? "Yuklanmoqda..." : "Hujjat turini tanlang"}
+          data={documentTypeOptions}
+          value={form.watch("documentTypeId")}
+          onChange={(value) =>
+            form.setValue("documentTypeId", value || "", { shouldValidate: true })
+          }
+          disabled={isLoadingDocumentTypes}
+          error={form.formState.errors.documentTypeId?.message}
+          size="sm"
+          radius="sm"
+          styles={{
+            input: {
+              backgroundColor: "#f8f9fa",
+              border: "1px solid #e9ecef",
+              "&:focus": {
+                borderColor: "#1e3a5f",
+              },
+            },
+            label: {
+              color: "#495057",
+              fontWeight: 500,
+              marginBottom: 4,
+            },
+          }}
         />
 
-        <FormField
-          control={form.control}
-          name="documentId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Hujjat</FormLabel>
-              <Select
-                onValueChange={field.onChange}
-                value={field.value}
-                disabled={isLoadingDocuments || !selectedDocumentTypeId}
-              >
-                <FormControl>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder={selectedDocumentTypeId ? "Hujjatni tanlang" : "Avval hujjat turini tanlang"} />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {documentsData?.data?.map((doc: any) => (
-                    <SelectItem key={doc.id} value={doc.id}>
-                      {doc.title} - {doc.documentNumber}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
+        <Select
+          label="Hujjat"
+          placeholder={
+            !selectedDocumentTypeId
+              ? "Avval hujjat turini tanlang"
+              : isLoadingDocuments
+              ? "Yuklanmoqda..."
+              : "Hujjatni tanlang"
+          }
+          data={documentOptions}
+          value={form.watch("documentId")}
+          onChange={(value) =>
+            form.setValue("documentId", value || "", { shouldValidate: true })
+          }
+          disabled={isLoadingDocuments || !selectedDocumentTypeId}
+          error={form.formState.errors.documentId?.message}
+          searchable
+          size="sm"
+          radius="sm"
+          styles={{
+            input: {
+              backgroundColor: "#f8f9fa",
+              border: "1px solid #e9ecef",
+              "&:focus": {
+                borderColor: "#1e3a5f",
+              },
+            },
+            label: {
+              color: "#495057",
+              fontWeight: 500,
+              marginBottom: 4,
+            },
+          }}
         />
 
-        <FormField
-          control={form.control}
-          name="workflowTemplateId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Aylanma shabloni</FormLabel>
-              <Select
-                onValueChange={field.onChange}
-                value={field.value}
-                disabled={isLoadingTemplates || !selectedDocumentTypeId}
-              >
-                <FormControl>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder={selectedDocumentTypeId ? "Shablonni tanlang" : "Avval hujjat turini tanlang"} />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {templatesData?.data?.map((template: any) => (
-                    <SelectItem key={template.id} value={template.id}>
-                      <div className="flex flex-col">
-                        <span>{template.name}</span>
-                        <span className="text-xs text-muted-foreground">
-                          {template.steps?.length || 0} ta bosqich
-                        </span>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
+        <Select
+          label="Aylanma shabloni"
+          placeholder={
+            !selectedDocumentTypeId
+              ? "Avval hujjat turini tanlang"
+              : isLoadingTemplates
+              ? "Yuklanmoqda..."
+              : "Shablonni tanlang"
+          }
+          data={templateOptions}
+          value={form.watch("workflowTemplateId")}
+          onChange={(value) =>
+            form.setValue("workflowTemplateId", value || "", {
+              shouldValidate: true,
+            })
+          }
+          disabled={isLoadingTemplates || !selectedDocumentTypeId}
+          error={form.formState.errors.workflowTemplateId?.message}
+          size="sm"
+          radius="sm"
+          styles={{
+            input: {
+              backgroundColor: "#f8f9fa",
+              border: "1px solid #e9ecef",
+              "&:focus": {
+                borderColor: "#1e3a5f",
+              },
+            },
+            label: {
+              color: "#495057",
+              fontWeight: 500,
+              marginBottom: 4,
+            },
+          }}
         />
 
-        <div className="flex justify-end gap-2 pt-4">
+        <Group
+          justify="flex-end"
+          gap="xs"
+          pt="md"
+          style={{ borderTop: "1px solid #e9ecef" }}
+        >
           <Button
-            type="button"
             variant="outline"
+            size="sm"
+            radius="sm"
             onClick={handleCancel}
             disabled={createMutation.isLoading}
+            styles={{
+              root: {
+                borderColor: "#e9ecef",
+                color: "#495057",
+                "&:hover": {
+                  backgroundColor: "#f8f9fa",
+                },
+              },
+            }}
           >
             Bekor qilish
           </Button>
-          <Button type="submit" disabled={createMutation.isLoading}>
+          <Button
+            type="submit"
+            size="sm"
+            radius="sm"
+            loading={createMutation.isLoading}
+            style={{ backgroundColor: "#1e3a5f" }}
+          >
             {createMutation.isLoading ? "Yaratilmoqda..." : "Yaratish"}
           </Button>
-        </div>
-      </form>
-    </Form>
+        </Group>
+      </Stack>
+    </form>
   );
 };
 

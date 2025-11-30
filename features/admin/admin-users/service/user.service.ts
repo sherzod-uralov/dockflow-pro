@@ -5,45 +5,38 @@ import {
   UserGetRequest,
   UserHookProps,
 } from "@/features/admin/admin-users/type/user.types";
-import { AxiosResponse } from "axios";
-import { handleUserError } from "@/utils/http-error-handler";
 import { UserSchemaZodType } from "../schema/user.schema";
 
 export const userService = {
   getAllUsers: async (params: UserHookProps): Promise<UserGetRequest> => {
-    try {
-      const response: AxiosResponse<UserGetRequest> =
-        await axiosInstance.get<UserGetRequest>(endpoints.user.list, {
-          params: {
-            pageNumber: Number(params.pageNumber),
-            pageSize: Number(params.pageSize),
-            search: params.search || undefined,
-            departmentId: params.departmentId || undefined,
-          },
-        });
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
+    const { data } = await axiosInstance.get<UserGetRequest>(endpoints.user.list, {
+      params: {
+        pageNumber: Number(params.pageNumber),
+        pageSize: Number(params.pageSize),
+        search: params.search || undefined,
+        departmentId: params.departmentId || undefined,
+      },
+    });
+    return data;
   },
-  createUser: async (user: UserSchemaZodType) => {
-    return await handleUserError.executeCreate(() =>
-      axiosInstance.post(endpoints.user.create, user),
-    );
+
+  createUser: async (payload: UserSchemaZodType) => {
+    const { data } = await axiosInstance.post(endpoints.user.create, payload);
+    return data;
   },
+
   deleteUser: async (id: string) => {
-    return await handleUserError.executeDelete(() =>
-      axiosInstance.delete(endpoints.user.delete(id)),
-    );
+    const { data } = await axiosInstance.delete(endpoints.user.delete(id));
+    return data;
   },
-  updateUser: async (id: string, data: User) => {
-    return await handleUserError.executeUpdate(() =>
-      axiosInstance.patch(endpoints.user.update(id), data),
-    );
+
+  updateUser: async (id: string, payload: User) => {
+    const { data } = await axiosInstance.patch(endpoints.user.update(id), payload);
+    return data;
   },
+
   getUserById: async (id: string) => {
-    return await handleUserError.executeGet(() =>
-      axiosInstance.get(endpoints.user.detail(id)),
-    );
+    const { data } = await axiosInstance.get(endpoints.user.detail(id));
+    return data;
   },
 };

@@ -10,6 +10,7 @@ export enum WorkflowStatus {
   ACTIVE = "ACTIVE",
   COMPLETED = "COMPLETED",
   CANCELLED = "CANCELLED",
+  PAUSED = "PAUSED",
   DRAFT = "DRAFT",
 }
 
@@ -74,6 +75,7 @@ export type DocumentInfo = {
   id: string;
   title: string;
   description: string;
+    pdfUrl:string
   documentNumber: string;
   version: number;
 };
@@ -164,6 +166,7 @@ export type RollbackUser = {
   stepActionType: string;
   stepStatus: string;
 };
+
 
 export type WorkflowStepsValidation = {
   isValid: boolean;

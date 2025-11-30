@@ -1,44 +1,35 @@
-// audit-log.service.ts
 import axiosInstance from "@/api/axios.instance";
 import { endpoints } from "@/api/axios.endpoints";
 import {
-  AuditLog,
-  AuditLogList,
   AuditLogQueryParams,
   CreateAuditLogRequest,
 } from "../type/audit-log.type";
-import { handlePermissionError } from "@/utils/http-error-handler";
-
-const auditLogHandler = handlePermissionError;
 
 export const auditLogService = {
   getAllAuditLogs: async (params?: AuditLogQueryParams) => {
-    return await auditLogHandler.executeList(() =>
-      axiosInstance.get(endpoints.auditLog.list, {
-        params: {
-          search: params?.search,
-          pageSize: params?.pageSize,
-          pageNumber: params?.pageNumber,
-          entity: params?.entity,
-          entityId: params?.entityId,
-          action: params?.action,
-          performedByUserId: params?.performedByUserId,
-          startDate: params?.startDate,
-          endDate: params?.endDate,
-        },
-      }),
-    );
+    const { data } = await axiosInstance.get(endpoints.auditLog.list, {
+      params: {
+        search: params?.search,
+        pageSize: params?.pageSize,
+        pageNumber: params?.pageNumber,
+        entity: params?.entity,
+        entityId: params?.entityId,
+        action: params?.action,
+        performedByUserId: params?.performedByUserId,
+        startDate: params?.startDate,
+        endDate: params?.endDate,
+      },
+    });
+    return data;
   },
 
-  createAuditLog: async (data: CreateAuditLogRequest) => {
-    return await auditLogHandler.executeCreate(() =>
-      axiosInstance.post(endpoints.auditLog.create, data),
-    );
+  createAuditLog: async (payload: CreateAuditLogRequest) => {
+    const { data } = await axiosInstance.post(endpoints.auditLog.create, payload);
+    return data;
   },
 
   getAuditLogById: async (id: string) => {
-    return await auditLogHandler.executeGet(() =>
-      axiosInstance.get(endpoints.auditLog.detail(id)),
-    );
+    const { data } = await axiosInstance.get(endpoints.auditLog.detail(id));
+    return data;
   },
 };

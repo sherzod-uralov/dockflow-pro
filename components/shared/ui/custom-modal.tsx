@@ -1,18 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { X } from "lucide-react";
-import { cn } from "@/lib/utils";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import { Modal, Button, Text, Group, Box, Stack } from "@mantine/core";
 
 export interface CustomModalProps {
   isOpen: boolean;
@@ -31,14 +20,14 @@ export interface CustomModalProps {
   trigger?: React.ReactNode;
 }
 
-const sizeClasses = {
-  sm: "sm:max-w-sm",
-  md: "sm:max-w-md",
-  lg: "sm:max-w-lg",
-  xl: "sm:max-w-xl",
-  "2xl": "sm:max-w-2xl",
-  "3xl": "sm:max-w-3xl max-h-[90vh]",
-  full: "sm:max-w-[95vw] max-h-[95vh]",
+const sizeMap: Record<string, string> = {
+  sm: "sm",
+  md: "md",
+  lg: "lg",
+  xl: "xl",
+  "2xl": "70rem",
+  "3xl": "85rem",
+  full: "95vw",
 };
 
 export function CustomModal({
@@ -50,68 +39,61 @@ export function CustomModal({
   size = "md",
   showCloseButton = true,
   closeOnOverlayClick = true,
-  className,
-  headerClassName,
-  contentClassName,
-  footerClassName,
-  footer,
-  trigger,
 }: CustomModalProps) {
-  const handleOpenChange = (open: boolean) => {
-    if (!open) {
-      onClose();
-    }
-  };
-
-  const handleOverlayClick = (e: React.MouseEvent) => {
-    if (closeOnOverlayClick && e.target === e.currentTarget) {
-      onClose();
-    }
-  };
-
   return (
-    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
-      <DialogContent
-        className={cn("sm:max-w-[425px]", sizeClasses[size], className)}
-        showCloseButton={false}
-        onClick={handleOverlayClick}
-      >
-        {showCloseButton && (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute group right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground h-6 w-6"
-            onClick={onClose}
-          >
-            <X className="h-4 w-4 group-hover:text-text-on-dark" />
-            <span className="sr-only">Close</span>
-          </Button>
-        )}
-        {(title || description) && (
-          <DialogHeader className={cn("text-left", headerClassName)}>
-            {title && (
-              <DialogTitle className="text-xl font-semibold leading-none tracking-tight">
-                {title}
-              </DialogTitle>
-            )}
+    <Modal
+      opened={isOpen}
+      onClose={onClose}
+      title={
+        title && (
+          <Box>
+            <Text size="lg" fw={600} c="#212529">
+              {title}
+            </Text>
             {description && (
-              <DialogDescription className="text-sm text-muted-foreground">
+              <Text size="sm" c="dimmed" mt={4}>
                 {description}
-              </DialogDescription>
+              </Text>
             )}
-          </DialogHeader>
-        )}
-        <div className={cn("flex-1 overflow-auto", contentClassName)}>
-          {children}
-        </div>
-        {footer && (
-          <DialogFooter className={cn("gap-2", footerClassName)}>
-            {footer}
-          </DialogFooter>
-        )}
-      </DialogContent>
-    </Dialog>
+          </Box>
+        )
+      }
+      size={sizeMap[size] || size}
+      radius="sm"
+      closeOnClickOutside={closeOnOverlayClick}
+      withCloseButton={showCloseButton}
+      centered
+      overlayProps={{
+        backgroundOpacity: 0.55,
+        blur: 3,
+      }}
+      styles={{
+        header: {
+          borderBottom: "1px solid #e9ecef",
+          paddingBottom: 12,
+        },
+        title: {
+          flex: 1,
+        },
+        close: {
+          color: "#495057",
+          "&:hover": {
+            backgroundColor: "#f8f9fa",
+          },
+        },
+        body: {
+          padding: 16,
+          overflowX: "hidden",
+          wordBreak: "break-word",
+        },
+        content: {
+          maxHeight: "90vh",
+          overflowX: "hidden",
+        },
+      }}
+    >
+      {children}
+    </Modal>
   );
 }
 
@@ -147,7 +129,7 @@ export function ConfirmationModal({
   confirmText = "Ha",
   cancelText = "Bekor qilish",
   variant = "default",
-  ...props
+  closeOnOverlayClick = true,
 }: Omit<CustomModalProps, "children"> & {
   onConfirm: () => void;
   confirmText?: string;
@@ -155,32 +137,76 @@ export function ConfirmationModal({
   variant?: "default" | "destructive";
 }) {
   return (
-    <CustomModal
-      isOpen={isOpen}
+    <Modal
+      opened={isOpen}
       onClose={onClose}
-      title={title}
-      description={description}
+      title={
+        <Text size="lg" fw={600} c="#212529">
+          {title}
+        </Text>
+      }
       size="sm"
-      footer={
-        <div className="flex justify-end gap-2">
-          <Button variant="outline" onClick={onClose}>
+      radius="sm"
+      closeOnClickOutside={closeOnOverlayClick}
+      centered
+      overlayProps={{
+        backgroundOpacity: 0.55,
+        blur: 3,
+      }}
+      styles={{
+        header: {
+          borderBottom: "1px solid #e9ecef",
+          paddingBottom: 12,
+        },
+        close: {
+          color: "#495057",
+          "&:hover": {
+            backgroundColor: "#f8f9fa",
+          },
+        },
+        body: {
+          padding: 16,
+        },
+      }}
+    >
+      <Stack gap="md">
+        <Text size="sm" c="dimmed">
+          {description}
+        </Text>
+        <Group justify="flex-end" gap="xs">
+          <Button
+            variant="outline"
+            size="sm"
+            radius="sm"
+            onClick={onClose}
+            styles={{
+              root: {
+                borderColor: "#e9ecef",
+                color: "#495057",
+                "&:hover": {
+                  backgroundColor: "#f8f9fa",
+                },
+              },
+            }}
+          >
             {cancelText}
           </Button>
           <Button
-            variant={variant === "destructive" ? "destructive" : "default"}
+            size="sm"
+            radius="sm"
             onClick={() => {
               onConfirm();
               onClose();
             }}
+            style={{
+              backgroundColor: variant === "destructive" ? "#c92a2a" : "#1e3a5f",
+            }}
           >
             {confirmText}
           </Button>
-        </div>
-      }
-      {...props}
-    >
-      <div className="py-4"></div>
-    </CustomModal>
+        </Group>
+      </Stack>
+    </Modal>
   );
 }
 
@@ -190,19 +216,56 @@ export function InfoModal({
   title = "Ma'lumot",
   children,
   okText = "OK",
-  ...props
+  closeOnOverlayClick = true,
 }: Omit<CustomModalProps, "footer"> & {
   okText?: string;
 }) {
   return (
-    <CustomModal
-      isOpen={isOpen}
+    <Modal
+      opened={isOpen}
       onClose={onClose}
-      title={title}
-      footer={<Button onClick={onClose}>{okText}</Button>}
-      {...props}
+      title={
+        <Text size="lg" fw={600} c="#212529">
+          {title}
+        </Text>
+      }
+      size="md"
+      radius="sm"
+      closeOnClickOutside={closeOnOverlayClick}
+      centered
+      overlayProps={{
+        backgroundOpacity: 0.55,
+        blur: 3,
+      }}
+      styles={{
+        header: {
+          borderBottom: "1px solid #e9ecef",
+          paddingBottom: 12,
+        },
+        close: {
+          color: "#495057",
+          "&:hover": {
+            backgroundColor: "#f8f9fa",
+          },
+        },
+        body: {
+          padding: 16,
+        },
+      }}
     >
-      {children}
-    </CustomModal>
+      <Stack gap="md">
+        {children}
+        <Group justify="flex-end">
+          <Button
+            size="sm"
+            radius="sm"
+            onClick={onClose}
+            style={{ backgroundColor: "#1e3a5f" }}
+          >
+            {okText}
+          </Button>
+        </Group>
+      </Stack>
+    </Modal>
   );
 }

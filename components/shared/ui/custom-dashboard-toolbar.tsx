@@ -1,8 +1,12 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { UserCheck, PlusIcon, Search, Filter } from "lucide-react";
+import { Group, Button, TextInput, Box } from "@mantine/core";
+import {
+  IconUserCheck,
+  IconPlus,
+  IconSearch,
+  IconFilter,
+} from "@tabler/icons-react";
 
 interface UserToolbarProps {
   selectedCount?: number;
@@ -12,8 +16,6 @@ interface UserToolbarProps {
   onFilter?: () => void;
   onBulkAction?: () => void;
   searchPlaceholder?: string;
-
-  // Text props
   createLabel?: string;
   filterLabel?: string;
   bulkLabel?: string;
@@ -25,61 +27,82 @@ export function UserToolbar({
   onSearch,
   onCreate,
   onFilter,
-  onBulkAction,
   searchPlaceholder = "Qidirish...",
-
-  createLabel = "Yangi element qo‘shish",
+  createLabel = "Yangi element qo'shish",
   filterLabel = "Filtrlash",
   bulkLabel = "Tanlangan",
+  onBulkAction,
 }: UserToolbarProps) {
   return (
-    <div className="flex flex-col md:flex-row-reverse md:items-center md:justify-between gap-4">
+    <Group justify="space-between" mb="md">
+      {/* Search & Filter */}
+      <Group gap="sm">
+        <TextInput
+          placeholder={searchPlaceholder}
+          value={searchQuery}
+          onChange={(e) => onSearch(e.target.value)}
+          leftSection={<IconSearch size={16} color="#868e96" />}
+          size="sm"
+          radius="sm"
+          w={320}
+          styles={{
+            input: {
+              backgroundColor: "#f8f9fa",
+              border: "1px solid #e9ecef",
+              "&:focus": {
+                borderColor: "#1e3a5f",
+              },
+            },
+          }}
+        />
+        {onFilter && (
+          <Button
+            variant="outline"
+            size="sm"
+            radius="sm"
+            leftSection={<IconFilter size={16} />}
+            onClick={onFilter}
+            styles={{
+              root: {
+                borderColor: "#e9ecef",
+                color: "#495057",
+                "&:hover": {
+                  backgroundColor: "#f8f9fa",
+                },
+              },
+            }}
+          >
+            {filterLabel}
+          </Button>
+        )}
+      </Group>
+
       {/* Actions */}
-      <div className="flex items-center gap-2">
+      <Group gap="sm">
         {selectedCount > 0 && (
           <Button
-            variant="ghost"
+            variant="subtle"
             size="sm"
+            radius="sm"
+            leftSection={<IconUserCheck size={16} />}
             onClick={onBulkAction}
-            className="hover:bg-transparent text-muted-foreground"
+            c="dimmed"
           >
-            <UserCheck className="mr-2 h-4 w-4" />
             {bulkLabel} ({selectedCount})
           </Button>
         )}
         {onCreate && (
           <Button
+            size="sm"
+            radius="sm"
+            leftSection={<IconPlus size={16} />}
             onClick={onCreate}
-            className="bg-primary hover:bg-primary-hover text-text-on-dark"
+            style={{ backgroundColor: "#1e3a5f" }}
           >
-            <PlusIcon className="mr-2 h-4 w-4" />
             {createLabel}
           </Button>
         )}
-      </div>
-
-      {/* Search & Filter */}
-      <div className="flex items-center gap-3 w-full md:w-auto">
-        <div className="relative flex-1 md:flex-none md:w-80">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-          <Input
-            placeholder={searchPlaceholder}
-            value={searchQuery}
-            onChange={(e) => onSearch(e.target.value)}
-            className="pl-9 pr-3 bg-transparent border-border focus-visible:ring-1 focus-visible:ring-primary"
-          />
-        </div>
-        {onFilter && (
-          <Button
-            variant="ghost"
-            onClick={onFilter}
-            className="hover:bg-transparent border border-border text-muted-foreground"
-          >
-            <Filter className="w-4 h-4 mr-2" />
-            {filterLabel}
-          </Button>
-        )}
-      </div>
-    </div>
+      </Group>
+    </Group>
   );
 }

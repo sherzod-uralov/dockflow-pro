@@ -1,28 +1,23 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ModalState } from "@/types/modal";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import {
+  Box,
+  Button,
+  TextInput,
+  Textarea,
   Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+  Paper,
+  Text,
+  Group,
+  Stack,
+  SimpleGrid,
+  Loader,
+} from "@mantine/core";
+import { IconTag, IconLoader2 } from "@tabler/icons-react";
 import { FileUpload } from "@/components/shared/ui/custom-file-upload";
 import {
   DocumentFormType,
@@ -41,8 +36,7 @@ import {
   RequiredTags,
 } from "@/features/document-template";
 import { useCreateAttachment } from "@/features/attachment/hook/attachment.hook";
-import { toast } from "sonner";
-import { Tag, Loader2 } from "lucide-react";
+import { notifications } from "@mantine/notifications";
 
 interface DocumentFormModalProps {
   modal: ModalState;
@@ -87,38 +81,36 @@ const DocumentFormModal = ({
     resolver: zodResolver(documentScheme),
     defaultValues: isUpdate
       ? {
-          title: document?.title ?? "",
-          description: document?.description ?? "",
-          documentNumber: document?.documentNumber ?? "",
-          priority: document?.priority ?? "LOW",
-          documentTypeId: document?.documentType?.id ?? "",
-          journalId: document?.journal?.id ?? "",
-          templateId: document?.template?.id ?? "",
-          tags: document?.tags ?? {},
-          attachments: document?.attachments?.map((a) => a.id) ?? [],
-        }
+        title: document?.title ?? "",
+        description: document?.description ?? "",
+        documentNumber: document?.documentNumber ?? "",
+        priority: document?.priority ?? "LOW",
+        documentTypeId: document?.documentType?.id ?? "",
+        journalId: document?.journal?.id ?? "",
+        templateId: document?.template?.id ?? "",
+        tags: document?.tags ?? {},
+        attachments: document?.attachments?.map((a) => a.id) ?? [],
+      }
       : {
-          title: "",
-          description: "",
-          documentNumber: "",
-          priority: "LOW",
-          documentTypeId: "",
-          journalId: "",
-          templateId: "",
-          tags: {},
-          attachments: [],
-        },
+        title: "",
+        description: "",
+        documentNumber: "",
+        priority: "LOW",
+        documentTypeId: undefined,
+        journalId: undefined,
+        templateId: undefined,
+        tags: {},
+        attachments: [],
+      },
     mode: "onChange",
   });
 
-  // Initialize tag values when template is selected or changed
   useEffect(() => {
     if (selectedTemplate?.requiredTags) {
       const requiredTags = selectedTemplate.requiredTags as RequiredTags;
       const initialTags: Record<string, string> = {};
 
       Object.keys(requiredTags).forEach((tagName) => {
-        // Preserve existing values or use empty string
         initialTags[tagName] = tagValues[tagName] || "";
       });
 
@@ -127,7 +119,7 @@ const DocumentFormModal = ({
     }
   }, [selectedTemplate]);
 
-  const handleDeleteFile = (fileId: string) => {
+  const handleDeleteFile = useCallback((fileId: string) => {
     setExistingFiles((prev) => prev.filter((f) => f.id !== fileId));
     const current = form.getValues("attachments") || [];
     form.setValue(
@@ -135,10 +127,13 @@ const DocumentFormModal = ({
       current.filter((id: string) => id !== fileId),
       { shouldValidate: true }
     );
-    toast.success("Fayl o'chirildi");
-  };
+    notifications.show({
+      message: "Fayl o'chirildi",
+      color: "green",
+    });
+  }, [form]);
 
-  const handleFileUpload = async (file: File) => {
+  const handleFileUpload = useCallback(async (file: File) => {
     if (!file) return;
     try {
       const response = await uploadFile(file);
@@ -147,26 +142,31 @@ const DocumentFormModal = ({
         shouldValidate: true,
       });
     } catch (error: any) {
-      toast.error(error.message || "Fayl yuklashda xatolik");
+      notifications.show({
+        message: error.message || "Fayl yuklashda xatolik",
+        color: "red",
+      });
     }
-  };
+  }, [uploadFile, form]);
 
-  const handleTemplateChange = (templateId: string) => {
-    setSelectedTemplateId(templateId);
-    form.setValue("templateId", templateId, { shouldValidate: true });
+  const handleTemplateChange = useCallback((templateId: string | null) => {
+    const value = templateId || "";
+    setSelectedTemplateId(value);
+    form.setValue("templateId", value, { shouldValidate: true });
 
-    // Reset tag values when template changes
-    if (!templateId) {
+    if (!value) {
       setTagValues({});
       form.setValue("tags", {});
     }
-  };
+  }, [form]);
 
-  const handleTagChange = (tagName: string, value: string) => {
-    const newTags = { ...tagValues, [tagName]: value };
-    setTagValues(newTags);
-    form.setValue("tags", newTags, { shouldValidate: true });
-  };
+  const handleTagChange = useCallback((tagName: string, value: string) => {
+    setTagValues((prev) => {
+      const newTags = { ...prev, [tagName]: value };
+      form.setValue("tags", newTags, { shouldValidate: true });
+      return newTags;
+    });
+  }, [form]);
 
   const handleSubmit = (values: DocumentFormType) => {
     const data = {
@@ -188,7 +188,7 @@ const DocumentFormModal = ({
       );
     } else {
       // @ts-ignore
-        createMutation.mutate(data, {
+      createMutation.mutate(data, {
         onSuccess: () => {
           modal.closeModal();
           onSuccess?.();
@@ -200,270 +200,343 @@ const DocumentFormModal = ({
   const requiredTags = selectedTemplate?.requiredTags as RequiredTags | undefined;
   const hasRequiredTags = requiredTags && Object.keys(requiredTags).length > 0;
 
+  const priorityOptions = [
+    { value: "LOW", label: "Past" },
+    { value: "MEDIUM", label: "O'rta" },
+    { value: "HIGH", label: "Yuqori" },
+  ];
+
+  const documentTypeOptions = documentTypes?.data?.map((t) => ({
+    value: t.id,
+    label: t.name,
+  })) || [];
+
+  const journalOptions = journals?.data?.map((j) => ({
+    value: j.id,
+    label: j.name,
+  })) || [];
+
+  const templateOptions = [
+    { value: "", label: "Shablonsiz" },
+    ...(templates?.data?.map((t) => ({
+      value: t.id,
+      label: t.name,
+    })) || []),
+  ];
+
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        <div className="grid grid-cols-2 gap-4">
-          {/* Title */}
-          <FormField
-            control={form.control}
-            name="title"
-            render={({ field }) => (
-              <FormItem className="col-span-2">
-                <FormLabel>Hujjat nomi</FormLabel>
-                <FormControl>
-                  <Input placeholder="Hujjat nomini kiriting" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+    <form onSubmit={form.handleSubmit(handleSubmit)}>
+      <Stack gap="md">
+        {/* Title */}
+        <TextInput
+          label="Hujjat nomi"
+          placeholder="Hujjat nomini kiriting"
+          size="sm"
+          radius="sm"
+          error={form.formState.errors.title?.message}
+          {...form.register("title")}
+          styles={{
+            input: {
+              backgroundColor: "#f8f9fa",
+              border: "1px solid #e9ecef",
+              "&:focus": {
+                borderColor: "#1e3a5f",
+              },
+            },
+            label: {
+              color: "#495057",
+              fontWeight: 500,
+              marginBottom: 4,
+            },
+          }}
+        />
 
-          {/* Description */}
-          <FormField
-            control={form.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem className="col-span-2">
-                <FormLabel>Hujjat tavsifi</FormLabel>
-                <FormControl>
-                  <Textarea placeholder="Hujjat tavsifini kiriting" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+        {/* Description */}
+        <Textarea
+          label="Hujjat tavsifi"
+          placeholder="Hujjat tavsifini kiriting"
+          size="sm"
+          radius="sm"
+          minRows={3}
+          error={form.formState.errors.description?.message}
+          {...form.register("description")}
+          styles={{
+            input: {
+              backgroundColor: "#f8f9fa",
+              border: "1px solid #e9ecef",
+              "&:focus": {
+                borderColor: "#1e3a5f",
+              },
+            },
+            label: {
+              color: "#495057",
+              fontWeight: 500,
+              marginBottom: 4,
+            },
+          }}
+        />
 
+        <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
           {/* Document Number */}
-          <FormField
-            control={form.control}
-            name="documentNumber"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Hujjat raqami</FormLabel>
-                <FormControl>
-                  <Input placeholder="DOC-001" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+          <TextInput
+            label="Hujjat raqami"
+            placeholder="DOC-001"
+            size="sm"
+            radius="sm"
+            error={form.formState.errors.documentNumber?.message}
+            {...form.register("documentNumber")}
+            styles={{
+              input: {
+                backgroundColor: "#f8f9fa",
+                border: "1px solid #e9ecef",
+                "&:focus": {
+                  borderColor: "#1e3a5f",
+                },
+              },
+              label: {
+                color: "#495057",
+                fontWeight: 500,
+                marginBottom: 4,
+              },
+            }}
           />
 
           {/* Priority */}
-          <FormField
-            control={form.control}
-            name="priority"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Muhimlik darajasi</FormLabel>
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <FormControl>
-                      <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Tanlang" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="LOW">Past</SelectItem>
-                    <SelectItem value="MEDIUM">O'rta</SelectItem>
-                    <SelectItem value="HIGH">Yuqori</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
+          <Select
+            label="Muhimlik darajasi"
+            placeholder="Tanlang"
+            size="sm"
+            radius="sm"
+            data={priorityOptions}
+            value={form.watch("priority")}
+            //@ts-ignore
+            onChange={(value) => form.setValue("priority", value || "LOW", { shouldValidate: true })}
+            error={form.formState.errors.priority?.message}
+            styles={{
+              input: {
+                backgroundColor: "#f8f9fa",
+                border: "1px solid #e9ecef",
+                "&:focus": {
+                  borderColor: "#1e3a5f",
+                },
+              },
+              label: {
+                color: "#495057",
+                fontWeight: 500,
+                marginBottom: 4,
+              },
+            }}
           />
 
-          <FormField
-            control={form.control}
-            name="documentTypeId"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Hujjat turi</FormLabel>
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <FormControl>
-                      <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Tanlang" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {documentTypes?.data?.map((t) => (
-                      <SelectItem key={t.id} value={t.id}>
-                        {t.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
+          {/* Document Type */}
+          <Select
+            label="Hujjat turi"
+            placeholder="Tanlang"
+            size="sm"
+            radius="sm"
+            data={documentTypeOptions}
+            value={form.watch("documentTypeId") || ""}
+            onChange={(value) => form.setValue("documentTypeId", value || "", { shouldValidate: true })}
+            error={form.formState.errors.documentTypeId?.message}
+            styles={{
+              input: {
+                backgroundColor: "#f8f9fa",
+                border: "1px solid #e9ecef",
+                "&:focus": {
+                  borderColor: "#1e3a5f",
+                },
+              },
+              label: {
+                color: "#495057",
+                fontWeight: 500,
+                marginBottom: 4,
+              },
+            }}
           />
 
           {/* Journal */}
-          <FormField
-            control={form.control}
-            name="journalId"
-            render={({ field }) => (
-              <FormItem className="col-span-2">
-                <FormLabel>Jurnal</FormLabel>
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <FormControl>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Tanlang" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {journals?.data?.map((j) => (
-                      <SelectItem key={j.id} value={j.id}>
-                        {j.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
+          <Select
+            label="Jurnal"
+            placeholder="Tanlang"
+            size="sm"
+            radius="sm"
+            data={journalOptions}
+            value={form.watch("journalId") || ""}
+            onChange={(value) => form.setValue("journalId", value || "", { shouldValidate: true })}
+            error={form.formState.errors.journalId?.message}
+            styles={{
+              input: {
+                backgroundColor: "#f8f9fa",
+                border: "1px solid #e9ecef",
+                "&:focus": {
+                  borderColor: "#1e3a5f",
+                },
+              },
+              label: {
+                color: "#495057",
+                fontWeight: 500,
+                marginBottom: 4,
+              },
+            }}
           />
+        </SimpleGrid>
 
-          {/* Template Selection */}
-          <FormField
-            control={form.control}
-            name="templateId"
-            render={() => (
-              <FormItem className="col-span-2">
-                <FormLabel>Shablon</FormLabel>
-                <Select
-                  value={selectedTemplateId || "none"}
-                  onValueChange={(value) => handleTemplateChange(value === "none" ? "" : value)}
-                >
-                  <FormControl>
-                      <SelectTrigger className="w-full">
-                      <SelectValue placeholder={isLoadingTemplates ? "Yuklanmoqda..." : "Shablon tanlang (ixtiyoriy)"} />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="none">Shablonsiz</SelectItem>
-                    {templates?.data && templates.data.length > 0 ? (
-                      templates.data.map((t) => (
-                        <SelectItem key={t.id} value={t.id}>
-                          {t.name}
-                        </SelectItem>
-                      ))
-                    ) : !isLoadingTemplates ? (
-                      <div className="px-2 py-1.5 text-sm text-muted-foreground">
-                        Shablonlar topilmadi
-                      </div>
-                    ) : null}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+        {/* Template Selection */}
+        <Select
+          label="Shablon"
+          placeholder={isLoadingTemplates ? "Yuklanmoqda..." : "Shablon tanlang (ixtiyoriy)"}
+          size="sm"
+          radius="sm"
+          data={templateOptions}
+          value={selectedTemplateId || ""}
+          onChange={handleTemplateChange}
+          disabled={isLoadingTemplates}
+          styles={{
+            input: {
+              backgroundColor: "#f8f9fa",
+              border: "1px solid #e9ecef",
+              "&:focus": {
+                borderColor: "#1e3a5f",
+              },
+            },
+            label: {
+              color: "#495057",
+              fontWeight: 500,
+              marginBottom: 4,
+            },
+          }}
+        />
 
         {/* Dynamic Tag Fields */}
         {isLoadingTemplate && selectedTemplateId && (
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <Loader2 className="h-4 w-4 animate-spin" />
-            <span>Shablon yuklanmoqda...</span>
-          </div>
+          <Group gap="xs" c="dimmed">
+            <Loader size="xs" color="#1e3a5f" />
+            <Text size="sm">Shablon yuklanmoqda...</Text>
+          </Group>
         )}
 
         {hasRequiredTags && (
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-base">
-                <Tag className="h-4 w-4" />
+          <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+            <Group gap="xs" mb="md">
+              <IconTag size={16} color="#1e3a5f" />
+              <Text size="sm" fw={600} c="#212529">
                 Shablon maydonlari
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 gap-4">
-                {Object.entries(requiredTags).map(([tagName, tagType]) => (
-                  <FormItem key={tagName}>
-                    <FormLabel className="capitalize">
-                      {tagName.replace(/([A-Z])/g, " $1").trim()}
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder={`${tagName} kiriting`}
-                        value={tagValues[tagName] || ""}
-                        onChange={(e) => handleTagChange(tagName, e.target.value)}
-                      />
-                    </FormControl>
-                  </FormItem>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+              </Text>
+            </Group>
+            <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+              {Object.entries(requiredTags).map(([tagName]) => (
+                <TextInput
+                  key={tagName}
+                  label={tagName.replace(/([A-Z])/g, " $1").trim()}
+                  placeholder={`${tagName} kiriting`}
+                  size="sm"
+                  radius="sm"
+                  value={tagValues[tagName] || ""}
+                  onChange={(e) => handleTagChange(tagName, e.target.value)}
+                  styles={{
+                    input: {
+                      backgroundColor: "#f8f9fa",
+                      border: "1px solid #e9ecef",
+                      "&:focus": {
+                        borderColor: "#1e3a5f",
+                      },
+                    },
+                    label: {
+                      color: "#495057",
+                      fontWeight: 500,
+                      marginBottom: 4,
+                      textTransform: "capitalize",
+                    },
+                  }}
+                />
+              ))}
+            </SimpleGrid>
+          </Paper>
         )}
 
         {/* File Upload - only show when no template selected */}
         {!selectedTemplateId && (
-          <FormField
-            control={form.control}
-            name="attachments"
-            render={() => (
-              <FormItem>
-                <FormLabel>Fayllar</FormLabel>
-                <FormControl>
-                  <FileUpload
-                    name="attachments"
-                    multiple={true}
-                    existingFiles={existingFiles.map((f) => ({
-                      ...f,
-                      fileSize: f.fileSize || 0,
-                    }))}
-                    onDeleteExisting={handleDeleteFile}
-                    onChange={async (files) => {
-                      if (!files) return;
-                      if (Array.isArray(files)) {
-                        for (const file of files) {
-                          await handleFileUpload(file);
-                        }
-                      } else {
-                        await handleFileUpload(files);
-                      }
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+          <Box>
+            <Text size="sm" fw={500} c="#495057" mb={4}>
+              Fayllar <span style={{ color: "var(--mantine-color-error)" }}>*</span>
+            </Text>
+            <FileUpload
+              name="attachments"
+              multiple={true}
+              accept={{
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"],
+                "application/msword": [".doc"],
+              }}
+              helperText="Faqat DOCX formatdagi fayllar (max 50MB)"
+              existingFiles={existingFiles.map((f) => ({
+                ...f,
+                fileSize: f.fileSize || 0,
+              }))}
+              onDeleteExisting={handleDeleteFile}
+              onChange={async (files) => {
+                if (!files) return;
+                if (Array.isArray(files)) {
+                  for (const file of files) {
+                    await handleFileUpload(file);
+                  }
+                } else {
+                  await handleFileUpload(files);
+                }
+              }}
+            />
+            {form.formState.errors.attachments && (
+              <Text c="red" size="xs" mt={4}>
+                {form.formState.errors.attachments.message}
+              </Text>
             )}
-          />
+          </Box>
         )}
 
         {/* Actions */}
-        <div className="flex justify-end gap-2 pt-4">
+        <Group justify="flex-end" gap="xs" pt="md" style={{ borderTop: "1px solid #e9ecef" }}>
           <Button
-            type="button"
             variant="outline"
+            size="sm"
+            radius="sm"
             onClick={modal.closeModal}
+            styles={{
+              root: {
+                borderColor: "#e9ecef",
+                color: "#495057",
+                "&:hover": {
+                  backgroundColor: "#f8f9fa",
+                },
+              },
+            }}
           >
             Bekor qilish
           </Button>
           <Button
             type="submit"
-            disabled={
+            size="sm"
+            radius="sm"
+            disabled={!form.formState.isValid}
+            loading={
               form.formState.isSubmitting ||
               isUploading ||
               createMutation.isLoading ||
               updateMutation.isLoading
             }
+            style={{ backgroundColor: "#1e3a5f" }}
           >
             {form.formState.isSubmitting ||
-            createMutation.isLoading ||
-            updateMutation.isLoading
+              createMutation.isLoading ||
+              updateMutation.isLoading
               ? isUpdate
                 ? "Yangilanmoqda..."
                 : "Qo'shilmoqda..."
               : isUpdate
-              ? "Yangilash"
-              : "Qo'shish"}
+                ? "Yangilash"
+                : "Qo'shish"}
           </Button>
-        </div>
-      </form>
-    </Form>
+        </Group>
+      </Stack>
+    </form>
   );
 };
 

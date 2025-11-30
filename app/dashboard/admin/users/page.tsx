@@ -5,25 +5,6 @@ import { PageHeader } from "@/components/shared/ui/custom-breadcrumb";
 const Page = () => {
   return (
     <>
-      <PageHeader
-        title="Foydalanuvchilar"
-        description="Foydalanuvchilarni boshqarish"
-        items={[
-          {
-            label: "Bosh sahifa",
-            href: "/dashboard",
-            icon: <Home size={16} />,
-          },
-          {
-            label: "Boshqaruv",
-            href: "/dashboard/admin",
-          },
-          {
-            label: "Foydalanuvchilar",
-            href: "/dashboard/admin/users",
-          },
-        ]}
-      />
       <UserPage />
     </>
   );

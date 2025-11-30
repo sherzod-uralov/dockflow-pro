@@ -1,23 +1,16 @@
-import { zodResolver } from "@hookform/resolvers/zod";
+"use client";
+
+import { useEffect, useCallback } from "react";
 import { useForm } from "react-hook-form";
-import { documentTypeScheme } from "../schema/document-type.schema";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Button } from "@/components/ui/button";
+import { Stack, TextInput, Textarea, Button, Group } from "@mantine/core";
+import { documentTypeScheme } from "../schema/document-type.schema";
 import { ModalState } from "@/types/modal";
 import {
   useCreateDocumentType,
   useUpdateDocumentType,
 } from "../hook/document-type.hook";
-import { useEffect } from "react";
 import { DocumentType as DocumentTypeModel } from "../type/document-type.type";
 
 type DocumentTypeFormType = z.infer<typeof documentTypeScheme>;
@@ -61,6 +54,7 @@ const DocumentTypeFormModal = ({
     } else if (!isUpdate) {
       form.reset({
         name: "",
+        description: "",
       });
     }
   }, [documentType, isUpdate, form, modal.isOpen]);
@@ -75,7 +69,7 @@ const DocumentTypeFormModal = ({
             form.reset();
             onSuccess?.();
           },
-        },
+        }
       );
     } else {
       // @ts-ignore
@@ -89,70 +83,105 @@ const DocumentTypeFormModal = ({
     }
   };
 
-  const handleCancel = () => {
+  const handleCancel = useCallback(() => {
     modal.closeModal();
     form.reset();
-  };
+  }, [modal, form]);
 
   return (
-    <Form {...form}>
-      <form className="space-y-5" onSubmit={form.handleSubmit(handleSubmit)}>
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Hujjat turi nomi</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Hujjat turini nomini kiriting"
-                  disabled={isLoading}
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+    <form onSubmit={form.handleSubmit(handleSubmit)}>
+      <Stack gap="md">
+        <TextInput
+          label="Hujjat turi nomi"
+          placeholder="Hujjat turini nomini kiriting"
+          size="sm"
+          radius="sm"
+          disabled={isLoading}
+          error={form.formState.errors.name?.message}
+          {...form.register("name")}
+          styles={{
+            input: {
+              backgroundColor: "#f8f9fa",
+              border: "1px solid #e9ecef",
+              "&:focus": {
+                borderColor: "#1e3a5f",
+              },
+            },
+            label: {
+              color: "#495057",
+              fontWeight: 500,
+              marginBottom: 4,
+            },
+          }}
         />
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Hujjat tavsifi</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Hujjat tavsifini nomini kiriting"
-                  disabled={isLoading}
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+
+        <Textarea
+          label="Hujjat tavsifi"
+          placeholder="Hujjat tavsifini kiriting"
+          size="sm"
+          radius="sm"
+          minRows={3}
+          disabled={isLoading}
+          error={form.formState.errors.description?.message}
+          {...form.register("description")}
+          styles={{
+            input: {
+              backgroundColor: "#f8f9fa",
+              border: "1px solid #e9ecef",
+              "&:focus": {
+                borderColor: "#1e3a5f",
+              },
+            },
+            label: {
+              color: "#495057",
+              fontWeight: 500,
+              marginBottom: 4,
+            },
+          }}
         />
-        <div className="flex justify-end gap-2 pt-4">
+
+        <Group
+          justify="flex-end"
+          gap="xs"
+          pt="md"
+          style={{ borderTop: "1px solid #e9ecef" }}
+        >
           <Button
-            className="hover:text-text-on-dark"
-            type="button"
             variant="outline"
+            size="sm"
+            radius="sm"
             onClick={handleCancel}
             disabled={isLoading}
+            styles={{
+              root: {
+                borderColor: "#e9ecef",
+                color: "#495057",
+                "&:hover": {
+                  backgroundColor: "#f8f9fa",
+                },
+              },
+            }}
           >
             Bekor qilish
           </Button>
-          <Button type="submit" disabled={isLoading}>
+          <Button
+            type="submit"
+            size="sm"
+            radius="sm"
+            loading={isLoading}
+            style={{ backgroundColor: "#1e3a5f" }}
+          >
             {isLoading
               ? isUpdate
                 ? "Yangilanmoqda..."
                 : "Qo'shilmoqda..."
               : isUpdate
-                ? "Yangilash"
-                : "Qo'shish"}
+              ? "Yangilash"
+              : "Qo'shish"}
           </Button>
-        </div>
-      </form>
-    </Form>
+        </Group>
+      </Stack>
+    </form>
   );
 };
 

@@ -6,9 +6,10 @@ import {
   useModal,
 } from "@/components/shared/ui/custom-modal";
 import { ModalState } from "@/types/modal";
-import { ArrowLeft, Send, Trash2 } from "lucide-react";
-import { useState, FC, ReactElement, useEffect } from "react";
+import { IconArrowLeft, IconSend, IconTrash } from "@tabler/icons-react";
+import { useState, FC, ReactElement, useEffect, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
+import { Group } from "@mantine/core";
 import {
   CustomAction,
   createEditAction,
@@ -27,10 +28,31 @@ import {
 import { SplitLayoutWithTabs } from "@/components/shared/layout/document.management.layout";
 import WorkflowForm from "@/features/workflow/component/workflow.form";
 import { useGetAllDocumentTypes } from "@/features/document-type";
+import { useGetAllJournals } from "@/features/journal/hook/journal.hook";
+import { useGetAllDocumentTemplates } from "@/features/document-template/hook/document-template.hook";
+import { useOnboarding, TourButton } from "@/hooks/use-onboarding";
+
+// Status options
+const STATUS_OPTIONS = [
+  { value: "DRAFT", label: "Qoralama" },
+  { value: "PUBLISHED", label: "Chop etilgan" },
+  { value: "ARCHIVED", label: "Arxivlangan" },
+];
+
+// Priority options
+const PRIORITY_OPTIONS = [
+  { value: "LOW", label: "Past" },
+  { value: "MEDIUM", label: "O'rta" },
+  { value: "HIGH", label: "Yuqori" },
+];
+
 const DocumentPage: FC<{ children: ReactElement }> = ({ children }) => {
   const router = useRouter();
   const params = useParams();
   const documentId = params?.id as string | undefined;
+
+  // Onboarding tour
+  useOnboarding("document");
 
   const createModal: ModalState = useModal();
   const editModal: ModalState = useModal();
@@ -42,20 +64,42 @@ const DocumentPage: FC<{ children: ReactElement }> = ({ children }) => {
     useState<DocumentGetResponse | null>(null);
   const [searchQuery, debouncedSearch, setSearchQuery] = useDebounce("", 500);
   const [selectedTab, setSelectedTab] = useState<string>("");
+
+  // Filter states
+  const [statusFilter, setStatusFilter] = useState<string | null>(null);
+  const [priorityFilter, setPriorityFilter] = useState<string | null>(null);
+  const [journalFilter, setJournalFilter] = useState<string | null>(null);
+  const [templateFilter, setTemplateFilter] = useState<string | null>(null);
+
   useEffect(() => {
     handlePageChange(1);
-  }, [selectedTab]);
+  }, [selectedTab, statusFilter, priorityFilter, journalFilter, templateFilter]);
 
   const { data, isLoading } = useGetAllDocuments({
     search: debouncedSearch || undefined,
     pageSize: pageSize,
     pageNumber: pageNumber,
     documentTypeId: selectedTab || undefined,
+    status: statusFilter || undefined,
+    priority: priorityFilter || undefined,
+    journalId: journalFilter || undefined,
+    templateId: templateFilter || undefined,
   });
 
   const { data: documentTypes } = useGetAllDocumentTypes({
     pageNumber: 1,
     pageSize: 1000,
+  });
+
+  // Get journals and templates for filters
+  const { data: journalsData } = useGetAllJournals({
+    pageNumber: 1,
+    pageSize: 100,
+  });
+
+  const { data: templatesData } = useGetAllDocumentTemplates({
+    pageNumber: 1,
+    pageSize: 100,
   });
 
   const { data: documentData, isLoading: isDocumentLoading } =
@@ -75,7 +119,7 @@ const DocumentPage: FC<{ children: ReactElement }> = ({ children }) => {
   useEffect(() => {
     if (documentId && data?.data && !selectedDocument) {
       const foundDoc = data.data.find(
-        (doc: DocumentGetResponse) => doc.id === documentId,
+        (doc: DocumentGetResponse) => doc.id === documentId
       );
       if (foundDoc) {
         setSelectedDocument(foundDoc);
@@ -83,12 +127,12 @@ const DocumentPage: FC<{ children: ReactElement }> = ({ children }) => {
     }
   }, [documentId, data, selectedDocument]);
 
-  const handleEdit = (item: DocumentGetResponse) => {
+  const handleEdit = useCallback((item: DocumentGetResponse) => {
     setSelectedDocument(item);
     editModal.openModal();
-  };
+  }, [editModal]);
 
-  const handleDelete = (id: string) => {
+  const handleDelete = useCallback((id: string) => {
     deleteDocumentMutation.mutate(id, {
       onSuccess: () => {
         router.push("/dashboard/document");
@@ -96,29 +140,29 @@ const DocumentPage: FC<{ children: ReactElement }> = ({ children }) => {
       },
     });
     deleteModal.closeModal();
-  };
+  }, [deleteDocumentMutation, router, deleteModal]);
 
-  const handleEditSuccess = () => {
+  const handleEditSuccess = useCallback(() => {
     setSelectedDocument(null);
-  };
+  }, []);
 
-  const handleEditModalClose = () => {
+  const handleEditModalClose = useCallback(() => {
     setSelectedDocument(null);
     editModal.closeModal();
-  };
+  }, [editModal]);
 
-  const handleViewDocument = (item: DocumentGetResponse) => {
+  const handleViewDocument = useCallback((item: DocumentGetResponse) => {
     setSelectedDocument(item);
     router.push(`/dashboard/document/${item.id}`, { scroll: false });
-  };
+  }, [router]);
 
-  const handleBack = () => {
+  const handleBack = useCallback(() => {
     router.push("/dashboard/document");
     setSelectedDocument(null);
-  };
+  }, [router]);
 
   const tabs = [
-    { value: "", label: "Barchasi" },
+    { value: "all", label: "Barchasi" },
     ...(documentTypes?.data.map((type) => ({
       value: type.id,
       label: type.name,
@@ -128,12 +172,12 @@ const DocumentPage: FC<{ children: ReactElement }> = ({ children }) => {
   const actionButtons = [
     {
       label: "Ortga",
-      icon: <ArrowLeft className="h-4 w-4" />,
+      icon: <IconArrowLeft size={16} />,
       onClick: handleBack,
     },
     {
       label: "Yuborish",
-      icon: <Send className="h-4 w-4" />,
+      icon: <IconSend size={16} />,
       onClick: () => {
         workflowModal.openModal();
         router.push(`?documentId=${selectedDocument?.id}`);
@@ -141,24 +185,51 @@ const DocumentPage: FC<{ children: ReactElement }> = ({ children }) => {
     },
     {
       label: "O'chirish",
-      icon: <Trash2 className="h-4 w-4" />,
+      icon: <IconTrash size={16} />,
       onClick: () => deleteModal.openModal(),
     },
-    // {
-    //   label: "Ijro qadamlari (beta)",
-    //   icon: <FileEdit className="h-4 w-4" />,
-    //   onClick: () => {},
-    // },
   ];
+
+  // Filter configuration
+  const filterConfig = {
+    status: {
+      value: statusFilter,
+      onChange: setStatusFilter,
+      options: STATUS_OPTIONS,
+    },
+    priority: {
+      value: priorityFilter,
+      onChange: setPriorityFilter,
+      options: PRIORITY_OPTIONS,
+    },
+    journalId: {
+      value: journalFilter,
+      onChange: setJournalFilter,
+      options: journalsData?.data?.map((j) => ({
+        value: j.id,
+        label: j.name,
+      })) || [],
+      label: "Jurnal",
+    },
+    templateId: {
+      value: templateFilter,
+      onChange: setTemplateFilter,
+      options: templatesData?.data?.map((t) => ({
+        value: t.id,
+        label: t.name,
+      })) || [],
+      label: "Shablon",
+    },
+  };
 
   return (
     <>
       <SplitLayoutWithTabs
         tabs={tabs}
-        defaultTab=""
+        defaultTab="all"
         createButtonLabel="+ Yangi hujjat"
         onCreateNew={createModal.openModal}
-        searchPlaceholder="HUJJATLAR RO'YXATI"
+        searchPlaceholder="Hujjatlarni qidirish..."
         searchValue={searchQuery}
         onSearchChange={setSearchQuery}
         // @ts-ignore
@@ -173,19 +244,24 @@ const DocumentPage: FC<{ children: ReactElement }> = ({ children }) => {
         totalCount={data?.count || 0}
         onPageChange={handlePageChange}
         rightPanelContent={children}
-        onTabChange={(tab) => setSelectedTab(tab)}
+        onTabChange={(tab) => setSelectedTab(tab === "all" ? "" : tab)}
         selectedItemActions={actionButtons}
+        filters={filterConfig}
+        showFilters={false}
         additionalActions={
-          selectedDocument && (
-            <CustomAction
-              actions={[
-                createEditAction(() => handleEdit(selectedDocument)),
-                createCopyAction(() =>
-                  handleCopyToClipboard(selectedDocument.id || "", "ID"),
-                ),
-              ]}
-            />
-          )
+          <Group gap="xs">
+            <TourButton tourKey="document" variant="icon" size="md" />
+            {selectedDocument && (
+              <CustomAction
+                actions={[
+                  createEditAction(() => handleEdit(selectedDocument)),
+                  createCopyAction(() =>
+                    handleCopyToClipboard(selectedDocument.id || "", "ID")
+                  ),
+                ]}
+              />
+            )}
+          </Group>
         }
       />
 
@@ -226,6 +302,7 @@ const DocumentPage: FC<{ children: ReactElement }> = ({ children }) => {
           handleDelete(selectedDocument?.id as string);
         }}
       />
+
       <CustomModal
         size="3xl"
         closeOnOverlayClick={false}

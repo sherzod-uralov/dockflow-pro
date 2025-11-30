@@ -1,134 +1,181 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { handleCopyToClipboard } from "@/utils/copy-text";
-import { useSearchParams } from "next/navigation";
-import { useGetJournalById } from "../hook/journal.hook";
-import SkeletonWrapper from "@/components/wrappers/skleton-wrapper";
-import { Copy, FileText, Building, User, Type } from "lucide-react";
+    Box,
+    Text,
+    Group,
+    Badge,
+    Paper,
+    Stack,
+    SimpleGrid,
+    Divider,
+    CopyButton,
+    ActionIcon,
+    Tooltip,
+} from "@mantine/core";
+import {
+    IconBook,
+    IconHash,
+    IconTemplate,
+    IconBuilding,
+    IconUser,
+    IconCopy,
+    IconCheck,
+} from "@tabler/icons-react";
+import { SingleJournalApiResponse } from "../types/journal.types";
 
-const JournalView = () => {
-  const params = useSearchParams();
-  const journalId = params.get("journalId") || "";
+interface JournalViewProps {
+    journal: SingleJournalApiResponse;
+}
 
-  const { data: journal, isLoading, isFetching } = useGetJournalById(journalId);
+const JournalView = ({ journal }: JournalViewProps) => {
+    return (
+        <Stack gap="lg">
+            {/* Header */}
+            <Box>
+                <Group justify="space-between" align="flex-start">
+                    <Group gap="sm">
+                        <Box
+                            p={10}
+                            style={{
+                                backgroundColor: "#f1f3f5",
+                                borderRadius: 8,
+                            }}
+                        >
+                            <IconBook size={24} color="#1e3a5f" />
+                        </Box>
+                        <Box>
+                            <Text size="xl" fw={600} c="#212529">
+                                {journal.name}
+                            </Text>
+                            <Text size="sm" c="dimmed">
+                                Jurnal haqida batafsil ma'lumotlar
+                            </Text>
+                        </Box>
+                    </Group>
+                    <CopyButton value={journal.id}>
+                        {({ copied, copy }) => (
+                            <Tooltip label={copied ? "Nusxalandi!" : "ID nusxalash"}>
+                                <Badge
+                                    variant="light"
+                                    color={copied ? "green" : "gray"}
+                                    radius="sm"
+                                    size="lg"
+                                    style={{ cursor: "pointer" }}
+                                    onClick={copy}
+                                    rightSection={
+                                        copied ? (
+                                            <IconCheck size={14} />
+                                        ) : (
+                                            <IconCopy size={14} />
+                                        )
+                                    }
+                                >
+                                    ID: {journal.id.slice(0, 8)}...
+                                </Badge>
+                            </Tooltip>
+                        )}
+                    </CopyButton>
+                </Group>
+            </Box>
 
-  return (
-    <SkeletonWrapper isLoading={isLoading || isFetching}>
-      {journal && (
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-          <div className="flex items-start justify-between">
-            <div className="space-y-1">
-              <CardTitle className="flex items-center gap-2 text-xl">
-                {/* 4. Меняем иконку и данные */}
-                <FileText className="h-5 w-5 text-primary" />
-                {journal.name}
-              </CardTitle>
-              <CardDescription className="text-sm text-muted-foreground">
-                Jurnal haqida batafsil ma'lumotlar
-              </CardDescription>
-            </div>
-            {journal.id && (
-              <Badge
-                variant="outline"
-                className="font-mono cursor-pointer hover:bg-muted transition-colors"
-                onClick={() =>
-                  handleCopyToClipboard(journal.id, "ID nusxalandi")
-                }
-              >
-                ID: {journal.id.slice(0, 8)}...
-                <Copy className="ml-1 h-3 w-3" />
-              </Badge>
-            )}
-          </div>
-        </CardHeader>
+            <Divider />
 
-        <CardContent className="space-y-6">
-          {/* --- 5. Основная информация о журнале --- */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Префикс */}
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <Type className="h-4 w-4 text-muted-foreground" />
-                <span className="font-medium text-sm">Prefiks</span>
-              </div>
-              <div
-                className="p-3 bg-blue-50 rounded-md border border-blue-200 cursor-pointer hover:bg-blue-100 transition-colors flex items-center justify-between"
-                onClick={() =>
-                  handleCopyToClipboard(journal.prefix, "Prefiks nusxalandi")
-                }
-              >
-                <code className="text-sm font-mono text-blue-700">
-                  {journal.prefix}
-                </code>
-                <Copy className="h-4 w-4 text-blue-600" />
-              </div>
-            </div>
+            {/* Prefix and Format */}
+            <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
+                <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+                    <Group gap="xs" mb="xs">
+                        <IconHash size={16} color="#868e96" />
+                        <Text size="xs" c="dimmed" tt="uppercase" fw={600}>
+                            Prefiks
+                        </Text>
+                    </Group>
+                    <CopyButton value={journal.prefix}>
+                        {({ copied, copy }) => (
+                            <Paper
+                                p="sm"
+                                radius="sm"
+                                style={{
+                                    backgroundColor: copied ? "#d3f9d8" : "#e7f5ff",
+                                    cursor: "pointer",
+                                    border: `1px solid ${copied ? "#8ce99a" : "#a5d8ff"}`,
+                                }}
+                                onClick={copy}
+                            >
+                                <Group justify="space-between">
+                                    <Text size="md" fw={600} c={copied ? "#2b8a3e" : "#1e3a5f"} ff="monospace">
+                                        {journal.prefix}
+                                    </Text>
+                                    {copied ? (
+                                        <IconCheck size={16} color="#2b8a3e" />
+                                    ) : (
+                                        <IconCopy size={16} color="#1e3a5f" />
+                                    )}
+                                </Group>
+                            </Paper>
+                        )}
+                    </CopyButton>
+                </Paper>
 
-            {/* Формат */}
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <Type className="h-4 w-4 text-muted-foreground" />
-                <span className="font-medium text-sm">Format</span>
-              </div>
-              <div className="p-3 bg-muted/50 rounded-md">
-                <code className="text-sm font-mono">{journal.format}</code>
-              </div>
-            </div>
-          </div>
+                <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+                    <Group gap="xs" mb="xs">
+                        <IconTemplate size={16} color="#868e96" />
+                        <Text size="xs" c="dimmed" tt="uppercase" fw={600}>
+                            Format
+                        </Text>
+                    </Group>
+                    <Paper
+                        p="sm"
+                        radius="sm"
+                        style={{
+                            backgroundColor: "#f8f9fa",
+                        }}
+                    >
+                        <Text size="md" c="#495057" ff="monospace">
+                            {journal.format}
+                        </Text>
+                    </Paper>
+                </Paper>
+            </SimpleGrid>
 
-          <Separator />
+            {/* Department and Responsible User */}
+            <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
+                <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+                    <Group gap="xs" mb="sm">
+                        <IconBuilding size={16} color="#868e96" />
+                        <Text size="xs" c="dimmed" tt="uppercase" fw={600}>
+                            Bo'lim / Departament
+                        </Text>
+                    </Group>
+                    <Badge
+                        variant="light"
+                        color="green"
+                        size="lg"
+                        radius="sm"
+                    >
+                        {journal.department?.name || "—"}
+                    </Badge>
+                </Paper>
 
-          {/* --- 6. Связанные данные (Департамент и Пользователь) --- */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <Building className="h-4 w-4 text-muted-foreground" />
-                <span className="font-medium text-sm">
-                  Departament / Bo'lim
-                </span>
-              </div>
-              <Badge
-                variant="outline"
-                className="bg-green-50 text-green-700 border-green-200 px-3 py-1"
-              >
-                {journal.department.name}
-              </Badge>
-            </div>
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <User className="h-4 w-4 text-muted-foreground" />
-                <span className="font-medium text-sm">Mas'ul shaxs</span>
-              </div>
-              <Badge
-                variant="outline"
-                className="bg-indigo-50 text-indigo-700 border-indigo-200 px-3 py-1"
-              >
-                {journal.responsibleUser.username}
-              </Badge>
-            </div>
-          </div>
-
-          <Separator />
-
-          {/* --- 7. Даты создания и обновления --- */}
-        </CardContent>
-      </Card>
-    </div>
-      )}
-    </SkeletonWrapper>
-  );
+                <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+                    <Group gap="xs" mb="sm">
+                        <IconUser size={16} color="#868e96" />
+                        <Text size="xs" c="dimmed" tt="uppercase" fw={600}>
+                            Mas'ul shaxs
+                        </Text>
+                    </Group>
+                    <Badge
+                        variant="light"
+                        color="indigo"
+                        size="lg"
+                        radius="sm"
+                    >
+                        {journal.responsibleUser?.username || "—"}
+                    </Badge>
+                </Paper>
+            </SimpleGrid>
+        </Stack>
+    );
 };
 
 export default JournalView;

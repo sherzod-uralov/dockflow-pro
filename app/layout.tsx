@@ -5,7 +5,10 @@ import { GeistMono } from "geist/font/mono";
 import { Analytics } from "@vercel/analytics/next";
 import { Suspense } from "react";
 import { ThemeProvider } from "@/components/shared/theme-provider";
+import { MantineProviderWrapper } from "@/providers/mantine-provider";
+import { ColorSchemeScript } from "@mantine/core";
 import "./globals.css";
+import "@/styles/onboarding.css";
 import { Geist } from "next/font/google";
 import ReactQueryProvider from "@/context/react-query.provider";
 import { ClientToaster } from "@/components/shared/client-toast";
@@ -30,6 +33,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <ColorSchemeScript />
         <Script
           src="https://cdn.cloud.pspdfkit.com/pspdfkit-web@1.7.0/nutrient-viewer.js"
           // Load before the page becomes interactive to reference `window.NutrientViewer` in the client.
@@ -46,10 +50,12 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <Suspense fallback={null}>
-              {children}
-              <ClientToaster />
-            </Suspense>
+            <MantineProviderWrapper>
+              <Suspense fallback={null}>
+                {children}
+                <ClientToaster />
+              </Suspense>
+            </MantineProviderWrapper>
           </ThemeProvider>
         </ReactQueryProvider>
         <Analytics />

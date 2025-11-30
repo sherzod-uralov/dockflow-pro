@@ -1,11 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "react-query";
-import { toast } from "sonner";
 import {
   DocumentQueryParams,
   documentService,
   GetAllDocuments,
 } from "@/features/document";
 import { DocumentFormType } from "@/features/document/schema/document.schema";
+import { showError, showSuccess } from "@/utils/show-error";
 
 export const useCreateDocument = () => {
   const queryClient = useQueryClient();
@@ -14,11 +14,9 @@ export const useCreateDocument = () => {
       documentService.createDocument(payload),
     onSuccess: () => {
       queryClient?.invalidateQueries(["documents"]);
-      toast.success("Document muvaffaqiyatli yaratildi");
+      showSuccess("Hujjat yaratildi");
     },
-    onError: (error: any) => {
-      toast.error(error.message);
-    },
+    onError: showError,
   });
 };
 
@@ -42,11 +40,9 @@ export const useUpdateDocument = () => {
     }) => documentService.updateDocument(id, data),
     onSuccess: () => {
       queryClient?.invalidateQueries(["documents"]);
-      toast.success("Document muvaffaqiyatli yangilandi");
+      showSuccess("Hujjat yangilandi");
     },
-    onError: (error: any) => {
-      toast.error(error.message);
-    },
+    onError: showError,
   });
 };
 
@@ -56,29 +52,16 @@ export const useDeleteDocument = () => {
     mutationFn: (id: string) => documentService.deleteDocument(id),
     onSuccess: () => {
       queryClient?.invalidateQueries(["documents"]);
-      toast.success("Document muvaffaqiyatli o'chirildi");
+      showSuccess("Hujjat o'chirildi");
     },
-    onError: (error: any) => {
-      toast.error(
-        error?.response?.data?.message ||
-          error.message ||
-          "O'chirishda xatolik yuz berdi",
-      );
-    },
+    onError: showError,
   });
 };
 
-export const useGetDocumentById = (id: string, p0?: { enabled: boolean }) => {
+export const useGetDocumentById = (id: string, options?: { enabled: boolean }) => {
   return useQuery({
     queryKey: ["document", id],
     queryFn: () => documentService.getDocumentById(id),
-    enabled: !!id,
-    onError: (error: any) => {
-      toast.error(
-        error?.response?.data?.message ||
-          error.message ||
-          "Ma'lumotni olishda xatolik",
-      );
-    },
+    enabled: !!id && (options?.enabled !== false),
   });
 };

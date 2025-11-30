@@ -7,29 +7,25 @@ import {
   WorkflowStepRejectPayload,
   MyTasksResponse,
   MyTasksQueryParams,
-  RollbackUser,
-  WorkflowFromTemplatePayload,
+  WorkflowFromTemplatePayload, RollbackUser,
 } from "@/features/workflow/type/workflow.type";
 import { WorkflowCreateType } from "../schema/workflow.schema";
-import { toast } from "sonner";
+import { workflowService } from "@/features/workflow";
+import { showError, showSuccess } from "@/utils/show-error";
 import { useGetUserByIdQuery } from "@/features/admin/admin-users/hook/user.hook";
 import { useMemo } from "react";
-import { workflowService } from "@/features/workflow";
 
 export const useCreateWorkflow = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (payload: WorkflowCreateType) =>
-      workflowService.createWorkflow(payload),
+    mutationFn: (payload: WorkflowCreateType) => workflowService.createWorkflow(payload),
     onSuccess: () => {
       queryClient?.invalidateQueries(["workflows"]);
       queryClient?.invalidateQueries(["my-tasks"]);
-      toast.success("Workflow muvaffaqiyatli yaratildi");
+      showSuccess("Hujjat aylanmasi yaratildi");
     },
-    onError: (error: any) => {
-      toast.error(error.message || "Workflow yaratishda xatolik");
-    },
+    onError: showError,
   });
 };
 
@@ -42,11 +38,9 @@ export const useCreateWorkflowFromTemplate = () => {
     onSuccess: () => {
       queryClient?.invalidateQueries(["workflows"]);
       queryClient?.invalidateQueries(["my-tasks"]);
-      toast.success("Workflow shablon asosida muvaffaqiyatli yaratildi");
+      showSuccess("Hujjat aylanmasi yaratildi");
     },
-    onError: (error: any) => {
-      toast.error(error.message || "Workflow yaratishda xatolik");
-    },
+    onError: showError,
   });
 };
 
@@ -62,21 +56,14 @@ export const useUpdateWorkflow = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({
-      id,
-      data,
-    }: {
-      id: string;
-      data: Partial<WorkflowCreateType>;
-    }) => workflowService.updateWorkflow(id, data),
+    mutationFn: ({ id, data }: { id: string; data: Partial<WorkflowCreateType> }) =>
+      workflowService.updateWorkflow(id, data),
     onSuccess: (_, variables) => {
       queryClient?.invalidateQueries(["workflows"]);
       queryClient?.invalidateQueries(["workflow", variables.id]);
-      toast.success("Workflow muvaffaqiyatli yangilandi");
+      showSuccess("Hujjat aylanmasi yangilandi");
     },
-    onError: (error: any) => {
-      toast.error(error.message || "Workflow yangilashda xatolik");
-    },
+    onError: showError,
   });
 };
 
@@ -87,11 +74,9 @@ export const useDeleteWorkflow = () => {
     mutationFn: (id: string) => workflowService.deleteWorkflow(id),
     onSuccess: () => {
       queryClient?.invalidateQueries(["workflows"]);
-      toast.success("Workflow muvaffaqiyatli o'chirildi");
+      showSuccess("Hujjat aylanmasi o'chirildi");
     },
-    onError: (error: any) => {
-      toast.error(error.message || "O'chirishda xatolik yuz berdi");
-    },
+    onError: showError,
   });
 };
 
@@ -100,9 +85,6 @@ export const useGetWorkflowById = (id: string) => {
     queryKey: ["workflow", id],
     queryFn: () => workflowService.getWorkflowById(id),
     enabled: !!id,
-    onError: (error: any) => {
-      toast.error(error.message || "Ma'lumotni olishda xatolik");
-    },
   });
 };
 
@@ -120,18 +102,15 @@ export const useUpdateWorkflowStep = () => {
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: WorkflowStepUpdateType }) =>
       workflowService.updateWorkflowStep(id, data),
-    onSuccess: (response, variables) => {
+    onSuccess: (response) => {
       queryClient?.invalidateQueries(["workflows"]);
       queryClient?.invalidateQueries(["workflow-steps"]);
       if (response?.workflowId) {
         queryClient?.invalidateQueries(["workflow", response.workflowId]);
       }
+      showSuccess("Bosqich yangilandi");
+    },
 
-      toast.success("Workflow step muvaffaqiyatli yangilandi");
-    },
-    onError: (error: any) => {
-      toast.error(error.message || "Workflow step yangilashda xatolik");
-    },
   });
 };
 
@@ -149,28 +128,18 @@ export const useCompleteWorkflowStep = () => {
         queryClient?.invalidateQueries(["workflow", response.workflowId]);
       }
 
-      toast.success("Vazifa muvaffaqiyatli tasdiqlandi");
+      showSuccess("Vazifa tasdiqlandi");
     },
-    onError: (error: any) => {
-      toast.error(error.message || "Vazifani tasdiqlashda xatolik");
-    },
+    onError: showError,
   });
 };
 
-/**
- * Отклонить workflow step
- */
 export const useRejectWorkflowStep = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({
-      id,
-      data,
-    }: {
-      id: string;
-      data?: WorkflowStepRejectPayload;
-    }) => workflowService.rejectWorkflowStep(id, data),
+    mutationFn: ({ id, data }: { id: string; data?: WorkflowStepRejectPayload }) =>
+      workflowService.rejectWorkflowStep(id, data),
     onSuccess: (response) => {
       queryClient?.invalidateQueries(["workflows"]);
       queryClient?.invalidateQueries(["workflow-steps"]);
@@ -180,11 +149,9 @@ export const useRejectWorkflowStep = () => {
         queryClient?.invalidateQueries(["workflow", response.workflowId]);
       }
 
-      toast.success("Vazifa rad etildi");
+      showSuccess("Vazifa rad etildi");
     },
-    onError: (error: any) => {
-      toast.error(error.message || "Vazifani rad etishda xatolik");
-    },
+    onError: showError,
   });
 };
 

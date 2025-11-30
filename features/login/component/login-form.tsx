@@ -1,121 +1,124 @@
 "use client";
 
-import React, { useState } from "react";
-import { Eye, EyeOff } from "lucide-react";
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { useForm, type SubmitHandler } from "react-hook-form";
-import {
-  loginScheme,
-  LoginFormValue,
-} from "@/features/login/scheme/login-scheme";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Input } from "@/components/ui/input";
+    TextInput,
+    PasswordInput,
+    Button,
+    Stack,
+} from "@mantine/core";
+import { useForm } from "@mantine/form";
+import { IconUser, IconLock } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
 import { useLoginMutation } from "../hook/login.hook";
 import Cookie from "js-cookie";
+import React from "react";
+
+interface LoginFormValues {
+    username: string;
+    password: string;
+}
 
 export const LoginForm = () => {
-  const authMutation = useLoginMutation();
-  const router = useRouter();
-  const [showPassword, setShowPassword] = useState(false);
+    const authMutation = useLoginMutation();
+    const router = useRouter();
 
-  const form = useForm<LoginFormValue>({
-    resolver: zodResolver(loginScheme),
-    defaultValues: {
-      username: "",
-      password: "",
-    },
-  });
-
-  const onSubmit: SubmitHandler<LoginFormValue> = async (values) => {
-    authMutation.mutate(values, {
-      onSuccess: (data) => {
-        Cookie.set("accessToken", data.accessToken);
-        Cookie.set("refreshToken", data.refreshToken);
-        router.push("/dashboard");
-      },
+    const form = useForm<LoginFormValues>({
+        initialValues: {
+            username: "",
+            password: "",
+        },
+        validate: {
+            username: (value) =>
+                value.length < 3 ? "Foydalanuvchi nomi 3 tadan katta bo'lishi kerak" : null,
+            password: (value) =>
+                value.length < 3 ? "Parol uzunligi 3 tadan katta bo'lishi kerak" : null,
+        },
     });
-  };
 
-  return (
-    <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-6 bg-card text-card-foreground p-8 rounded-xl max-w-md mx-auto"
-      >
-        <div className="space-y-2 mb-8">
-          <h2 className="text-2xl font-bold text-foreground">Kirish</h2>
-          <p className="text-sm text-muted-foreground">
-            Tizimga kirish uchun ma'lumotlaringizni kiriting
-          </p>
-        </div>
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
 
-        <FormField
-          name="username"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-foreground font-medium text-sm">
-                Foydalanuvchi nomi
-              </FormLabel>
-              <FormControl>
-                <Input
-                  {...field}
-                  placeholder="Foydalanuvchi nomi"
-                  className="bg-input text-foreground border border-input-border rounded-lg focus:border-input-focus focus:ring-2 focus:ring-primary/20 w-full py-3 px-4 transition-all duration-200 placeholder:text-muted-foreground hover:border-border-hover"
+        const validation = form.validate();
+        if (validation.hasErrors) {
+            return;
+        }
+
+        authMutation.mutate(form.values, {
+            onSuccess: (data) => {
+                Cookie.set("accessToken", data.accessToken);
+                Cookie.set("refreshToken", data.refreshToken);
+                router.push("/dashboard");
+            },
+        });
+    };
+
+    return (
+        <form onSubmit={handleSubmit}>
+            <Stack gap="lg">
+                {/* Username */}
+                <TextInput
+                    label="Foydalanuvchi nomi"
+                    placeholder="Foydalanuvchi nomini kiriting"
+                    size="md"
+                    radius="sm"
+                    leftSection={<IconUser size={18} color="#868e96" />}
+                    {...form.getInputProps("username")}
+                    styles={{
+                        label: {
+                            fontWeight: 500,
+                            marginBottom: 6,
+                            color: "#212529",
+                        },
+                        input: {
+                            "&:focus": {
+                                borderColor: "#1e3a5f",
+                            },
+                        },
+                    }}
                 />
-              </FormControl>
-              <FormMessage className="text-error text-xs mt-1" />
-            </FormItem>
-          )}
-        />
 
-        <FormField
-          name="password"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-foreground font-medium text-sm">
-                Parol
-              </FormLabel>
-              <FormControl>
-                <div className="relative">
-                  <Input
-                    {...field}
-                    type={showPassword ? "text" : "password"}
-                    placeholder="••••••••"
-                    className="bg-input text-foreground border border-input-border rounded-lg focus:border-input-focus focus:ring-2 focus:ring-primary/20 w-full py-3 px-4 pr-12 transition-all duration-200 placeholder:text-muted-foreground hover:border-border-hover"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    {showPassword ? (
-                      <EyeOff className="h-5 w-5" />
-                    ) : (
-                      <Eye className="h-5 w-5" />
-                    )}
-                  </button>
-                </div>
-              </FormControl>
-              <FormMessage className="text-error text-xs mt-1" />
-            </FormItem>
-          )}
-        />
+                {/* Password */}
+                <PasswordInput
+                    label="Parol"
+                    placeholder="Parolni kiriting"
+                    size="md"
+                    radius="sm"
+                    leftSection={<IconLock size={18} color="#868e96" />}
+                    {...form.getInputProps("password")}
+                    styles={{
+                        label: {
+                            fontWeight: 500,
+                            marginBottom: 6,
+                            color: "#212529",
+                        },
+                        input: {
+                            "&:focus": {
+                                borderColor: "#1e3a5f",
+                            },
+                        },
+                    }}
+                />
 
-        <button
-          type="submit"
-          className="w-full py-3 px-4 bg-primary text-primary-foreground font-semibold rounded-lg hover:bg-primary-hover transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background disabled:opacity-50 disabled:cursor-not-allowed shadow-custom-md hover:shadow-custom-lg active:scale-[0.98]"
-        >
-          Kirish
-        </button>
-      </form>
-    </Form>
-  );
+                {/* Submit Button */}
+                <Button
+                    type="submit"
+                    size="md"
+                    radius="sm"
+                    fullWidth
+                    loading={authMutation.isLoading}
+                    styles={{
+                        root: {
+                            backgroundColor: "#1e3a5f",
+                            height: 48,
+                            "&:hover": {
+                                backgroundColor: "#162d4a",
+                            },
+                        },
+                    }}
+                >
+                    Kirish
+                </Button>
+            </Stack>
+        </form>
+    );
 };
