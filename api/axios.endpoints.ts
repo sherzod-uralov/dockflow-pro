@@ -107,6 +107,13 @@ export const endpoints = {
     list: (id: string | number) => `/document/${id}/pdf-url`,
     create: (id: string | number) => `/document/${id}/pdf-url`,
   },
+  notification: {
+    list: "/notifications",
+    unreadCount: "/notifications/unread-count",
+    markAsRead: (id: string) => `/notifications/${id}/read`,
+    markAllAsRead: "/notifications/read-all",
+    delete: (id: string) => `/notifications/${id}`,
+  },
 } as const;
 
 export type Endpoints = typeof endpoints;

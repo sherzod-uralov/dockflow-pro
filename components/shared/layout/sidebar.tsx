@@ -9,6 +9,7 @@ import {
   ScrollArea,
   Collapse,
   Button,
+  Badge,
 } from "@mantine/core";
 import {
   IconFiles,
@@ -32,6 +33,7 @@ import { useState, useEffect, useMemo } from "react";
 import Cookie from "js-cookie";
 import { useLogoutMutation } from "@/features/login/hook/login.hook";
 import { usePermission } from "@/providers/permission-provider";
+import { useNotificationContext } from "@/context/notification.provider";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -149,6 +151,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
   const logOutMutation = useLogoutMutation();
   const { hasPermission } = usePermission();
+  const { activeWorkflowsCount } = useNotificationContext();
 
   const [openMenu, setOpenMenu] = useState<string | null>(null);
 
@@ -287,9 +290,21 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
               <>
                 <NavLink
                   label={
-                    <Text size="sm" c="rgba(255,255,255,0.9)">
-                      {item.label}
-                    </Text>
+                    <Group justify="space-between" wrap="nowrap">
+                      <Text size="sm" c="rgba(255,255,255,0.9)">
+                        {item.label}
+                      </Text>
+                      {item.label === "Hujjat aylanmasi" && activeWorkflowsCount > 0 && (
+                        <Badge
+                          size="xs"
+                          circle
+                          color="red"
+                          style={{ width: 18, height: 18, padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                        >
+                          {activeWorkflowsCount > 99 ? '99+' : activeWorkflowsCount}
+                        </Badge>
+                      )}
+                    </Group>
                   }
                   leftSection={
                     <item.icon
@@ -340,16 +355,28 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                       <NavLink
                         key={sub.href}
                         label={
-                          <Text
-                            size="sm"
-                            c={
-                              isActive(sub.href)
-                                ? "white"
-                                : "rgba(255,255,255,0.75)"
-                            }
-                          >
-                            {sub.label}
-                          </Text>
+                          <Group justify="space-between" wrap="nowrap">
+                            <Text
+                              size="sm"
+                              c={
+                                isActive(sub.href)
+                                  ? "white"
+                                  : "rgba(255,255,255,0.75)"
+                              }
+                            >
+                              {sub.label}
+                            </Text>
+                            {sub.label === "Jarayonlar" && activeWorkflowsCount > 0 && (
+                              <Badge
+                                size="xs"
+                                circle
+                                color="red"
+                                style={{ width: 18, height: 18, padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                              >
+                                {activeWorkflowsCount > 99 ? '99+' : activeWorkflowsCount}
+                              </Badge>
+                            )}
+                          </Group>
                         }
                         onClick={() => handleItemClick(sub.href)}
                         active={isActive(sub.href)}

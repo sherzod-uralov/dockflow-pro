@@ -26,6 +26,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { GlobalSearch } from "@/components/shared/layout/global-search";
 import Cookie from "js-cookie";
 import { TourSettingsButton } from "@/hooks/use-onboarding";
+import { NotificationBell } from "@/components/shared/notification-bell";
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -62,11 +63,11 @@ export function Header({ onMenuClick }: HeaderProps) {
   const email = `@${data.username}`;
   const initials = fullName
     ? fullName
-        .split(" ")
-        .map((n: string) => n[0])
-        .join("")
-        .toUpperCase()
-        .slice(0, 2)
+      .split(" ")
+      .map((n: string) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2)
     : "FN";
 
   const handleProfileClick = () => {
@@ -110,11 +111,7 @@ export function Header({ onMenuClick }: HeaderProps) {
 
         <Group gap="xs">
           {/* Bildirishnomalar */}
-          <Indicator size={8} color="red" offset={4} disabled>
-            <ActionIcon variant="subtle" color="gray" size="lg" radius="sm">
-              <IconBell size={20} stroke={1.5} />
-            </ActionIcon>
-          </Indicator>
+          <NotificationBell />
 
           {/* Tanishuv sozlamalari */}
           <TourSettingsButton />
