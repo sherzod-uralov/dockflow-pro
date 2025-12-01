@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { WorkflowStepStatus, WorkflowActionType, WorkflowStatus } from "@/features/workflow/type/workflow.type";
 import { WorkflowStepInfo } from "../type/view.type";
+import { da } from "date-fns/locale";
 
 interface ViewPageProps {
   documentId: string;
@@ -162,6 +163,7 @@ const WorkflowStepCard = ({ step, isLast }: { step: WorkflowStepInfo; isLast: bo
 export default function ViewPage({ documentId }: ViewPageProps) {
   const { data, isLoading, isError, error } = useVerifyDocument(documentId);
 
+  console.log(data)
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 py-8">
@@ -326,10 +328,10 @@ export default function ViewPage({ documentId }: ViewPageProps) {
                   {data.workflow.status === WorkflowStatus.COMPLETED
                     ? "Yakunlangan"
                     : data.workflow.status === WorkflowStatus.ACTIVE
-                    ? "Faol"
-                    : data.workflow.status === WorkflowStatus.CANCELLED
-                    ? "Bekor qilingan"
-                    : "Qoralama"}
+                      ? "Faol"
+                      : data.workflow.status === WorkflowStatus.CANCELLED
+                        ? "Bekor qilingan"
+                        : "Qoralama"}
                 </Badge>
               </div>
             </CardHeader>

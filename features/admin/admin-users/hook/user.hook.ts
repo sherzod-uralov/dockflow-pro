@@ -6,7 +6,7 @@ import {
   UserGetRequest,
   UserHookProps,
 } from "@/features/admin/admin-users/type/user.types";
-import { toast } from "sonner";
+import { showError, showSuccess } from "@/utils/show-error";
 import { UserSchemaZodType } from "../schema/user.schema";
 import { useForm } from "react-hook-form";
 
@@ -29,10 +29,10 @@ export const useCreateUserMutation = (form?: ReturnType<typeof useForm>) => {
     mutationFn: (user: UserSchemaZodType) => userService.createUser(user),
     onSuccess: () => {
       queryClient.invalidateQueries("user");
-      toast.success("Foydalanuvchi muvaffaqiyatli yaratildi");
+      showSuccess("Foydalanuvchi muvaffaqiyatli yaratildi");
     },
     onError: (error: any) => {
-      toast.error(error.message);
+      showError(error);
     },
   });
 };
@@ -43,10 +43,10 @@ export const useDeleteUserMutation = () => {
     mutationFn: (id: string) => userService.deleteUser(id),
     onSuccess: () => {
       queryClient.invalidateQueries("user");
-      toast.success("Foydalanuvchi muvaffaqiyatli o'chirildi");
+      showSuccess("Foydalanuvchi muvaffaqiyatli o'chirildi");
     },
     onError: () => {
-      toast.error("Foydalanuvchi o'chirishda xatolik yuz berdi");
+      showError("Foydalanuvchi o'chirishda xatolik yuz berdi");
     },
   });
 };
@@ -58,12 +58,10 @@ export const useUpdateUserMutation = () => {
       userService.updateUser(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries("user");
-      toast.success("Foydalanuvchi muvaffaqiyatli yangilandi");
+      showSuccess("Foydalanuvchi muvaffaqiyatli yangilandi");
     },
     onError: (error: any) => {
-      const msg =
-        error?.response?.data?.message ?? error?.message ?? "Xatolik yuz berdi";
-      toast.error(msg);
+      showError(error);
     },
   });
 };

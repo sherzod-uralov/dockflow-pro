@@ -3,18 +3,16 @@ import { useRouter } from "next/navigation";
 import Cookie from "js-cookie";
 import { LoginBody } from "@/features/login/type/login.type";
 import { authService } from "@/features/login/service/login.service";
-import { toast } from "sonner";
+import { showError, showSuccess } from "@/utils/show-error";
 
 export const useLoginMutation = () => {
   return useMutation({
     mutationFn: (payload: LoginBody) => authService.login(payload),
     onSuccess: () => {
-      toast.success("muvaffaqiyatli kirdingiz", {
-        description: "siz tizimga kirdingiz",
-      });
+      showSuccess("Muvaffaqiyatli kirdingiz");
     },
     onError: () => {
-      toast.error("parolyoki login noto'g'ri");
+      showError("Login yoki parol noto'g'ri");
     },
   });
 };
@@ -33,11 +31,11 @@ export const useLogoutMutation = () => {
     mutationFn: () => authService.logout(),
     onSuccess: () => {
       Cookie.remove("accessToken");
-      toast.success("Tizimdan muvaffaqiyatli chiqdingiz");
+      showSuccess("Tizimdan muvaffaqiyatli chiqdingiz");
       router.push("/login");
     },
     onError: () => {
-      toast.error("Chiqishda xatolik");
+      showError("Chiqishda xatolik");
     },
   });
 };
@@ -46,7 +44,7 @@ export const useProfileUpdateMutation = () => {
   return useMutation({
     mutationFn: (payload: any) => authService.updateProfile(payload),
     onSuccess: () => {
-      toast.success("Profil muvaffaqiyatli yangilandi");
+      showSuccess("Profil muvaffaqiyatli yangilandi");
     },
     onError: (error: any) => {
       throw new Error(error.message);

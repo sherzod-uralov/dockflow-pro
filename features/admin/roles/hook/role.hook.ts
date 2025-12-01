@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { RoleZodType } from "../schema/role.schema";
 import { rolesService } from "../service/role.service";
-import { toast } from "sonner";
+import { showError, showSuccess } from "@/utils/show-error";
 
 export const useRoleCreateMutation = () => {
   const queryClient = useQueryClient();
@@ -10,10 +10,10 @@ export const useRoleCreateMutation = () => {
     mutationFn: async (data: RoleZodType) => rolesService.createRole(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["roles"] });
-      toast.success("Rol muvaffaqiyatli yaratildi");
+      showSuccess("Rol muvaffaqiyatli yaratildi");
     },
     onError: (error: any) => {
-      toast.error(error.message);
+      showError(error);
     },
   });
 };
@@ -33,10 +33,10 @@ export const useDeleteRole = () => {
     mutationFn: async (id: string) => rolesService.deleteRole(id),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["roles"] });
-      toast.success("Rol muvaffaqiyatli o'chirildi");
+      showSuccess("Rol muvaffaqiyatli o'chirildi");
     },
     onError: (error: any) => {
-      toast.error(error.message);
+      showError(error);
     },
   });
 };
@@ -49,10 +49,10 @@ export const useUpdateRole = () => {
       rolesService.updateRole(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["roles"] });
-      toast.success("Rol muvaffaqiyatli yangilandi");
+      showSuccess("Rol muvaffaqiyatli yangilandi");
     },
     onError: (error: any) => {
-      toast.error(error.message);
+      showError(error);
     },
   });
 };

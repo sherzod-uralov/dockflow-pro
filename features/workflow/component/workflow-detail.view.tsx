@@ -224,10 +224,8 @@ const WorkflowDetailView = memo(({ workflow }: WorkflowDetailViewProps) => {
           </Group>
 
           <Progress value={progress} size="sm" radius="xl" mb="lg" color="dark" />
-
-          {/* Actions based on action type */}
           <Stack gap="sm">
-            {/* QR_CODE - go to PDF editor */}
+
             {currentStep.actionType === "QR_CODE" && canEditDocument && (
               <Button
                 variant="outline"
@@ -505,6 +503,15 @@ const WorkflowDetailView = memo(({ workflow }: WorkflowDetailViewProps) => {
                 <Text size="xs" c="dimmed">Yaratilgan</Text>
                 <Text size="sm" c="#495057">{formatDateTime(workflow.createdAt)}</Text>
               </Box>
+
+              {workflow.deadline && (
+                <Box>
+                  <Text size="xs" c="dimmed">Muddat (Deadline)</Text>
+                  <Text size="sm" c={new Date(workflow.deadline) < new Date() && workflow.status !== 'COMPLETED' ? "red" : "#495057"} fw={500}>
+                    {formatDateTime(workflow.deadline)}
+                  </Text>
+                </Box>
+              )}
             </Stack>
           </Paper>
         </Stack>

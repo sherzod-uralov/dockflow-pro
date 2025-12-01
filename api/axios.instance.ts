@@ -46,8 +46,8 @@ axiosInstance.interceptors.response.use(
       _retry?: boolean;
     };
 
-    // Agar 401 xatosi va token yangilanishi kerak bo'lsa
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // Agar 401 yoki 403 xatosi va token yangilanishi kerak bo'lsa
+    if ((error.response?.status === 401 || error.response?.status === 403) && !originalRequest._retry && !originalRequest.url?.includes('/auth/refresh-token')) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });

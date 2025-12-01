@@ -197,11 +197,6 @@ const DocumentPage: FC<{ children: ReactElement }> = ({ children }) => {
       onChange: setStatusFilter,
       options: STATUS_OPTIONS,
     },
-    priority: {
-      value: priorityFilter,
-      onChange: setPriorityFilter,
-      options: PRIORITY_OPTIONS,
-    },
     journalId: {
       value: journalFilter,
       onChange: setJournalFilter,

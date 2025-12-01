@@ -55,7 +55,6 @@ describe('DocumentView', () => {
         expect(screen.getByText('Type A')).toBeInTheDocument()
         expect(screen.getByText('Journal A')).toBeInTheDocument()
         expect(screen.getByText('Chop etilgan')).toBeInTheDocument() // StatusBadge
-        expect(screen.getByText('Muhim')).toBeInTheDocument() // PriorityBadge
     })
 
     test('biriktirilgan fayllarni ko\'rsatadi', () => {

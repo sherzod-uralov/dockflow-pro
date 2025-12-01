@@ -84,7 +84,6 @@ const DocumentFormModal = ({
         title: document?.title ?? "",
         description: document?.description ?? "",
         documentNumber: document?.documentNumber ?? "",
-        priority: document?.priority ?? "LOW",
         documentTypeId: document?.documentType?.id ?? "",
         journalId: document?.journal?.id ?? "",
         templateId: document?.template?.id ?? "",
@@ -95,7 +94,6 @@ const DocumentFormModal = ({
         title: "",
         description: "",
         documentNumber: "",
-        priority: "LOW",
         documentTypeId: undefined,
         journalId: undefined,
         templateId: undefined,
@@ -169,6 +167,15 @@ const DocumentFormModal = ({
   }, [form]);
 
   const handleSubmit = (values: DocumentFormType) => {
+    // Custom validation: If no template is selected, attachments are required
+    if (!selectedTemplateId && (!values.attachments || values.attachments.length === 0)) {
+      form.setError("attachments", {
+        type: "manual",
+        message: "Kamida bitta fayl yuklanishi kerak",
+      });
+      return;
+    }
+
     const data = {
       ...values,
       templateId: selectedTemplateId || undefined,
@@ -200,11 +207,7 @@ const DocumentFormModal = ({
   const requiredTags = selectedTemplate?.requiredTags as RequiredTags | undefined;
   const hasRequiredTags = requiredTags && Object.keys(requiredTags).length > 0;
 
-  const priorityOptions = [
-    { value: "LOW", label: "Past" },
-    { value: "MEDIUM", label: "O'rta" },
-    { value: "HIGH", label: "Yuqori" },
-  ];
+  const areTagsValid = !hasRequiredTags || Object.keys(requiredTags).every((key) => tagValues[key] && tagValues[key].trim() !== "");
 
   const documentTypeOptions = documentTypes?.data?.map((t) => ({
     value: t.id,
@@ -285,33 +288,6 @@ const DocumentFormModal = ({
             radius="sm"
             error={form.formState.errors.documentNumber?.message}
             {...form.register("documentNumber")}
-            styles={{
-              input: {
-                backgroundColor: "#f8f9fa",
-                border: "1px solid #e9ecef",
-                "&:focus": {
-                  borderColor: "#1e3a5f",
-                },
-              },
-              label: {
-                color: "#495057",
-                fontWeight: 500,
-                marginBottom: 4,
-              },
-            }}
-          />
-
-          {/* Priority */}
-          <Select
-            label="Muhimlik darajasi"
-            placeholder="Tanlang"
-            size="sm"
-            radius="sm"
-            data={priorityOptions}
-            value={form.watch("priority")}
-            //@ts-ignore
-            onChange={(value) => form.setValue("priority", value || "LOW", { shouldValidate: true })}
-            error={form.formState.errors.priority?.message}
             styles={{
               input: {
                 backgroundColor: "#f8f9fa",
@@ -515,7 +491,7 @@ const DocumentFormModal = ({
             type="submit"
             size="sm"
             radius="sm"
-            disabled={!form.formState.isValid}
+            disabled={!form.formState.isValid || !areTagsValid}
             loading={
               form.formState.isSubmitting ||
               isUploading ||

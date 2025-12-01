@@ -117,71 +117,27 @@ export const StatusBadge = memo(({ status }: { status: string }) => {
 
 StatusBadge.displayName = "StatusBadge";
 
-// Priority Badge - memo bilan optimizatsiya
-export const PriorityBadge = memo(({ priority }: { priority: string }) => {
-  const config: Record<string, { label: string; bg: string; color: string }> = {
-    LOW: {
-      label: "Oddiy",
-      bg: "#f1f3f5",
-      color: "#495057"
-    },
-    MEDIUM: {
-      label: "O'rtacha",
-      bg: "#fff3bf",
-      color: "#e67700"
-    },
-    HIGH: {
-      label: "Muhim",
-      bg: "#ffe8cc",
-      color: "#d9480f"
-    },
-    URGENT: {
-      label: "Juda muhim",
-      bg: "#ffe3e3",
-      color: "#c92a2a"
-    },
-  };
 
-  const cfg = config[priority] || { label: priority, bg: "#f1f3f5", color: "#495057" };
-
-  return (
-    <Badge
-      size="md"
-      radius="sm"
-      variant="filled"
-      style={{
-        backgroundColor: cfg.bg,
-        color: cfg.color,
-        fontWeight: 600,
-        textTransform: "none",
-      }}
-    >
-      {cfg.label}
-    </Badge>
-  );
-});
-
-PriorityBadge.displayName = "PriorityBadge";
 
 // Info Field komponenti
 const InfoField = ({ label, value, style = {} }: { label: string; value: any; style?: any }) => (
-    <Box style={{ minWidth: 0, ...style }}>
-        <Text size="xs" c="dimmed" tt="uppercase" fw={700} mb={4}>
-            {label}
-        </Text>
-        <Text
-            size="sm"
-            fw={500}
-            style={{
-                color: "#1F3A5F",
-                wordBreak: "break-word",
-                overflowWrap: "break-word",
-                whiteSpace: "normal"
-            }}
-        >
-            {value}
-        </Text>
-    </Box>
+  <Box style={{ minWidth: 0, ...style }}>
+    <Text size="xs" c="dimmed" tt="uppercase" fw={700} mb={4}>
+      {label}
+    </Text>
+    <Text
+      size="sm"
+      fw={500}
+      style={{
+        color: "#1F3A5F",
+        wordBreak: "break-word",
+        overflowWrap: "break-word",
+        whiteSpace: "normal"
+      }}
+    >
+      {value}
+    </Text>
+  </Box>
 );
 
 InfoField.displayName = "InfoField";
@@ -280,7 +236,6 @@ const DocumentView = ({ id }: { id: string }) => {
             <InfoField label="Hujjat turi" value={data.documentType?.name || "—"} />
             <InfoField label="Jurnal" value={data.journal?.name || "—"} />
             <InfoField label="Holati" value={<StatusBadge status={data.status} />} />
-            <InfoField label="Muhimlik" value={<PriorityBadge priority={data.priority} />} />
             <InfoField
               label="Versiya"
               value={

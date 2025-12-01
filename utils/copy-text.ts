@@ -1,10 +1,10 @@
-import { toast } from "sonner";
+import { showError, showSuccess } from "./show-error";
 
 export const handleCopyToClipboard = async (text: string, label: string) => {
   try {
     await navigator.clipboard.writeText(text);
-    toast.success(`${label} nusxalandi!`);
+    showSuccess(`${label} nusxalandi!`);
   } catch (error) {
-    toast.error(`${label} nusxalanmadi`);
+    showError(`${label} nusxalanmadi`);
   }
 };

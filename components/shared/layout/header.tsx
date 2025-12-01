@@ -116,9 +116,9 @@ export function Header({ onMenuClick }: HeaderProps) {
           {/* Tanishuv sozlamalari */}
           <TourSettingsButton />
 
-          <Box data-tour="theme-toggle">
+          {/* <Box data-tour="theme-toggle">
             <ThemeToggle />
-          </Box>
+          </Box> */}
 
           <Menu shadow="sm" width={200} position="bottom-end" radius="sm">
             <Menu.Target>

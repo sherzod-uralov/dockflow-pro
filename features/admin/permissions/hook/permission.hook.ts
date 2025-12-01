@@ -5,7 +5,7 @@ import {
   Permission,
   PermissionQueryParams,
 } from "../type/permission.type";
-import { toast } from "sonner";
+import { showError, showSuccess } from "@/utils/show-error";
 
 export const useCreatePermission = () => {
   const queryClient = useQueryClient();
@@ -14,10 +14,10 @@ export const useCreatePermission = () => {
       permissionService.createPermission(payload),
     onSuccess: () => {
       queryClient.invalidateQueries(["permissions"]);
-      toast.success("Ruxsat muvaffaqiyatli yaratildi");
+      showSuccess("Ruxsat muvaffaqiyatli yaratildi");
     },
     onError: (error: any) => {
-      toast.error(error.message);
+      showError(error);
     },
   });
 };
@@ -37,10 +37,10 @@ export const useUpdatePermission = () => {
       permissionService.updatePermission(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries(["permissions"]);
-      toast.success("Ruxsat muvaffaqiyatli yangilandi");
+      showSuccess("Ruxsat muvaffaqiyatli yangilandi");
     },
     onError: (error: any) => {
-      toast.error(error.message);
+      showError(error);
     },
   });
 };
@@ -51,14 +51,10 @@ export const useDeletePermission = () => {
     mutationFn: (id: string) => permissionService.deletePermission(id),
     onSuccess: () => {
       queryClient.invalidateQueries(["permissions"]);
-      toast.success("Ruxsat muvaffaqiyatli o'chirildi");
+      showSuccess("Ruxsat muvaffaqiyatli o'chirildi");
     },
     onError: (error: any) => {
-      toast.error(
-        error?.response?.data?.message ||
-          error.message ||
-          "O'chirishda xatolik yuz berdi",
-      );
+      showError(error);
     },
   });
 };
@@ -69,11 +65,7 @@ export const useGetPermissionById = (id: string) => {
     queryFn: () => permissionService.getPermissionById(id),
     enabled: !!id,
     onError: (error: any) => {
-      toast.error(
-        error?.response?.data?.message ||
-          error.message ||
-          "Ma'lumotni olishda xatolik",
-      );
+      showError(error);
     },
   });
 };

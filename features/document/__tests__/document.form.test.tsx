@@ -172,4 +172,68 @@ describe('DocumentFormModal', () => {
 
         expect(submitButton).toBeDisabled()
     })
+
+    test('shablon tanlanganda maydonlar to\'ldirilmasa submit disabled bo\'ladi', async () => {
+        // Mock template with required tags
+        ; (useGetDocumentTemplateById as jest.Mock).mockReturnValue({
+            data: {
+                id: 'temp1',
+                requiredTags: { 'Custom Tag': 'string' }
+            },
+            isLoading: false
+        })
+
+        renderWithMantine(
+            <DocumentFormModal
+                modal={mockModal}
+                mode="create"
+            />
+        )
+
+        // Fill basic fields
+        fireEvent.change(screen.getByLabelText(/Hujjat nomi/i), { target: { value: 'Test Doc' } })
+        fireEvent.change(screen.getByLabelText(/Hujjat tavsifi/i), { target: { value: 'Desc' } })
+        fireEvent.change(screen.getByLabelText(/Hujjat raqami/i), { target: { value: 'DOC-1' } })
+
+        // Select Template
+        const templateSelect = screen.getByLabelText(/Shablon/i)
+        // Note: In real Mantine Select, we might need more complex interaction, 
+        // but for this test we assume we can trigger the change or mock the state.
+        // Since we mocked useGetDocumentTemplateById to return data for 'temp1',
+        // we simulate selecting it.
+
+        // However, since we can't easily simulate Mantine Select change in this setup without more complex mocking,
+        // we will rely on the fact that if we select it, the tag input appears.
+
+        // Let's try to find the template option and click it
+        fireEvent.click(templateSelect)
+        const templateOption = await screen.findByText('Template 1')
+        fireEvent.click(templateOption)
+
+        // Now "Custom Tag" input should appear
+        const tagInput = await screen.findByLabelText(/Custom Tag/i)
+        expect(tagInput).toBeInTheDocument()
+
+        // Button should be disabled because tag is empty
+        const submitButton = screen.getByText("Qo'shish").closest('button')
+        expect(submitButton).toBeDisabled()
+
+        // Fill the tag
+        fireEvent.change(tagInput, { target: { value: 'Tag Value' } })
+
+        // Now button should be enabled (assuming other fields are valid)
+        // We also need to select Document Type and Journal for full validity
+        const typeInputs = screen.getAllByLabelText(/Hujjat turi/i)
+        fireEvent.click(typeInputs[0])
+        const typeOption = await screen.findByText('Type 1')
+        fireEvent.click(typeOption)
+
+        const journalInputs = screen.getAllByLabelText(/Jurnal/i)
+        fireEvent.click(journalInputs[0])
+        const journalOption = await screen.findByText('Journal 1')
+        fireEvent.click(journalOption)
+
+        // Now it should be enabled
+        expect(submitButton).not.toBeDisabled()
+    })
 })

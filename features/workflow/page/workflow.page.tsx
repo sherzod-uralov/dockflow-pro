@@ -164,6 +164,16 @@ const WorkflowItem = memo(({
                 {formatDate(workflow.createdAt)}
               </Text>
             </Group>
+
+            {/* Deadline */}
+            {workflow.deadline && (
+              <Group gap={6} wrap="nowrap">
+                <IconClock size={14} color={new Date(workflow.deadline) < new Date() && workflow.status !== 'COMPLETED' ? "red" : "#868e96"} />
+                <Text size="sm" c={new Date(workflow.deadline) < new Date() && workflow.status !== 'COMPLETED' ? "red" : "#868e96"}>
+                  {formatDate(workflow.deadline)}
+                </Text>
+              </Group>
+            )}
           </Group>
         </Box>
 

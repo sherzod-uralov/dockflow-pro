@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "react-query";
-import { toast } from "sonner";
+import { showError, showSuccess } from "@/utils/show-error";
 import { workflowTemplateService } from "../service/workflow-template.service";
 import {
   WorkflowTemplateQueryParams,
@@ -26,10 +26,10 @@ export const useCreateWorkflowTemplate = () => {
       workflowTemplateService.createWorkflowTemplate(payload),
     onSuccess: () => {
       queryClient.invalidateQueries(["workflowTemplates"]);
-      toast.success("Workflow shablon muvaffaqiyatli yaratildi");
+      showSuccess("Workflow shablon muvaffaqiyatli yaratildi");
     },
     onError: (error: any) => {
-      toast.error(error.message || "Yaratishda xatolik yuz berdi");
+      showError(error);
     },
   });
 };
@@ -46,10 +46,10 @@ export const useUpdateWorkflowTemplate = () => {
     }) => workflowTemplateService.updateWorkflowTemplate(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries(["workflowTemplates"]);
-      toast.success("Workflow shablon muvaffaqiyatli yangilandi");
+      showSuccess("Workflow shablon muvaffaqiyatli yangilandi");
     },
     onError: (error: any) => {
-      toast.error(error.message || "Yangilashda xatolik yuz berdi");
+      showError(error);
     },
   });
 };
@@ -61,14 +61,10 @@ export const useDeleteWorkflowTemplate = () => {
       workflowTemplateService.deleteWorkflowTemplate(id),
     onSuccess: () => {
       queryClient.invalidateQueries(["workflowTemplates"]);
-      toast.success("Workflow shablon muvaffaqiyatli o'chirildi");
+      showSuccess("Workflow shablon muvaffaqiyatli o'chirildi");
     },
     onError: (error: any) => {
-      toast.error(
-        error?.response?.data?.message ||
-          error.message ||
-          "O'chirishda xatolik yuz berdi",
-      );
+      showError(error);
     },
   });
 };
@@ -79,11 +75,7 @@ export const useGetWorkflowTemplateById = (id: string) => {
     queryFn: () => workflowTemplateService.getWorkflowTemplateById(id),
     enabled: !!id,
     onError: (error: any) => {
-      toast.error(
-        error?.response?.data?.message ||
-          error.message ||
-          "Ma'lumotni olishda xatolik",
-      );
+      showError(error);
     },
   });
 };

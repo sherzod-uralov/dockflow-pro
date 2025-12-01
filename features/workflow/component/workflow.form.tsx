@@ -16,6 +16,7 @@ import {
   ActionIcon,
   ScrollArea,
 } from "@mantine/core";
+import { DateTimePicker } from "@mantine/dates";
 import {
   IconPlus,
   IconInfoCircle,
@@ -46,7 +47,7 @@ import {
 } from "../utils/workflow.mapper";
 import { useCreateWorkflow, useUpdateWorkflowStep } from "@/features/workflow";
 import { useSearchParams } from "next/navigation";
-import { showError } from "@/utils/show-error";
+import { showError, showSuccess } from "@/utils/show-error";
 
 const WorkflowForm = ({
   modal,
@@ -80,6 +81,7 @@ const WorkflowForm = ({
       documentId: "",
       workflowType: WorkflowType.CONSECUTIVE,
       steps: [createEmptyStep()],
+      deadline: undefined,
     },
   });
 
@@ -109,6 +111,7 @@ const WorkflowForm = ({
         documentId: "",
         workflowType: WorkflowType.CONSECUTIVE,
         steps: [createEmptyStep()],
+        deadline: undefined,
       });
     }
   }, [workflow, isUpdate, form, modal.isOpen]);
@@ -152,6 +155,7 @@ const WorkflowForm = ({
         .then(() => {
           modal.closeModal();
           form.reset();
+          showSuccess("Hujjat aylanmasi yangilandi");
           onSuccess?.();
         })
         .catch((error) => {
@@ -242,6 +246,30 @@ const WorkflowForm = ({
                 shouldValidate: true,
               })
             }
+            size="sm"
+            radius="sm"
+            styles={{
+              input: {
+                backgroundColor: "#f8f9fa",
+                border: "1px solid #e9ecef",
+                "&:focus": {
+                  borderColor: "#1e3a5f",
+                },
+              },
+              label: {
+                color: "#495057",
+                fontWeight: 500,
+                marginBottom: 4,
+              },
+            }}
+          />
+
+          <DateTimePicker
+            label="Muddat"
+            placeholder="Sanani tanlang"
+            value={form.watch("deadline") ? new Date(form.watch("deadline")!) : null}
+            onChange={(date) => form.setValue("deadline", date ? new Date(date).toISOString() : undefined)}
+            minDate={new Date()}
             size="sm"
             radius="sm"
             styles={{

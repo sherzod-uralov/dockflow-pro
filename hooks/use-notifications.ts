@@ -46,16 +46,13 @@ export const useNotifications = (): UseNotificationsReturn => {
             auth: {
                 token: accessToken,
             },
-            transports: ['polling', 'websocket'],  // Polling birinchi, keyin WebSocket
             reconnection: true,
-            reconnectionDelay: 1000,  // 1 soniya
-            reconnectionDelayMax: 5000,  // Max 5 soniya
-            reconnectionAttempts: 5,  // 5 marta urinish
-            timeout: 20000,  // 20 soniya timeout
+            reconnectionDelay: 1000,
+            reconnectionDelayMax: 5000,
+            reconnectionAttempts: Infinity, // Cheksiz urinish
+            timeout: 20000,
             autoConnect: true,
-            upgrade: true,  // Polling-dan WebSocket-ga upgrade qilishga ruxsat
-            forceNew: false,  // Mavjud connection-ni qayta ishlatish
-            withCredentials: false,  // CORS uchun
+            forceNew: true,
         });
 
         // Connection successful
@@ -149,11 +146,28 @@ export const useNotifications = (): UseNotificationsReturn => {
 
         // Connection error
         let errorCount = 0;
-        newSocket.on('connect_error', (error: Error) => {
+        newSocket.on('connect_error', async (error: Error) => {
             errorCount++;
+            console.warn('⚠️ Notification server bilan ulanishda xatolik:', error.message);
+
+            // Agar xatolik autentifikatsiya bilan bog'liq bo'lsa, tokenni yangilashga urinib ko'ramiz
+            if (error.message.includes('Authentication error') || error.message.includes('jwt expired') || error.message.includes('403') || error.message.includes('401') || error.message.includes('websocket error')) {
+                console.log('🔄 Token eskirgan bo\'lishi mumkin, yangilashga urinmoqda...');
+                try {
+                    const newToken = await authService.refreshToken();
+                    if (newToken) {
+                        console.log('✅ Token yangilandi, qayta ulanmoqda...');
+                        newSocket.auth = { token: newToken };
+                        newSocket.connect();
+                        return;
+                    }
+                } catch (refreshError) {
+                    console.error('❌ Tokenni yangilash imkonsiz:', refreshError);
+                }
+            }
+
             // Faqat birinchi xatoda log qilish (spam oldini olish)
             if (errorCount === 1) {
-                console.warn('⚠️ Notification server bilan ulanishda xatolik:', error.message);
                 console.info('ℹ️ Notification tizimi hozircha ishlamayapti. Asosiy funksiyalar ishlaydi.');
             }
             setIsConnected(false);

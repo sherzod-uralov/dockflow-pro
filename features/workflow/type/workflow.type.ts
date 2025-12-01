@@ -75,7 +75,7 @@ export type DocumentInfo = {
   id: string;
   title: string;
   description: string;
-    pdfUrl:string
+  pdfUrl: string
   documentNumber: string;
   version: number;
 };
@@ -126,6 +126,7 @@ export type WorkflowApiResponse = {
   workflowType?: WorkflowType;
   document: DocumentInfo;
   workflowSteps: WorkflowStepApiResponse[];
+  deadline?: string | null;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
@@ -291,6 +292,7 @@ export type WorkflowFormData = {
   documentId: string;
   workflowType: WorkflowType; // Тип выполнения workflow
   steps: WorkflowStepFormData[];
+  deadline?: string;
 };
 
 // ============================================

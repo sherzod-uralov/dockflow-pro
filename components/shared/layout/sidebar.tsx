@@ -260,26 +260,26 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         </Group>
 
         {/* Yuborish tugmasi */}
-        <Button
-          fullWidth
-          mt="md"
-          leftSection={<IconSend size={18} />}
-          onClick={() => {
-            router.push("/dashboard/send");
-            onClose();
-          }}
-          styles={{
-            root: {
-              backgroundColor: "rgba(255,255,255,0.15)",
-              border: "1px solid rgba(255,255,255,0.2)",
-              "&:hover": {
-                backgroundColor: "rgba(255,255,255,0.25)",
-              },
-            },
-          }}
-        >
-          Yuborish
-        </Button>
+        {/*<Button*/}
+        {/*  fullWidth*/}
+        {/*  mt="md"*/}
+        {/*  leftSection={<IconSend size={18} />}*/}
+        {/*  onClick={() => {*/}
+        {/*    router.push("/dashboard/send");*/}
+        {/*    onClose();*/}
+        {/*  }}*/}
+        {/*  styles={{*/}
+        {/*    root: {*/}
+        {/*      backgroundColor: "rgba(255,255,255,0.15)",*/}
+        {/*      border: "1px solid rgba(255,255,255,0.2)",*/}
+        {/*      "&:hover": {*/}
+        {/*        backgroundColor: "rgba(255,255,255,0.25)",*/}
+        {/*      },*/}
+        {/*    },*/}
+        {/*  }}*/}
+        {/*>*/}
+        {/*  Yuborish*/}
+        {/*</Button>*/}
       </Box>
 
       {/* Navigation */}

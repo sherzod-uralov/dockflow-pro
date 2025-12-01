@@ -1,4 +1,3 @@
-// audit-log.hook.ts
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { auditLogService } from "../service/audit-log.service";
 import {
@@ -6,7 +5,7 @@ import {
   AuditLogQueryParams,
   CreateAuditLogRequest,
 } from "../type/audit-log.type";
-import { toast } from "sonner";
+import { showError, showSuccess } from "@/utils/show-error";
 
 export const useCreateAuditLog = () => {
   const queryClient = useQueryClient();
@@ -15,10 +14,10 @@ export const useCreateAuditLog = () => {
       auditLogService.createAuditLog(payload),
     onSuccess: () => {
       queryClient.invalidateQueries(["audit-logs"]);
-      toast.success("Audit log muvaffaqiyatli yaratildi");
+      showSuccess("Audit log muvaffaqiyatli yaratildi");
     },
     onError: (error: any) => {
-      toast.error(error.message);
+      showError(error);
     },
   });
 };
@@ -37,11 +36,7 @@ export const useGetAuditLogById = (id: string) => {
     queryFn: () => auditLogService.getAuditLogById(id),
     enabled: !!id,
     onError: (error: any) => {
-      toast.error(
-        error?.response?.data?.message ||
-          error.message ||
-          "Ma'lumotni olishda xatolik",
-      );
+      showError(error);
     },
   });
 };

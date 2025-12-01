@@ -108,9 +108,8 @@ export const useUpdateWorkflowStep = () => {
       if (response?.workflowId) {
         queryClient?.invalidateQueries(["workflow", response.workflowId]);
       }
-      showSuccess("Bosqich yangilandi");
+      // Toast ko'rsatilmaydi - form o'zida bitta marta ko'rsatiladi
     },
-
   });
 };
 

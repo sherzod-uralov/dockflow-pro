@@ -11,7 +11,6 @@ import "./globals.css";
 import "@/styles/onboarding.css";
 import { Geist } from "next/font/google";
 import ReactQueryProvider from "@/context/react-query.provider";
-import { ClientToaster } from "@/components/shared/client-toast";
 import Script from "next/script";
 
 const satoshi = Geist({
@@ -46,14 +45,13 @@ export default function RootLayout({
         <ReactQueryProvider>
           <ThemeProvider
             attribute="class"
-            defaultTheme="system"
-            enableSystem
+            defaultTheme="light"
+            forcedTheme="light"
             disableTransitionOnChange
           >
             <MantineProviderWrapper>
               <Suspense fallback={null}>
                 {children}
-                <ClientToaster />
               </Suspense>
             </MantineProviderWrapper>
           </ThemeProvider>

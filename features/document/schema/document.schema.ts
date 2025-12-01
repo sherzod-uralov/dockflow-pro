@@ -10,12 +10,11 @@ export const documentScheme = z.object({
     .min(1, "Hujjat raqami kiritilishi kerak")
     .optional(),
   status: z.enum(["DRAFT", "PUBLISHED", "ARCHIVED"]).default("DRAFT"),
-  priority: z.enum(["LOW", "MEDIUM", "HIGH"]).default("LOW"),
   documentTypeId: z.string().uuid("Hujjat turi tanlanishi kerak"),
   journalId: z.string().uuid("Jurnal tanlanishi kerak"),
   templateId: z.string().optional(),
   tags: z.record(z.string(), z.string()).optional().default({}),
-  attachments: z.array(z.string().uuid()).min(1, "Kamida bitta fayl yuklanishi kerak"),
+  attachments: z.array(z.string().uuid()).optional().default([]),
 });
 
 export type DocumentFormType = z.infer<typeof documentScheme>;

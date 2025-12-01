@@ -104,7 +104,7 @@ const STATUS_MESSAGES: Record<number, string> = {
 
 export function showError(error: any) {
   const status = error?.response?.status || error?.status || 500;
-  const message = error?.response?.data?.message || error?.message || "";
+  const message = typeof error === "string" ? error : (error?.response?.data?.message || error?.message || "");
 
   console.log(message, error, "hatolik");
   let uzbekMessage = ERROR_MESSAGES[message];

@@ -1,5 +1,4 @@
 import { useMutation, useQuery, useQueryClient } from "react-query";
-import { toast } from "sonner";
 import { documentTemplateService } from "../service/document-template.service";
 import {
   DocumentTemplateQueryParams,
@@ -7,7 +6,7 @@ import {
   DocumentTemplateCreatePayload,
   DocumentTemplateUpdatePayload,
 } from "../type/document-template.type";
-import {showSuccess} from "@/utils/show-error";
+import { showError, showSuccess } from "@/utils/show-error";
 
 export const useGetAllDocumentTemplates = (
   params?: DocumentTemplateQueryParams,
@@ -29,7 +28,7 @@ export const useCreateDocumentTemplate = () => {
       showSuccess("Shablon muvaffaqiyatli yaratildi");
     },
     onError: (error: any) => {
-      toast.error(error.message);
+      showError(error);
     },
   });
 };
@@ -46,10 +45,10 @@ export const useUpdateDocumentTemplate = () => {
     }) => documentTemplateService.updateDocumentTemplate(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries(["documentTemplates"]);
-      toast.success("Shablon muvaffaqiyatli yangilandi");
+      showSuccess("Shablon muvaffaqiyatli yangilandi");
     },
     onError: (error: any) => {
-      toast.error(error.message);
+      showError(error);
     },
   });
 };
@@ -61,14 +60,10 @@ export const useDeleteDocumentTemplate = () => {
       documentTemplateService.deleteDocumentTemplate(id),
     onSuccess: () => {
       queryClient.invalidateQueries(["documentTemplates"]);
-      toast.success("Shablon muvaffaqiyatli o'chirildi");
+      showSuccess("Shablon muvaffaqiyatli o'chirildi");
     },
     onError: (error: any) => {
-      toast.error(
-        error?.response?.data?.message ||
-          error.message ||
-          "O'chirishda xatolik yuz berdi",
-      );
+      showError(error);
     },
   });
 };
@@ -79,11 +74,7 @@ export const useGetDocumentTemplateById = (id: string) => {
     queryFn: () => documentTemplateService.getDocumentTemplateById(id),
     enabled: !!id,
     onError: (error: any) => {
-      toast.error(
-        error?.response?.data?.message ||
-          error.message ||
-          "Ma'lumotni olishda xatolik",
-      );
+      showError(error);
     },
   });
 };

@@ -6,6 +6,7 @@ import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import "@mantine/core/styles.css";
 import "@mantine/notifications/styles.css";
+import "@mantine/dates/styles.css";
 
 // Davlat sektori uchun professional ko'k rang palitrasi
 const theme = createTheme({
@@ -80,7 +81,7 @@ export function MantineProviderWrapper({
   return (
     <MantineProvider
       theme={theme}
-      forceColorScheme={resolvedTheme === "dark" ? "dark" : "light"}
+      forceColorScheme="light"
     >
       <Notifications position="top-right" />
       {children}

@@ -137,4 +137,6 @@ export type WorkflowUpdateType = z.infer<typeof workflowUpdateSchema>;
 export type WorkflowStepFormType = z.infer<typeof workflowStepSchema>;
 
 // ✅ ОБНОВЛЕНО: используем union type для создания и редактирования
-export type WorkflowFormType = WorkflowCreateType | WorkflowUpdateType;
+export type WorkflowFormType = (WorkflowCreateType | WorkflowUpdateType) & {
+  deadline?: string;
+};
