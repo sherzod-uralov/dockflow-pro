@@ -33,6 +33,7 @@ interface Tab {
   label: string;
   badge?: number;
 }
+//dfd
 
 interface ListItem {
   id: string;
@@ -319,6 +320,7 @@ export const SplitLayoutWithTabs = ({
             backgroundColor: "#fff",
           }}
         >
+
           <Group justify="space-between" py="xs">
             <Tabs.List style={{ border: "none" }}>
               {validTabs.map((tab) => (
