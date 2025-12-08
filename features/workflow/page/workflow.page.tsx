@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, memo, useState } from "react";
+import React, { useCallback, memo, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   Box,
@@ -324,7 +324,7 @@ const WorkflowPage = () => {
     React.useState<WorkflowApiResponse | null>(null);
 
   const [search, debouncedSearch, setSearch] = useDebounce("", 500);
-  const [activeStatus, setActiveStatus] = useState<string>("all");
+  const [activeStatus, setActiveStatus] = useState<string | null>(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   // Filter states
@@ -337,9 +337,27 @@ const WorkflowPage = () => {
     pageSize: 100,
   });
 
+  // Check for active workflows to set default tab
+  const { data: activeWorkflowsCheck } = useGetAllWorkflows({
+    status: WorkflowStatus.ACTIVE,
+    page: 1,
+    limit: 1,
+  });
+
+  // Set default tab based on active workflows
+  useEffect(() => {
+    if (activeStatus === null && activeWorkflowsCheck !== undefined) {
+      if (activeWorkflowsCheck.count > 0) {
+        setActiveStatus(WorkflowStatus.ACTIVE);
+      } else {
+        setActiveStatus("all");
+      }
+    }
+  }, [activeWorkflowsCheck, activeStatus]);
+
   const { data, isLoading } = useGetAllWorkflows({
     documentId: documentFilter || debouncedSearch || undefined,
-    status: activeStatus !== "all" ? (activeStatus as WorkflowStatus) : undefined,
+    status: activeStatus !== "all" && activeStatus !== null ? (activeStatus as WorkflowStatus) : undefined,
     type: typeFilter || undefined,
     page: pageNumber,
     limit: pageSize,
@@ -480,7 +498,7 @@ const WorkflowPage = () => {
           </Group>
 
           <Tabs
-            value={activeStatus}
+            value={activeStatus || "all"}
             onChange={(value) => {
               setActiveStatus(value || "all");
               handlePageChange(1);

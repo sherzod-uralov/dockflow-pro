@@ -8,39 +8,14 @@ import {
   Group,
   Button,
   Skeleton,
-  Stack,
-  Badge,
-  Progress,
-  Avatar,
-  Divider,
   SimpleGrid,
   ActionIcon,
-  Tooltip,
-  Modal,
-  Textarea,
-  Select,
-  Checkbox,
-  Breadcrumbs,
-  Anchor,
   Alert,
 } from "@mantine/core";
 import {
   IconArrowLeft,
-  IconHome,
-  IconChevronRight,
-  IconFileText,
-  IconUser,
-  IconClock,
-  IconCircleCheck,
-  IconCircleX,
-  IconPlayerPlay,
-  IconHourglass,
-  IconEdit,
-  IconEye,
   IconAlertCircle,
-  IconRotate,
 } from "@tabler/icons-react";
-import Link from "next/link";
 import { useGetWorkflowById } from "@/features/workflow/hook/workflow.hook";
 import WorkflowDetailView from "@/features/workflow/component/workflow-detail.view";
 

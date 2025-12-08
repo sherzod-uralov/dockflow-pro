@@ -1,15 +1,15 @@
 "use client";
 
 import {
-  NavLink,
-  Box,
-  Group,
-  Text,
-  ActionIcon,
-  ScrollArea,
-  Collapse,
-  Button,
-  Badge,
+    NavLink,
+    Box,
+    Group,
+    Text,
+    ActionIcon,
+    ScrollArea,
+    Collapse,
+    Button,
+    Badge, Typography,
 } from "@mantine/core";
 import {
   IconFiles,
@@ -34,6 +34,8 @@ import Cookie from "js-cookie";
 import { useLogoutMutation } from "@/features/login/hook/login.hook";
 import { usePermission } from "@/providers/permission-provider";
 import { useNotificationContext } from "@/context/notification.provider";
+import { Link } from "lucide-react";
+import Image from "next/image";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -201,7 +203,6 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const isActive = (href?: string) => {
     if (!href || !pathname) return false;
     if (href === "/dashboard") return pathname === href;
-    // Aniq mos kelish yoki keyingi belgi "/" bo'lishi kerak
     if (pathname === href) return true;
     return pathname.startsWith(href + "/");
   };
@@ -223,41 +224,18 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
           borderBottom: "1px solid rgba(255,255,255,0.1)",
         }}
       >
-        <Group justify="space-between" wrap="nowrap">
-          <Group gap="xs" wrap="nowrap">
-            <Box
-              w={36}
-              h={36}
-              style={{
-                backgroundColor: "#fff",
-                borderRadius: 6,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <IconFiles size={22} color="#1e3a5f" stroke={1.5} />
-            </Box>
-            <Box>
-              <Text size="sm" fw={600} c="white" lh={1.2}>
-                DockFlow
-              </Text>
-              <Text size="xs" c="rgba(255,255,255,0.6)">
-                Hujjat boshqaruvi
-              </Text>
-            </Box>
-          </Group>
-          {showClose && (
-            <ActionIcon
-              variant="subtle"
-              color="white"
-              onClick={onClose}
-              size="sm"
-            >
-              <IconX size={18} />
-            </ActionIcon>
-          )}
-        </Group>
+          <div className="flex flex-col  gap-4">
+              <div className="relative">
+                  <div className="absolute inset-0 bg-blue-500/20 blur-2xl rounded-full"></div>
+                  <Image
+                      alt="university logo"
+                      width={120}
+                      height={120}
+                      src="/university_logo.svg"
+                      className="relative z-10 drop-shadow-2xl"
+                  />
+              </div>
+          </div>
 
         {/* Yuborish tugmasi */}
         {/*<Button*/}

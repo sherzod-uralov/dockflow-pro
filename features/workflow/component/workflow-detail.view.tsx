@@ -257,7 +257,7 @@ const WorkflowDetailView = memo(({ workflow }: WorkflowDetailViewProps) => {
               </Button>
             )}
 
-            {(currentStep.actionType === "REVIEW" || currentStep.actionType === "ACKNOWLEDGE") && canEditDocument && (
+            {(currentStep.actionType === "REVIEW" || currentStep.actionType === "ACKNOWLEDGE" || currentStep.actionType === "APPROVAL") && canEditDocument && (
               <Button
                 variant="outline"
                 size="md"
@@ -268,7 +268,7 @@ const WorkflowDetailView = memo(({ workflow }: WorkflowDetailViewProps) => {
                 disabled={isLoading}
                 color="dark"
               >
-                yuklangan hujjatni ko'rish
+                Hujjat bilan tanishish
               </Button>
             )}
 
@@ -354,7 +354,7 @@ const WorkflowDetailView = memo(({ workflow }: WorkflowDetailViewProps) => {
                           size={32}
                           radius="xl"
                           color={stepStatus.color}
-                          variant={isCurrentStep ? "filled" : "light"}
+                          variant={step.status === "COMPLETED" || isCurrentStep ? "filled" : "light"}
                         >
                           <ActionIcon size={16} />
                         </ThemeIcon>
