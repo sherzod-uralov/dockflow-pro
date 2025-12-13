@@ -1,0 +1,370 @@
+"use client";
+
+import { useState, useMemo, useCallback, useRef } from "react";
+import {
+    Box,
+    Paper,
+    Group,
+    Stack,
+    Text,
+    Select,
+    SegmentedControl,
+    Badge,
+    Modal,
+    Button,
+    Loader,
+    Center,
+    Alert,
+    Divider,
+} from "@mantine/core";
+import { DatePickerInput } from "@mantine/dates";
+import FullCalendar from "@fullcalendar/react";
+import dayGridPlugin from "@fullcalendar/daygrid";
+import timeGridPlugin from "@fullcalendar/timegrid";
+import interactionPlugin from "@fullcalendar/interaction";
+import listPlugin from "@fullcalendar/list";
+import {
+    IconCalendar,
+    IconFilter,
+    IconFileText,
+    IconUser,
+    IconClock,
+    IconArrowRight,
+    IconInfoCircle,
+} from "@tabler/icons-react";
+import { useWorkflowCalendar } from "../hook/workflow.hook";
+import { WorkflowStepApiResponse, CalendarDayData } from "../type/workflow.type";
+import { formatDateTime } from "@/lib/date-utils";
+import { useRouter } from "next/navigation";
+
+const STEP_STATUS_COLORS: Record<string, string> = {
+    NOT_STARTED: "#868e96",
+    PENDING: "#868e96",
+    IN_PROGRESS: "#228be6",
+    COMPLETED: "#40c057",
+    REJECTED: "#fa5252",
+};
+
+const STEP_STATUS_LABELS: Record<string, string> = {
+    NOT_STARTED: "Kutilmoqda",
+    PENDING: "Kutilmoqda",
+    IN_PROGRESS: "Jarayonda",
+    COMPLETED: "Bajarildi",
+    REJECTED: "Rad etildi",
+};
+
+const ACTION_LABELS: Record<string, string> = {
+    APPROVAL: "Tasdiqlash",
+    SIGN: "Imzolash",
+    QR_CODE: "QR kod qo'yish",
+    REVIEW: "Ko'rib chiqish",
+    ACKNOWLEDGE: "Tanishish",
+};
+
+type ViewType = "dayGridMonth" | "timeGridWeek" | "dayGridYear" | "listMonth";
+
+export default function WorkflowCalendarPage() {
+    const router = useRouter();
+    const calendarRef = useRef<any>(null);
+    const [view, setView] = useState<ViewType>("dayGridMonth");
+    const [statusFilter, setStatusFilter] = useState<string | null>(null);
+    const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([
+        new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+        new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0),
+    ]);
+    const [selectedStep, setSelectedStep] = useState<WorkflowStepApiResponse | null>(null);
+    const [modalOpen, setModalOpen] = useState(false);
+
+    const params = useMemo(() => {
+        const [start, end] = dateRange;
+        if (!start || !end) return undefined;
+
+        return {
+            startDate: start.toISOString().split("T")[0],
+            endDate: end.toISOString().split("T")[0],
+            status: statusFilter || undefined,
+        };
+    }, [dateRange, statusFilter]);
+
+    const { data, isLoading } = useWorkflowCalendar(params);
+
+    const events = useMemo(() => {
+        if (!data?.data) return [];
+
+        return data.data.flatMap((dayData: CalendarDayData) =>
+            dayData.workflowSteps.map((step: WorkflowStepApiResponse) => ({
+                id: step.id,
+                title: `${ACTION_LABELS[step.actionType] || step.actionType}`,
+                start: dayData.date,
+                backgroundColor: STEP_STATUS_COLORS[step.status] || "#868e96",
+                borderColor: STEP_STATUS_COLORS[step.status] || "#868e96",
+                extendedProps: {
+                    step,
+                    documentNumber: step.workflow?.document?.documentNumber,
+                },
+            }))
+        );
+    }, [data]);
+
+    const handleEventClick = useCallback((info: any) => {
+        const step = info.event.extendedProps.step as WorkflowStepApiResponse;
+        setSelectedStep(step);
+        setModalOpen(true);
+    }, []);
+
+    const handleDatesSet = useCallback((dateInfo: any) => {
+        setDateRange([dateInfo.start, new Date(dateInfo.end.getTime() - 1)]);
+    }, []);
+
+    const handleViewChange = useCallback((value: string) => {
+        setView(value as ViewType);
+        const calendarApi = calendarRef.current?.getApi();
+        if (calendarApi) {
+            calendarApi.changeView(value);
+        }
+    }, []);
+
+    const handleWorkflowNavigate = useCallback(() => {
+        if (selectedStep?.workflowId) {
+            router.push(`/dashboard/workflow/${selectedStep.workflowId}`);
+            setModalOpen(false);
+        }
+    }, [selectedStep, router]);
+
+    const handleDateRangeChange = useCallback((value: [Date | null, Date | null]) => {
+        setDateRange(value);
+    }, []);
+
+    return (
+        <Box p="md">
+            <Stack gap="md">
+                <Paper p="lg" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+                    <Group justify="space-between" mb="md">
+                        <Group gap="sm">
+                            <IconCalendar size={28} color="#1e3a5f" />
+                            <div>
+                                <Text size="xl" fw={600} c="#212529">
+                                    Vazifalar taqvimi
+                                </Text>
+                                <Text size="sm" c="dimmed">
+                                    Menga tayinlangan vazifalar
+                                </Text>
+                            </div>
+                        </Group>
+                        {data && (
+                            <Stack gap={4} align="flex-end">
+                                <Badge variant="light" color="dark" size="lg">
+                                    {data.totalCount} ta vazifa
+                                </Badge>
+                                <Text size="xs" c="dimmed">
+                                    {data.daysWithSteps} kun
+                                </Text>
+                            </Stack>
+                        )}
+                    </Group>
+
+                    <Stack gap="md">
+                        <Group grow>
+                            <SegmentedControl
+                                value={view}
+                                onChange={handleViewChange}
+                                data={[
+                                    { label: "Oylik", value: "dayGridMonth" },
+                                    { label: "Haftalik", value: "timeGridWeek" },
+                                    { label: "Yillik", value: "dayGridYear" },
+                                    { label: "Ro'yxat", value: "listMonth" },
+                                ]}
+                                size="sm"
+                                styles={{
+                                    root: { backgroundColor: "#f8f9fa" },
+                                    label: { padding: "8px 16px" },
+                                }}
+                            />
+                        </Group>
+
+                        <Group grow>
+                            <Select
+                                placeholder="Holat bo'yicha"
+                                leftSection={<IconFilter size={16} />}
+                                data={[
+                                    { value: "", label: "Barchasi" },
+                                    { value: "IN_PROGRESS", label: "Jarayonda" },
+                                    { value: "PENDING", label: "Kutilmoqda" },
+                                    { value: "COMPLETED", label: "Bajarildi" },
+                                    { value: "REJECTED", label: "Rad etildi" },
+                                ]}
+                                value={statusFilter}
+                                onChange={setStatusFilter}
+                                clearable
+                                size="sm"
+                                styles={{ input: { backgroundColor: "#f8f9fa" } }}
+                            />
+
+                            <DatePickerInput
+                                type="range"
+                                placeholder="Sana oralig'i"
+                                value={dateRange}
+                                onChange={handleDateRangeChange}
+                                leftSection={<IconCalendar size={16} />}
+                                clearable={false}
+                                size="sm"
+                                styles={{ input: { backgroundColor: "#f8f9fa" } }}
+                            />
+                        </Group>
+                    </Stack>
+                </Paper>
+
+
+                <Paper p="lg" radius="sm" withBorder style={{ minHeight: 600, borderColor: "#e9ecef" }}>
+                    {isLoading ? (
+                        <Center h={500}>
+                            <Stack align="center" gap="md">
+                                <Loader size="lg" color="dark" />
+                                <Text size="sm" c="dimmed">Yuklanmoqda...</Text>
+                            </Stack>
+                        </Center>
+                    ) : (
+                        <Box
+                            style={{
+                                "& .fc": { fontFamily: "var(--mantine-font-family)" },
+                                "& .fc-button": {
+                                    backgroundColor: "#1e3a5f",
+                                    border: "none",
+                                    color: "white",
+                                    padding: "6px 12px",
+                                    fontSize: "14px",
+                                },
+                                "& .fc-button:hover": { backgroundColor: "#2c5282" },
+                                "& .fc-button-active": { backgroundColor: "#2c5282 !important" },
+                                "& .fc-daygrid-day-number": { color: "#495057", fontSize: "14px", padding: "4px" },
+                                "& .fc-col-header-cell": { backgroundColor: "#f8f9fa", padding: "12px 8px", fontWeight: 600, color: "#212529" },
+                                "& .fc-event": { cursor: "pointer", borderRadius: "4px", padding: "2px 4px", marginBottom: "2px" },
+                                "& .fc-event:hover": { opacity: 0.85 },
+                                "& .fc-toolbar-title": { fontSize: "18px", fontWeight: 600, color: "#212529" },
+                                "& .fc-list-event:hover td": { backgroundColor: "#f8f9fa" },
+                            }}
+                        >
+                            <FullCalendar
+                                ref={calendarRef}
+                                plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
+                                initialView={view}
+                                headerToolbar={{ left: "prev,next today", center: "title", right: "" }}
+                                height="auto"
+                                events={events}
+                                eventClick={handleEventClick}
+                                datesSet={handleDatesSet}
+                                locale="uz"
+                                firstDay={1}
+                                buttonText={{ today: "Bugun", month: "Oy", week: "Hafta", day: "Kun", list: "Ro'yxat" }}
+                                dayHeaderFormat={{ weekday: "short" }}
+                                eventContent={(arg) => ({
+                                    html: `
+                    <div style="padding: 2px 4px; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                      <strong>${arg.event.title}</strong>
+                      ${arg.event.extendedProps.documentNumber ? ` - ${arg.event.extendedProps.documentNumber}` : ""}
+                    </div>
+                  `,
+                                })}
+                            />
+                        </Box>
+                    )}
+                </Paper>
+            </Stack>
+
+            <Modal
+                opened={modalOpen}
+                onClose={() => setModalOpen(false)}
+                title={
+                    <Group gap="xs">
+                        <IconFileText size={20} color="#1e3a5f" />
+                        <Text fw={600} size="lg" c="#212529">Vazifa tafsilotlari</Text>
+                    </Group>
+                }
+                size="md"
+                radius="sm"
+                centered
+            >
+                {selectedStep && (
+                    <Stack gap="md">
+                        <Paper p="sm" radius="sm" bg="#f8f9fa">
+                            <Group gap="xs">
+                                <Text size="sm" c="dimmed">Amal turi:</Text>
+                                <Text size="sm" fw={600} c="#1e3a5f">
+                                    {ACTION_LABELS[selectedStep.actionType] || selectedStep.actionType}
+                                </Text>
+                            </Group>
+                        </Paper>
+
+                        <Box>
+                            <Text size="xs" c="dimmed" mb={6}>Holat</Text>
+                            <Badge
+                                variant="light"
+                                size="md"
+                                color={
+                                    selectedStep.status === "COMPLETED" ? "green" :
+                                        selectedStep.status === "IN_PROGRESS" ? "blue" :
+                                            selectedStep.status === "REJECTED" ? "red" : "gray"
+                                }
+                            >
+                                {STEP_STATUS_LABELS[selectedStep.status] || selectedStep.status}
+                            </Badge>
+                        </Box>
+
+                        {selectedStep.workflow?.document && (
+                            <Box>
+                                <Text size="xs" c="dimmed" mb={6}>Hujjat</Text>
+                                <Paper p="sm" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+                                    <Stack gap={4}>
+                                        <Text size="sm" fw={500} c="#212529">{selectedStep.workflow.document.title}</Text>
+                                        <Text size="xs" c="dimmed" style={{ fontFamily: "monospace" }}>
+                                            №{selectedStep.workflow.document.documentNumber}
+                                        </Text>
+                                    </Stack>
+                                </Paper>
+                            </Box>
+                        )}
+
+                        {selectedStep.assignedToUser && (
+                            <Box>
+                                <Text size="xs" c="dimmed" mb={6}>Mas'ul shaxs</Text>
+                                <Group gap="xs">
+                                    <IconUser size={16} color="#495057" />
+                                    <Text size="sm" fw={500}>{selectedStep.assignedToUser.fullname}</Text>
+                                </Group>
+                            </Box>
+                        )}
+
+                        {selectedStep.dueDate && (
+                            <Box>
+                                <Text size="xs" c="dimmed" mb={6}>Muddat</Text>
+                                <Group gap="xs">
+                                    <IconClock size={16} color="#fa5252" />
+                                    <Text size="sm" fw={500} c={new Date(selectedStep.dueDate) < new Date() ? "red" : "#495057"}>
+                                        {formatDateTime(selectedStep.dueDate)}
+                                    </Text>
+                                </Group>
+                            </Box>
+                        )}
+
+                        <Divider />
+
+                        <Group justify="space-between">
+                            <Button variant="subtle" onClick={() => setModalOpen(false)} color="gray">
+                                Yopish
+                            </Button>
+                            {selectedStep.workflowId && (
+                                <Button
+                                    onClick={handleWorkflowNavigate}
+                                    rightSection={<IconArrowRight size={16} />}
+                                    style={{ backgroundColor: "#1e3a5f" }}
+                                >
+                                    Jarayonga o'tish
+                                </Button>
+                            )}
+                        </Group>
+                    </Stack>
+                )}
+            </Modal>
+        </Box>
+    );
+}
