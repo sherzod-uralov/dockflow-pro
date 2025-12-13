@@ -5,13 +5,14 @@ import {
     PasswordInput,
     Button,
     Stack,
+    Alert,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { IconUser, IconLock } from "@tabler/icons-react";
+import { IconUser, IconLock, IconAlertCircle } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
 import { useLoginMutation } from "../hook/login.hook";
 import Cookie from "js-cookie";
-import React from "react";
+import React, { useState } from "react";
 
 interface LoginFormValues {
     username: string;
@@ -21,6 +22,7 @@ interface LoginFormValues {
 export const LoginForm = () => {
     const authMutation = useLoginMutation();
     const router = useRouter();
+    const [loginError, setLoginError] = useState<string | null>(null);
 
     const form = useForm<LoginFormValues>({
         initialValues: {
@@ -35,8 +37,9 @@ export const LoginForm = () => {
         },
     });
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setLoginError(null); // Clear previous errors
 
         const validation = form.validate();
         if (validation.hasErrors) {
@@ -49,12 +52,37 @@ export const LoginForm = () => {
                 Cookie.set("refreshToken", data.refreshToken);
                 router.push("/dashboard");
             },
+            onError: (error: any) => {
+                // Set error message to display
+                const errorMessage = error?.response?.data?.message ||
+                    error?.message ||
+                    "Login yoki parol noto'g'ri";
+                setLoginError(errorMessage);
+
+                // Don't reset form - keep user's input so they can correct it
+                // Optional: Only clear password field for security
+                form.setFieldValue("password", "");
+            },
         });
     };
 
     return (
         <form onSubmit={handleSubmit}>
             <Stack gap="lg">
+                {/* Error Alert */}
+                {loginError && (
+                    <Alert
+                        icon={<IconAlertCircle size={16} />}
+                        title="Xatolik"
+                        color="red"
+                        variant="light"
+                        withCloseButton
+                        onClose={() => setLoginError(null)}
+                    >
+                        {loginError}
+                    </Alert>
+                )}
+
                 {/* Username */}
                 <TextInput
                     label="Foydalanuvchi nomi"

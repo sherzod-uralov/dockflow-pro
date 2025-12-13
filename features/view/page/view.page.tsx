@@ -1,71 +1,80 @@
 "use client";
 
 import { useVerifyDocument } from "../hook/view.hook";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
-  FileText,
-  User,
-  Calendar,
-  CheckCircle2,
-  XCircle,
-  Clock,
-  AlertCircle,
-  Loader2,
-  ShieldCheck,
-  Hash,
-  Flag,
-  Building2,
-} from "lucide-react";
+  Paper,
+  Badge,
+  Alert,
+  Stack,
+  Group,
+  Text,
+  Title,
+  Loader,
+  Timeline,
+  Box,
+  Divider,
+  ThemeIcon,
+  Container,
+} from "@mantine/core";
+import {
+  IconFileText,
+  IconUser,
+  IconCalendar,
+  IconCircleCheck,
+  IconX,
+  IconClock,
+  IconAlertCircle,
+  IconShieldCheck,
+  IconHash,
+  IconBuilding,
+  IconCheckbox,
+} from "@tabler/icons-react";
 import { WorkflowStepStatus, WorkflowActionType, WorkflowStatus } from "@/features/workflow/type/workflow.type";
 import { WorkflowStepInfo } from "../type/view.type";
-import { da } from "date-fns/locale";
 
 interface ViewPageProps {
   documentId: string;
 }
 
 const getStatusBadge = (status: string) => {
-  const statusConfig: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
-    APPROVED: { label: "Tasdiqlangan", variant: "default" },
-    PUBLISHED: { label: "Chop etilgan", variant: "default" },
-    PENDING: { label: "Kutilmoqda", variant: "secondary" },
-    DRAFT: { label: "Qoralama", variant: "outline" },
-    REJECTED: { label: "Rad etilgan", variant: "destructive" },
-    ARCHIVED: { label: "Arxivlangan", variant: "secondary" },
+  const statusConfig: Record<string, { label: string; color: string }> = {
+    APPROVED: { label: "Tasdiqlangan", color: "gov" },
+    PUBLISHED: { label: "Chop etilgan", color: "gov" },
+    PENDING: { label: "Kutilmoqda", color: "gray" },
+    DRAFT: { label: "Qoralama", color: "gray" },
+    REJECTED: { label: "Rad etilgan", color: "gray" },
+    ARCHIVED: { label: "Arxivlangan", color: "gray" },
   };
-  const config = statusConfig[status] || { label: status, variant: "outline" as const };
-  return <Badge variant={config.variant}>{config.label}</Badge>;
+  const config = statusConfig[status] || { label: status, color: "gray" };
+  return <Badge color={config.color} variant="light">{config.label}</Badge>;
 };
 
 const getPriorityBadge = (priority: string) => {
-  const priorityConfig: Record<string, { label: string; className: string }> = {
-    HIGH: { label: "Yuqori", className: "bg-red-100 text-red-800 border-red-200" },
-    MEDIUM: { label: "O'rtacha", className: "bg-yellow-100 text-yellow-800 border-yellow-200" },
-    LOW: { label: "Past", className: "bg-green-100 text-green-800 border-green-200" },
+  const priorityConfig: Record<string, { label: string; color: string }> = {
+    HIGH: { label: "Yuqori", color: "red" },
+    MEDIUM: { label: "O'rtacha", color: "yellow" },
+    LOW: { label: "Past", color: "green" },
   };
-  const config = priorityConfig[priority] || { label: priority, className: "" };
-  return <Badge variant="outline" className={config.className}>{config.label}</Badge>;
+  const config = priorityConfig[priority] || { label: priority, color: "gray" };
+  return <Badge color={config.color} variant="light">{config.label}</Badge>;
 };
 
 const getStepStatusIcon = (status: WorkflowStepStatus, isRejected: boolean) => {
   if (isRejected) {
-    return <XCircle className="h-5 w-5 text-red-500" />;
+    return <IconX size={20} color="var(--mantine-color-gray-6)" />;
   }
   switch (status) {
     case WorkflowStepStatus.COMPLETED:
-      return <CheckCircle2 className="h-5 w-5 text-green-500" />;
+      return <IconCircleCheck size={20} color="var(--mantine-color-gov-6)" />;
     case WorkflowStepStatus.IN_PROGRESS:
     case WorkflowStepStatus.PENDING:
-      return <Clock className="h-5 w-5 text-yellow-500" />;
+      return <IconClock size={20} color="var(--mantine-color-gray-6)" />;
     case WorkflowStepStatus.NOT_STARTED:
-      return <AlertCircle className="h-5 w-5 text-gray-400" />;
+      return <IconAlertCircle size={20} color="var(--mantine-color-gray-4)" />;
     case WorkflowStepStatus.REJECTED:
-      return <XCircle className="h-5 w-5 text-red-500" />;
+      return <IconX size={20} color="var(--mantine-color-gray-6)" />;
     default:
-      return <AlertCircle className="h-5 w-5 text-gray-400" />;
+      return <IconAlertCircle size={20} color="var(--mantine-color-gray-4)" />;
   }
 };
 
@@ -92,6 +101,23 @@ const getStepStatusLabel = (status: WorkflowStepStatus, isRejected: boolean) => 
   return labels[status] || status;
 };
 
+const getStepBulletColor = (status: WorkflowStepStatus, isRejected: boolean) => {
+  if (isRejected) return "gray";
+  switch (status) {
+    case WorkflowStepStatus.COMPLETED:
+      return "gov";
+    case WorkflowStepStatus.IN_PROGRESS:
+    case WorkflowStepStatus.PENDING:
+      return "gray";
+    case WorkflowStepStatus.NOT_STARTED:
+      return "gray";
+    case WorkflowStepStatus.REJECTED:
+      return "gray";
+    default:
+      return "gray";
+  }
+};
+
 const formatDate = (dateString: string | null) => {
   if (!dateString) return "-";
   return new Date(dateString).toLocaleDateString("uz-UZ", {
@@ -103,270 +129,283 @@ const formatDate = (dateString: string | null) => {
   });
 };
 
-const WorkflowStepCard = ({ step, isLast }: { step: WorkflowStepInfo; isLast: boolean }) => {
-  return (
-    <div className="relative">
-      {!isLast && (
-        <div className="absolute left-[22px] top-[44px] h-[calc(100%-20px)] w-0.5 bg-gray-200" />
-      )}
-      <div className="flex gap-4">
-        <div className="flex-shrink-0 mt-1">
-          {getStepStatusIcon(step.status, step.isRejected)}
-        </div>
-        <div className="flex-1 pb-6">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="font-medium text-sm">
-              {step.order}. {getActionTypeLabel(step.actionType)}
-            </span>
-            <Badge variant="outline" className="text-xs">
-              {getStepStatusLabel(step.status, step.isRejected)}
-            </Badge>
-          </div>
-          <div className="text-sm text-muted-foreground space-y-1">
-            <div className="flex items-center gap-2">
-              <User className="h-4 w-4" />
-              <span>{step.assignedToUser?.fullname || "Noma'lum"}</span>
-              {step.assignedToUser?.username && (
-                <span className="text-xs">(@{step.assignedToUser.username})</span>
-              )}
-            </div>
-            {step.completedAt && (
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4 text-green-500" />
-                <span>Bajarilgan: {formatDate(step.completedAt)}</span>
-              </div>
-            )}
-            {step.isRejected && step.rejectionReason && (
-              <div className="mt-2 p-2 bg-red-50 rounded-md border border-red-200">
-                <p className="text-red-700 text-sm">
-                  <strong>Rad etilish sababi:</strong> {step.rejectionReason}
-                </p>
-              </div>
-            )}
-            {step.actions && step.actions.length > 0 && (
-              <div className="mt-2 space-y-1">
-                {step.actions.map((action) => (
-                  <div key={action.id} className="text-xs bg-gray-50 p-2 rounded">
-                    <span className="font-medium">{action.performedBy?.fullname}</span>
-                    {action.comment && <span className="ml-2">- {action.comment}</span>}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
 export default function ViewPage({ documentId }: ViewPageProps) {
   const { data, isLoading, isError, error } = useVerifyDocument(documentId);
+  console.log(data);
 
-  console.log(data)
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
-        <div className="container max-w-4xl mx-auto px-4">
-          <div className="space-y-6">
-            <Skeleton className="h-12 w-64" />
-            <Card>
-              <CardContent className="pt-6">
-                <div className="space-y-4">
-                  <Skeleton className="h-6 w-full" />
-                  <Skeleton className="h-6 w-3/4" />
-                  <Skeleton className="h-6 w-1/2" />
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="pt-6">
-                <div className="space-y-4">
-                  {Array.from({ length: 3 }).map((_, i) => (
-                    <div key={i} className="flex gap-4">
-                      <Skeleton className="h-10 w-10 rounded-full" />
-                      <div className="flex-1 space-y-2">
-                        <Skeleton className="h-4 w-32" />
-                        <Skeleton className="h-4 w-48" />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </div>
+      <Box style={{ backgroundColor: "#f8f9fa", padding: "2rem 0" }}>
+        <Container size="lg">
+          <Stack gap="xl" align="center" justify="center" style={{ minHeight: "50vh" }}>
+            <Loader size="lg" color="gov" />
+            <Text c="dimmed">Hujjat yuklanmoqda...</Text>
+          </Stack>
+        </Container>
+      </Box>
     );
   }
 
   if (isError) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
-        <div className="container max-w-4xl mx-auto px-4">
-          <Alert variant="destructive" className="bg-yellow-50 border-yellow-200">
-            <Clock className="h-5 w-5 text-yellow-600" />
-            <AlertTitle className="text-yellow-800">Ish jarayoni hali yakunlanmagan</AlertTitle>
-            <AlertDescription className="text-yellow-700">
-              Hujjat ish jarayoni hali tugallanmagan. Iltimos, yakunlanishini kuting va qayta urinib ko'ring.
-            </AlertDescription>
+      <Box style={{ backgroundColor: "#f8f9fa", padding: "2rem 0" }}>
+        <Container size="lg">
+          <Alert
+            variant="light"
+            color="yellow"
+            title="Ish jarayoni hali yakunlanmagan"
+            icon={<IconClock size={20} />}
+          >
+            Hujjat ish jarayoni hali tugallanmagan. Iltimos, yakunlanishini kuting va qayta urinib ko'ring.
           </Alert>
-        </div>
-      </div>
+        </Container>
+      </Box>
     );
   }
 
   if (!data) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
-        <div className="container max-w-4xl mx-auto px-4">
-          <Alert variant="destructive">
-            <AlertCircle className="h-5 w-5" />
-            <AlertTitle>Hujjat topilmadi</AlertTitle>
-            <AlertDescription>
-              Berilgan ID bo'yicha hujjat topilmadi.
-            </AlertDescription>
+      <Box style={{ backgroundColor: "#f8f9fa", padding: "2rem 0" }}>
+        <Container size="lg">
+          <Alert
+            variant="light"
+            color="red"
+            title="Hujjat topilmadi"
+            icon={<IconAlertCircle size={20} />}
+          >
+            Berilgan ID bo'yicha hujjat topilmadi.
           </Alert>
-        </div>
-      </div>
+        </Container>
+      </Box>
     );
   }
 
   const isWorkflowComplete = data.workflow?.status === WorkflowStatus.COMPLETED;
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="container max-w-4xl mx-auto px-4">
-        {/* Header */}
-        <div className="mb-6 flex items-center gap-3">
-          <div className="p-3 bg-primary/10 rounded-full">
-            <ShieldCheck className="h-8 w-8 text-primary" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold">Hujjatni tekshirish</h1>
-            <p className="text-muted-foreground">Hujjat va ish jarayoni ma'lumotlari</p>
-          </div>
-        </div>
+    <Box style={{ backgroundColor: "#f8f9fa", padding: "2rem 0" }}>
+      <Container size="lg">
+        <Stack gap="lg">
+          {/* Header */}
+          <Paper p="xl" shadow="xs" style={{ backgroundColor: "#1864ab", color: "white" }}>
+            <Group gap="md">
+              <ThemeIcon size={56} radius="md" variant="white" color="gov">
+                <IconShieldCheck size={32} />
+              </ThemeIcon>
+              <div>
+                <Title order={2}>Hujjat aylanmalari</Title>
+                <Text size="sm" opacity={0.9}>Barcha hujjat aylanmalarini boshariq</Text>
+              </div>
+            </Group>
+          </Paper>
 
-        {/* Verification Status */}
-        {isWorkflowComplete && (
-          <Alert className="mb-6 bg-green-50 border-green-200">
-            <CheckCircle2 className="h-5 w-5 text-green-600" />
-            <AlertTitle className="text-green-800">Hujjat tasdiqlangan</AlertTitle>
-            <AlertDescription className="text-green-700">
+          {/* Verification Status */}
+          {isWorkflowComplete && (
+            <Alert
+              variant="light"
+              color="gov"
+              title="Hujjat tasdiqlangan"
+              icon={<IconCircleCheck size={20} />}
+            >
               Ushbu hujjat barcha ish jarayonlarini muvaffaqiyatli o'tgan va tasdiqlangan.
-            </AlertDescription>
-          </Alert>
-        )}
+            </Alert>
+          )}
 
-        {/* Document Info */}
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <FileText className="h-5 w-5" />
-              Hujjat ma'lumotlari
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-3">
-                <div>
-                  <label className="text-sm text-muted-foreground">Sarlavha</label>
-                  <p className="font-medium">{data.title}</p>
-                </div>
-                <div>
-                  <label className="text-sm text-muted-foreground">Tavsif</label>
-                  <p className="text-sm">{data.description || "-"}</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Hash className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">Hujjat raqami:</span>
-                  <span className="font-mono font-medium">{data.documentNumber}</span>
-                </div>
-              </div>
-              <div className="space-y-3">
-                <div className="flex items-center gap-4">
-                  <div>
-                    <label className="text-sm text-muted-foreground">Status</label>
-                    <div className="mt-1">{getStatusBadge(data.status)}</div>
-                  </div>
-                  <div>
-                    <label className="text-sm text-muted-foreground">Muhimlik</label>
-                    <div className="mt-1">{getPriorityBadge(data.priority)}</div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Building2 className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">Hujjat turi:</span>
-                  <span className="font-medium">{data.documentType?.name || "-"}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <User className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">Yaratuvchi:</span>
-                  <span className="font-medium">{data.createdBy?.fullname || "-"}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">Yaratilgan:</span>
-                  <span className="text-sm">{formatDate(data.createdAt)}</span>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+          {/* Document Info */}
+          <Paper p="xl" shadow="sm" withBorder>
+            <Stack gap="md">
+              <Group gap="xs">
+                <IconFileText size={20} color="var(--mantine-color-gov-6)" />
+                <Title order={3} c="gov.8">Hujjat ma'lumotlari</Title>
+              </Group>
+              <Divider />
 
-        {/* Workflow Info */}
-        {data.workflow && (
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2">
-                  <Clock className="h-5 w-5" />
-                  Ish jarayoni
-                </CardTitle>
-                <Badge variant={data.workflow.status === WorkflowStatus.COMPLETED ? "default" : "secondary"}>
-                  {data.workflow.status === WorkflowStatus.COMPLETED
-                    ? "Yakunlangan"
-                    : data.workflow.status === WorkflowStatus.ACTIVE
-                      ? "Faol"
-                      : data.workflow.status === WorkflowStatus.CANCELLED
-                        ? "Bekor qilingan"
-                        : "Qoralama"}
-                </Badge>
-              </div>
-            </CardHeader>
-            <CardContent>
-              {data.workflow.workflowSteps && data.workflow.workflowSteps.length > 0 ? (
-                <div className="space-y-0">
-                  {data.workflow.workflowSteps
-                    .sort((a, b) => a.order - b.order)
-                    .map((step, index) => (
-                      <WorkflowStepCard
-                        key={step.id}
-                        step={step}
-                        isLast={index === data.workflow!.workflowSteps.length - 1}
-                      />
-                    ))}
-                </div>
-              ) : (
-                <p className="text-muted-foreground text-center py-4">
-                  Ish jarayoni qadamlari mavjud emas
-                </p>
-              )}
-            </CardContent>
-          </Card>
-        )}
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "1.5rem" }}>
+                <Stack gap="xs">
+                  <Text size="sm" c="dimmed">Sarlavha</Text>
+                  <Text fw={600}>{data.title}</Text>
+                </Stack>
 
-        {!data.workflow && (
-          <Alert>
-            <AlertCircle className="h-5 w-5" />
-            <AlertTitle>Ish jarayoni mavjud emas</AlertTitle>
-            <AlertDescription>
+                <Stack gap="xs">
+                  <Text size="sm" c="dimmed">Tavsif</Text>
+                  <Text>{data.description || "-"}</Text>
+                </Stack>
+
+                <Stack gap="xs">
+                  <Group gap="xs">
+                    <IconHash size={16} color="var(--mantine-color-dimmed)" />
+                    <Text size="sm" c="dimmed">Hujjat raqami</Text>
+                  </Group>
+                  <Text fw={500} ff="monospace">{data.documentNumber}</Text>
+                </Stack>
+
+                <Stack gap="xs">
+                  <Text size="sm" c="dimmed">Status</Text>
+                  <div>{getStatusBadge(data.status)}</div>
+                </Stack>
+
+                <Stack gap="xs">
+                  <Group gap="xs">
+                    <IconBuilding size={16} color="var(--mantine-color-dimmed)" />
+                    <Text size="sm" c="dimmed">Hujjat turi</Text>
+                  </Group>
+                  <Text fw={500}>{data.documentType?.name || "-"}</Text>
+                </Stack>
+
+                <Stack gap="xs">
+                  <Group gap="xs">
+                    <IconUser size={16} color="var(--mantine-color-dimmed)" />
+                    <Text size="sm" c="dimmed">Yaratuvchi</Text>
+                  </Group>
+                  <Text fw={500}>{data.createdBy?.fullname || "-"}</Text>
+                  {data.createdBy?.username && (
+                    <Text size="xs" c="dimmed">@{data.createdBy.username}</Text>
+                  )}
+                </Stack>
+
+                <Stack gap="xs">
+                  <Group gap="xs">
+                    <IconCalendar size={16} color="var(--mantine-color-dimmed)" />
+                    <Text size="sm" c="dimmed">Yaratilgan</Text>
+                  </Group>
+                  <Text size="sm">{formatDate(data.createdAt)}</Text>
+                </Stack>
+              </div>
+            </Stack>
+          </Paper>
+
+          {/* Workflow Info */}
+          {data.workflow && (
+            <Paper p="xl" shadow="sm" withBorder>
+              <Stack gap="md">
+                <Group justify="space-between">
+                  <Group gap="xs">
+                    <IconClock size={20} color="var(--mantine-color-gov-6)" />
+                    <Title order={3} c="gov.8">Ish jarayoni</Title>
+                  </Group>
+                  <Badge
+                    color={data.workflow.status === WorkflowStatus.COMPLETED ? "gov" : "gray"}
+                    variant="light"
+                    size="lg"
+                  >
+                    {data.workflow.status === WorkflowStatus.COMPLETED
+                      ? "Yakunlangan"
+                      : data.workflow.status === WorkflowStatus.ACTIVE
+                        ? "Faol"
+                        : data.workflow.status === WorkflowStatus.CANCELLED
+                          ? "Bekor qilingan"
+                          : "Qoralama"}
+                  </Badge>
+                </Group>
+                <Divider />
+
+                {data.workflow.steps && data.workflow.steps.length > 0 ? (
+                  <Timeline active={data.workflow.currentStepOrder - 1} bulletSize={28} lineWidth={2}>
+                    {data.workflow.steps
+                      .sort((a, b) => a.order - b.order)
+                      .map((step) => (
+                        <Timeline.Item
+                          key={step.id}
+                          bullet={getStepStatusIcon(step.status, step.isRejected)}
+                          title={
+                            <Group gap="sm">
+                              <Text fw={600} size="md">
+                                {step.order}. {getActionTypeLabel(step.actionType)}
+                              </Text>
+                              <Badge color={getStepBulletColor(step.status, step.isRejected)} size="sm">
+                                {getStepStatusLabel(step.status, step.isRejected)}
+                              </Badge>
+                            </Group>
+                          }
+                          color={getStepBulletColor(step.status, step.isRejected)}
+                        >
+                          <Stack gap="xs" mt="xs">
+                            <Group gap="xs">
+                              <IconUser size={16} color="var(--mantine-color-dimmed)" />
+                              <Text size="sm" c="dimmed">
+                                {step.assignedToUser?.fullname || "Noma'lum"}
+                              </Text>
+                              {step.assignedToUser?.username && (
+                                <Text size="xs" c="dimmed">(@{step.assignedToUser.username})</Text>
+                              )}
+                            </Group>
+
+                            {step.completedAt && (
+                              <Group gap="xs">
+                                <IconCircleCheck size={16} color="var(--mantine-color-green-6)" />
+                                <Text size="sm" c="dimmed">
+                                  Bajarilgan: {formatDate(step.completedAt)}
+                                </Text>
+                              </Group>
+                            )}
+
+                            {step.isRejected && step.rejectionReason && (
+                              <Alert
+                                variant="light"
+                                color="gray"
+                                title="Rad etilish sababi"
+                                icon={<IconX size={16} />}
+                                mt="xs"
+                              >
+                                <Text size="sm">{step.rejectionReason}</Text>
+                              </Alert>
+                            )}
+
+                            {step.actions && step.actions.length > 0 && (
+                              <Stack gap="xs" mt="xs">
+                                <Text size="sm" fw={500} c="dimmed">Harakatlar:</Text>
+                                {step.actions.map((action) => (
+                                  <Paper key={action.id} p="sm" withBorder bg="gray.0">
+                                    <Stack gap={4}>
+                                      <Group gap="xs">
+                                        <IconCheckbox size={14} />
+                                        <Text size="sm" fw={500}>
+                                          {action.performedBy?.fullname}
+                                        </Text>
+                                        {action.performedBy?.username && (
+                                          <Text size="xs" c="dimmed">
+                                            (@{action.performedBy.username})
+                                          </Text>
+                                        )}
+                                      </Group>
+                                      <Text size="xs" c="dimmed">
+                                        {formatDate(action.createdAt)}
+                                      </Text>
+                                      {action.comment && (
+                                        <Text size="sm" mt={4}>
+                                          {action.comment}
+                                        </Text>
+                                      )}
+                                    </Stack>
+                                  </Paper>
+                                ))}
+                              </Stack>
+                            )}
+                          </Stack>
+                        </Timeline.Item>
+                      ))}
+                  </Timeline>
+                ) : (
+                  <Text c="dimmed" ta="center" py="md">
+                    Ish jarayoni qadamlari mavjud emas
+                  </Text>
+                )}
+              </Stack>
+            </Paper>
+          )}
+
+          {!data.workflow && (
+            <Alert
+              variant="light"
+              color="gray"
+              title="Ish jarayoni mavjud emas"
+              icon={<IconAlertCircle size={20} />}
+            >
               Ushbu hujjat uchun ish jarayoni tayinlanmagan.
-            </AlertDescription>
-          </Alert>
-        )}
-      </div>
-    </div>
+            </Alert>
+          )}
+        </Stack>
+      </Container>
+    </Box>
   );
 }

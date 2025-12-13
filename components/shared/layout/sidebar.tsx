@@ -1,15 +1,15 @@
 "use client";
 
 import {
-    NavLink,
-    Box,
-    Group,
-    Text,
-    ActionIcon,
-    ScrollArea,
-    Collapse,
-    Button,
-    Badge, Typography,
+  NavLink,
+  Box,
+  Group,
+  Text,
+  ActionIcon,
+  ScrollArea,
+  Collapse,
+  Button,
+  Badge, Typography,
 } from "@mantine/core";
 import {
   IconFiles,
@@ -100,6 +100,10 @@ const menuItems: MenuItem[] = [
         label: "Shablonlar",
         href: "/dashboard/workflow-template",
         permission: "workflow:list",
+      },
+      {
+        label: "Taqvim",
+        href: "/dashboard/workflow-calendar",
       },
     ],
   },
@@ -224,18 +228,18 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
           borderBottom: "1px solid rgba(255,255,255,0.1)",
         }}
       >
-          <div className="flex flex-col  gap-4">
-              <div className="relative">
-                  <div className="absolute inset-0 bg-blue-500/20 blur-2xl rounded-full"></div>
-                  <Image
-                      alt="university logo"
-                      width={120}
-                      height={120}
-                      src="/university_logo.svg"
-                      className="relative z-10 drop-shadow-2xl"
-                  />
-              </div>
+        <div className="flex flex-col  gap-4">
+          <div className="relative">
+            <div className="absolute inset-0 bg-blue-500/20 blur-2xl rounded-full"></div>
+            <Image
+              alt="university logo"
+              width={120}
+              height={120}
+              src="/university_logo.svg"
+              className="relative z-10 drop-shadow-2xl"
+            />
           </div>
+        </div>
 
         {/* Yuborish tugmasi */}
         {/*<Button*/}

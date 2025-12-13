@@ -20,6 +20,7 @@ export const apiToFormData = (
         id: step.id,
         assignedToUserId: step.assignedToUserId,
         actionType: step.actionType || WorkflowActionType.APPROVAL,
+        dueDate: step.dueDate || undefined,
       })),
   };
 };
@@ -33,6 +34,7 @@ export const formToApiPayload = (
       order: index + 1,
       actionType: step.actionType,
       assignedToUserId: step.assignedToUserId,
+      dueDate: step.dueDate || null,
       isRejected: false,
     })),
   };

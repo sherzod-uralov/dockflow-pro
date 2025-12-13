@@ -40,6 +40,19 @@ export const useUpdateDeportament = () => {
   });
 };
 
+export const useUpdateDepartmentParent = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, parentId }: { id: string; parentId: string | null }) =>
+      deportamentService.updateDeportament(id, { parentId } as any),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["deportaments"]);
+      showSuccess("Bo'lim bog'landi");
+    },
+    onError: showError,
+  });
+};
+
 export const useDeleteDeportament = () => {
   const queryClient = useQueryClient();
   return useMutation({

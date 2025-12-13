@@ -26,6 +26,7 @@ const WorkflowDetailPage = () => {
 
   const { data: workflow, isLoading, isError } = useGetWorkflowById(workflowId);
 
+  console.log(workflow, "workflow");
   if (isLoading) {
     return (
       <Box>

@@ -41,7 +41,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                 p="md"
                 type="auto"
               >
-                <Box maw={1280} mx="auto">
+                <Box mx="auto">
                   {children}
                 </Box>
               </ScrollArea>

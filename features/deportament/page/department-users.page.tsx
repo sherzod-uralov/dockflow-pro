@@ -8,16 +8,13 @@ import {
     Group,
     TextInput,
     Paper,
-    Table,
     Badge,
     ActionIcon,
     Menu,
-    Pagination,
-    Select,
     Stack,
-    Skeleton,
     Center,
     Avatar,
+    Button,
 } from "@mantine/core";
 import {
     IconSearch,
@@ -28,14 +25,13 @@ import {
     IconBuilding,
     IconUser,
     IconUsers,
-    IconHash,
-    IconMapPin,
 } from "@tabler/icons-react";
 import { useDebounce } from "@/hooks/use-debaunce";
 import { useGetUserQuery } from "@/features/admin/admin-users/hook/user.hook";
 import { useGetDeportamentById } from "@/features/deportament/hook/deportament.hook";
 import { User } from "@/features/admin/admin-users/type/user.types";
 import { handleCopyToClipboard } from "@/utils/copy-text";
+import { DataTable, DataTableColumn } from "@/components/shared/ui/custom-table";
 
 const DepartmentUsersPage = () => {
     const params = useParams();
@@ -65,8 +61,6 @@ const DepartmentUsersPage = () => {
         router.push("/dashboard/department");
     };
 
-    const totalPages = Math.ceil((usersData?.count || 0) / pageSize);
-
     const formatDate = (dateString: string | undefined) => {
         if (!dateString) return "—";
         try {
@@ -89,85 +83,201 @@ const DepartmentUsersPage = () => {
             .slice(0, 2);
     };
 
+    // Columns
+    const columns: DataTableColumn<User>[] = [
+        {
+            accessorKey: "fullname",
+            header: "Foydalanuvchi",
+            cell: ({ row }) => (
+                <Group gap="sm" wrap="nowrap">
+                    <Avatar
+                        size="sm"
+                        radius="xl"
+                        src={row.original.avatarUrl}
+                        style={{ backgroundColor: "#e7f5ff" }}
+                    >
+                        <Text size="xs" c="#1e3a5f" fw={500}>
+                            {row.original.fullname ? getInitials(row.original.fullname) : "?"}
+                        </Text>
+                    </Avatar>
+                    <Box>
+                        <Text size="sm" fw={500} c="#212529">
+                            {row.original.fullname}
+                        </Text>
+                        <Text size="xs" c="dimmed">
+                            @{row.original.username}
+                        </Text>
+                    </Box>
+                </Group>
+            ),
+            meta: { minWidth: 200 },
+        },
+        {
+            accessorKey: "role",
+            header: "Rol",
+            cell: ({ row }) => (
+                <Badge variant="light" color="blue" radius="sm">
+                    {row.original.role?.name || "—"}
+                </Badge>
+            ),
+            meta: { minWidth: 120 },
+        },
+        {
+            accessorKey: "isActive",
+            header: "Holat",
+            cell: ({ row }) => (
+                <Badge
+                    variant="light"
+                    color={row.original.isActive ? "green" : "red"}
+                    radius="sm"
+                >
+                    {row.original.isActive ? "Faol" : "Nofaol"}
+                </Badge>
+            ),
+            meta: { minWidth: 100 },
+        },
+        {
+            accessorKey: "lastLogin",
+            header: "Oxirgi kirish",
+            cell: ({ row }) => (
+                <Text size="sm" c="#495057">
+                    {row.original.lastLogin ? formatDate(row.original.lastLogin) : "Hali kirmagan"}
+                </Text>
+            ),
+            meta: { minWidth: 150 },
+        },
+        {
+            accessorKey: "createdAt",
+            header: "Ro'yxatdan o'tgan",
+            cell: ({ row }) => (
+                <Text size="sm" c="#495057">
+                    {formatDate(row.original.createdAt)}
+                </Text>
+            ),
+            meta: { minWidth: 150 },
+        },
+        {
+            id: "actions",
+            header: "Amallar",
+            cell: ({ row }) => (
+                <Menu shadow="md" width={160} position="bottom-end">
+                    <Menu.Target>
+                        <ActionIcon variant="subtle" color="gray" radius="sm">
+                            <IconDotsVertical size={18} />
+                        </ActionIcon>
+                    </Menu.Target>
+                    <Menu.Dropdown>
+                        <Menu.Item
+                            leftSection={<IconEye size={16} />}
+                            onClick={() => handleViewUser(row.original)}
+                        >
+                            Ko'rish
+                        </Menu.Item>
+                        <Menu.Item
+                            leftSection={<IconCopy size={16} />}
+                            onClick={() => handleCopyToClipboard(row.original.id || "", "ID")}
+                        >
+                            ID nusxalash
+                        </Menu.Item>
+                    </Menu.Dropdown>
+                </Menu>
+            ),
+            meta: { width: 80, truncate: false },
+        },
+    ];
+
+    // Empty state
+    const EmptyState = () => (
+        <Center py={60}>
+            <Stack align="center" gap="md">
+                <Box
+                    p={16}
+                    style={{
+                        backgroundColor: "#f1f3f5",
+                        borderRadius: 12,
+                    }}
+                >
+                    <IconUsers size={40} color="#868e96" stroke={1.5} />
+                </Box>
+                <Text size="lg" fw={500} c="#495057">
+                    Foydalanuvchi topilmadi
+                </Text>
+                <Text size="sm" c="dimmed" ta="center">
+                    Bu bo'limda hali foydalanuvchi yo'q
+                </Text>
+            </Stack>
+        </Center>
+    );
+
+    if (isDepartmentLoading) {
+        return (
+            <Center h={400}>
+                <Stack align="center">
+                    <Text>Yuklanmoqda...</Text>
+                </Stack>
+            </Center>
+        )
+    }
+
+    if (!department) {
+        return (
+            <Center h={400}>
+                <Stack align="center">
+                    <Text>Bo'lim topilmadi</Text>
+                    <Button onClick={handleBack} variant="light">Ortga qaytish</Button>
+                </Stack>
+            </Center>
+        )
+    }
+
     return (
         <Box>
-            {/* Department Info Header */}
-            {isDepartmentLoading ? (
-                <Skeleton height={100} radius="sm" mb="md" />
-            ) : department ? (
-                <Paper p="lg" radius="sm" withBorder mb="md" style={{ borderColor: "#e9ecef" }}>
-                    <Group justify="space-between" wrap="wrap">
-                        <Group gap="md">
-                            <ActionIcon
-                                variant="light"
-                                size="lg"
-                                radius="sm"
-                                onClick={handleBack}
-                                style={{ backgroundColor: "#f1f3f5" }}
-                            >
-                                <IconArrowLeft size={20} color="#495057" />
-                            </ActionIcon>
-                            <Box
-                                p={10}
-                                style={{
-                                    backgroundColor: "#f1f3f5",
-                                    borderRadius: 8,
-                                }}
-                            >
-                                <IconBuilding size={24} color="#1e3a5f" />
-                            </Box>
-                            <Box>
-                                <Text size="lg" fw={600} c="#212529">
-                                    {department.name}
-                                </Text>
-                                <Text size="sm" c="dimmed">
-                                    Bo'limga tegishli foydalanuvchilar ro'yxati
-                                </Text>
-                            </Box>
-                        </Group>
-                        {department.director && (
-                            <Group gap="sm">
-                                <IconUser size={16} color="#868e96" />
-                                <Avatar
-                                    size="sm"
-                                    radius="xl"
-                                    src={department.director.avatarUrl}
-                                    style={{ backgroundColor: "#e7f5ff" }}
-                                >
-                                    <Text size="xs" c="#1e3a5f" fw={500}>
-                                        {getInitials(department.director.fullname)}
-                                    </Text>
-                                </Avatar>
-                                <Badge variant="light" color="indigo" radius="sm">
-                                    {department.director.fullname}
-                                </Badge>
-                            </Group>
-                        )}
-                    </Group>
-                    <Group gap="lg" mt="md">
-                        {department.code && (
-                            <Text size="sm" c="dimmed">
-                                <IconHash size={14} style={{ verticalAlign: "middle" }} /> Kod:{" "}
-                                <Text span fw={500} c="#1e3a5f" ff="monospace">
-                                    {department.code}
-                                </Text>
-                            </Text>
-                        )}
-                        {department.location && (
-                            <Text size="sm" c="dimmed">
-                                <IconMapPin size={14} style={{ verticalAlign: "middle" }} />{" "}
-                                {department.location}
-                            </Text>
-                        )}
-                        <Text size="sm" c="dimmed">
-                            Jami foydalanuvchilar:{" "}
-                            <Text span fw={600} c="#212529">
-                                {usersData?.count || 0}
-                            </Text>
+            {/* Header */}
+            <Group justify="space-between" mb="md" align="flex-start">
+                <Group>
+                    <ActionIcon
+                        variant="light"
+                        size="lg"
+                        radius="sm"
+                        onClick={handleBack}
+                        style={{ backgroundColor: "#f1f3f5" }}
+                    >
+                        <IconArrowLeft size={20} color="#495057" />
+                    </ActionIcon>
+                    <Box>
+                        <Text size="lg" fw={600} c="#212529">
+                            {department.name}
                         </Text>
-                    </Group>
-                </Paper>
-            ) : null}
+                        <Group gap="xs" c="dimmed">
+                            <IconBuilding size={14} />
+                            <Text size="sm">
+                                Bo'lim foydalanuvchilari
+                            </Text>
+                        </Group>
+                    </Box>
+                </Group>
+
+                {department.director && (
+                    <Paper px="md" py="xs" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+                        <Group gap="sm">
+                            <Text size="xs" c="dimmed" tt="uppercase" fw={600}>Rahbar:</Text>
+                            <Avatar
+                                size="sm"
+                                radius="xl"
+                                src={department.director.avatarUrl}
+                                style={{ backgroundColor: "#e7f5ff" }}
+                            >
+                                <Text size="xs" c="#1e3a5f" fw={500}>
+                                    {getInitials(department.director.fullname)}
+                                </Text>
+                            </Avatar>
+                            <Text size="sm" fw={500} c="#212529">
+                                {department.director.fullname}
+                            </Text>
+                        </Group>
+                    </Paper>
+                )}
+            </Group>
 
             {/* Search */}
             <Paper p="md" radius="sm" withBorder mb="md" style={{ borderColor: "#e9ecef" }}>
@@ -182,187 +292,28 @@ const DepartmentUsersPage = () => {
             </Paper>
 
             {/* Users Table */}
-            <Paper radius="sm" withBorder style={{ borderColor: "#e9ecef", overflow: "hidden" }}>
-                {isUsersLoading ? (
-                    <Stack p="xl" gap="md">
-                        {[...Array(5)].map((_, i) => (
-                            <Skeleton key={i} height={50} radius="sm" />
-                        ))}
-                    </Stack>
-                ) : usersData?.data?.length === 0 ? (
-                    <Center py={60}>
-                        <Stack align="center" gap="md">
-                            <Box
-                                p={16}
-                                style={{
-                                    backgroundColor: "#f1f3f5",
-                                    borderRadius: 12,
-                                }}
-                            >
-                                <IconUsers size={40} color="#868e96" stroke={1.5} />
-                            </Box>
-                            <Text size="lg" fw={500} c="#495057">
-                                Foydalanuvchi topilmadi
-                            </Text>
-                            <Text size="sm" c="dimmed" ta="center">
-                                Bu bo'limda hali foydalanuvchi yo'q
-                            </Text>
-                        </Stack>
-                    </Center>
+            <Box>
+                {usersData?.data?.length === 0 && !isUsersLoading ? (
+                    <Paper radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+                        <EmptyState />
+                    </Paper>
                 ) : (
-                    <Table.ScrollContainer minWidth={800}>
-                        <Table verticalSpacing="md" horizontalSpacing="md">
-                            <Table.Thead style={{ backgroundColor: "#f8f9fa" }}>
-                                <Table.Tr>
-                                    <Table.Th style={{ color: "#495057", fontWeight: 600 }}>
-                                        Foydalanuvchi
-                                    </Table.Th>
-                                    <Table.Th style={{ color: "#495057", fontWeight: 600 }}>
-                                        Rol
-                                    </Table.Th>
-                                    <Table.Th style={{ color: "#495057", fontWeight: 600 }}>
-                                        Holat
-                                    </Table.Th>
-                                    <Table.Th style={{ color: "#495057", fontWeight: 600 }}>
-                                        Oxirgi kirish
-                                    </Table.Th>
-                                    <Table.Th style={{ color: "#495057", fontWeight: 600 }}>
-                                        Ro'yxatdan o'tgan
-                                    </Table.Th>
-                                    <Table.Th style={{ color: "#495057", fontWeight: 600, width: 80 }}>
-                                        Amallar
-                                    </Table.Th>
-                                </Table.Tr>
-                            </Table.Thead>
-                            <Table.Tbody>
-                                {usersData?.data?.map((user: User) => (
-                                    <Table.Tr
-                                        key={user.id}
-                                        style={{ cursor: "pointer" }}
-                                        onClick={() => handleViewUser(user)}
-                                    >
-                                        <Table.Td>
-                                            <Group gap="sm">
-                                                <Avatar
-                                                    size="sm"
-                                                    radius="xl"
-                                                    src={user.avatarUrl}
-                                                    style={{ backgroundColor: "#e7f5ff" }}
-                                                >
-                                                    <Text size="xs" c="#1e3a5f" fw={500}>
-                                                        {user.fullname ? getInitials(user.fullname) : "?"}
-                                                    </Text>
-                                                </Avatar>
-                                                <Box>
-                                                    <Text size="sm" fw={500} c="#212529">
-                                                        {user.fullname}
-                                                    </Text>
-                                                    <Text size="xs" c="dimmed">
-                                                        @{user.username}
-                                                    </Text>
-                                                </Box>
-                                            </Group>
-                                        </Table.Td>
-                                        <Table.Td>
-                                            <Badge variant="light" color="blue" radius="sm">
-                                                {user.role?.name || "—"}
-                                            </Badge>
-                                        </Table.Td>
-                                        <Table.Td>
-                                            <Badge
-                                                variant="light"
-                                                color={user.isActive ? "green" : "red"}
-                                                radius="sm"
-                                            >
-                                                {user.isActive ? "Faol" : "Nofaol"}
-                                            </Badge>
-                                        </Table.Td>
-                                        <Table.Td>
-                                            <Text size="sm" c="#495057">
-                                                {user.lastLogin ? formatDate(user.lastLogin) : "Hali kirmagan"}
-                                            </Text>
-                                        </Table.Td>
-                                        <Table.Td>
-                                            <Text size="sm" c="#495057">
-                                                {formatDate(user.createdAt)}
-                                            </Text>
-                                        </Table.Td>
-                                        <Table.Td onClick={(e) => e.stopPropagation()}>
-                                            <Menu shadow="md" width={160} position="bottom-end">
-                                                <Menu.Target>
-                                                    <ActionIcon variant="subtle" color="gray" radius="sm">
-                                                        <IconDotsVertical size={18} />
-                                                    </ActionIcon>
-                                                </Menu.Target>
-                                                <Menu.Dropdown>
-                                                    <Menu.Item
-                                                        leftSection={<IconEye size={16} />}
-                                                        onClick={() => handleViewUser(user)}
-                                                    >
-                                                        Ko'rish
-                                                    </Menu.Item>
-                                                    <Menu.Item
-                                                        leftSection={<IconCopy size={16} />}
-                                                        onClick={() => handleCopyToClipboard(user.id || "", "ID")}
-                                                    >
-                                                        ID nusxalash
-                                                    </Menu.Item>
-                                                </Menu.Dropdown>
-                                            </Menu>
-                                        </Table.Td>
-                                    </Table.Tr>
-                                ))}
-                            </Table.Tbody>
-                        </Table>
-                    </Table.ScrollContainer>
+                    <DataTable
+                        columns={columns}
+                        data={usersData?.data || []}
+                        loading={isUsersLoading}
+                        totalCount={usersData?.count || 0}
+                        currentPage={page}
+                        pageSize={pageSize}
+                        onPageChange={setPage}
+                        onPageSizeChange={(size) => {
+                            setPageSize(size);
+                            setPage(1);
+                        }}
+                        emptyMessage="Foydalanuvchi topilmadi"
+                    />
                 )}
-
-                {/* Pagination */}
-                {usersData && usersData.count > 0 && (
-                    <Group justify="space-between" p="md" style={{ borderTop: "1px solid #e9ecef" }}>
-                        <Group gap="xs">
-                            <Text size="sm" c="dimmed">
-                                Ko'rsatish:
-                            </Text>
-                            <Select
-                                value={String(pageSize)}
-                                onChange={(val) => {
-                                    setPageSize(Number(val));
-                                    setPage(1);
-                                }}
-                                data={[
-                                    { value: "10", label: "10" },
-                                    { value: "20", label: "20" },
-                                    { value: "50", label: "50" },
-                                ]}
-                                size="xs"
-                                w={70}
-                                radius="sm"
-                            />
-                        </Group>
-                        <Group gap="md">
-                            <Text size="sm" c="dimmed">
-                                Jami: {usersData.count} ta
-                            </Text>
-                            <Pagination
-                                total={totalPages}
-                                value={page}
-                                onChange={setPage}
-                                size="sm"
-                                radius="sm"
-                                styles={{
-                                    control: {
-                                        "&[data-active]": {
-                                            backgroundColor: "#1e3a5f",
-                                            borderColor: "#1e3a5f",
-                                        },
-                                    },
-                                }}
-                            />
-                        </Group>
-                    </Group>
-                )}
-            </Paper>
+            </Box>
         </Box>
     );
 };

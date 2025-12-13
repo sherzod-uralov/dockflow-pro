@@ -23,6 +23,8 @@ export const workflowStepSchema = z.object({
     required_error: "Amal turini tanlang",
     invalid_type_error: "Noto'g'ri amal turi",
   }),
+
+  dueDate: z.string().optional(), // ✨ Optional due date for this step
 });
 
 // ============================================

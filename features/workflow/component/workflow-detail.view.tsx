@@ -42,6 +42,7 @@ import {
 import {
   useCompleteWorkflowStep,
   useRejectWorkflowStep,
+  useDownloadDocument,
 } from "../hook/workflow.hook";
 import { useGetDocumentById } from "@/features/document";
 import { useGetProfileQuery } from "@/features/login/hook/login.hook";
@@ -79,6 +80,7 @@ const WorkflowDetailView = memo(({ workflow }: WorkflowDetailViewProps) => {
   const router = useRouter();
   const completeMutation = useCompleteWorkflowStep();
   const rejectMutation = useRejectWorkflowStep();
+  const downloadMutation = useDownloadDocument();
 
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
   const [selectedStep, setSelectedStep] = useState<WorkflowStepApiResponse | null>(null);
@@ -88,7 +90,7 @@ const WorkflowDetailView = memo(({ workflow }: WorkflowDetailViewProps) => {
   const { data: currentUser } = useGetProfileQuery();
   const { data: documentData } = useGetDocumentById(workflow.document?.id || "");
 
-  const isLoading = completeMutation.isLoading || rejectMutation.isLoading;
+  const isLoading = completeMutation.isLoading || rejectMutation.isLoading || downloadMutation.isLoading;
 
   // Progress
   const totalSteps = workflow.workflowSteps?.length || 0;
@@ -191,16 +193,13 @@ const WorkflowDetailView = memo(({ workflow }: WorkflowDetailViewProps) => {
   }, [documentData, workflow.documentId, router]);
 
   const handleDownloadDocument = useCallback(() => {
-    if (workflow.document?.pdfUrl) {
-      const link = document.createElement('a');
-      link.href = workflow.document.pdfUrl;
-      link.download = `${workflow.document.title || 'document'}.pdf`;
-      link.target = '_blank';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+    if (workflow.document?.id) {
+      downloadMutation.mutate({
+        documentId: workflow.document.id,
+        filename: `${workflow.document.title || 'document'}.pdf`,
+      });
     }
-  }, [workflow.document]);
+  }, [workflow.document, downloadMutation]);
 
   return (
     <Stack gap="md">
@@ -337,7 +336,7 @@ const WorkflowDetailView = memo(({ workflow }: WorkflowDetailViewProps) => {
               </Badge>
             </Group>
 
-            <Timeline active={workflow.currentStepOrder} bulletSize={32} lineWidth={2}>
+            <Timeline active={workflow.currentStepOrder - 1} bulletSize={36} lineWidth={2} color="dark">
               {workflow.workflowSteps
                 .sort((a, b) => a.order - b.order)
                 .map((step) => {
@@ -345,72 +344,120 @@ const WorkflowDetailView = memo(({ workflow }: WorkflowDetailViewProps) => {
                   const actionLabel = ACTION_LABELS[step.actionType] || ACTION_LABELS.APPROVAL;
                   const ActionIcon = actionLabel.icon;
                   const isCurrentStep = step.order === workflow.currentStepOrder;
+                  const isCompleted = step.status === "COMPLETED";
+                  const hasPdf = workflow.document?.pdfUrl;
 
                   return (
                     <Timeline.Item
                       key={step.id}
                       bullet={
                         <ThemeIcon
-                          size={32}
+                          size={36}
                           radius="xl"
                           color={stepStatus.color}
-                          variant={step.status === "COMPLETED" || isCurrentStep ? "filled" : "light"}
+                          variant={isCompleted ? "filled" : isCurrentStep ? "light" : "outline"}
+                          style={{
+                            border: isCompleted ? "none" : "2px solid",
+                            borderColor: stepStatus.color === "green" ? "#51cf66" : stepStatus.color === "blue" ? "#339af0" : "#ced4da"
+                          }}
                         >
-                          <ActionIcon size={16} />
+                          <ActionIcon size={18} />
                         </ThemeIcon>
                       }
                       title={
-                        <Group gap="xs">
-                          <Text size="sm" fw={500} c="#212529">
-                            {actionLabel.label}
-                          </Text>
-                          {isCurrentStep && (
-                            <Badge size="xs" variant="light" color="blue">Joriy</Badge>
-                          )}
+                        <Group justify="space-between" wrap="nowrap">
+                          <Group gap="xs">
+                            <Text size="md" fw={600} c="#212529">
+                              {actionLabel.label}
+                            </Text>
+                            {isCurrentStep && (
+                              <Badge size="sm" variant="dot" color="blue">Joriy bosqich</Badge>
+                            )}
+                          </Group>
+                          <Badge size="sm" variant="light" color={stepStatus.color}>
+                            {stepStatus.label}
+                          </Badge>
                         </Group>
                       }
                     >
-                      <Paper p="sm" mt="xs" radius="sm" bg={isCurrentStep ? "#f8f9fa" : "transparent"}>
-                        <Group gap="sm">
-                          <Avatar size="sm" radius="xl" color="dark">
+                      <Paper
+                        p="md"
+                        mt="sm"
+                        radius="sm"
+                        bg={isCurrentStep ? "#f1f3f5" : "white"}
+                        withBorder={isCurrentStep}
+                        style={{
+                          borderColor: isCurrentStep ? "#339af0" : "transparent",
+                          transition: "all 0.2s ease"
+                        }}
+                      >
+                        {/* User Info */}
+                        <Group gap="md" mb={isCompleted || step.isRejected ? "md" : 0}>
+                          <Avatar
+                            size="md"
+                            radius="xl"
+                            color={isCompleted ? "green" : isCurrentStep ? "blue" : "gray"}
+                            variant={isCompleted ? "filled" : "light"}
+                          >
                             {step.assignedToUser?.fullname
                               ?.split(" ")
                               .map(n => n[0])
                               .join("") || "??"}
                           </Avatar>
                           <Box style={{ flex: 1 }}>
-                            <Text size="sm" c="#212529">
+                            <Text size="sm" fw={500} c="#212529">
                               {step.assignedToUser?.fullname || "Tayinlanmagan"}
                             </Text>
+                            <Text size="xs" c="dimmed">
+                              @{step.assignedToUser?.username || "unknown"}
+                            </Text>
                           </Box>
-                          <Badge size="xs" variant="light" color={stepStatus.color}>
-                            {stepStatus.label}
-                          </Badge>
                         </Group>
+
+                        {/* Completion Time */}
+                        {step.completedAt && (
+                          <Group gap="xs" mb="sm">
+                            <IconCheck size={14} color="#51cf66" />
+                            <Text size="xs" c="dimmed">
+                              Bajarilgan: {formatDateTime(step.completedAt)}
+                            </Text>
+                          </Group>
+                        )}
+
+                        {/* Started Time for current step */}
+                        {isCurrentStep && step.startedAt && (
+                          <Group gap="xs" mb="sm">
+                            <IconClock size={14} color="#339af0" />
+                            <Text size="xs" c="dimmed">
+                              Boshlangan: {formatDateTime(step.startedAt)}
+                            </Text>
+                          </Group>
+                        )}
 
                         {/* Rejection reason */}
                         {step.isRejected && step.rejectionReason && (
                           <Box
-                            p="xs"
-                            mt="sm"
+                            p="sm"
+                            mb="sm"
                             style={{
                               backgroundColor: "#fff5f5",
-                              borderRadius: 4,
+                              borderRadius: 6,
                               border: "1px solid #ffe3e3",
                             }}
                           >
+                            <Group gap="xs" mb={4}>
+                              <IconAlertCircle size={14} color="#c92a2a" />
+                              <Text size="xs" fw={600} c="#c92a2a">
+                                Rad etildi
+                              </Text>
+                            </Group>
                             <Text size="xs" c="#c92a2a">
-                              <IconAlertCircle size={12} style={{ display: "inline", marginRight: 4 }} />
                               {step.rejectionReason}
                             </Text>
                           </Box>
                         )}
 
-                        {step.completedAt && (
-                          <Text size="xs" c="dimmed" mt="xs">
-                            {formatDateTime(step.completedAt)}
-                          </Text>
-                        )}
+
                       </Paper>
                     </Timeline.Item>
                   );
@@ -422,51 +469,69 @@ const WorkflowDetailView = memo(({ workflow }: WorkflowDetailViewProps) => {
         {/* Right sidebar */}
         <Stack gap="md">
           {/* Document info */}
-          <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
-            <Group gap="xs" mb="sm">
-              <IconFileText size={16} color="#1e3a5f" />
-              <Text size="sm" fw={600} c="#212529">Hujjat</Text>
+          <Paper p="lg" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+            <Group gap="xs" mb="md">
+              <IconFileText size={18} color="#1e3a5f" />
+              <Text size="md" fw={600} c="#212529">Hujjat</Text>
             </Group>
 
-            <Stack gap="xs">
-              <Text size="sm" c="#212529">{workflow.document?.title || "—"}</Text>
-              <Text size="xs" c="dimmed" style={{ fontFamily: "monospace" }}>
-                {workflow.document?.documentNumber || "—"}
-              </Text>
-            </Stack>
+            <Stack gap="md">
+              <Box>
+                <Text size="xs" c="dimmed" mb={4}>Nomi</Text>
+                <Text size="sm" fw={500} c="#212529">
+                  {workflow.document?.title || "—"}
+                </Text>
+              </Box>
 
-            {canEditDocument && (
-              <>
-                <Divider my="sm" />
-                <Stack gap="xs">
-                  {/* Original document (Word/Excel) */}
+              <Box>
+                <Text size="xs" c="dimmed" mb={4}>Raqam</Text>
+                <Text size="sm" style={{ fontFamily: "monospace" }} c="#495057">
+                  {workflow.document?.documentNumber || "—"}
+                </Text>
+              </Box>
+
+              {workflow.document?.documentType && (
+                <Box>
+                  <Text size="xs" c="dimmed" mb={4}>Turi</Text>
+                  <Badge variant="light" color="dark" size="sm">
+                    {workflow.document.documentType.name}
+                  </Badge>
+                </Box>
+              )}
+
+              <Divider />
+
+              {/* Document Actions */}
+              <Stack gap="xs">
+                {canEditDocument && (
                   <Button
                     variant="light"
-                    size="xs"
+                    size="sm"
                     radius="sm"
                     fullWidth
-                    leftSection={<IconFile size={14} />}
+                    leftSection={<IconFile size={16} />}
                     onClick={handleViewDocument}
-                    color="gray"
+                    color="dark"
                   >
                     Original hujjat
                   </Button>
-                  {workflow.document?.pdfUrl && workflow.status === "COMPLETED" && (
-                    <Button
-                      variant="filled"
-                      size="xs"
-                      radius="sm"
-                      fullWidth
-                      leftSection={<IconDownload size={14} />}
-                      onClick={handleDownloadDocument}
-                      style={{ backgroundColor: "#1e3a5f" }}
-                    >
-                      Tasdiqlangan PDF
-                    </Button>
-                  )}
-                </Stack>
-              </>
-            )}
+                )}
+                {workflow.status === "COMPLETED" && workflow.document?.id && (
+                  <Button
+                    variant="filled"
+                    size="sm"
+                    radius="sm"
+                    fullWidth
+                    leftSection={<IconDownload size={16} />}
+                    onClick={handleDownloadDocument}
+                    loading={downloadMutation.isLoading}
+                    style={{ backgroundColor: "#1e3a5f" }}
+                  >
+                    Tasdiqlangan PDF
+                  </Button>
+                )}
+              </Stack>
+            </Stack>
           </Paper>
 
           {/* Creator */}
@@ -491,25 +556,73 @@ const WorkflowDetailView = memo(({ workflow }: WorkflowDetailViewProps) => {
             </Paper>
           )}
 
-          {/* Dates */}
-          <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
-            <Group gap="xs" mb="sm">
-              <IconClock size={16} color="#1e3a5f" />
-              <Text size="sm" fw={600} c="#212529">Sanalar</Text>
+          {/* Progress & Stats */}
+          <Paper p="lg" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+            <Group gap="xs" mb="md">
+              <IconClock size={18} color="#1e3a5f" />
+              <Text size="md" fw={600} c="#212529">Ish jarayoni</Text>
             </Group>
 
-            <Stack gap="xs">
+            <Stack gap="md">
               <Box>
-                <Text size="xs" c="dimmed">Yaratilgan</Text>
+                <Group justify="space-between" mb={6}>
+                  <Text size="xs" c="dimmed">Jarayon</Text>
+                  <Text size="xs" fw={600} c="#1e3a5f">
+                    {completedSteps}/{totalSteps}
+                  </Text>
+                </Group>
+                <Progress
+                  value={progress}
+                  size="md"
+                  radius="xl"
+                  color="dark"
+                  striped={workflow.status === "ACTIVE"}
+                  animated={workflow.status === "ACTIVE"}
+                />
+                <Text size="xs" c="dimmed" mt={4}>
+                  {Math.round(progress)}% bajarildi
+                </Text>
+              </Box>
+
+              <Divider />
+
+              <Box>
+                <Text size="xs" c="dimmed" mb={4}>Yaratilgan</Text>
                 <Text size="sm" c="#495057">{formatDateTime(workflow.createdAt)}</Text>
               </Box>
 
+              {workflow.updatedAt && workflow.updatedAt !== workflow.createdAt && (
+                <Box>
+                  <Text size="xs" c="dimmed" mb={4}>Yangilangan</Text>
+                  <Text size="sm" c="#495057">{formatDateTime(workflow.updatedAt)}</Text>
+                </Box>
+              )}
+
               {workflow.deadline && (
                 <Box>
-                  <Text size="xs" c="dimmed">Muddat (Deadline)</Text>
-                  <Text size="sm" c={new Date(workflow.deadline) < new Date() && workflow.status !== 'COMPLETED' ? "red" : "#495057"} fw={500}>
+                  <Text size="xs" c="dimmed" mb={4}>Muddat</Text>
+                  <Text
+                    size="sm"
+                    c={new Date(workflow.deadline) < new Date() && workflow.status !== 'COMPLETED' ? "red" : "#495057"}
+                    fw={500}
+                  >
                     {formatDateTime(workflow.deadline)}
                   </Text>
+                  {new Date(workflow.deadline) < new Date() && workflow.status !== 'COMPLETED' && (
+                    <Text size="xs" c="red" mt={4}>
+                      ⚠️ Muddat o'tgan
+                    </Text>
+                  )}
+                </Box>
+              )}
+
+              {workflow.type && (
+                <Box>
+                  <Text size="xs" c="dimmed" mb={4}>Turi</Text>
+                  <Badge variant="outline" color="dark" size="sm">
+                    {workflow.type === "CONSECUTIVE" ? "Ketma-ket" :
+                      workflow.type === "PARALLEL" ? "Parallel" : workflow.type}
+                  </Badge>
                 </Box>
               )}
             </Stack>

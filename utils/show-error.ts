@@ -87,6 +87,7 @@ const ERROR_MESSAGES: Record<string, string> = {
   // Department
   "This user is already assigned as a director of another department": "Bu foydalanuvchi boshqa bo'limda direktor",
   "Department code must be unique": "Bu kod allaqachon mavjud",
+  "description must be shorter than or equal to 1000 characters": "Tavfsif uzunligi 1000 ta belgidan oshmasligi kerak",
 
   // Workflow Template
   "Workflow template not found": "Aylanma shabloni topilmadi",

@@ -75,9 +75,21 @@ export type DocumentInfo = {
   id: string;
   title: string;
   description: string;
-  pdfUrl: string
+  pdfUrl: string;
   documentNumber: string;
   version: number;
+  status?: string;
+  priority?: string;
+  documentType?: {
+    id: string;
+    name: string;
+    description?: string;
+  };
+  createdBy?: {
+    id: string;
+    fullname: string;
+    username: string;
+  };
 };
 
 export type AssignedUser = {
@@ -136,6 +148,7 @@ export type WorkflowStepFormData = {
   id?: string;
   assignedToUserId: string;
   actionType: WorkflowActionType;
+  dueDate?: string;
 };
 
 export type WorkflowStepUpdateType = {
@@ -262,6 +275,32 @@ export function isUserEligibleForRollback(
   // Проверяем, есть ли у пользователя шаги до текущего
   return userSteps.some((step) => step.order < currentStep.order);
 }
+
+// ============================================
+// CALENDAR VIEW
+// ============================================
+
+export type CalendarViewParams = {
+  startDate?: string;
+  endDate?: string;
+  status?: WorkflowStepStatus;
+};
+
+export type CalendarDayData = {
+  date: string;
+  workflowSteps: WorkflowStepApiResponse[];
+  count: number;
+};
+
+export type CalendarViewResponse = {
+  data: CalendarDayData[];
+  totalCount: number;
+  daysWithSteps: number;
+};
+
+// ============================================
+// MY TASKS
+// ============================================
 
 // Список задач пользователя (workflow steps)
 export interface MyTasksResponse extends DataPagination {

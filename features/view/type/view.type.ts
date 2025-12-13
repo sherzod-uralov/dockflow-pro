@@ -8,6 +8,7 @@ export interface DocumentTypeInfo {
 export interface CreatedByInfo {
   id: string;
   fullname: string;
+  username: string;
 }
 
 export interface WorkflowStepActionInfo {
@@ -46,7 +47,7 @@ export interface WorkflowInfo {
   status: WorkflowStatus;
   currentStepOrder: number;
   workflowType: string;
-  workflowSteps: WorkflowStepInfo[];
+  steps: WorkflowStepInfo[];
   createdAt: string;
   updatedAt: string;
 }

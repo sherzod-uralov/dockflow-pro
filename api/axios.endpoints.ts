@@ -25,6 +25,7 @@ export const endpoints = {
     detail: (id: string | number) => `/workflow-step/${id}`,
     complete: (id: string | number) => `/workflow-step/${id}/complete`,
     reject: (id: string | number) => `/workflow-step/${id}/reject`,
+    calendarView: "/workflow-step/calendar/view",
   },
 
   documentTemplate: {
@@ -41,6 +42,7 @@ export const endpoints = {
     update: (id: string | number) => `/document/${id}`,
     delete: (id: string | number) => `/document/${id}`,
     savePdfAnnotations: (id: string | number) => `/document/${id}/pdf-url`,
+    download: (id: string | number) => `/document/${id}/download`,
   },
   deportament: {
     list: "/department",

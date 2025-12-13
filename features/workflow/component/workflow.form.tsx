@@ -37,6 +37,7 @@ import {
   WorkflowActionType,
   WorkflowType,
   WorkflowStepUpdateType,
+  WorkflowStatus,
 } from "@/features/workflow/type/workflow.type";
 import { useGetUserQuery } from "@/features/admin/admin-users/hook/user.hook";
 import { useGetAllDocuments } from "@/features/document";
@@ -58,7 +59,9 @@ const WorkflowForm = ({
   const createWorkflowMutation = useCreateWorkflow();
   const updateStepMutation = useUpdateWorkflowStep();
   const { data: usersData, isLoading: isLoadingUsers } = useGetUserQuery();
-  const { data: documentsData } = useGetAllDocuments();
+  const { data: documentsData } = useGetAllDocuments({
+    status: WorkflowStatus.DRAFT
+  });
   const [searchQueries, setSearchQueries] = useState<{ [key: number]: string }>(
     {}
   );
@@ -141,6 +144,7 @@ const WorkflowForm = ({
           order: index + 1,
           actionType: step.actionType as WorkflowActionType,
           assignedToUserId: step.assignedToUserId,
+          dueDate: step.dueDate || null,
         };
 
         return updateStepMutation.mutateAsync(
@@ -479,6 +483,34 @@ const WorkflowForm = ({
                           form.formState.errors.steps?.[index]?.actionType
                             ?.message
                         }
+                        styles={{
+                          input: {
+                            backgroundColor: "#f8f9fa",
+                            border: "1px solid #e9ecef",
+                            "&:focus": {
+                              borderColor: "#1e3a5f",
+                            },
+                          },
+                          label: {
+                            color: "#495057",
+                            fontWeight: 500,
+                            marginBottom: 4,
+                          },
+                        }}
+                      />
+
+                      <DateTimePicker
+                        label="Muddat"
+                        placeholder="Sanani tanlang"
+                        value={form.watch(`steps.${index}.dueDate`) ? new Date(form.watch(`steps.${index}.dueDate`)!) : null}
+                        onChange={(date) => form.setValue(
+                          `steps.${index}.dueDate`,
+                          date ? new Date(date).toISOString() : undefined
+                        )}
+                        minDate={new Date()}
+                        size="sm"
+                        radius="sm"
+                        clearable
                         styles={{
                           input: {
                             backgroundColor: "#f8f9fa",

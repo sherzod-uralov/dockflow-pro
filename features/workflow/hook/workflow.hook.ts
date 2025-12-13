@@ -206,3 +206,22 @@ export const useEnrichedRollbackUsers = (
     hasError,
   };
 };
+
+export const useDownloadDocument = () => {
+  return useMutation({
+    mutationFn: ({ documentId, filename }: { documentId: string; filename?: string }) =>
+      workflowService.downloadDocument(documentId, filename),
+    onSuccess: () => {
+      showSuccess("Hujjat yuklab olindi");
+    },
+    onError: showError,
+  });
+};
+
+export const useWorkflowCalendar = (params?: { startDate?: string; endDate?: string; status?: string }) => {
+  return useQuery({
+    queryKey: ['workflow-calendar', params],
+    queryFn: () => workflowService.getCalendarView(params),
+    enabled: !!params?.startDate && !!params?.endDate,
+  });
+};

@@ -15,6 +15,7 @@ import {
   Stack,
   Center,
   Avatar,
+  Tabs,
 } from "@mantine/core";
 import {
   IconPlus,
@@ -26,6 +27,8 @@ import {
   IconBuilding,
   IconCopy,
   IconUsers,
+  IconTable,
+  IconHierarchy,
 } from "@tabler/icons-react";
 import {
   CustomModal,
@@ -35,11 +38,13 @@ import {
 import {
   useGetAllDeportaments,
   useDeleteDeportament,
+  useUpdateDepartmentParent,
 } from "../hook/deportament.hook";
 import { DepartmentResponse } from "../type/deportament.type";
 import { useDebounce } from "@/hooks/use-debaunce";
 import DeportamentFormModal from "../component/deportament.form";
 import DeportamentView from "../component/deportament.view";
+import DepartmentGraphView from "../component/deportament-graph.view";
 import { handleCopyToClipboard } from "@/utils/copy-text";
 import { DataTable, DataTableColumn } from "@/components/shared/ui/custom-table";
 
@@ -58,6 +63,7 @@ const DeportamentPage = () => {
   const [searchQuery, debouncedSearch, setSearchQuery] = useDebounce("", 500);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [activeTab, setActiveTab] = useState<string | null>("table");
 
   // Query
   const { data, isLoading } = useGetAllDeportaments({
@@ -67,6 +73,7 @@ const DeportamentPage = () => {
   });
 
   const deleteMutation = useDeleteDeportament();
+  const updateParentMutation = useUpdateDepartmentParent();
 
   // URL param uchun
   useEffect(() => {
@@ -121,6 +128,15 @@ const DeportamentPage = () => {
   const handleEditClose = () => {
     editModal.closeModal();
     setSelectedDeportament(null);
+  };
+
+  const handleConnectDepartments = (targetId: string, parentId: string) => {
+    console.log("handleConnectDepartments called from deportament.page.tsx", { targetId, parentId });
+    updateParentMutation.mutate({ id: targetId, parentId });
+  };
+
+  const handleDisconnectDepartment = (id: string) => {
+    updateParentMutation.mutate({ id, parentId: null });
   };
 
   const getInitials = (name: string) => {
@@ -317,27 +333,52 @@ const DeportamentPage = () => {
         />
       </Paper>
 
-      {/* Table */}
-      {!isLoading && data?.data?.length === 0 ? (
-        <Paper radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
-          <EmptyState />
-        </Paper>
-      ) : (
-        <DataTable
-          columns={columns}
-          data={data?.data || []}
-          loading={isLoading}
-          totalCount={data?.count || 0}
-          currentPage={page}
-          pageSize={pageSize}
-          onPageChange={setPage}
-          onPageSizeChange={(size) => {
-            setPageSize(size);
-            setPage(1);
-          }}
-          emptyMessage="Bo'lim topilmadi"
-        />
-      )}
+      {/* Tabs */}
+      <Tabs value={activeTab} onChange={setActiveTab} radius="sm">
+        <Tabs.List mb="md">
+          <Tabs.Tab value="table" leftSection={<IconTable size={18} />}>
+            Jadval
+          </Tabs.Tab>
+          <Tabs.Tab value="graph" leftSection={<IconHierarchy size={18} />}>
+            Ierarxiya
+          </Tabs.Tab>
+        </Tabs.List>
+
+        <Tabs.Panel value="table">
+          {!isLoading && data?.data?.length === 0 ? (
+            <Paper radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+              <EmptyState />
+            </Paper>
+          ) : (
+            <DataTable
+              columns={columns}
+              data={data?.data || []}
+              loading={isLoading}
+              totalCount={data?.count || 0}
+              currentPage={page}
+              pageSize={pageSize}
+              onPageChange={setPage}
+              onPageSizeChange={(size) => {
+                setPageSize(size);
+                setPage(1);
+              }}
+              emptyMessage="Bo'lim topilmadi"
+            />
+          )}
+        </Tabs.Panel>
+
+        <Tabs.Panel value="graph">
+          <DepartmentGraphView
+            departments={data?.data || []}
+            onEdit={handleEdit}
+            onDelete={handleDeleteClick}
+            onView={handleView}
+            onConnectDepartments={handleConnectDepartments}
+            onDisconnectDepartment={handleDisconnectDepartment}
+            onViewUsers={(dept) => router.push(`/dashboard/department/${dept.id}`)}
+          />
+        </Tabs.Panel>
+      </Tabs>
 
       {/* Create Modal */}
       <CustomModal

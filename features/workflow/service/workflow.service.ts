@@ -92,4 +92,29 @@ export const workflowService = {
     });
     return data;
   },
+
+  downloadDocument: async (documentId: string, filename?: string) => {
+    const response = await axiosInstance.get(endpoints.document.download(documentId), {
+      responseType: 'blob',
+    });
+
+    // Create blob link to download
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', filename || `document-${documentId}.pdf`);
+    document.body.appendChild(link);
+    link.click();
+    link.parentNode?.removeChild(link);
+    window.URL.revokeObjectURL(url);
+
+    return response.data;
+  },
+
+  getCalendarView: async (params?: { startDate?: string; endDate?: string; status?: string }) => {
+    const { data } = await axiosInstance.get(endpoints.workflowStep.calendarView, {
+      params,
+    });
+    return data;
+  },
 };
