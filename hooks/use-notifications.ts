@@ -91,14 +91,10 @@ export const useNotifications = (): UseNotificationsReturn => {
             setNotificationsList(data.notifications);
             setUnreadCount(data.count);
         });
-
-        // Active workflows count (connection paytida va o'zgarishlarda keladi)
         newSocket.on('active-workflows-count', (data: { count: number }) => {
             console.log(`📊 Active workflows count: ${data.count}`);
             setActiveWorkflowsCount(data.count);
         });
-
-        // Debug: barcha eventlarni tinglash
         newSocket.onAny((eventName, ...args) => {
             console.log(`🎯 Event received: ${eventName}`, args);
         });

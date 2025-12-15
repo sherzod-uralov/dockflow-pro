@@ -40,49 +40,58 @@ axiosInstance.interceptors.request.use(
 );
 
 axiosInstance.interceptors.response.use(
-  (response) => response,
-  async (error: AxiosError) => {
-    const originalRequest = error.config as InternalAxiosRequestConfig & {
-      _retry?: boolean;
-    };
+    (response) => response,
+    async (error: AxiosError) => {
+        const originalRequest = error.config as InternalAxiosRequestConfig & {
+            _retry?: boolean;
+        };
 
-    // Agar 401 yoki 403 xatosi va token yangilanishi kerak bo'lsa
-    if ((error.response?.status === 401 || error.response?.status === 403) && !originalRequest._retry && !originalRequest.url?.includes('/auth/refresh-token')) {
-      if (isRefreshing) {
-        return new Promise((resolve, reject) => {
-          failedQueue.push({ resolve, reject });
-        })
-          .then((token) => {
-            originalRequest.headers.Authorization = `Bearer ${token}`;
-            return axiosInstance(originalRequest);
-          })
-          .catch((err) => {
-            return Promise.reject(err);
-          });
-      }
+        const status = error.response?.status;
 
-      originalRequest._retry = true;
-      isRefreshing = true;
+        const isAuthRoute = [
+            "/auth/login",
+            "/auth/register",
+            "/auth/refresh-token",
+        ].some(route => originalRequest.url?.includes(route));
 
-      try {
-        const newAccessToken = await authService.refreshToken();
+        // ❗ Login / register xatolarida logout QILINMAYDI
+        if (isAuthRoute) {
+            return Promise.reject(error);
+        }
 
-        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+        if ((status === 401 || status === 403) && !originalRequest._retry) {
+            if (isRefreshing) {
+                return new Promise((resolve, reject) => {
+                    failedQueue.push({ resolve, reject });
+                }).then((token) => {
+                    originalRequest.headers.Authorization = `Bearer ${token}`;
+                    return axiosInstance(originalRequest);
+                });
+            }
 
-        processQueue(null, newAccessToken);
+            originalRequest._retry = true;
+            isRefreshing = true;
 
-        return axiosInstance(originalRequest);
-      } catch (refreshError) {
-        processQueue(refreshError, null);
-        authService.logout();
-        return Promise.reject(refreshError);
-      } finally {
-        isRefreshing = false;
-      }
+            try {
+                const newAccessToken = await authService.refreshToken();
+
+                originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+                processQueue(null, newAccessToken);
+
+                return axiosInstance(originalRequest);
+            } catch (refreshError) {
+                processQueue(refreshError, null);
+                authService.logout();
+
+                return Promise.reject(refreshError);
+            } finally {
+                isRefreshing = false;
+            }
+        }
+
+        return Promise.reject(error);
     }
-
-    return Promise.reject(error);
-  },
 );
+
 
 export default axiosInstance;

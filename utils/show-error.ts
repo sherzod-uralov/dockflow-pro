@@ -107,9 +107,10 @@ export function showError(error: any) {
   const status = error?.response?.status || error?.status || 500;
   const message = typeof error === "string" ? error : (error?.response?.data?.message || error?.message || "");
 
-  console.log(message, error, "hatolik");
+  console.log(message)
   let uzbekMessage = ERROR_MESSAGES[message];
 
+  console.log(uzbekMessage)
   if (!uzbekMessage) {
     for (const [key, value] of Object.entries(ERROR_MESSAGES)) {
       if (message.toLowerCase().includes(key.toLowerCase())) {

@@ -33,7 +33,7 @@ import {
     IconInfoCircle,
 } from "@tabler/icons-react";
 import { useWorkflowCalendar } from "../hook/workflow.hook";
-import { WorkflowStepApiResponse, CalendarDayData } from "../type/workflow.type";
+import { WorkflowStepApiResponse, CalendarDayData, WorkflowStepWithWorkflow } from "../type/workflow.type";
 import { formatDateTime } from "@/lib/date-utils";
 import { useRouter } from "next/navigation";
 
@@ -72,16 +72,21 @@ export default function WorkflowCalendarPage() {
         new Date(new Date().getFullYear(), new Date().getMonth(), 1),
         new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0),
     ]);
-    const [selectedStep, setSelectedStep] = useState<WorkflowStepApiResponse | null>(null);
+    const [selectedStep, setSelectedStep] = useState<WorkflowStepWithWorkflow | null>(null);
     const [modalOpen, setModalOpen] = useState(false);
 
     const params = useMemo(() => {
         const [start, end] = dateRange;
         if (!start || !end) return undefined;
 
+        const safeStart = start instanceof Date ? start : new Date(start);
+        const safeEnd = end instanceof Date ? end : new Date(end);
+
+        if (isNaN(safeStart.getTime()) || isNaN(safeEnd.getTime())) return undefined;
+
         return {
-            startDate: start.toISOString().split("T")[0],
-            endDate: end.toISOString().split("T")[0],
+            startDate: safeStart.toISOString().split("T")[0],
+            endDate: safeEnd.toISOString().split("T")[0],
             status: statusFilter || undefined,
         };
     }, [dateRange, statusFilter]);
@@ -92,7 +97,7 @@ export default function WorkflowCalendarPage() {
         if (!data?.data) return [];
 
         return data.data.flatMap((dayData: CalendarDayData) =>
-            dayData.workflowSteps.map((step: WorkflowStepApiResponse) => ({
+            dayData.workflowSteps.map((step: WorkflowStepWithWorkflow) => ({
                 id: step.id,
                 title: `${ACTION_LABELS[step.actionType] || step.actionType}`,
                 start: dayData.date,
@@ -107,7 +112,7 @@ export default function WorkflowCalendarPage() {
     }, [data]);
 
     const handleEventClick = useCallback((info: any) => {
-        const step = info.event.extendedProps.step as WorkflowStepApiResponse;
+        const step = info.event.extendedProps.step as WorkflowStepWithWorkflow;
         setSelectedStep(step);
         setModalOpen(true);
     }, []);
@@ -131,12 +136,12 @@ export default function WorkflowCalendarPage() {
         }
     }, [selectedStep, router]);
 
-    const handleDateRangeChange = useCallback((value: [Date | null, Date | null]) => {
+    const handleDateRangeChange = useCallback((value: any) => {
         setDateRange(value);
     }, []);
 
     return (
-        <Box p="md">
+        <Box>
             <Stack gap="md">
                 <Paper p="lg" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
                     <Group justify="space-between" mb="md">
@@ -175,10 +180,6 @@ export default function WorkflowCalendarPage() {
                                     { label: "Ro'yxat", value: "listMonth" },
                                 ]}
                                 size="sm"
-                                styles={{
-                                    root: { backgroundColor: "#f8f9fa" },
-                                    label: { padding: "8px 16px" },
-                                }}
                             />
                         </Group>
 
@@ -224,26 +225,7 @@ export default function WorkflowCalendarPage() {
                             </Stack>
                         </Center>
                     ) : (
-                        <Box
-                            style={{
-                                "& .fc": { fontFamily: "var(--mantine-font-family)" },
-                                "& .fc-button": {
-                                    backgroundColor: "#1e3a5f",
-                                    border: "none",
-                                    color: "white",
-                                    padding: "6px 12px",
-                                    fontSize: "14px",
-                                },
-                                "& .fc-button:hover": { backgroundColor: "#2c5282" },
-                                "& .fc-button-active": { backgroundColor: "#2c5282 !important" },
-                                "& .fc-daygrid-day-number": { color: "#495057", fontSize: "14px", padding: "4px" },
-                                "& .fc-col-header-cell": { backgroundColor: "#f8f9fa", padding: "12px 8px", fontWeight: 600, color: "#212529" },
-                                "& .fc-event": { cursor: "pointer", borderRadius: "4px", padding: "2px 4px", marginBottom: "2px" },
-                                "& .fc-event:hover": { opacity: 0.85 },
-                                "& .fc-toolbar-title": { fontSize: "18px", fontWeight: 600, color: "#212529" },
-                                "& .fc-list-event:hover td": { backgroundColor: "#f8f9fa" },
-                            }}
-                        >
+                        <Box>
                             <FullCalendar
                                 ref={calendarRef}
                                 plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}

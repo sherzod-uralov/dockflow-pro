@@ -39,7 +39,8 @@ export const LoginForm = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setLoginError(null); // Clear previous errors
+        e.stopPropagation
+        setLoginError(null);
 
         const validation = form.validate();
         if (validation.hasErrors) {
@@ -51,17 +52,6 @@ export const LoginForm = () => {
                 Cookie.set("accessToken", data.accessToken);
                 Cookie.set("refreshToken", data.refreshToken);
                 router.push("/dashboard");
-            },
-            onError: (error: any) => {
-                // Set error message to display
-                const errorMessage = error?.response?.data?.message ||
-                    error?.message ||
-                    "Login yoki parol noto'g'ri";
-                setLoginError(errorMessage);
-
-                // Don't reset form - keep user's input so they can correct it
-                // Optional: Only clear password field for security
-                form.setFieldValue("password", "");
             },
         });
     };

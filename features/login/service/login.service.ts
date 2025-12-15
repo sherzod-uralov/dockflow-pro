@@ -94,10 +94,6 @@ export const authService = {
 
       return response.data;
     } catch (error: any) {
-      // Don't clear tokens on login failure - there are no tokens to clear yet
-      if (error.response?.status === 401) {
-        throw new Error("Login yoki parol noto'g'ri");
-      }
       throw error;
     }
   },

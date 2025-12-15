@@ -2,7 +2,7 @@
 @import "tw-animate-css";
 
 
-body{
+body {
     overflow-y: auto;
 }
 
@@ -435,13 +435,13 @@ body{
     /* Shadows */
     --shadow-sm: 0 1px 2px 0 oklch(0.145 0 0 / 0.05);
     --shadow-md:
-            0 4px 6px -1px oklch(0.145 0 0 / 0.1), 0 2px 4px -2px oklch(0.145 0 0 / 0.1);
+        0 4px 6px -1px oklch(0.145 0 0 / 0.1), 0 2px 4px -2px oklch(0.145 0 0 / 0.1);
     --shadow-lg:
-            0 10px 15px -3px oklch(0.145 0 0 / 0.1),
-            0 4px 6px -4px oklch(0.145 0 0 / 0.1);
+        0 10px 15px -3px oklch(0.145 0 0 / 0.1),
+        0 4px 6px -4px oklch(0.145 0 0 / 0.1);
     --shadow-xl:
-            0 20px 25px -5px oklch(0.145 0 0 / 0.1),
-            0 8px 10px -6px oklch(0.145 0 0 / 0.1);
+        0 20px 25px -5px oklch(0.145 0 0 / 0.1),
+        0 8px 10px -6px oklch(0.145 0 0 / 0.1);
 
     --radius: 0.75rem;
 
@@ -554,11 +554,11 @@ body{
     /* Shadows */
     --shadow-sm: 0 1px 2px 0 oklch(0 0 0 / 0.15);
     --shadow-md:
-            0 4px 6px -1px oklch(0 0 0 / 0.2), 0 2px 4px -2px oklch(0 0 0 / 0.15);
+        0 4px 6px -1px oklch(0 0 0 / 0.2), 0 2px 4px -2px oklch(0 0 0 / 0.15);
     --shadow-lg:
-            0 10px 15px -3px oklch(0 0 0 / 0.2), 0 4px 6px -4px oklch(0 0 0 / 0.15);
+        0 10px 15px -3px oklch(0 0 0 / 0.2), 0 4px 6px -4px oklch(0 0 0 / 0.15);
     --shadow-xl:
-            0 20px 25px -5px oklch(0 0 0 / 0.2), 0 8px 10px -6px oklch(0 0 0 / 0.15);
+        0 20px 25px -5px oklch(0 0 0 / 0.2), 0 8px 10px -6px oklch(0 0 0 / 0.15);
 
     /* Sidebar */
     --sidebar: oklch(0.145 0 0);
@@ -795,8 +795,8 @@ body{
     body {
         @apply bg-background text-foreground;
         font-feature-settings:
-                "rlig" 1,
-                "calt" 1;
+            "rlig" 1,
+            "calt" 1;
     }
 
     h1,
@@ -811,18 +811,23 @@ body{
     h1 {
         @apply text-4xl;
     }
+
     h2 {
         @apply text-3xl;
     }
+
     h3 {
         @apply text-2xl;
     }
+
     h4 {
         @apply text-xl;
     }
+
     h5 {
         @apply text-lg;
     }
+
     h6 {
         @apply text-base;
     }
@@ -830,16 +835,20 @@ body{
 
 /* Utility classes for new colors */
 @layer utilities {
+
     /* Status colors */
     .text-success {
         color: var(--success);
     }
+
     .text-warning {
         color: var(--warning);
     }
+
     .text-error {
         color: var(--error);
     }
+
     .text-info {
         color: var(--info);
     }
@@ -847,12 +856,15 @@ body{
     .bg-success {
         background-color: var(--success);
     }
+
     .bg-warning {
         background-color: var(--warning);
     }
+
     .bg-error {
         background-color: var(--error);
     }
+
     .bg-info {
         background-color: var(--info);
     }
@@ -860,12 +872,15 @@ body{
     .border-success {
         border-color: var(--success);
     }
+
     .border-warning {
         border-color: var(--warning);
     }
+
     .border-error {
         border-color: var(--error);
     }
+
     .border-info {
         border-color: var(--info);
     }
@@ -874,18 +889,23 @@ body{
     .bg-surface-primary {
         background-color: var(--surface-primary);
     }
+
     .bg-surface-secondary {
         background-color: var(--surface-secondary);
     }
+
     .bg-surface-success {
         background-color: var(--surface-success);
     }
+
     .bg-surface-warning {
         background-color: var(--surface-warning);
     }
+
     .bg-surface-error {
         background-color: var(--surface-error);
     }
+
     .bg-surface-info {
         background-color: var(--surface-info);
     }
@@ -894,18 +914,23 @@ body{
     .hover\:bg-primary-hover:hover {
         background-color: var(--primary-hover);
     }
+
     .hover\:bg-secondary-hover:hover {
         background-color: var(--secondary-hover);
     }
+
     .hover\:bg-success-hover:hover {
         background-color: var(--success-hover);
     }
+
     .hover\:bg-warning-hover:hover {
         background-color: var(--warning-hover);
     }
+
     .hover\:bg-error-hover:hover {
         background-color: var(--error-hover);
     }
+
     .hover\:bg-info-hover:hover {
         background-color: var(--info-hover);
     }
@@ -914,24 +939,31 @@ body{
     .text-on-primary {
         color: var(--text-on-primary);
     }
+
     .text-on-secondary {
         color: var(--text-on-secondary);
     }
+
     .text-on-success {
         color: var(--text-on-success);
     }
+
     .text-on-warning {
         color: var(--text-on-warning);
     }
+
     .text-on-error {
         color: var(--text-on-error);
     }
+
     .text-on-info {
         color: var(--text-on-info);
     }
+
     .text-on-dark {
         color: var(--text-on-dark);
     }
+
     .text-on-light {
         color: var(--text-on-light);
     }
@@ -940,12 +972,15 @@ body{
     .shadow-custom-sm {
         box-shadow: var(--shadow-sm);
     }
+
     .shadow-custom-md {
         box-shadow: var(--shadow-md);
     }
+
     .shadow-custom-lg {
         box-shadow: var(--shadow-lg);
     }
+
     .shadow-custom-xl {
         box-shadow: var(--shadow-xl);
     }
@@ -956,15 +991,17 @@ body{
     transform: translateY(10px) scale(0.97);
     filter: blur(6px);
 }
+
 .fade-row-enter-active {
     opacity: 1;
     transform: translateY(0) scale(1);
     filter: blur(0);
     transition:
-            opacity 400ms cubic-bezier(0.16, 1, 0.3, 1),
-            transform 400ms cubic-bezier(0.16, 1, 0.3, 1),
-            filter 400ms ease;
+        opacity 400ms cubic-bezier(0.16, 1, 0.3, 1),
+        transform 400ms cubic-bezier(0.16, 1, 0.3, 1),
+        filter 400ms ease;
 }
+
 .fade-row-enter-done {
     opacity: 1;
     transform: none;
@@ -976,15 +1013,17 @@ body{
     transform: none;
     filter: none;
 }
+
 .fade-row-exit-active {
     opacity: 0;
     transform: translateY(-20px) scale(0.9) rotateZ(-4deg);
     filter: blur(8px) brightness(1.3);
     transition:
-            opacity 500ms cubic-bezier(0.77, 0, 0.175, 1),
-            transform 500ms cubic-bezier(0.77, 0, 0.175, 1),
-            filter 500ms ease;
+        opacity 500ms cubic-bezier(0.77, 0, 0.175, 1),
+        transform 500ms cubic-bezier(0.77, 0, 0.175, 1),
+        filter 500ms ease;
 }
+
 .fade-row-exit-done {
     opacity: 0;
     transform: translateY(-20px) scale(0.9);
@@ -1000,15 +1039,18 @@ body{
     opacity: 0;
     transform: scale(0.95) translateY(10px);
 }
+
 .fade-row-empty-enter-active {
     opacity: 1;
     transform: scale(1) translateY(0);
     transition: all 300ms ease;
 }
+
 .fade-row-empty-exit {
     opacity: 1;
     transform: scale(1);
 }
+
 .fade-row-empty-exit-active {
     opacity: 0;
     transform: scale(0.9) translateY(-10px);
@@ -1018,8 +1060,8 @@ body{
 .table-body-wrapper {
     overflow: hidden;
     transition:
-            max-height 400ms ease,
-            opacity 300ms ease;
+        max-height 400ms ease,
+        opacity 300ms ease;
 }
 
 .table-body-wrapper.entering,
@@ -1052,13 +1094,68 @@ label.required::after {
 }
 
 
-form{
+form {
     padding-left: 4px;
-    padding-right:4px;
+    padding-right: 4px;
 }
 
 
 [data-element="watermark"],
 .watermark-layer {
     display: none !important;
+}
+
+/* FullCalendar Overrides */
+.fc {
+    font-family: var(--mantine-font-family);
+}
+
+.fc .fc-button {
+    background-color: #1e3a5f;
+    border: none;
+    color: white;
+    padding: 6px 12px;
+    font-size: 14px;
+}
+
+.fc .fc-button:hover {
+    background-color: #2c5282;
+}
+
+.fc .fc-button-active {
+    background-color: #2c5282 !important;
+}
+
+.fc .fc-daygrid-day-number {
+    color: #495057;
+    font-size: 14px;
+    padding: 4px;
+}
+
+.fc .fc-col-header-cell {
+    background-color: #f8f9fa;
+    padding: 12px 8px;
+    font-weight: 600;
+    color: #212529;
+}
+
+.fc .fc-event {
+    cursor: pointer;
+    border-radius: 4px;
+    padding: 2px 4px;
+    margin-bottom: 2px;
+}
+
+.fc .fc-event:hover {
+    opacity: 0.85;
+}
+
+.fc .fc-toolbar-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #212529;
+}
+
+.fc .fc-list-event:hover td {
+    background-color: #f8f9fa;
 }

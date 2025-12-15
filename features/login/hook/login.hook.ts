@@ -11,8 +11,8 @@ export const useLoginMutation = () => {
     onSuccess: () => {
       showSuccess("Muvaffaqiyatli kirdingiz");
     },
-    onError: () => {
-      showError("Login yoki parol noto'g'ri");
+    onError: (error) => {
+      showError(error);
     },
   });
 };

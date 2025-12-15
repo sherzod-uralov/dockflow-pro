@@ -286,9 +286,16 @@ export type CalendarViewParams = {
   status?: WorkflowStepStatus;
 };
 
+export type WorkflowStepWithWorkflow = WorkflowStepApiResponse & {
+  workflow?: {
+    id: string;
+    document: DocumentInfo;
+  };
+};
+
 export type CalendarDayData = {
   date: string;
-  workflowSteps: WorkflowStepApiResponse[];
+  workflowSteps: WorkflowStepWithWorkflow[];
   count: number;
 };
 
