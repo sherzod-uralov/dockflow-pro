@@ -110,3 +110,27 @@ export interface MarkAsReadResponse {
 export interface SocketErrorResponse {
     message: string;
 }
+
+// Online Users types
+export interface OnlineUser {
+    id: string;
+    fullname: string;
+    username: string;
+    avatarUrl?: string;
+    department?: {
+        id: string;
+        name: string;
+    };
+}
+
+export interface OnlineUsersListEvent {
+    users: OnlineUser[];
+    count: number;
+    timestamp: string;
+}
+
+export interface UserStatusEvent {
+    user: OnlineUser;
+    isOnline: boolean;
+    timestamp: string;
+}

@@ -19,7 +19,7 @@ export const workflowStepSchema = z.object({
     })
     .min(1, "Mas'ul shaxsni tanlang"),
 
-  actionType: z.enum(["APPROVAL", "REVIEW", "SIGN", "QR_CODE", "ACKNOWLEDGE"], {
+  actionType: z.enum(["APPROVAL", "REVIEW", "SIGN", "QR_CODE", "ACKNOWLEDGE", "VERIFICATION"], {
     required_error: "Amal turini tanlang",
     invalid_type_error: "Noto'g'ri amal turi",
   }),

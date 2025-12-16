@@ -66,7 +66,6 @@ import { formatDate } from "@/lib/date-utils";
 import { useGetAllDocuments } from "@/features/document";
 import { useOnboarding, TourButton } from "@/hooks/use-onboarding";
 
-// Status konfiguratsiyasi
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; icon: any }> = {
   ACTIVE: { label: "Faol", color: "#1971c2", bg: "#e7f5ff", icon: IconPlayerPlay },
   COMPLETED: { label: "Tugallangan", color: "#2b8a3e", bg: "#ebfbee", icon: IconCircleCheck },
@@ -75,13 +74,11 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; 
   DRAFT: { label: "Tayyorlanmoqda", color: "#868e96", bg: "#f8f9fa", icon: IconHourglass },
 };
 
-// Type options
 const TYPE_OPTIONS = [
   { value: "CONSECUTIVE", label: "Ketma-ket" },
   { value: "PARALLEL", label: "Parallel" },
 ];
 
-// Workflow item komponenti
 const WorkflowItem = memo(({
   workflow,
   onView,

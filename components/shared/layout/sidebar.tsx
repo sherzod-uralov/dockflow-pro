@@ -152,6 +152,244 @@ const menuItems: MenuItem[] = [
   },
 ];
 
+const SidebarBody = ({
+  showClose = false,
+  filteredMenuItems,
+  openMenu,
+  toggleMenu,
+  isActive,
+  handleItemClick,
+  handleLogout,
+  activeWorkflowsCount
+}: {
+  showClose?: boolean;
+  filteredMenuItems: MenuItem[];
+  openMenu: string | null;
+  toggleMenu: (label: string) => void;
+  isActive: (href?: string) => boolean;
+  handleItemClick: (href?: string) => void;
+  handleLogout: () => void;
+  activeWorkflowsCount: number;
+}) => (
+  <Box
+    h="100%"
+    style={{
+      display: "flex",
+      flexDirection: "column",
+      backgroundColor: "#1e3a5f",
+    }}
+  >
+    {/* Header */}
+    <Box
+      px="md"
+      py="sm"
+      style={{
+        borderBottom: "1px solid rgba(255,255,255,0.1)",
+      }}
+    >
+      <div className="flex flex-col gap-4">
+        <div className="relative">
+          <div className="absolute inset-0 bg-blue-500/20 blur-2xl rounded-full"></div>
+          <Image
+            alt="university logo"
+            width={120}
+            height={120}
+            src="/university_logo.svg"
+            className="relative z-10 drop-shadow-2xl"
+            priority
+          />
+        </div>
+      </div>
+    </Box>
+
+    {/* Navigation */}
+    <ScrollArea flex={1} px="xs" py="sm" scrollbarSize={4}>
+      {filteredMenuItems.map((item) => (
+        <Box key={item.label} mb={2}>
+          {item.subItems ? (
+            <>
+              <NavLink
+                label={
+                  <Group justify="space-between" wrap="nowrap">
+                    <Text size="sm" c="rgba(255,255,255,0.9)">
+                      {item.label}
+                    </Text>
+                    {item.label === "Hujjat aylanmasi" && activeWorkflowsCount > 0 && (
+                      <Badge
+                        size="xs"
+                        circle
+                        color="red"
+                        style={{ width: 18, height: 18, padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                      >
+                        {activeWorkflowsCount > 99 ? '99+' : activeWorkflowsCount}
+                      </Badge>
+                    )}
+                  </Group>
+                }
+                leftSection={
+                  <item.icon
+                    size={18}
+                    stroke={1.5}
+                    color="rgba(255,255,255,0.7)"
+                  />
+                }
+                rightSection={
+                  <IconChevronRight
+                    size={14}
+                    color="rgba(255,255,255,0.5)"
+                    style={{
+                      transform:
+                        openMenu === item.label
+                          ? "rotate(90deg)"
+                          : "rotate(0deg)",
+                      transition: "transform 150ms ease",
+                    }}
+                  />
+                }
+                onClick={() => toggleMenu(item.label)}
+                active={openMenu === item.label}
+                variant="subtle"
+                styles={{
+                  root: {
+                    borderRadius: 4,
+                    backgroundColor:
+                      openMenu === item.label
+                        ? "rgba(255,255,255,0.1)"
+                        : "transparent",
+                    "&:hover": {
+                      backgroundColor: "rgba(255,255,255,0.08)",
+                    },
+                  },
+                }}
+              />
+              <Collapse in={openMenu === item.label}>
+                <Box
+                  ml="md"
+                  mt={4}
+                  pl="xs"
+                  style={{
+                    borderLeft: "1px solid rgba(255,255,255,0.15)",
+                  }}
+                >
+                  {item.subItems.map((sub) => (
+                    <NavLink
+                      key={sub.href}
+                      label={
+                        <Group justify="space-between" wrap="nowrap">
+                          <Text
+                            size="sm"
+                            c={
+                              isActive(sub.href)
+                                ? "white"
+                                : "rgba(255,255,255,0.75)"
+                            }
+                          >
+                            {sub.label}
+                          </Text>
+                          {sub.label === "Jarayonlar" && activeWorkflowsCount > 0 && (
+                            <Badge
+                              size="xs"
+                              circle
+                              color="red"
+                              style={{ width: 18, height: 18, padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                            >
+                              {activeWorkflowsCount > 99 ? '99+' : activeWorkflowsCount}
+                            </Badge>
+                          )}
+                        </Group>
+                      }
+                      onClick={() => handleItemClick(sub.href)}
+                      active={isActive(sub.href)}
+                      variant="subtle"
+                      styles={{
+                        root: {
+                          borderRadius: 4,
+                          backgroundColor: isActive(sub.href)
+                            ? "rgba(255,255,255,0.15)"
+                            : "transparent",
+                          "&:hover": {
+                            backgroundColor: "rgba(255,255,255,0.08)",
+                          },
+                        },
+                      }}
+                    />
+                  ))}
+                </Box>
+              </Collapse>
+            </>
+          ) : (
+            <NavLink
+              label={
+                <Text
+                  size="sm"
+                  c={isActive(item.href) ? "white" : "rgba(255,255,255,0.9)"}
+                  fw={isActive(item.href) ? 500 : 400}
+                >
+                  {item.label}
+                </Text>
+              }
+              leftSection={
+                <item.icon
+                  size={18}
+                  stroke={1.5}
+                  color={
+                    isActive(item.href) ? "white" : "rgba(255,255,255,0.7)"
+                  }
+                />
+              }
+              onClick={() => handleItemClick(item.href)}
+              active={isActive(item.href)}
+              variant="subtle"
+              styles={{
+                root: {
+                  borderRadius: 4,
+                  backgroundColor: isActive(item.href)
+                    ? "rgba(255,255,255,0.15)"
+                    : "transparent",
+                  "&:hover": {
+                    backgroundColor: "rgba(255,255,255,0.08)",
+                  },
+                },
+              }}
+            />
+          )}
+        </Box>
+      ))}
+    </ScrollArea>
+
+    {/* Footer */}
+    <Box
+      px="xs"
+      py="sm"
+      style={{
+        borderTop: "1px solid rgba(255,255,255,0.1)",
+      }}
+    >
+      <NavLink
+        label={
+          <Text size="sm" c="rgba(255,255,255,0.9)">
+            Chiqish
+          </Text>
+        }
+        leftSection={
+          <IconLogout size={18} stroke={1.5} color="rgba(255,255,255,0.7)" />
+        }
+        onClick={handleLogout}
+        variant="filled"
+        styles={{
+          root: {
+            borderRadius: 4,
+            transition: "background-color 0.2s ease",
+          },
+          label: {
+            color: "rgba(255,255,255,0.9)",
+          },
+        }}
+      />
+    </Box>
+  </Box>
+);
+
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -211,245 +449,15 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
     return pathname.startsWith(href + "/");
   };
 
-  const SidebarBody = ({ showClose = false }: { showClose?: boolean }) => (
-    <Box
-      h="100%"
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        backgroundColor: "#1e3a5f",
-      }}
-    >
-      {/* Header */}
-      <Box
-        px="md"
-        py="sm"
-        style={{
-          borderBottom: "1px solid rgba(255,255,255,0.1)",
-        }}
-      >
-        <div className="flex flex-col  gap-4">
-          <div className="relative">
-            <div className="absolute inset-0 bg-blue-500/20 blur-2xl rounded-full"></div>
-            <Image
-              alt="university logo"
-              width={120}
-              height={120}
-              src="/university_logo.svg"
-              className="relative z-10 drop-shadow-2xl"
-            />
-          </div>
-        </div>
-
-        {/* Yuborish tugmasi */}
-        {/*<Button*/}
-        {/*  fullWidth*/}
-        {/*  mt="md"*/}
-        {/*  leftSection={<IconSend size={18} />}*/}
-        {/*  onClick={() => {*/}
-        {/*    router.push("/dashboard/send");*/}
-        {/*    onClose();*/}
-        {/*  }}*/}
-        {/*  styles={{*/}
-        {/*    root: {*/}
-        {/*      backgroundColor: "rgba(255,255,255,0.15)",*/}
-        {/*      border: "1px solid rgba(255,255,255,0.2)",*/}
-        {/*      "&:hover": {*/}
-        {/*        backgroundColor: "rgba(255,255,255,0.25)",*/}
-        {/*      },*/}
-        {/*    },*/}
-        {/*  }}*/}
-        {/*>*/}
-        {/*  Yuborish*/}
-        {/*</Button>*/}
-      </Box>
-
-      {/* Navigation */}
-      <ScrollArea flex={1} px="xs" py="sm" scrollbarSize={4}>
-        {filteredMenuItems.map((item) => (
-          <Box key={item.label} mb={2}>
-            {item.subItems ? (
-              <>
-                <NavLink
-                  label={
-                    <Group justify="space-between" wrap="nowrap">
-                      <Text size="sm" c="rgba(255,255,255,0.9)">
-                        {item.label}
-                      </Text>
-                      {item.label === "Hujjat aylanmasi" && activeWorkflowsCount > 0 && (
-                        <Badge
-                          size="xs"
-                          circle
-                          color="red"
-                          style={{ width: 18, height: 18, padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                        >
-                          {activeWorkflowsCount > 99 ? '99+' : activeWorkflowsCount}
-                        </Badge>
-                      )}
-                    </Group>
-                  }
-                  leftSection={
-                    <item.icon
-                      size={18}
-                      stroke={1.5}
-                      color="rgba(255,255,255,0.7)"
-                    />
-                  }
-                  rightSection={
-                    <IconChevronRight
-                      size={14}
-                      color="rgba(255,255,255,0.5)"
-                      style={{
-                        transform:
-                          openMenu === item.label
-                            ? "rotate(90deg)"
-                            : "rotate(0deg)",
-                        transition: "transform 150ms ease",
-                      }}
-                    />
-                  }
-                  onClick={() => toggleMenu(item.label)}
-                  active={openMenu === item.label}
-                  variant="subtle"
-                  styles={{
-                    root: {
-                      borderRadius: 4,
-                      backgroundColor:
-                        openMenu === item.label
-                          ? "rgba(255,255,255,0.1)"
-                          : "transparent",
-                      "&:hover": {
-                        backgroundColor: "rgba(255,255,255,0.08)",
-                      },
-                    },
-                  }}
-                />
-                <Collapse in={openMenu === item.label}>
-                  <Box
-                    ml="md"
-                    mt={4}
-                    pl="xs"
-                    style={{
-                      borderLeft: "1px solid rgba(255,255,255,0.15)",
-                    }}
-                  >
-                    {item.subItems.map((sub) => (
-                      <NavLink
-                        key={sub.href}
-                        label={
-                          <Group justify="space-between" wrap="nowrap">
-                            <Text
-                              size="sm"
-                              c={
-                                isActive(sub.href)
-                                  ? "white"
-                                  : "rgba(255,255,255,0.75)"
-                              }
-                            >
-                              {sub.label}
-                            </Text>
-                            {sub.label === "Jarayonlar" && activeWorkflowsCount > 0 && (
-                              <Badge
-                                size="xs"
-                                circle
-                                color="red"
-                                style={{ width: 18, height: 18, padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                              >
-                                {activeWorkflowsCount > 99 ? '99+' : activeWorkflowsCount}
-                              </Badge>
-                            )}
-                          </Group>
-                        }
-                        onClick={() => handleItemClick(sub.href)}
-                        active={isActive(sub.href)}
-                        variant="subtle"
-                        styles={{
-                          root: {
-                            borderRadius: 4,
-                            backgroundColor: isActive(sub.href)
-                              ? "rgba(255,255,255,0.15)"
-                              : "transparent",
-                            "&:hover": {
-                              backgroundColor: "rgba(255,255,255,0.08)",
-                            },
-                          },
-                        }}
-                      />
-                    ))}
-                  </Box>
-                </Collapse>
-              </>
-            ) : (
-              <NavLink
-                label={
-                  <Text
-                    size="sm"
-                    c={isActive(item.href) ? "white" : "rgba(255,255,255,0.9)"}
-                    fw={isActive(item.href) ? 500 : 400}
-                  >
-                    {item.label}
-                  </Text>
-                }
-                leftSection={
-                  <item.icon
-                    size={18}
-                    stroke={1.5}
-                    color={
-                      isActive(item.href) ? "white" : "rgba(255,255,255,0.7)"
-                    }
-                  />
-                }
-                onClick={() => handleItemClick(item.href)}
-                active={isActive(item.href)}
-                variant="subtle"
-                styles={{
-                  root: {
-                    borderRadius: 4,
-                    backgroundColor: isActive(item.href)
-                      ? "rgba(255,255,255,0.15)"
-                      : "transparent",
-                    "&:hover": {
-                      backgroundColor: "rgba(255,255,255,0.08)",
-                    },
-                  },
-                }}
-              />
-            )}
-          </Box>
-        ))}
-      </ScrollArea>
-
-      {/* Footer */}
-      <Box
-        px="xs"
-        py="sm"
-        style={{
-          borderTop: "1px solid rgba(255,255,255,0.1)",
-        }}
-      >
-        <NavLink
-          label={
-            <Text size="sm" c="rgba(255,255,255,0.9)">
-              Chiqish
-            </Text>
-          }
-          leftSection={
-            <IconLogout size={18} stroke={1.5} color="rgba(255,255,255,0.7)" />
-          }
-          onClick={handleLogout}
-          variant="subtle"
-          styles={{
-            root: {
-              borderRadius: 4,
-              "&:hover": {
-                backgroundColor: "rgba(220,53,69,0.3)",
-              },
-            },
-          }}
-        />
-      </Box>
-    </Box>
-  );
+  const sidebarProps = {
+    filteredMenuItems,
+    openMenu,
+    toggleMenu,
+    isActive,
+    handleItemClick,
+    handleLogout,
+    activeWorkflowsCount
+  };
 
   return (
     <>
@@ -482,7 +490,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         }}
         hiddenFrom="lg"
       >
-        <SidebarBody showClose />
+        <SidebarBody showClose {...sidebarProps} />
       </Box>
 
       {/* Desktop Sidebar */}
@@ -493,7 +501,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         visibleFrom="lg"
         data-tour="sidebar"
       >
-        <SidebarBody />
+        <SidebarBody {...sidebarProps} />
       </Box>
     </>
   );

@@ -5,10 +5,7 @@ export const documentScheme = z.object({
     .string()
     .min(2, "Hujjat nomi kamida 2 ta belgidan iborat bo'lishi kerak"),
   description: z.string().min(1, "Hujjat tavsifi kiritilishi kerak"),
-  documentNumber: z
-    .string()
-    .min(1, "Hujjat raqami kiritilishi kerak")
-    .optional(),
+  documentNumber: z.string().optional().or(z.literal("")),
   status: z.enum(["DRAFT", "PUBLISHED", "ARCHIVED"]).default("DRAFT"),
   documentTypeId: z.string().uuid("Hujjat turi tanlanishi kerak"),
   journalId: z.string().uuid("Jurnal tanlanishi kerak"),

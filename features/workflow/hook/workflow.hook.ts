@@ -225,3 +225,24 @@ export const useWorkflowCalendar = (params?: { startDate?: string; endDate?: str
     enabled: !!params?.startDate && !!params?.endDate,
   });
 };
+
+export const useVerifyWorkflowStep = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, formData }: { id: string; formData: FormData }) =>
+      workflowService.verifyWorkflowStep(id, formData),
+    onSuccess: (response) => {
+      queryClient?.invalidateQueries(["workflows"]);
+      queryClient?.invalidateQueries(["workflow-steps"]);
+      queryClient?.invalidateQueries(["my-tasks"]);
+
+      if (response?.workflowId) {
+        queryClient?.invalidateQueries(["workflow", response.workflowId]);
+      }
+
+      showSuccess("Vazifa muvaffaqiyatli tasdiqlandi");
+    },
+    onError: showError,
+  });
+};

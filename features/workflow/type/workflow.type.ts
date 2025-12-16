@@ -12,6 +12,7 @@ export enum WorkflowStatus {
   CANCELLED = "CANCELLED",
   PAUSED = "PAUSED",
   DRAFT = "DRAFT",
+  VERIFIED = "VERIFIED",
 }
 
 export enum WorkflowStepStatus {
@@ -19,15 +20,15 @@ export enum WorkflowStepStatus {
   PENDING = "PENDING",
   IN_PROGRESS = "IN_PROGRESS",
   COMPLETED = "COMPLETED",
-  REJECTED = "REJECTED",
+  REJECTED = "REJECTED"
 }
 
 export enum WorkflowActionType {
   APPROVAL = "APPROVAL",
   REVIEW = "REVIEW",
   SIGN = "SIGN",
-  QR_CODE = "QR_CODE",
   ACKNOWLEDGE = "ACKNOWLEDGE",
+  VERIFICATION = "VERIFICATION",
 }
 
 export const ACTION_TYPE_OPTIONS = [
@@ -47,14 +48,14 @@ export const ACTION_TYPE_OPTIONS = [
     description: "Hujjatga imzo qo'yish",
   },
   {
-    value: WorkflowActionType.QR_CODE,
-    label: "QR kod qo'shish",
-    description: "Hujjatga QR kod va izohlar qo'shish",
-  },
-  {
     value: WorkflowActionType.ACKNOWLEDGE,
     label: "Tanishish",
     description: "Hujjat bilan tanishish",
+  },
+  {
+    value: WorkflowActionType.VERIFICATION,
+    label: "Ishni tasdiqlash",
+    description: "Ish bajarilganligini tasdiqlovchi fayllar yuklash",
   },
 ] as const;
 

@@ -78,6 +78,19 @@ export const workflowService = {
     return data;
   },
 
+  verifyWorkflowStep: async (id: string, formData: FormData) => {
+    const { data } = await axiosInstance.post(
+      endpoints.workflowStep.verify(id),
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+    return data;
+  },
+
   getMyTasks: async (params?: MyTasksQueryParams) => {
     const queryParams: Record<string, any> = {
       pageNumber: params?.page ?? 1,

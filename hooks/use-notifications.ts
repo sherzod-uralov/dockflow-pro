@@ -6,6 +6,9 @@ import {
     PendingNotificationsResponse,
     MarkAsReadResponse,
     SocketErrorResponse,
+    OnlineUser,
+    OnlineUsersListEvent,
+    UserStatusEvent,
 } from '@/types/notification.types';
 import { notifications } from '@mantine/notifications';
 
@@ -20,6 +23,8 @@ interface UseNotificationsReturn {
     markAllAsRead: () => void;
     refreshWorkflowCount: () => void;
     isConnected: boolean;
+    onlineUsers: OnlineUser[];
+    showError: (error: string) => void;
 }
 
 export const useNotifications = (): UseNotificationsReturn => {
@@ -28,6 +33,7 @@ export const useNotifications = (): UseNotificationsReturn => {
     const [unreadCount, setUnreadCount] = useState<number>(0);
     const [isConnected, setIsConnected] = useState<boolean>(false);
     const [activeWorkflowsCount, setActiveWorkflowsCount] = useState<number>(0);
+    const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
 
     useEffect(() => {
         const accessToken = authService.getAccessToken();
@@ -38,10 +44,10 @@ export const useNotifications = (): UseNotificationsReturn => {
             return;
         }
 
-        console.log('🔌 Initializing Socket.IO connection to:', `${WS_URL}${NAMESPACE}`);
-        console.log('🔑 Using token:', accessToken.substring(0, 20) + '...');
+        const targetUrl = `${WS_URL}${NAMESPACE}`;
+        console.log('🔌 Initializing Socket.IO connection to:', targetUrl);
+        console.log('🔑 Token available:', !!accessToken);
 
-        // Socket connection yaratish - namespace URL-da
         const newSocket = io(`${WS_URL}${NAMESPACE}`, {
             auth: {
                 token: accessToken,
@@ -49,7 +55,7 @@ export const useNotifications = (): UseNotificationsReturn => {
             reconnection: true,
             reconnectionDelay: 1000,
             reconnectionDelayMax: 5000,
-            reconnectionAttempts: Infinity, // Cheksiz urinish
+            reconnectionAttempts: Infinity,
             timeout: 20000,
             autoConnect: true,
             forceNew: true,
@@ -61,8 +67,10 @@ export const useNotifications = (): UseNotificationsReturn => {
             console.log('📡 Socket ID:', newSocket.id);
             setIsConnected(true);
 
-            // Fallback: REST API orqali notificationlarni yuklash
-            // Agar backend pending-notifications event yubormasa
+            // Request online users list
+            console.log('📤 Emitting online-users:request');
+            newSocket.emit('online-users:request');
+
             try {
                 const response = await fetch(`${WS_URL}/notifications?isRead=false&limit=50`, {
                     headers: {
@@ -138,12 +146,41 @@ export const useNotifications = (): UseNotificationsReturn => {
         newSocket.on('disconnect', (reason: string) => {
             console.log('🔌 Disconnected from notification server:', reason);
             setIsConnected(false);
+            console.log('🔌 Disconnected from notification server:', reason);
+            setIsConnected(false);
+            setOnlineUsers([]);
+        });
+
+        // Online Users Events
+        newSocket.on('online-users:list', (data: OnlineUsersListEvent) => {
+            console.log('👥 Received online users list:', data);
+            console.log(`👥 Received ${data.count} online users`);
+            setOnlineUsers(data.users);
+        });
+
+        newSocket.on('user:status', (data: UserStatusEvent) => {
+            if (data.isOnline) {
+                console.log(`👤 User online: ${data.user.fullname}`);
+                setOnlineUsers((prev) => {
+                    const exists = prev.some((u) => u.id === data.user.id);
+                    if (exists) return prev;
+                    return [...prev, data.user];
+                });
+            } else {
+                console.log(`👤 User offline: ${data.user.fullname}`);
+                setOnlineUsers((prev) => prev.filter((u) => u.id !== data.user.id));
+            }
         });
 
         // Connection error
         let errorCount = 0;
         newSocket.on('connect_error', async (error: Error) => {
             errorCount++;
+            console.error('❌ Socket connection error details:', {
+                message: error.message,
+                name: error.name,
+                stack: error.stack
+            });
             console.warn('⚠️ Notification server bilan ulanishda xatolik:', error.message);
 
             // Agar xatolik autentifikatsiya bilan bog'liq bo'lsa, tokenni yangilashga urinib ko'ramiz
@@ -169,11 +206,29 @@ export const useNotifications = (): UseNotificationsReturn => {
             setIsConnected(false);
         });
 
+        // Heartbeat mechanism (keep connection alive)
+        const heartbeatInterval = setInterval(() => {
+            if (newSocket.connected) {
+                // console.log('💓 Sending heartbeat');
+                newSocket.emit('heartbeat');
+            }
+        }, 30000);
+
+        // Periodic refresh for online users (resilience)
+        const refreshInterval = setInterval(() => {
+            if (newSocket.connected) {
+                console.log('🔄 Refreshing online users list');
+                newSocket.emit('online-users:request');
+            }
+        }, 10000);
+
         setSocket(newSocket);
 
         // Cleanup on unmount
         return () => {
             console.log('🧹 Cleaning up socket connection');
+            clearInterval(heartbeatInterval);
+            clearInterval(refreshInterval);
             newSocket.close();
         };
     }, []); // Empty dependency array - faqat mount/unmount paytida
@@ -269,6 +324,8 @@ export const useNotifications = (): UseNotificationsReturn => {
         markAsRead,
         markAllAsRead,
         refreshWorkflowCount,
+        showError: (error: string) => notifications.show({ message: error, color: 'red' }),
+        onlineUsers,
         isConnected,
     };
 };

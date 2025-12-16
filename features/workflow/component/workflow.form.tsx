@@ -47,7 +47,7 @@ import {
   createEmptyStep,
 } from "../utils/workflow.mapper";
 import { useCreateWorkflow, useUpdateWorkflowStep } from "@/features/workflow";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { showError, showSuccess } from "@/utils/show-error";
 
 const WorkflowForm = ({
@@ -66,6 +66,7 @@ const WorkflowForm = ({
     {}
   );
   const searchParams = useSearchParams();
+  const router = useRouter();
   const queryDocumentId = searchParams.get("documentId");
 
   const isUpdate = mode === "edit";
@@ -173,6 +174,11 @@ const WorkflowForm = ({
           modal.closeModal();
           form.reset();
           onSuccess?.();
+
+          // Redirect to PDF editor for QR code placement
+          if (payload.documentId) {
+            router.push(`/pdf/${payload.documentId}?actionType=QR_CODE&showTips=true`);
+          }
         },
       });
     }
@@ -187,20 +193,17 @@ const WorkflowForm = ({
     form.reset();
   }, [modal, form]);
 
-  // Document options
   const documentOptions =
     documentsData?.data.map((doc: any) => ({
       value: doc.id,
       label: `${doc.title} - ${doc.documentNumber}`,
     })) || [];
 
-  // Workflow type options
   const workflowTypeOptions = WORKFLOW_TYPE_OPTIONS.map((option) => ({
     value: option.value,
     label: option.label,
   }));
 
-  // Action type options
   const actionTypeOptions = ACTION_TYPE_OPTIONS.map((option) => ({
     value: option.value,
     label: option.label,
@@ -209,7 +212,6 @@ const WorkflowForm = ({
   return (
     <form onSubmit={form.handleSubmit(handleSubmit)}>
       <Stack gap="md">
-        {/* Document and Workflow Type */}
         <Group grow>
           <Select
             label="Hujjat"

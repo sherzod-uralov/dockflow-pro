@@ -91,7 +91,6 @@ const getActionTypeConfig = (actionType: string) => {
     APPROVAL: { label: "Tasdiqlash", icon: IconCheck, canEdit: false },
     REVIEW: { label: "Ko'rib chiqish", icon: IconSearch, canEdit: false },
     SIGN: { label: "Imzolash", icon: IconWritingSign, canEdit: true },
-    QR_CODE: { label: "QR kod qo'shish", icon: IconQrcode, canEdit: true },
     ACKNOWLEDGE: { label: "Tanishish", icon: IconFileText, canEdit: false },
   };
   return configs[actionType] || configs.APPROVAL;
@@ -554,9 +553,8 @@ const TaskCard = memo(({
                         backgroundColor: "#f8f9fa",
                       },
                     },
-                  }}
-                >
-                  {task.actionType === "QR_CODE" ? "QR kod qo'shish" : "Hujjatni tahrirlash"}
+                  }}>
+                  Hujjatni tahrirlash
                 </Button>
               )}
               <Group grow>
@@ -594,13 +592,13 @@ const TaskCard = memo(({
             </Stack>
           )}
         </Stack>
-      </Paper>
+      </Paper >
 
       {/* Complete Dialog */}
-      <Modal
+      < Modal
         opened={showCompleteDialog}
         onClose={() => setShowCompleteDialog(false)}
-        title={<Text fw={600} c="#212529">Vazifani tasdiqlash</Text>}
+        title={< Text fw={600} c="#212529" > Vazifani tasdiqlash</Text >}
         centered
         size="sm"
       >
@@ -635,10 +633,10 @@ const TaskCard = memo(({
             </Button>
           </Group>
         </Stack>
-      </Modal>
+      </Modal >
 
       {/* Reject Dialog */}
-      <Modal
+      < Modal
         opened={showRejectDialog}
         onClose={() => {
           setShowRejectDialog(false);
@@ -646,7 +644,7 @@ const TaskCard = memo(({
           setComment("");
           setRollbackToUserId("");
         }}
-        title={<Text fw={600} c="#212529">Vazifani bekor qilish</Text>}
+        title={< Text fw={600} c="#212529" > Vazifani bekor qilish</Text >}
         centered
         size="md"
       >
@@ -767,7 +765,7 @@ const TaskCard = memo(({
             </Button>
           </Group>
         </Stack>
-      </Modal>
+      </Modal >
     </>
   );
 });

@@ -83,8 +83,8 @@ const getActionTypeLabel = (actionType: WorkflowActionType) => {
     [WorkflowActionType.APPROVAL]: "Tasdiqlash",
     [WorkflowActionType.REVIEW]: "Ko'rib chiqish",
     [WorkflowActionType.SIGN]: "Imzolash",
-    [WorkflowActionType.QR_CODE]: "QR kod qo'shish",
     [WorkflowActionType.ACKNOWLEDGE]: "Tanishish",
+    [WorkflowActionType.VERIFICATION]: "Tekshirish (Fayl)",
   };
   return labels[actionType] || actionType;
 };

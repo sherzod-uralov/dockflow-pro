@@ -47,6 +47,7 @@ import {
 import { useGetDocumentById } from "@/features/document";
 import { useGetProfileQuery } from "@/features/login/hook/login.hook";
 import Link from "next/link";
+import { VerificationStep } from "@/features/workflow/component/verification-step";
 
 interface WorkflowDetailViewProps {
   workflow: WorkflowApiResponse;
@@ -55,9 +56,9 @@ interface WorkflowDetailViewProps {
 const ACTION_LABELS: Record<string, { label: string; icon: any }> = {
   APPROVAL: { label: "Tasdiqlash", icon: IconClipboardCheck },
   SIGN: { label: "Imzolash", icon: IconSignature },
-  QR_CODE: { label: "QR kod qo'yish", icon: IconQrcode },
   REVIEW: { label: "Ko'rib chiqish", icon: IconEye },
   ACKNOWLEDGE: { label: "Tanishish", icon: IconBookmark },
+  VERIFICATION: { label: "Ishni tasdiqlash", icon: IconCheck },
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -204,100 +205,91 @@ const WorkflowDetailView = memo(({ workflow }: WorkflowDetailViewProps) => {
   return (
     <Stack gap="md">
       {canTakeAction && currentActionLabel && currentStep && (
-        <Paper p="lg" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
-          <Group justify="space-between" mb="md">
-            <Group gap="sm">
-              <ThemeIcon size={40} radius="sm" variant="light" color="dark">
-                <currentActionLabel.icon size={22} />
-              </ThemeIcon>
-              <Box>
-                <Text size="sm" c="dimmed">Sizning vazifangiz</Text>
-                <Text size="lg" fw={600} c="#212529">
+        currentStep.actionType === 'VERIFICATION' ? (
+          <VerificationStep stepId={currentStep.id} />
+        ) : (
+          <Paper p="lg" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+            <Group justify="space-between" mb="md">
+              <Group gap="sm">
+                <ThemeIcon size={40} radius="sm" variant="light" color="dark">
+                  <currentActionLabel.icon size={22} />
+                </ThemeIcon>
+                <Box>
+                  <Text size="sm" c="dimmed">Sizning vazifangiz</Text>
+                  <Text size="lg" fw={600} c="#212529">
+                    {currentActionLabel.label}
+                  </Text>
+                </Box>
+              </Group>
+              <Badge variant="light" color="gray" size="lg">
+                {completedSteps}/{totalSteps} bosqich
+              </Badge>
+            </Group>
+
+            <Progress value={progress} size="sm" radius="xl" mb="lg" color="dark" />
+            <Stack gap="sm">
+
+
+
+              {/* SIGN - go to PDF editor for signature */}
+              {currentStep.actionType === "SIGN" && canEditDocument && (
+                <Button
+                  variant="outline"
+                  size="md"
+                  radius="sm"
+                  fullWidth
+                  leftSection={<IconSignature size={18} />}
+                  onClick={() => handlePdfAction("SIGN")}
+                  disabled={isLoading}
+                  color="dark"
+                >
+                  imzolash
+                </Button>
+              )}
+
+              {(currentStep.actionType === "REVIEW" || currentStep.actionType === "ACKNOWLEDGE" || currentStep.actionType === "APPROVAL") && canEditDocument && (
+                <Button
+                  variant="outline"
+                  size="md"
+                  radius="sm"
+                  fullWidth
+                  leftSection={<IconEye size={18} />}
+                  onClick={handleViewDocument}
+                  disabled={isLoading}
+                  color="dark"
+                >
+                  Hujjat bilan tanishish
+                </Button>
+              )}
+
+              {/* Main actions */}
+              <Group grow>
+                <Button
+                  size="md"
+                  radius="sm"
+                  leftSection={<IconCheck size={18} />}
+                  onClick={() => handleComplete(currentStep.id)}
+                  disabled={isLoading}
+                  loading={completeMutation.isLoading}
+                  style={{ backgroundColor: "#1e3a5f" }}
+                >
                   {currentActionLabel.label}
-                </Text>
-              </Box>
-            </Group>
-            <Badge variant="light" color="gray" size="lg">
-              {completedSteps}/{totalSteps} bosqich
-            </Badge>
-          </Group>
-
-          <Progress value={progress} size="sm" radius="xl" mb="lg" color="dark" />
-          <Stack gap="sm">
-
-            {currentStep.actionType === "QR_CODE" && canEditDocument && (
-              <Button
-                variant="outline"
-                size="md"
-                radius="sm"
-                fullWidth
-                leftSection={<IconQrcode size={18} />}
-                onClick={() => handlePdfAction("QR_CODE")}
-                disabled={isLoading}
-                color="dark"
-              >
-                QR kod qo'yish
-              </Button>
-            )}
-
-            {/* SIGN - go to PDF editor for signature */}
-            {currentStep.actionType === "SIGN" && canEditDocument && (
-              <Button
-                variant="outline"
-                size="md"
-                radius="sm"
-                fullWidth
-                leftSection={<IconSignature size={18} />}
-                onClick={() => handlePdfAction("SIGN")}
-                disabled={isLoading}
-                color="dark"
-              >
-                imzolash
-              </Button>
-            )}
-
-            {(currentStep.actionType === "REVIEW" || currentStep.actionType === "ACKNOWLEDGE" || currentStep.actionType === "APPROVAL") && canEditDocument && (
-              <Button
-                variant="outline"
-                size="md"
-                radius="sm"
-                fullWidth
-                leftSection={<IconEye size={18} />}
-                onClick={handleViewDocument}
-                disabled={isLoading}
-                color="dark"
-              >
-                Hujjat bilan tanishish
-              </Button>
-            )}
-
-            {/* Main actions */}
-            <Group grow>
-              <Button
-                size="md"
-                radius="sm"
-                leftSection={<IconCheck size={18} />}
-                onClick={() => handleComplete(currentStep.id)}
-                disabled={isLoading}
-                loading={completeMutation.isLoading}
-                style={{ backgroundColor: "#1e3a5f" }}
-              >
-                {currentActionLabel.label === "QR kod qo'yish" ? "Tasdiqlash" : currentActionLabel.label}
-              </Button>
-              <Button
-                variant="outline"
-                size="md"
-                radius="sm"
-                leftSection={<IconCircleX size={18} />}
-                onClick={() => handleOpenReject(currentStep)}
-                disabled={isLoading}
-                color="red"
-              >
-                Rad etish
-              </Button>
-            </Group>
-          </Stack>
-        </Paper>
+                </Button>
+                <Button
+                  variant="outline"
+                  size="md"
+                  radius="sm"
+                  leftSection={<IconCircleX size={18} />}
+                  onClick={() => handleOpenReject(currentStep)}
+                  disabled={isLoading}
+                  color="red"
+                >
+                  Rad etish
+                </Button>
+              </Group>
+            </Stack>
+          </Paper>
+        )
       )}
 
       {!canTakeAction && currentStep &&

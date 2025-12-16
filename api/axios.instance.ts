@@ -40,57 +40,55 @@ axiosInstance.interceptors.request.use(
 );
 
 axiosInstance.interceptors.response.use(
-    (response) => response,
-    async (error: AxiosError) => {
-        const originalRequest = error.config as InternalAxiosRequestConfig & {
-            _retry?: boolean;
-        };
+  (response) => response,
+  async (error: AxiosError) => {
+    const originalRequest = error.config as InternalAxiosRequestConfig & {
+      _retry?: boolean;
+    };
 
-        const status = error.response?.status;
+    const status = error.response?.status;
 
-        const isAuthRoute = [
-            "/auth/login",
-            "/auth/register",
-            "/auth/refresh-token",
-        ].some(route => originalRequest.url?.includes(route));
-
-        // ❗ Login / register xatolarida logout QILINMAYDI
-        if (isAuthRoute) {
-            return Promise.reject(error);
-        }
-
-        if ((status === 401 || status === 403) && !originalRequest._retry) {
-            if (isRefreshing) {
-                return new Promise((resolve, reject) => {
-                    failedQueue.push({ resolve, reject });
-                }).then((token) => {
-                    originalRequest.headers.Authorization = `Bearer ${token}`;
-                    return axiosInstance(originalRequest);
-                });
-            }
-
-            originalRequest._retry = true;
-            isRefreshing = true;
-
-            try {
-                const newAccessToken = await authService.refreshToken();
-
-                originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-                processQueue(null, newAccessToken);
-
-                return axiosInstance(originalRequest);
-            } catch (refreshError) {
-                processQueue(refreshError, null);
-                authService.logout();
-
-                return Promise.reject(refreshError);
-            } finally {
-                isRefreshing = false;
-            }
-        }
-
-        return Promise.reject(error);
+    const isAuthRoute = [
+      "/auth/login",
+      "/auth/register",
+      "/auth/refresh-token",
+    ].some(route => originalRequest.url?.includes(route));
+    if (isAuthRoute) {
+      return Promise.reject(error);
     }
+
+    if ((status === 401 || status === 403) && !originalRequest._retry) {
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        }).then((token) => {
+          originalRequest.headers.Authorization = `Bearer ${token}`;
+          return axiosInstance(originalRequest);
+        });
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      try {
+        const newAccessToken = await authService.refreshToken();
+
+        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+        processQueue(null, newAccessToken);
+
+        return axiosInstance(originalRequest);
+      } catch (refreshError) {
+        processQueue(refreshError, null);
+        authService.logout();
+
+        return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
+      }
+    }
+
+    return Promise.reject(error);
+  }
 );
 
 

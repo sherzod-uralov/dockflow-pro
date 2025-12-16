@@ -8,9 +8,6 @@ export interface EditorPermissions {
   canViewOnly: boolean;
 }
 
-/**
- * Определяет разрешения редактора на основе типа действия workflow step
- */
 export const getEditorPermissions = (
   actionType: WorkflowActionType | string,
 ): EditorPermissions => {
@@ -63,31 +60,7 @@ export const getEditorPermissions = (
   );
 };
 
-/**
- * Проверяет, может ли пользователь редактировать документ
- */
-export const canUserEditDocument = (
-  actionType: WorkflowActionType | string,
-): boolean => {
-  const editableTypes: string[] = [
-    WorkflowActionType.SIGN,
-    WorkflowActionType.QR_CODE,
-  ];
-  return editableTypes.includes(actionType);
-};
 
-/**
- * Проверяет, может ли пользователь сохранять аннотации (только QR_CODE)
- */
-export const canUserSaveAnnotations = (
-  actionType: WorkflowActionType | string,
-): boolean => {
-  return actionType === WorkflowActionType.QR_CODE;
-};
-
-/**
- * Получает текст для кнопки сохранения в зависимости от типа действия
- */
 export const getSaveButtonText = (
   actionType: WorkflowActionType | string,
 ): string => {
@@ -102,9 +75,7 @@ export const getSaveButtonText = (
   return texts[actionType] || "Saqlash";
 };
 
-/**
- * Получает описание разрешений для UI
- */
+
 export const getPermissionDescription = (
   actionType: WorkflowActionType | string,
 ): string => {

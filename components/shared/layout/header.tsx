@@ -27,6 +27,8 @@ import { GlobalSearch } from "@/components/shared/layout/global-search";
 import Cookie from "js-cookie";
 import { TourSettingsButton } from "@/hooks/use-onboarding";
 import { NotificationBell } from "@/components/shared/notification-bell";
+import { useNotifications } from "@/hooks/use-notifications";
+import { Popover, ScrollArea } from "@mantine/core";
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -36,6 +38,7 @@ export function Header({ onMenuClick }: HeaderProps) {
   const { data, isLoading } = useGetProfileQuery();
   const router = useRouter();
   const logOutMutation = useLogoutMutation();
+  const { onlineUsers } = useNotifications();
 
   if (isLoading || !data) {
     return (
@@ -110,6 +113,67 @@ export function Header({ onMenuClick }: HeaderProps) {
         </Group>
 
         <Group gap="xs">
+          {/* Online Users */}
+          <Popover width={300} position="bottom" withArrow shadow="md">
+            <Popover.Target>
+              <Box style={{ cursor: "pointer" }}>
+                <Avatar.Group spacing="sm">
+                  {onlineUsers.slice(0, 3).map((user) => (
+                    <Tooltip key={user.id} label={user.fullname} withArrow>
+                      <Avatar src={user.avatarUrl} radius="xl" size="md" color="blue">
+                        {user.fullname
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")
+                          .toUpperCase()
+                          .slice(0, 2)}
+                      </Avatar>
+                    </Tooltip>
+                  ))}
+                  {onlineUsers.length > 3 && (
+                    <Avatar radius="xl" size="md">
+                      +{onlineUsers.length - 3}
+                    </Avatar>
+                  )}
+                </Avatar.Group>
+              </Box>
+            </Popover.Target>
+            <Popover.Dropdown p={0}>
+              <Box p="xs" style={{ borderBottom: "1px solid var(--mantine-color-default-border)" }}>
+                <Text size="sm" fw={600}>
+                  Online foydalanuvchilar ({onlineUsers.length})
+                </Text>
+              </Box>
+              <ScrollArea h={300} p="xs">
+                <Box>
+                  {onlineUsers.map((user) => (
+                    <Group key={user.id} mb="sm" wrap="nowrap">
+                      <Avatar src={user.avatarUrl} radius="xl" size="sm" color="blue">
+                        {user.fullname
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")
+                          .toUpperCase()
+                          .slice(0, 2)}
+                      </Avatar>
+                      <Box style={{ flex: 1 }}>
+                        <Text size="sm" fw={500} lineClamp={1}>
+                          {user.fullname}
+                        </Text>
+                        <Text size="xs" c="dimmed" lineClamp={1}>
+                          @{user.username}
+                        </Text>
+                      </Box>
+                      <Indicator color="green" size={8} processing />
+                    </Group>
+                  ))}
+                </Box>
+              </ScrollArea>
+            </Popover.Dropdown>
+          </Popover>
+
+          <Divider orientation="vertical" />
+
           {/* Bildirishnomalar */}
           <NotificationBell />
 

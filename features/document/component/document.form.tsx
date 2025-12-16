@@ -230,6 +230,32 @@ const DocumentFormModal = ({
   return (
     <form onSubmit={form.handleSubmit(handleSubmit)}>
       <Stack gap="md">
+
+        {/* Document Type */}
+        <Select
+          label="Hujjat turi"
+          placeholder="Tanlang"
+          size="sm"
+          radius="sm"
+          data={documentTypeOptions}
+          value={form.watch("documentTypeId") || ""}
+          onChange={(value) => form.setValue("documentTypeId", value || "", { shouldValidate: true })}
+          error={form.formState.errors.documentTypeId?.message}
+          styles={{
+            input: {
+              backgroundColor: "#f8f9fa",
+              border: "1px solid #e9ecef",
+              "&:focus": {
+                borderColor: "#1e3a5f",
+              },
+            },
+            label: {
+              color: "#495057",
+              fontWeight: 500,
+              marginBottom: 4,
+            },
+          }}
+        />
         {/* Title */}
         <TextInput
           label="Hujjat nomi"
@@ -279,57 +305,8 @@ const DocumentFormModal = ({
           }}
         />
 
+
         <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
-          {/* Document Number */}
-          <TextInput
-            label="Hujjat raqami"
-            placeholder="DOC-001"
-            size="sm"
-            radius="sm"
-            error={form.formState.errors.documentNumber?.message}
-            {...form.register("documentNumber")}
-            styles={{
-              input: {
-                backgroundColor: "#f8f9fa",
-                border: "1px solid #e9ecef",
-                "&:focus": {
-                  borderColor: "#1e3a5f",
-                },
-              },
-              label: {
-                color: "#495057",
-                fontWeight: 500,
-                marginBottom: 4,
-              },
-            }}
-          />
-
-          {/* Document Type */}
-          <Select
-            label="Hujjat turi"
-            placeholder="Tanlang"
-            size="sm"
-            radius="sm"
-            data={documentTypeOptions}
-            value={form.watch("documentTypeId") || ""}
-            onChange={(value) => form.setValue("documentTypeId", value || "", { shouldValidate: true })}
-            error={form.formState.errors.documentTypeId?.message}
-            styles={{
-              input: {
-                backgroundColor: "#f8f9fa",
-                border: "1px solid #e9ecef",
-                "&:focus": {
-                  borderColor: "#1e3a5f",
-                },
-              },
-              label: {
-                color: "#495057",
-                fontWeight: 500,
-                marginBottom: 4,
-              },
-            }}
-          />
-
           {/* Journal */}
           <Select
             label="Jurnal"
@@ -355,33 +332,33 @@ const DocumentFormModal = ({
               },
             }}
           />
-        </SimpleGrid>
 
-        {/* Template Selection */}
-        <Select
-          label="Shablon"
-          placeholder={isLoadingTemplates ? "Yuklanmoqda..." : "Shablon tanlang (ixtiyoriy)"}
-          size="sm"
-          radius="sm"
-          data={templateOptions}
-          value={selectedTemplateId || ""}
-          onChange={handleTemplateChange}
-          disabled={isLoadingTemplates}
-          styles={{
-            input: {
-              backgroundColor: "#f8f9fa",
-              border: "1px solid #e9ecef",
-              "&:focus": {
-                borderColor: "#1e3a5f",
+          {/* Template Selection */}
+          <Select
+            label="Shablon"
+            placeholder={isLoadingTemplates ? "Yuklanmoqda..." : "Shablon tanlang (ixtiyoriy)"}
+            size="sm"
+            radius="sm"
+            data={templateOptions}
+            value={selectedTemplateId || ""}
+            onChange={handleTemplateChange}
+            disabled={isLoadingTemplates}
+            styles={{
+              input: {
+                backgroundColor: "#f8f9fa",
+                border: "1px solid #e9ecef",
+                "&:focus": {
+                  borderColor: "#1e3a5f",
+                },
               },
-            },
-            label: {
-              color: "#495057",
-              fontWeight: 500,
-              marginBottom: 4,
-            },
-          }}
-        />
+              label: {
+                color: "#495057",
+                fontWeight: 500,
+                marginBottom: 4,
+              },
+            }}
+          />
+        </SimpleGrid>
 
         {/* Dynamic Tag Fields */}
         {isLoadingTemplate && selectedTemplateId && (

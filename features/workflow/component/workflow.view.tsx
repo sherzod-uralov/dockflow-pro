@@ -635,9 +635,7 @@ const WorkflowView = memo(({ workflow, onClose }: WorkflowViewProps) => {
                           },
                         }}
                       >
-                        {step.actionType === "QR_CODE"
-                          ? "QR kod qo'shish"
-                          : "Hujjatni tahrirlash"}
+                        Hujjatni tahrirlash
                       </Button>
                     )}
 

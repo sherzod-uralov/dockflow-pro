@@ -25,6 +25,7 @@ export const endpoints = {
     detail: (id: string | number) => `/workflow-step/${id}`,
     complete: (id: string | number) => `/workflow-step/${id}/complete`,
     reject: (id: string | number) => `/workflow-step/${id}/reject`,
+    verify: (id: string | number) => `/workflow-step/${id}/verify`,
     calendarView: "/workflow-step/calendar/view",
   },
 
@@ -73,6 +74,11 @@ export const endpoints = {
     detail: (id: string | number) => `/user/${id}`,
     update: (id: string | number) => `/user/${id}`,
     delete: (id: string | number) => `/user/${id}`,
+    telegram: {
+      linkInfo: (id: string | number) => `/user/${id}/telegram/link-info`,
+      link: (id: string | number) => `/user/${id}/telegram/link`,
+      status: (id: string | number) => `/user/${id}/telegram/status`,
+    },
   },
   role: {
     list: "/role",
