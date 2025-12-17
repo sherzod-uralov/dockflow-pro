@@ -8,7 +8,6 @@ import {
   Text,
   Button,
   Select,
-  TextInput,
   Paper,
   Group,
   Stack,
@@ -377,6 +376,9 @@ const WorkflowForm = ({
                   label: `${user.fullname} (@${user.username})`,
                 }));
 
+                const previousStepDate = index > 0 ? allSteps[index - 1]?.dueDate : null;
+                const minDate = previousStepDate ? new Date(previousStepDate) : new Date();
+
                 return (
                   <Paper
                     key={field.id}
@@ -509,7 +511,7 @@ const WorkflowForm = ({
                           `steps.${index}.dueDate`,
                           date ? new Date(date).toISOString() : undefined
                         )}
-                        minDate={new Date()}
+                        minDate={minDate}
                         size="sm"
                         radius="sm"
                         clearable

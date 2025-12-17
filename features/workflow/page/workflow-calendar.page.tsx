@@ -12,10 +12,8 @@ import {
     Badge,
     Modal,
     Button,
-    Loader,
-    Center,
-    Alert,
     Divider,
+    LoadingOverlay,
 } from "@mantine/core";
 import { DatePickerInput } from "@mantine/dates";
 import FullCalendar from "@fullcalendar/react";
@@ -36,6 +34,9 @@ import { useWorkflowCalendar } from "../hook/workflow.hook";
 import { WorkflowStepApiResponse, CalendarDayData, WorkflowStepWithWorkflow } from "../type/workflow.type";
 import { formatDateTime } from "@/lib/date-utils";
 import { useRouter } from "next/navigation";
+
+import "dayjs/locale/uz-latn";
+import uzLocale from "@fullcalendar/core/locales/uz";
 
 const STEP_STATUS_COLORS: Record<string, string> = {
     NOT_STARTED: "#868e96",
@@ -118,7 +119,18 @@ export default function WorkflowCalendarPage() {
     }, []);
 
     const handleDatesSet = useCallback((dateInfo: any) => {
-        setDateRange([dateInfo.start, new Date(dateInfo.end.getTime() - 1)]);
+        const newStart = dateInfo.start;
+        const newEnd = new Date(dateInfo.end.getTime() - 1);
+
+        setDateRange((prev) => {
+            if (
+                prev[0]?.getTime() === newStart.getTime() &&
+                prev[1]?.getTime() === newEnd.getTime()
+            ) {
+                return prev;
+            }
+            return [newStart, newEnd];
+        });
     }, []);
 
     const handleViewChange = useCallback((value: string) => {
@@ -203,6 +215,7 @@ export default function WorkflowCalendarPage() {
 
                             <DatePickerInput
                                 type="range"
+                                locale="uz-latn"
                                 placeholder="Sana oralig'i"
                                 value={dateRange}
                                 onChange={handleDateRangeChange}
@@ -216,40 +229,33 @@ export default function WorkflowCalendarPage() {
                 </Paper>
 
 
-                <Paper p="lg" radius="sm" withBorder style={{ minHeight: 600, borderColor: "#e9ecef" }}>
-                    {isLoading ? (
-                        <Center h={500}>
-                            <Stack align="center" gap="md">
-                                <Loader size="lg" color="dark" />
-                                <Text size="sm" c="dimmed">Yuklanmoqda...</Text>
-                            </Stack>
-                        </Center>
-                    ) : (
-                        <Box>
-                            <FullCalendar
-                                ref={calendarRef}
-                                plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
-                                initialView={view}
-                                headerToolbar={{ left: "prev,next today", center: "title", right: "" }}
-                                height="auto"
-                                events={events}
-                                eventClick={handleEventClick}
-                                datesSet={handleDatesSet}
-                                locale="uz"
-                                firstDay={1}
-                                buttonText={{ today: "Bugun", month: "Oy", week: "Hafta", day: "Kun", list: "Ro'yxat" }}
-                                dayHeaderFormat={{ weekday: "short" }}
-                                eventContent={(arg) => ({
-                                    html: `
-                    <div style="padding: 2px 4px; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                      <strong>${arg.event.title}</strong>
-                      ${arg.event.extendedProps.documentNumber ? ` - ${arg.event.extendedProps.documentNumber}` : ""}
-                    </div>
-                  `,
-                                })}
-                            />
-                        </Box>
-                    )}
+                <Paper p="lg" radius="sm" withBorder style={{ minHeight: 600, borderColor: "#e9ecef", position: "relative" }}>
+                    <LoadingOverlay visible={isLoading} zIndex={1000} overlayProps={{ radius: "sm", blur: 2 }} loaderProps={{ color: "dark", type: "dots" }} />
+                    <Box>
+                        <FullCalendar
+                            ref={calendarRef}
+                            plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
+                            initialView={view}
+                            locales={[uzLocale]}
+                            locale="uz"
+                            headerToolbar={{ left: "prev,next today", center: "title", right: "" }}
+                            height="auto"
+                            events={events}
+                            eventClick={handleEventClick}
+                            datesSet={handleDatesSet}
+                            firstDay={1}
+                            buttonText={{ today: "Bugun", month: "Oy", week: "Hafta", day: "Kun", list: "Ro'yxat" }}
+                            dayHeaderFormat={{ weekday: "short" }}
+                            eventContent={(arg) => ({
+                                html: `
+                <div style="padding: 2px 4px; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                  <strong>${arg.event.title}</strong>
+                  ${arg.event.extendedProps.documentNumber ? ` - ${arg.event.extendedProps.documentNumber}` : ""}
+                </div>
+              `,
+                            })}
+                        />
+                    </Box>
                 </Paper>
             </Stack>
 

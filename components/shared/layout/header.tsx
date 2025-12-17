@@ -144,10 +144,10 @@ export function Header({ onMenuClick }: HeaderProps) {
                   Online foydalanuvchilar ({onlineUsers.length})
                 </Text>
               </Box>
-              <ScrollArea h={300} p="xs">
-                <Box>
+              <ScrollArea h={300} type="auto" offsetScrollbars>
+                <Box p="xs">
                   {onlineUsers.map((user) => (
-                    <Group key={user.id} mb="sm" wrap="nowrap">
+                    <Group key={user.id} mb="sm" wrap="nowrap" w="100%">
                       <Avatar src={user.avatarUrl} radius="xl" size="sm" color="blue">
                         {user.fullname
                           .split(" ")
@@ -156,7 +156,7 @@ export function Header({ onMenuClick }: HeaderProps) {
                           .toUpperCase()
                           .slice(0, 2)}
                       </Avatar>
-                      <Box style={{ flex: 1 }}>
+                      <Box style={{ flex: 1, overflow: "hidden" }}>
                         <Text size="sm" fw={500} lineClamp={1}>
                           {user.fullname}
                         </Text>

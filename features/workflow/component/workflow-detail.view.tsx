@@ -254,7 +254,7 @@ const WorkflowDetailView = memo(({ workflow }: WorkflowDetailViewProps) => {
                   radius="sm"
                   fullWidth
                   leftSection={<IconEye size={18} />}
-                  onClick={handleViewDocument}
+                  onClick={() => handlePdfAction(currentStep.actionType)}
                   disabled={isLoading}
                   color="dark"
                 >
@@ -474,7 +474,6 @@ const WorkflowDetailView = memo(({ workflow }: WorkflowDetailViewProps) => {
                   {workflow.document?.title || "—"}
                 </Text>
               </Box>
-
               <Box>
                 <Text size="xs" c="dimmed" mb={4}>Raqam</Text>
                 <Text size="sm" style={{ fontFamily: "monospace" }} c="#495057">
