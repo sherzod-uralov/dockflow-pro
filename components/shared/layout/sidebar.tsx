@@ -5,16 +5,12 @@ import {
   Box,
   Group,
   Text,
-  ActionIcon,
   ScrollArea,
   Collapse,
-  Button,
-  Badge, Typography,
+  Badge,
 } from "@mantine/core";
 import {
-  IconFiles,
   IconLogout,
-  IconX,
   IconChevronRight,
   IconHome,
   IconBook,
@@ -26,7 +22,6 @@ import {
   IconClipboardList,
   IconSettings,
   IconUser,
-  IconSend,
 } from "@tabler/icons-react";
 import { useRouter, usePathname } from "next/navigation";
 import { useState, useEffect, useMemo } from "react";
@@ -34,7 +29,6 @@ import Cookie from "js-cookie";
 import { useLogoutMutation } from "@/features/login/hook/login.hook";
 import { usePermission } from "@/providers/permission-provider";
 import { useNotificationContext } from "@/context/notification.provider";
-import { Link } from "lucide-react";
 import Image from "next/image";
 
 interface SidebarProps {
@@ -375,7 +369,7 @@ const SidebarBody = ({
           <IconLogout size={18} stroke={1.5} color="rgba(255,255,255,0.7)" />
         }
         onClick={handleLogout}
-        variant="filled"
+        variant=""
         styles={{
           root: {
             borderRadius: 4,

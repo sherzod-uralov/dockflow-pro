@@ -54,8 +54,8 @@ export const ACTION_TYPE_OPTIONS = [
   },
   {
     value: WorkflowActionType.VERIFICATION,
-    label: "Ishni tasdiqlash",
-    description: "Ish bajarilganligini tasdiqlovchi fayllar yuklash",
+      label: "Ijro uchun",
+    description: "Ijro uchun fayllar yuklash",
   },
 ] as const;
 

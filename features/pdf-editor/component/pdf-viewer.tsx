@@ -178,7 +178,7 @@ export function PDFViewer({ documentId }: PDFViewerProps) {
     ctx.textAlign = 'center';
     ctx.font = 'bold 60px sans-serif';
     ctx.fillStyle = '#00a09d';
-    ctx.fillText('ТАСДИҚЛАНГАН', width / 2, 110);
+    ctx.fillText('TASDIQLANGAN', width / 2, 110);
 
     ctx.font = 'bold 32px sans-serif';
     ctx.fillStyle = '#000000';
