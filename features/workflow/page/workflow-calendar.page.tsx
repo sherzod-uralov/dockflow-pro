@@ -60,6 +60,7 @@ const ACTION_LABELS: Record<string, string> = {
     QR_CODE: "QR kod qo'yish",
     REVIEW: "Ko'rib chiqish",
     ACKNOWLEDGE: "Tanishish",
+    VERIFICATION:"ijro uchun"
 };
 
 type ViewType = "dayGridMonth" | "timeGridWeek" | "dayGridYear" | "listMonth";

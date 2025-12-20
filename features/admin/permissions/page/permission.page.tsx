@@ -1,5 +1,29 @@
 "use client";
 
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import {
+  Box,
+  Text,
+  Group,
+  Button,
+  TextInput,
+  Paper,
+  ActionIcon,
+  Menu,
+  Stack,
+  Center,
+} from "@mantine/core";
+import {
+  IconPlus,
+  IconSearch,
+  IconDotsVertical,
+  IconEye,
+  IconEdit,
+  IconTrash,
+  IconKey,
+  IconCopy,
+} from "@tabler/icons-react";
 import {
   ConfirmationModal,
   CustomModal,
@@ -13,22 +37,12 @@ import {
 } from "../hook/permission.hook";
 import { DataTable } from "@/components/shared/ui/custom-table";
 import { Badge } from "@/components/ui/badge";
-import { useState, useEffect } from "react";
-import {
-  CustomAction,
-  ActionItem,
-  createViewAction,
-  createEditAction,
-  createDeleteAction,
-  createCopyAction,
-} from "@/components/shared/ui/custom-action";
 import { Permission } from "../type/permission.type";
 import PermissionFormModal from "../component/permission.create.modal";
 import PermissionView from "../component/permission.view";
 import { useDebounce } from "@/hooks/use-debaunce";
 import { handleCopyToClipboard } from "@/utils/copy-text";
 import { usePagination } from "@/hooks/use-pagination";
-import { useRouter, useSearchParams } from "next/navigation";
 
 const PermissionPage = () => {
   const createModal: ModalState = useModal();
@@ -54,9 +68,9 @@ const PermissionPage = () => {
   useEffect(() => {
     const permissionId = searchParams.get("permissionId");
 
-    if (permissionId) {
-      const permission = data?.data
-        ?.flatMap((item: any) =>
+    if (permissionId && data?.data) {
+      const permission = data.data
+        .flatMap((item: any) =>
           item.permissions.map((perm: any) => ({
             ...perm,
             module: item.module,
@@ -87,11 +101,17 @@ const PermissionPage = () => {
   };
 
   const handleDelete = (id: string) => {
-    deletePermissionMutation.mutate(id);
+    deletePermissionMutation.mutate(id, {
+      onSuccess: () => {
+        deleteModal.closeModal();
+        setSelectedPermission(null);
+      },
+    });
   };
 
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
+  const handleDeleteClick = (permission: Permission) => {
+    setSelectedPermission(permission);
+    deleteModal.openModal();
   };
 
   const handleEditSuccess = () => {
@@ -109,102 +129,204 @@ const PermissionPage = () => {
     router.push("/dashboard/admin/permissions", { scroll: false });
   };
 
+  // Empty state
+  const EmptyState = () => (
+    <Center py={60}>
+      <Stack align="center" gap="md">
+        <Box
+          p={16}
+          style={{
+            backgroundColor: "#f1f3f5",
+            borderRadius: 12,
+          }}
+        >
+          <IconKey size={40} color="#868e96" stroke={1.5} />
+        </Box>
+        <Text size="lg" fw={500} c="#495057">
+          Ruxsat topilmadi
+        </Text>
+        <Text size="sm" c="dimmed" ta="center">
+          Yangi ruxsat qo'shish uchun yuqoridagi tugmani bosing
+        </Text>
+      </Stack>
+    </Center>
+  );
+
   return (
-    <>
-      <UserToolbar
-        searchQuery={searchQuery}
-        searchPlaceholder="Ruxsatlarni qidirish..."
-        onSearch={handleSearch}
-        createLabel="Ruxsat qo'shish"
-        onCreate={createModal.openModal}
-      />
+    <Box>
+      {/* Header */}
+      <Group justify="space-between" mb="md">
+        <Box>
+          <Text size="lg" fw={600} c="#212529">
+            Ruxsatlar
+          </Text>
+          <Text size="sm" c="dimmed">
+            Ruxsatlarni boshqarish
+          </Text>
+        </Box>
+        <Button
+          leftSection={<IconPlus size={18} />}
+          onClick={createModal.openModal}
+          radius="sm"
+          styles={{
+            root: {
+              backgroundColor: "#1e3a5f",
+              "&:hover": { backgroundColor: "#162d4a" },
+            },
+          }}
+        >
+          Ruxsat qo'shish
+        </Button>
+      </Group>
 
-      <DataTable
-        loading={isLoading}
-        pageSize={pageSize}
-        onPageChange={handlePageChange}
-        onPageSizeChange={handlePageSizeChange}
-        totalCount={data?.count || 0}
-        currentPage={pageNumber}
-        columns={[
-          {
-            header: "Nom",
-            accessorKey: "name",
-          },
-          {
-            header: "Tavsif",
-            accessorKey: "description",
-            cell: ({ row }) => (
-              <div
-                className="max-w-xs truncate"
-                title={row.original.description}
-              >
-                {row.original.description}
-              </div>
-            ),
-          },
-          {
-            header: "Kalit",
-            accessorKey: "key",
-            cell: ({ row }) => (
-              <Badge
-                variant="outline"
-                className="bg-blue-100 text-blue-700 cursor-pointer hover:bg-blue-200"
-                onClick={() => handleCopyToClipboard(row.original.key, "KEY")}
-                title="Nusxalash uchun bosing"
-              >
-                {row.original.key}
-              </Badge>
-            ),
-          },
-          {
-            header: "Modul",
-            accessorKey: "module",
-            cell: ({ row }) => (
-              <Badge
-                variant="outline"
-                className="bg-green-100 text-green-700 capitalize"
-              >
-                {row.original.module}
-              </Badge>
-            ),
-          },
-          {
-            header: "Harakatlar",
-            accessorKey: "actions",
-            cell: ({ row }) => {
-              const permission = row.original;
+      {/* Search */}
+      <Paper
+        p="md"
+        radius="sm"
+        withBorder
+        mb="md"
+        style={{ borderColor: "#e9ecef" }}
+      >
+        <TextInput
+          placeholder="Ruxsatlarni qidirish..."
+          leftSection={<IconSearch size={18} color="#868e96" />}
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          radius="sm"
+          size="md"
+        />
+      </Paper>
 
-              const actions: ActionItem[] = [
-                createViewAction(() => handleView(permission)),
-                createEditAction(() => handleEdit(permission)),
-                createCopyAction(() =>
-                  handleCopyToClipboard(permission.key, "KEY"),
+      {/* Table */}
+      <Box>
+        {!isLoading &&
+          (!data?.data ||
+            data?.data.flatMap((item: any) => item.permissions).length === 0) ? (
+          <Paper radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+            <EmptyState />
+          </Paper>
+        ) : (
+          <DataTable
+            loading={isLoading}
+            pageSize={pageSize}
+            onPageChange={handlePageChange}
+            onPageSizeChange={handlePageSizeChange}
+            totalCount={data?.count || 0}
+            currentPage={pageNumber}
+            columns={[
+              {
+                header: "NOM",
+                accessorKey: "name",
+                cell: ({ row }) => (
+                  <Text size="sm" fw={500} c="#212529">
+                    {row.original.name}
+                  </Text>
                 ),
-                createDeleteAction(() => {
-                  setSelectedPermission(permission);
-                  deleteModal.openModal();
-                }),
-              ];
+                meta: { minWidth: 200 },
+              },
+              {
+                header: "TAVSIF",
+                accessorKey: "description",
+                cell: ({ row }) => (
+                  <div
+                    className="max-w-xs truncate"
+                    title={row.original.description}
+                  >
+                    <Text size="sm" c="#495057">
+                      {row.original.description}
+                    </Text>
+                  </div>
+                ),
+                meta: { minWidth: 250 },
+              },
+              {
+                header: "KALIT",
+                accessorKey: "key",
+                cell: ({ row }) => (
+                  <Badge
+                    variant="outline"
+                    className="bg-blue-100 text-blue-700 cursor-pointer hover:bg-blue-200"
+                    onClick={() => handleCopyToClipboard(row.original.key, "KEY")}
+                    title="Nusxalash uchun bosing"
+                  >
+                    {row.original.key}
+                  </Badge>
+                ),
+                meta: { minWidth: 150 },
+              },
+              {
+                header: "MODUL",
+                accessorKey: "module",
+                cell: ({ row }) => (
+                  <Badge
+                    variant="outline"
+                    className="bg-green-100 text-green-700 capitalize"
+                  >
+                    {row.original.module}
+                  </Badge>
+                ),
+                meta: { minWidth: 100 },
+              },
+              {
+                header: "AMALLAR",
+                accessorKey: "actions",
+                cell: ({ row }) => (
+                  <Menu shadow="md" width={180} position="bottom-end">
+                    <Menu.Target>
+                      <ActionIcon variant="subtle" color="gray" radius="sm">
+                        <IconDotsVertical size={18} />
+                      </ActionIcon>
+                    </Menu.Target>
+                    <Menu.Dropdown>
+                      <Menu.Item
+                        leftSection={<IconEye size={16} />}
+                        onClick={() => handleView(row.original)}
+                      >
+                        Ko'rish
+                      </Menu.Item>
+                      <Menu.Item
+                        leftSection={<IconEdit size={16} />}
+                        onClick={() => handleEdit(row.original)}
+                      >
+                        Tahrirlash
+                      </Menu.Item>
+                      <Menu.Item
+                        leftSection={<IconCopy size={16} />}
+                        onClick={() =>
+                          handleCopyToClipboard(row.original.key, "KEY")
+                        }
+                      >
+                        Kalitdan nusxa olish
+                      </Menu.Item>
+                      <Menu.Divider />
+                      <Menu.Item
+                        color="red"
+                        leftSection={<IconTrash size={16} />}
+                        onClick={() => handleDeleteClick(row.original)}
+                      >
+                        O'chirish
+                      </Menu.Item>
+                    </Menu.Dropdown>
+                  </Menu>
+                ),
+                meta: { width: 80, truncate: false },
+              },
+            ]}
+            data={
+              data?.data
+                ? data?.data.flatMap((item: any) =>
+                  item.permissions.map((perm: any) => ({
+                    ...perm,
+                    module: item.module,
+                  })),
+                )
+                : []
+            }
+          />
+        )}
+      </Box>
 
-              return <CustomAction actions={actions} />;
-            },
-            meta: {
-              width: 20,
-            },
-          },
-        ]}
-        data={
-          data?.data
-            ? data?.data.flatMap((item: any) =>
-                item.permissions.map((perm: any) => ({
-                  ...perm,
-                  module: item.module,
-                })),
-              )
-            : []
-        }
-      />
+      {/* Modals */}
       <CustomModal
         closeOnOverlayClick={false}
         title="Ruxsat qo'shish"
@@ -214,6 +336,7 @@ const PermissionPage = () => {
       >
         <PermissionFormModal modal={createModal} mode="create" />
       </CustomModal>
+
       <CustomModal
         size="3xl"
         closeOnOverlayClick
@@ -223,6 +346,7 @@ const PermissionPage = () => {
       >
         <PermissionView />
       </CustomModal>
+
       <CustomModal
         closeOnOverlayClick={false}
         title="Ruxsatni yangilash"
@@ -237,6 +361,7 @@ const PermissionPage = () => {
           onSuccess={handleEditSuccess}
         />
       </CustomModal>
+
       <ConfirmationModal
         closeOnOverlayClick={false}
         title="Ruxsatlarni o'chirish"
@@ -246,8 +371,9 @@ const PermissionPage = () => {
         onConfirm={() => {
           handleDelete(selectedPermission?.id as string);
         }}
+        variant="destructive"
       />
-    </>
+    </Box>
   );
 };
 

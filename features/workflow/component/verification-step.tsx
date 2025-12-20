@@ -23,6 +23,7 @@ import {
 } from "@tabler/icons-react";
 import { useVerifyWorkflowStep } from "../hook/workflow.hook";
 import { notifications } from "@mantine/notifications";
+import { Dropzone, DropzoneProps, IMAGE_MIME_TYPE, PDF_MIME_TYPE } from "@mantine/dropzone";
 
 interface VerificationStepProps {
     stepId: string;
@@ -101,25 +102,77 @@ export const VerificationStep = ({ stepId, onSuccess }: VerificationStepProps) =
                 </Box>
 
                 {/* File Upload Area */}
+                {/* File Upload Area */}
                 <Box>
-                    <Group justify="space-between" mb="xs">
-                        <Text size="sm" fw={500}>Fayllar ({files.length}/10)</Text>
-                        <FileButton onChange={handleFileChange} accept="image/*,application/pdf" multiple>
-                            {(props) => (
-                                <Button
-                                    {...props}
-                                    variant="light"
-                                    size="xs"
-                                    leftSection={<IconUpload size={14} />}
-                                >
-                                    Fayl yuklash
-                                </Button>
-                            )}
-                        </FileButton>
-                    </Group>
+                    <Text size="sm" fw={500} mb="xs">Fayllar ({files.length}/10)</Text>
 
-                    {files.length > 0 ? (
-                        <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="xs">
+                    <Dropzone
+                        onDrop={handleFileChange}
+                        onReject={(files) => notifications.show({
+                            message: "Fayl yuklashda xatolik yuz berdi. Hajmi 50MB dan oshmasligi va ruxsat etilgan formatda bo'lishi kerak.",
+                            color: "red"
+                        })}
+                        maxSize={50 * 1024 ** 2}
+                        accept={[
+                            ...IMAGE_MIME_TYPE,
+                            ...PDF_MIME_TYPE,
+                            'application/msword',
+                            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                            'video/webm',
+                            'application/vnd.apple.mpegurl',
+                            'application/x-mpegURL'
+                        ]}
+                        maxFiles={10}
+                        disabled={files.length >= 10}
+                        styles={(theme) => ({
+                            root: {
+                                borderColor: theme.colors.gray[4],
+                                borderStyle: 'dashed',
+                                borderWidth: 1,
+                                backgroundColor: files.length >= 10 ? theme.colors.gray[0] : 'transparent',
+                                transition: 'all 0.2s ease',
+                                '&:hover': {
+                                    borderColor: theme.colors.blue[4],
+                                    backgroundColor: theme.colors.blue[0],
+                                }
+                            },
+                            inner: {
+                                pointerEvents: 'none',
+                            }
+                        })}
+                    >
+                        <Group justify="center" gap="md" mih={100} style={{ pointerEvents: 'none' }}>
+                            <Dropzone.Accept>
+                                <IconUpload
+                                    style={{ width: 40, height: 40, color: 'var(--mantine-color-blue-6)' }}
+                                    stroke={1.5}
+                                />
+                            </Dropzone.Accept>
+                            <Dropzone.Reject>
+                                <IconX
+                                    style={{ width: 40, height: 40, color: 'var(--mantine-color-red-6)' }}
+                                    stroke={1.5}
+                                />
+                            </Dropzone.Reject>
+                            <Dropzone.Idle>
+                                <ThemeIcon size={46} radius="md" variant="light" color="gray.5">
+                                    <IconUpload size={26} stroke={1.5} />
+                                </ThemeIcon>
+                            </Dropzone.Idle>
+
+                            <Box>
+                                <Text size="sm" fw={500} inline ta="center" c="dark.3">
+                                    Fayllarni yuklash uchun bosing yoki tashlang
+                                </Text>
+                                <Text size="xs" c="dimmed" inline mt={4} ta="center">
+                                    PDF, Word, Rasm, WebM va HLS (maks 50MB)
+                                </Text>
+                            </Box>
+                        </Group>
+                    </Dropzone>
+
+                    {files.length > 0 && (
+                        <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="xs" mt="md">
                             {files.map((file, index) => (
                                 <Paper
                                     key={index}
@@ -131,9 +184,14 @@ export const VerificationStep = ({ stepId, onSuccess }: VerificationStepProps) =
                                         <ThemeIcon
                                             size="lg"
                                             variant="light"
-                                            color={isImage(file) ? "blue" : "red"}
+                                            color={
+                                                file.type.startsWith("image/") ? "blue" :
+                                                    file.type === "application/pdf" ? "red" :
+                                                        file.type.includes("word") ? "blue" :
+                                                            file.type.includes("video") ? "grape" : "gray"
+                                            }
                                         >
-                                            {isImage(file) ? <IconPhoto size={20} /> : <IconFile size={20} />}
+                                            {file.type.startsWith("image/") ? <IconPhoto size={20} /> : <IconFile size={20} />}
                                         </ThemeIcon>
 
                                         <Box style={{ flex: 1, overflow: "hidden" }}>
@@ -167,23 +225,6 @@ export const VerificationStep = ({ stepId, onSuccess }: VerificationStepProps) =
                                 </Paper>
                             ))}
                         </SimpleGrid>
-                    ) : (
-                        <Paper
-                            p="xl"
-                            withBorder
-                            style={{ borderStyle: 'dashed', backgroundColor: '#f8f9fa' }}
-                        >
-                            <Center>
-                                <Stack align="center" gap="xs">
-                                    <ThemeIcon size={48} radius="xl" variant="light" color="gray">
-                                        <IconUpload size={24} />
-                                    </ThemeIcon>
-                                    <Text size="sm" c="dimmed">
-                                        Hali hech qanday fayl yuklanmadi
-                                    </Text>
-                                </Stack>
-                            </Center>
-                        </Paper>
                     )}
                 </Box>
 

@@ -58,7 +58,7 @@ const ACTION_LABELS: Record<string, { label: string; icon: any }> = {
   SIGN: { label: "Imzolash", icon: IconSignature },
   REVIEW: { label: "Ko'rib chiqish", icon: IconEye },
   ACKNOWLEDGE: { label: "Tanishish", icon: IconBookmark },
-  VERIFICATION: { label: "Ishni tasdiqlash", icon: IconCheck },
+  VERIFICATION: { label: "Ijro uchun", icon: IconCheck },
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -78,6 +78,7 @@ const STEP_STATUS_LABELS: Record<string, { label: string; color: string }> = {
 };
 
 const WorkflowDetailView = memo(({ workflow }: WorkflowDetailViewProps) => {
+  console.log(workflow);
   const router = useRouter();
   const completeMutation = useCompleteWorkflowStep();
   const rejectMutation = useRejectWorkflowStep();
@@ -188,10 +189,10 @@ const WorkflowDetailView = memo(({ workflow }: WorkflowDetailViewProps) => {
   }, [documentData, workflow.id, router]);
 
   const handleViewDocument = useCallback(() => {
-    if (documentData?.attachments?.[0]?.id && workflow.documentId) {
-      router.push(`/document-edit?id=${documentData.attachments[0].id}&documentId=${workflow.documentId}&readonly=true`);
+    if (workflow.document?.id) {
+      router.push(`/pdf/${workflow.document.id}?workflowId=${workflow.id}&actionType=read`);
     }
-  }, [documentData, workflow.documentId, router]);
+  }, [workflow.document, workflow.id, router]);
 
   const handleDownloadDocument = useCallback(() => {
     if (workflow.document?.id) {
@@ -494,7 +495,7 @@ const WorkflowDetailView = memo(({ workflow }: WorkflowDetailViewProps) => {
 
               {/* Document Actions */}
               <Stack gap="xs">
-                {canEditDocument && (
+                {workflow.document?.id && (
                   <Button
                     variant="light"
                     size="sm"
@@ -504,7 +505,7 @@ const WorkflowDetailView = memo(({ workflow }: WorkflowDetailViewProps) => {
                     onClick={handleViewDocument}
                     color="dark"
                   >
-                    Original hujjat
+                    Joriy hujjat
                   </Button>
                 )}
                 {workflow.status === "COMPLETED" && workflow.document?.id && (

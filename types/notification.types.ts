@@ -1,4 +1,4 @@
-// Notification Types
+
 export enum NotificationType {
     WORKFLOW_STEP_ASSIGNED = 'workflow_step_assigned',
     WORKFLOW_STEP_COMPLETED = 'workflow_step_completed',
@@ -11,7 +11,6 @@ export enum NotificationType {
     DOCUMENT_REJECTED = 'document_rejected',
 }
 
-// Metadata types for different notification types
 export interface WorkflowStepAssignedMetadata {
     workflowStepId: string;
     workflowId: string;
@@ -81,7 +80,6 @@ export type NotificationMetadata =
     | DocumentApprovedMetadata
     | DocumentRejectedMetadata;
 
-// Main Notification interface
 export interface Notification {
     id: string;
     userId: string;
@@ -95,7 +93,6 @@ export interface Notification {
     updatedAt: string;
 }
 
-// Response types
 export interface PendingNotificationsResponse {
     count: number;
     notifications: Notification[];
@@ -106,12 +103,10 @@ export interface MarkAsReadResponse {
     message: string;
 }
 
-// Socket event types
 export interface SocketErrorResponse {
     message: string;
 }
 
-// Online Users types
 export interface OnlineUser {
     id: string;
     fullname: string;

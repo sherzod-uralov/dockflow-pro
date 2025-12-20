@@ -35,7 +35,6 @@ import {
 } from "@mantine/core";
 import {useDisclosure} from "@mantine/hooks";
 
-// ==================== TYPES ====================
 type OnboardingConfig = {
     steps: DriveStep[];
     title: string;
@@ -56,11 +55,9 @@ type OnboardingContextType = {
     getTourProgress: () => { completed: number; total: number };
 };
 
-// ==================== CONSTANTS ====================
 const ONBOARDING_KEY = "dockflow_onboarding_completed";
 const ONBOARDING_ENABLED_KEY = "dockflow_onboarding_enabled";
 
-// ==================== TOUR CONFIGURATIONS ====================
 export const TOUR_CONFIGS: Record<string, OnboardingConfig> = {
     dashboard: {
         title: "Bosh sahifa",
@@ -360,10 +357,8 @@ function createDriver(
     });
 }
 
-// ==================== CONTEXT ====================
 const OnboardingContext = createContext<OnboardingContextType | null>(null);
 
-// ==================== PROVIDER ====================
 export function OnboardingProvider({children}: { children: ReactNode }) {
     const [isGlobalEnabled, setIsGlobalEnabled] = useState(true);
     const [completedTours, setCompletedTours] = useState<string[]>([]);
@@ -869,7 +864,6 @@ export function TourSettingsDrawer({opened, onClose}: TourSettingsDrawerProps) {
     );
 }
 
-// ==================== SETTINGS BUTTON ====================
 export function TourSettingsButton() {
     const [opened, {open, close}] = useDisclosure(false);
 
@@ -883,47 +877,4 @@ export function TourSettingsButton() {
             <TourSettingsDrawer opened={opened} onClose={close}/>
         </>
     );
-}
-
-// ==================== UTILITY FUNCTIONS ====================
-export function getCompletedTours(): string[] {
-    if (typeof window === "undefined") return [];
-    const completed = localStorage.getItem(ONBOARDING_KEY);
-    return completed ? JSON.parse(completed) : [];
-}
-
-export function isTourCompleted(tourKey: string): boolean {
-    return getCompletedTours().includes(tourKey);
-}
-
-export function markTourAsCompleted(tourKey: string): void {
-    if (typeof window === "undefined") return;
-    const completedTours = getCompletedTours();
-    if (!completedTours.includes(tourKey)) {
-        completedTours.push(tourKey);
-        localStorage.setItem(ONBOARDING_KEY, JSON.stringify(completedTours));
-    }
-}
-
-export function resetTour(tourKey: string): void {
-    if (typeof window === "undefined") return;
-    const completedTours = getCompletedTours();
-    const filtered = completedTours.filter((t) => t !== tourKey);
-    localStorage.setItem(ONBOARDING_KEY, JSON.stringify(filtered));
-}
-
-export function resetAllTours(): void {
-    if (typeof window === "undefined") return;
-    localStorage.removeItem(ONBOARDING_KEY);
-}
-
-export function isOnboardingEnabled(): boolean {
-    if (typeof window === "undefined") return true;
-    const enabled = localStorage.getItem(ONBOARDING_ENABLED_KEY);
-    return enabled !== null ? JSON.parse(enabled) : true;
-}
-
-export function setOnboardingEnabled(enabled: boolean): void {
-    if (typeof window === "undefined") return;
-    localStorage.setItem(ONBOARDING_ENABLED_KEY, JSON.stringify(enabled));
 }

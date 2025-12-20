@@ -26,9 +26,10 @@ import { useGetProfileQuery } from "@/features/login/hook/login.hook";
 
 interface PDFViewerProps {
   documentId?: string;
+  action?: "read" | "edit";
 }
 
-export function PDFViewer({ documentId }: PDFViewerProps) {
+export function PDFViewer({ documentId, action = "edit" }: PDFViewerProps) {
   const viewer = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -70,13 +71,66 @@ export function PDFViewer({ documentId }: PDFViewerProps) {
               documentViewer.setToolMode(panTool);
             }
 
-            // Set instance and loading state only after document is fully loaded
             setInstance(inst);
             setIsLoading(false);
           });
 
-          // Disable signature tool click for QR_CODE action
-          if (actionType === "QR_CODE") {
+          if (action === "read") {
+            inst.UI.disableFeatures([
+              inst.UI.Feature.Annotations,
+              inst.UI.Feature.Download,
+              inst.UI.Feature.FilePicker,
+              inst.UI.Feature.NotesPanel,
+              inst.UI.Feature.Print,
+              inst.UI.Feature.Redaction,
+              inst.UI.Feature.TextSelection,
+              inst.UI.Feature.Copy,
+            ]);
+
+            inst.UI.disableElements([
+              'header',
+              'toolsHeader',
+              'annotationPopup',
+              'contextMenuPopup',
+              'toolStylePopup',
+              'signatureModal',
+              'printModal',
+              'leftPanel',
+              'leftPanelButton',
+              'searchButton',
+              'notesPanel',
+              'notesPanelButton',
+              'menuButton',
+              'viewControlsButton',
+              'selectToolButton',
+              'annotationToolButton',
+              'toolsButton',
+              'searchPanel',
+            ]);
+
+            // Disable annotation creation and enable read-only
+            documentViewer.addEventListener('documentLoaded', () => {
+              const annotationManager = inst.Core.annotationManager;
+              annotationManager.enableReadOnlyMode();
+
+              // Disable all editing tools except pan
+              const { Tools } = inst.Core;
+              const panTool = documentViewer.getTool(Tools.ToolNames.PAN);
+
+              // Lock to pan tool only
+              documentViewer.setToolMode(panTool);
+
+              // Prevent tool switching
+              documentViewer.addEventListener('toolModeUpdated', (e: any) => {
+                if (e.mode.name !== Tools.ToolNames.PAN) {
+                  documentViewer.setToolMode(panTool);
+                }
+              });
+            });
+          }
+
+          // Disable signature tool click for QR_CODE action (when in edit mode)
+          if (action === "edit" && actionType === "QR_CODE") {
             // Disable signature-related UI elements
             inst.UI.disableElements(['signatureToolGroupButton', 'signatureToolButton']);
           }
@@ -338,58 +392,66 @@ export function PDFViewer({ documentId }: PDFViewerProps) {
               <IconArrowLeft size={20} />
             </ActionIcon>
             <Text size="md" fw={600} c="#212529">
-              {actionType === "SIGN" ? "Imzolash" : "PDF Editor"}
+              {action === "read"
+                ? "PDF Ko'rish"
+                : (actionType === "SIGN" ? "Imzolash" : "PDF Editor")
+              }
             </Text>
           </Group>
 
           <Group gap="xs">
-            {/* QR Code button - only for QR_CODE action */}
-            {actionType === "QR_CODE" && (
-              <Button
-                variant="outline"
-                size="sm"
-                radius="sm"
-                leftSection={<IconQrcode size={16} />}
-                onClick={handleAddQRCode}
-                disabled={!documentId || isLoading || !instance}
-                color="dark"
-              >
-                QR kod
-              </Button>
-            )}
+            {/* Only show editing buttons when action is "edit" */}
+            {action === "edit" && (
+              <>
+                {/* QR Code button - only for QR_CODE action */}
+                {actionType === "QR_CODE" && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    radius="sm"
+                    leftSection={<IconQrcode size={16} />}
+                    onClick={handleAddQRCode}
+                    disabled={!documentId || isLoading || !instance}
+                    color="dark"
+                  >
+                    QR kod
+                  </Button>
+                )}
 
-            {/* Signature button - only for SIGN action */}
-            {actionType === "SIGN" && (
-              <Button
-                variant="outline"
-                size="sm"
-                radius="sm"
-                leftSection={<IconSignature size={16} />}
-                onClick={handleAddSignature}
-                disabled={!documentId || isLoading || !instance}
-                color="dark"
-              >
-                Imzo qo'yish
-              </Button>
-            )}
+                {/* Signature button - only for SIGN action */}
+                {actionType === "SIGN" && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    radius="sm"
+                    leftSection={<IconSignature size={16} />}
+                    onClick={handleAddSignature}
+                    disabled={!documentId || isLoading || !instance}
+                    color="dark"
+                  >
+                    Imzo qo'yish
+                  </Button>
+                )}
 
-            {documentId && (
-              <Button
-                size="sm"
-                radius="sm"
-                leftSection={
-                  isSaving ? (
-                    <Loader size={14} color="white" />
-                  ) : (
-                    <IconDeviceFloppy size={16} />
-                  )
-                }
-                onClick={handleSaveAnnotations}
-                disabled={isSaving || isLoading}
-                style={{ backgroundColor: "#1e3a5f" }}
-              >
-                {isSaving ? "Saqlanmoqda..." : "Saqlash"}
-              </Button>
+                {documentId && (
+                  <Button
+                    size="sm"
+                    radius="sm"
+                    leftSection={
+                      isSaving ? (
+                        <Loader size={14} color="white" />
+                      ) : (
+                        <IconDeviceFloppy size={16} />
+                      )
+                    }
+                    onClick={handleSaveAnnotations}
+                    disabled={isSaving || isLoading}
+                    style={{ backgroundColor: "#1e3a5f" }}
+                  >
+                    {isSaving ? "Saqlanmoqda..." : "Saqlash"}
+                  </Button>
+                )}
+              </>
             )}
           </Group>
         </Group>

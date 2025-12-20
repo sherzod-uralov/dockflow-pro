@@ -1,6 +1,4 @@
-/**
- * Format date to DD.MM.YYYY HH:mm format
- */
+
 export function formatDateTime(date: Date | string): string {
   const d = typeof date === "string" ? new Date(date) : date;
 
@@ -13,9 +11,6 @@ export function formatDateTime(date: Date | string): string {
   return `${day}.${month}.${year} ${hours}:${minutes}`;
 }
 
-/**
- * Format date to DD.MM.YYYY format
- */
 export function formatDate(date: Date | string): string {
   const d = typeof date === "string" ? new Date(date) : date;
 
@@ -26,17 +21,5 @@ export function formatDate(date: Date | string): string {
   return `${day}.${month}.${year}`;
 }
 
-/**
- * Convert DD.MM.YYYY format to ISO string
- */
-export function parseDate(dateStr: string): string {
-  const [day, month, year] = dateStr.split(".");
-  return new Date(Number(year), Number(month) - 1, Number(day)).toISOString();
-}
 
-/**
- * Get current date/time in ISO format
- */
-export function getCurrentDateTime(): string {
-  return new Date().toISOString();
-}
+

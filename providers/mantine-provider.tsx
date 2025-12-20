@@ -8,7 +8,6 @@ import "@mantine/core/styles.css";
 import "@mantine/notifications/styles.css";
 import "@mantine/dates/styles.css";
 
-// Davlat sektori uchun professional ko'k rang palitrasi
 const theme = createTheme({
   primaryColor: "gov",
   colors: {
@@ -62,7 +61,6 @@ export function MantineProviderWrapper({
 }: {
   children: React.ReactNode;
 }) {
-  const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {

@@ -1,4 +1,4 @@
-import { DataPagination } from "@/types/global.types";
+ import { DataPagination } from "@/types/global.types";
 import { UserSchemaZodType } from "../schema/user.schema";
 import { ModalState } from "@/types/modal";
 

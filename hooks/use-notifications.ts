@@ -38,7 +38,6 @@ export const useNotifications = (): UseNotificationsReturn => {
     useEffect(() => {
         const accessToken = authService.getAccessToken();
 
-        // Agar token bo'lmasa, socket yaratmaymiz
         if (!accessToken) {
             console.warn('⚠️ No access token found, skipping socket connection');
             return;
@@ -61,13 +60,11 @@ export const useNotifications = (): UseNotificationsReturn => {
             forceNew: true,
         });
 
-        // Connection successful
         newSocket.on('connect', async () => {
             console.log('✅ Connected to notification server');
             console.log('📡 Socket ID:', newSocket.id);
             setIsConnected(true);
 
-            // Request online users list
             console.log('📤 Emitting online-users:request');
             newSocket.emit('online-users:request');
 
@@ -92,7 +89,6 @@ export const useNotifications = (): UseNotificationsReturn => {
             }
         });
 
-        // Pending notifications (connection paytida keladi)
         newSocket.on('pending-notifications', (data: PendingNotificationsResponse) => {
             console.log(`📬 Received ${data.count} pending notifications`);
             console.log('📬 Notifications data:', data);
@@ -107,15 +103,12 @@ export const useNotifications = (): UseNotificationsReturn => {
             console.log(`🎯 Event received: ${eventName}`, args);
         });
 
-        // Real-time yangi notification
         newSocket.on('notification', (notification: Notification) => {
             console.log('🔔 New notification received:', notification);
 
-            // Notificationlar ro'yxatiga qo'shish
             setNotificationsList((prev) => [notification, ...prev]);
             setUnreadCount((prev) => prev + 1);
 
-            // Mantine toast notification ko'rsatish
             notifications.show({
                 title: notification.title,
                 message: notification.message,
@@ -125,24 +118,18 @@ export const useNotifications = (): UseNotificationsReturn => {
             });
         });
 
-        // Error handling
         newSocket.on('error', (error: SocketErrorResponse) => {
             console.error('❌ Socket error:', error.message);
 
             if (error.message === 'Authentication failed') {
-                // Token muammosi bo'lsa, logout qilish
                 notifications.show({
                     title: 'Autentifikatsiya xatosi',
                     message: 'Iltimos, qayta tizimga kiring',
                     color: 'red',
                 });
-
-                // Optional: auto logout
-                // authService.logout();
             }
         });
 
-        // Disconnect
         newSocket.on('disconnect', (reason: string) => {
             console.log('🔌 Disconnected from notification server:', reason);
             setIsConnected(false);
@@ -151,7 +138,6 @@ export const useNotifications = (): UseNotificationsReturn => {
             setOnlineUsers([]);
         });
 
-        // Online Users Events
         newSocket.on('online-users:list', (data: OnlineUsersListEvent) => {
             console.log('👥 Received online users list:', data);
             console.log(`👥 Received ${data.count} online users`);
@@ -172,7 +158,6 @@ export const useNotifications = (): UseNotificationsReturn => {
             }
         });
 
-        // Connection error
         let errorCount = 0;
         newSocket.on('connect_error', async (error: Error) => {
             errorCount++;
@@ -183,7 +168,6 @@ export const useNotifications = (): UseNotificationsReturn => {
             });
             console.warn('⚠️ Notification server bilan ulanishda xatolik:', error.message);
 
-            // Agar xatolik autentifikatsiya bilan bog'liq bo'lsa, tokenni yangilashga urinib ko'ramiz
             if (error.message.includes('Authentication error') || error.message.includes('jwt expired') || error.message.includes('403') || error.message.includes('401') || error.message.includes('websocket error')) {
                 console.log('🔄 Token eskirgan bo\'lishi mumkin, yangilashga urinmoqda...');
                 try {
@@ -199,22 +183,18 @@ export const useNotifications = (): UseNotificationsReturn => {
                 }
             }
 
-            // Faqat birinchi xatoda log qilish (spam oldini olish)
             if (errorCount === 1) {
                 console.info('ℹ️ Notification tizimi hozircha ishlamayapti. Asosiy funksiyalar ishlaydi.');
             }
             setIsConnected(false);
         });
 
-        // Heartbeat mechanism (keep connection alive)
         const heartbeatInterval = setInterval(() => {
             if (newSocket.connected) {
-                // console.log('💓 Sending heartbeat');
                 newSocket.emit('heartbeat');
             }
         }, 30000);
 
-        // Periodic refresh for online users (resilience)
         const refreshInterval = setInterval(() => {
             if (newSocket.connected) {
                 console.log('🔄 Refreshing online users list');
@@ -224,16 +204,14 @@ export const useNotifications = (): UseNotificationsReturn => {
 
         setSocket(newSocket);
 
-        // Cleanup on unmount
         return () => {
             console.log('🧹 Cleaning up socket connection');
             clearInterval(heartbeatInterval);
             clearInterval(refreshInterval);
             newSocket.close();
         };
-    }, []); // Empty dependency array - faqat mount/unmount paytida
+    }, []);
 
-    // Mark as read function
     const markAsRead = useCallback(
         (notificationIds: string[]) => {
             if (!socket || !socket.connected) {
@@ -248,7 +226,6 @@ export const useNotifications = (): UseNotificationsReturn => {
                     if (response.success) {
                         console.log('✅ Notifications marked as read:', notificationIds);
 
-                        // Local state yangilash
                         setNotificationsList((prev) =>
                             prev.map((n) =>
                                 notificationIds.includes(n.id)
@@ -272,7 +249,6 @@ export const useNotifications = (): UseNotificationsReturn => {
         [socket]
     );
 
-    // Mark all as read function
     const markAllAsRead = useCallback(() => {
         if (!socket || !socket.connected) {
             console.warn('Socket not connected, cannot mark all as read');
@@ -283,7 +259,6 @@ export const useNotifications = (): UseNotificationsReturn => {
             if (response.success) {
                 console.log('✅ All notifications marked as read');
 
-                // Local state yangilash
                 setNotificationsList((prev) =>
                     prev.map((n) => ({ ...n, isRead: true, readAt: new Date().toISOString() }))
                 );
@@ -300,7 +275,6 @@ export const useNotifications = (): UseNotificationsReturn => {
         });
     }, [socket]);
 
-    // Refresh workflow count function
     const refreshWorkflowCount = useCallback(() => {
         if (!socket || !socket.connected) {
             console.warn('Socket not connected, cannot refresh workflow count');
