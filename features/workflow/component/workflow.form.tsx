@@ -57,9 +57,14 @@ const WorkflowForm = ({
 }: WorkflowFormProps) => {
   const createWorkflowMutation = useCreateWorkflow();
   const updateStepMutation = useUpdateWorkflowStep();
-  const { data: usersData, isLoading: isLoadingUsers } = useGetUserQuery();
+  const { data: usersData, isLoading: isLoadingUsers } = useGetUserQuery({
+      pageNumber:1,
+      pageSize:1000
+  });
   const { data: documentsData } = useGetAllDocuments({
-    status: WorkflowStatus.DRAFT
+    status: WorkflowStatus.DRAFT,
+      pageNumber:1,
+      pageSize:1000
   });
   const [searchQueries, setSearchQueries] = useState<{ [key: number]: string }>(
     {}

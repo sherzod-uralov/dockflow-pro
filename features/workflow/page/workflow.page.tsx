@@ -307,7 +307,6 @@ const EmptyState = ({ onCreateNew }: { onCreateNew: () => void }) => (
 const WorkflowPage = () => {
   const router = useRouter();
 
-  // Onboarding tour
   useOnboarding("workflow");
 
   const createModal: ModalState = useModal();
@@ -328,13 +327,11 @@ const WorkflowPage = () => {
   const [documentFilter, setDocumentFilter] = useState<string | null>(null);
   const [typeFilter, setTypeFilter] = useState<string | null>(null);
 
-  // Get documents for filter
   const { data: documentsData } = useGetAllDocuments({
     pageNumber: 1,
     pageSize: 100,
   });
 
-  // Check for active workflows to set default tab
   const { data: activeWorkflowsCheck } = useGetAllWorkflows({
     status: WorkflowStatus.ACTIVE,
     page: 1,
