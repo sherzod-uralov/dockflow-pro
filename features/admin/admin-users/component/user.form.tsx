@@ -27,12 +27,14 @@ import { useGetRoles } from "../../roles/hook/role.hook";
 import { useGetAllDeportaments } from "@/features/deportament";
 import type { UserFormProps } from "../type/user.types";
 import { z } from "zod";
+import { useCreateAttachment } from "@/features/attachment/hook/attachment.hook";
 
 type UserFormValues = z.infer<typeof UserSchema>;
 
 export default function UserForm({ mode, modal, userData }: UserFormProps) {
   const createUser = useCreateUserMutation();
   const updateUser = useUpdateUserMutation();
+  const { mutateAsync: uploadFile, isLoading: isUploading } = useCreateAttachment();
 
   const { data: roles, isLoading: isLoadingRoles } = useGetRoles({
     pageNumber: 1,
@@ -61,6 +63,21 @@ export default function UserForm({ mode, modal, userData }: UserFormProps) {
     password: "",
   }), [userData]);
 
+  // Dynamic Schema for Validation
+  const FormSchema = useMemo(() => {
+    if (isUpdate && !changePassword) {
+      return UserSchema;
+    }
+    // For Create Mode OR Update with Password Change, make password required
+    return UserSchema.extend({
+      password: z.string()
+        .min(8, { message: "Parol kamida 8 ta belgidan iborat bo'lishi kerak" })
+        .regex(/[A-Z]/, { message: "Parolda kamida bitta katta harf bo'lishi kerak" })
+        .regex(/[a-z]/, { message: "Parolda kamida bitta kichik harf bo'lishi kerak" })
+        .regex(/[0-9]/, { message: "Parolda kamida bitta raqam bo'lishi kerak" })
+    });
+  }, [isUpdate, changePassword]);
+
   const {
     control,
     handleSubmit,
@@ -69,7 +86,7 @@ export default function UserForm({ mode, modal, userData }: UserFormProps) {
     formState: { errors, isSubmitting },
     reset,
   } = useForm<UserFormValues>({
-    resolver: zodResolver(UserSchema),
+    resolver: zodResolver(FormSchema),
     defaultValues,
   });
 
@@ -81,20 +98,24 @@ export default function UserForm({ mode, modal, userData }: UserFormProps) {
     }
   }, [userData, reset, defaultValues]);
 
-  const onSubmit = (values: UserFormValues) => {
+  const onSubmit = async (values: UserFormValues) => {
     const payload: any = { ...values };
 
-    // Handle file upload separately if needed, or assume it's a URL/File object handled by backend
-    // For this implementation, we'll pass it as is, but in real app you might need to upload first
-    // If avatarUrl is a File object, we might need to upload it. 
-    // Assuming the mutation handles it or we need to handle it here.
-    // Based on previous code: avatarUrl: values.avatarUrl?.fileUrl || values.avatarUrl || ""
-
-    // If it's a file object (from Mantine FileInput), we need to handle it.
-    // However, the previous implementation suggested it returns an object with fileUrl.
-    // Let's assume for now we pass what we have, but we might need to adjust based on backend expectation.
-    // If the backend expects a URL string, we can't send a File object directly without uploading.
-    // Since I don't see the upload logic here, I will assume the mutation handles FormData or similar if it's a file.
+    // Handle file upload if avatarUrl is a File object
+    if (values.avatarUrl instanceof File) {
+      try {
+        const response = await uploadFile(values.avatarUrl);
+        payload.avatarUrl = response.fileUrl; // Use the URL from response
+      } catch (error) {
+        console.error("File upload failed", error);
+        return; // Stop submission on upload error
+      }
+    } else {
+      // If not a File (i.e. string or empty), check if it's empty
+      if (!values.avatarUrl || values.avatarUrl === "") {
+        delete payload.avatarUrl;
+      }
+    }
 
     // Password logic
     if (isUpdate && !changePassword) {
@@ -137,7 +158,7 @@ export default function UserForm({ mode, modal, userData }: UserFormProps) {
     if (file) {
       const url = URL.createObjectURL(file);
       setPreviewUrl(url);
-      setValue("avatarUrl", file as any); // Setting File object, schema might need adjustment or backend handles it
+      setValue("avatarUrl", file as any);
     } else {
       setPreviewUrl(null);
       setValue("avatarUrl", "");
@@ -147,7 +168,7 @@ export default function UserForm({ mode, modal, userData }: UserFormProps) {
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <Stack gap="md" pos="relative">
-        <LoadingOverlay visible={isLoading || isLoadingRoles || isLoadingDepartments} zIndex={1000} overlayProps={{ radius: "sm", blur: 2 }} />
+        <LoadingOverlay visible={isLoading || isLoadingRoles || isLoadingDepartments || isUploading} zIndex={1000} overlayProps={{ radius: "sm", blur: 2 }} />
 
         <Group grow align="flex-start">
           <Controller
@@ -215,6 +236,7 @@ export default function UserForm({ mode, modal, userData }: UserFormProps) {
             render={({ field }) => (
               <PasswordInput
                 label="Parol"
+                withAsterisk
                 placeholder="Parol kiriting"
                 error={errors.password?.message}
                 {...field}
@@ -228,6 +250,7 @@ export default function UserForm({ mode, modal, userData }: UserFormProps) {
             label="Parolni o'zgartirasizmi?"
             checked={changePassword}
             onChange={(event) => setChangePassword(event.currentTarget.checked)}
+            style={{ cursor: "pointer" }}
           />
         )}
 
@@ -261,6 +284,7 @@ export default function UserForm({ mode, modal, userData }: UserFormProps) {
               checked={field.value}
               onChange={(event) => field.onChange(event.currentTarget.checked)}
               error={errors.isActive?.message}
+              style={{ cursor: "pointer" }}
             />
           )}
         />
@@ -269,7 +293,7 @@ export default function UserForm({ mode, modal, userData }: UserFormProps) {
           <Button variant="default" onClick={() => modal.closeModal()}>
             Bekor qilish
           </Button>
-          <Button type="submit" loading={isSubmitting || isLoading}>
+          <Button type="submit" loading={isSubmitting || isLoading || isUploading}>
             {isUpdate ? "Saqlash" : "Qo'shish"}
           </Button>
         </Group>

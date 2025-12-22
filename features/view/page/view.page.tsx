@@ -1,6 +1,7 @@
 "use client";
 
 import { useVerifyDocument } from "../hook/view.hook";
+import { useDownloadDocument } from "@/features/workflow/hook/workflow.hook";
 import {
   Paper,
   Badge,
@@ -15,6 +16,7 @@ import {
   Divider,
   ThemeIcon,
   Container,
+  Button,
 } from "@mantine/core";
 import {
   IconFileText,
@@ -28,6 +30,7 @@ import {
   IconHash,
   IconBuilding,
   IconCheckbox,
+  IconDownload,
 } from "@tabler/icons-react";
 import { WorkflowStepStatus, WorkflowActionType, WorkflowStatus } from "@/features/workflow/type/workflow.type";
 import { WorkflowStepInfo } from "../type/view.type";
@@ -130,8 +133,14 @@ const formatDate = (dateString: string | null) => {
 };
 
 export default function ViewPage({ documentId }: ViewPageProps) {
-  const { data, isLoading, isError, error } = useVerifyDocument(documentId);
-  console.log(data);
+  const { data, isLoading, isError } = useVerifyDocument(documentId);
+  const downloadMutation = useDownloadDocument();
+
+  const handleDownload = () => {
+    if (documentId) {
+      downloadMutation.mutate({ documentId });
+    }
+  };
 
   if (isLoading) {
     return (
@@ -188,14 +197,29 @@ export default function ViewPage({ documentId }: ViewPageProps) {
         <Stack gap="lg">
           {/* Header */}
           <Paper p="xl" shadow="xs" style={{ backgroundColor: "#1864ab", color: "white" }}>
-            <Group gap="md">
-              <ThemeIcon size={56} radius="md" variant="white" color="gov">
-                <IconShieldCheck size={32} />
-              </ThemeIcon>
-              <div>
-                <Title order={2}>Hujjat aylanmalari</Title>
-                <Text size="sm" opacity={0.9}>Barcha hujjat aylanmalarini boshariq</Text>
-              </div>
+            <Group justify="space-between" align="center">
+              <Group gap="md">
+                <ThemeIcon size={56} radius="md" variant="white" color="gov">
+                  <IconShieldCheck size={32} />
+                </ThemeIcon>
+                <div>
+                  <Title order={2}>Hujjat aylanmalari</Title>
+                  <Text size="sm" opacity={0.9}>Barcha hujjat aylanmalarini boshariq</Text>
+                </div>
+              </Group>
+
+              {isWorkflowComplete && (
+                <Button
+                  justify="center"
+                  leftSection={<IconDownload size={20} />}
+                  variant="white"
+                  c="gov"
+                  loading={downloadMutation.isLoading}
+                  onClick={handleDownload}
+                >
+                  Tasdiqlangan hujjatni yuklab olish
+                </Button>
+              )}
             </Group>
           </Paper>
 
