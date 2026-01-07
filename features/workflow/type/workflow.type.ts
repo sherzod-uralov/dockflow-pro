@@ -32,31 +32,21 @@ export enum WorkflowActionType {
 }
 
 export const ACTION_TYPE_OPTIONS = [
-  {
-    value: WorkflowActionType.APPROVAL,
-    label: "Tasdiqlash",
-    description: "Hujjatni tasdiqlash jarayoni",
-  },
-  {
-    value: WorkflowActionType.REVIEW,
-    label: "Ko'rib chiqish",
-    description: "Hujjatni ko'rib chiqish",
-  },
-  {
-    value: WorkflowActionType.SIGN,
-    label: "Imzolash",
-    description: "Hujjatga imzo qo'yish",
-  },
-  {
-    value: WorkflowActionType.ACKNOWLEDGE,
-    label: "Tanishish",
-    description: "Hujjat bilan tanishish",
-  },
-  {
+    {
+        value: WorkflowActionType.SIGN,
+        label: "Imzolash",
+        description: "Hujjatga imzo qo'yish",
+    },
+    {
     value: WorkflowActionType.VERIFICATION,
       label: "Ijro uchun",
     description: "Ijro uchun fayllar yuklash",
-  },
+    },
+    {
+        value: WorkflowActionType.APPROVAL,
+        label: "Tasdiqlash",
+        description: "Hujjatni tasdiqlash jarayoni",
+    },
 ] as const;
 
 export const WORKFLOW_TYPE_OPTIONS = [
@@ -273,19 +263,9 @@ export function isUserEligibleForRollback(
     (step) => step.assignedToUserId === userId,
   );
 
-  // Проверяем, есть ли у пользователя шаги до текущего
   return userSteps.some((step) => step.order < currentStep.order);
 }
 
-// ============================================
-// CALENDAR VIEW
-// ============================================
-
-export type CalendarViewParams = {
-  startDate?: string;
-  endDate?: string;
-  status?: WorkflowStepStatus;
-};
 
 export type WorkflowStepWithWorkflow = WorkflowStepApiResponse & {
   workflow?: {
@@ -300,17 +280,6 @@ export type CalendarDayData = {
   count: number;
 };
 
-export type CalendarViewResponse = {
-  data: CalendarDayData[];
-  totalCount: number;
-  daysWithSteps: number;
-};
-
-// ============================================
-// MY TASKS
-// ============================================
-
-// Список задач пользователя (workflow steps)
 export interface MyTasksResponse extends DataPagination {
   data: Array<
     WorkflowStepApiResponse & {
@@ -325,26 +294,13 @@ export interface MyTasksResponse extends DataPagination {
   hasPrevious?: boolean;
 }
 
-// Параметры запроса для моих задач (workflow steps текущего пользователя)
 export interface MyTasksQueryParams {
-  status?: WorkflowStepStatus; // Фильтр по статусу step
-  actionType?: WorkflowActionType; // Фильтр по типу действия
+  status?: WorkflowStepStatus;
+  actionType?: WorkflowActionType;
   page?: number;
   limit?: number;
 }
 
-// Данные workflow для формы (плоская структура)
-// ✨ ОБНОВЛЕНО: actionType теперь в каждом step отдельно
-export type WorkflowFormData = {
-  documentId: string;
-  workflowType: WorkflowType; // Тип выполнения workflow
-  steps: WorkflowStepFormData[];
-  deadline?: string;
-};
-
-// ============================================
-// LIST & PAGINATION
-// ============================================
 
 export interface WorkflowListResponse extends DataPagination {
   data: WorkflowApiResponse[];

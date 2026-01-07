@@ -95,10 +95,12 @@ export const useNotifications = (): UseNotificationsReturn => {
             setNotificationsList(data.notifications);
             setUnreadCount(data.count);
         });
+
         newSocket.on('active-workflows-count', (data: { count: number }) => {
             console.log(`📊 Active workflows count: ${data.count}`);
             setActiveWorkflowsCount(data.count);
         });
+
         newSocket.onAny((eventName, ...args) => {
             console.log(`🎯 Event received: ${eventName}`, args);
         });
@@ -131,8 +133,6 @@ export const useNotifications = (): UseNotificationsReturn => {
         });
 
         newSocket.on('disconnect', (reason: string) => {
-            console.log('🔌 Disconnected from notification server:', reason);
-            setIsConnected(false);
             console.log('🔌 Disconnected from notification server:', reason);
             setIsConnected(false);
             setOnlineUsers([]);
@@ -202,12 +202,58 @@ export const useNotifications = (): UseNotificationsReturn => {
             }
         }, 10000);
 
+        // Brauzer yoki tab yopilganda disconnect qilish
+        const handleBeforeUnload = () => {
+            console.log('🚪 Browser/tab closing, disconnecting socket...');
+            if (newSocket && newSocket.connected) {
+                newSocket.disconnect();
+            }
+        };
+
+        // Logout qilganda disconnect qilish (custom event)
+        const handleForceDisconnect = () => {
+            console.log('🚪 Force disconnect (logout), disconnecting socket...');
+            if (newSocket && newSocket.connected) {
+                newSocket.disconnect();
+            }
+            setIsConnected(false);
+            setOnlineUsers([]);
+        };
+
+        // Tab visibility o'zgarganda (tab yashirilganda)
+        const handleVisibilityChange = () => {
+            if (document.hidden) {
+                console.log('👁️ Tab hidden, maintaining connection...');
+                // Tab yashirilganda disconnect qilmaymiz, faqat log qilamiz
+            } else {
+                console.log('👁️ Tab visible, checking connection...');
+                if (!newSocket.connected) {
+                    newSocket.connect();
+                }
+            }
+        };
+
+        // Event listenerlarni qo'shamiz
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        window.addEventListener('force-socket-disconnect', handleForceDisconnect);
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+
         setSocket(newSocket);
 
         return () => {
             console.log('🧹 Cleaning up socket connection');
             clearInterval(heartbeatInterval);
             clearInterval(refreshInterval);
+
+            // Event listenerlarni olib tashlaymiz
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+            window.removeEventListener('force-socket-disconnect', handleForceDisconnect);
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+
+            // Socket disconnect qilamiz
+            if (newSocket && newSocket.connected) {
+                newSocket.disconnect();
+            }
             newSocket.close();
         };
     }, []);

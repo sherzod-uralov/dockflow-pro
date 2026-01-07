@@ -72,6 +72,9 @@ const DocumentFormModal = ({
     document?.tags || {}
   );
 
+  // Track mapping between local File objects and backend IDs
+  const [uploadedFiles, setUploadedFiles] = useState<{ file: File; id: string }[]>([]);
+
   const { data: selectedTemplate, isLoading: isLoadingTemplate } =
     useGetDocumentTemplateById(selectedTemplateId);
 
@@ -131,21 +134,7 @@ const DocumentFormModal = ({
     });
   }, [form]);
 
-  const handleFileUpload = useCallback(async (file: File) => {
-    if (!file) return;
-    try {
-      const response = await uploadFile(file);
-      const current = form.getValues("attachments") || [];
-      form.setValue("attachments", [...current, response.id], {
-        shouldValidate: true,
-      });
-    } catch (error: any) {
-      notifications.show({
-        message: error.message || "Fayl yuklashda xatolik",
-        color: "red",
-      });
-    }
-  }, [uploadFile, form]);
+
 
   const handleTemplateChange = useCallback((templateId: string | null) => {
     const value = templateId || "";
@@ -427,14 +416,50 @@ const DocumentFormModal = ({
               }))}
               onDeleteExisting={handleDeleteFile}
               onChange={async (files) => {
-                if (!files) return;
-                if (Array.isArray(files)) {
-                  for (const file of files) {
-                    await handleFileUpload(file);
-                  }
-                } else {
-                  await handleFileUpload(files);
+                if (!files) {
+                  // If files is undefined/null (cleared), clear everything
+                  setUploadedFiles([]);
+                  form.setValue("attachments", [], { shouldValidate: true });
+                  return;
                 }
+
+                const currentFiles = Array.isArray(files) ? files : [files];
+
+
+                const removedFiles = uploadedFiles.filter(
+                  (uploaded) => !currentFiles.some((current) => current === uploaded.file)
+                );
+
+
+                const newFiles = currentFiles.filter(
+                  (current) => !uploadedFiles.some((uploaded) => uploaded.file === current)
+                );
+
+
+                let updatedUploadedFiles = uploadedFiles.filter(
+                  (uploaded) => !removedFiles.includes(uploaded)
+                );
+
+
+                for (const file of newFiles) {
+                  try {
+                    const response = await uploadFile(file);
+                    updatedUploadedFiles.push({ file, id: response.id });
+                  } catch (error: any) {
+                    notifications.show({
+                      message: error.message || "Fayl yuklashda xatolik",
+                      color: "red",
+                    });
+                  }
+                }
+
+                // Update state
+                setUploadedFiles(updatedUploadedFiles);
+                form.setValue(
+                  "attachments",
+                  updatedUploadedFiles.map((u) => u.id),
+                  { shouldValidate: true }
+                );
               }}
             />
             {form.formState.errors.attachments && (

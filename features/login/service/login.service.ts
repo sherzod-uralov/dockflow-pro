@@ -83,8 +83,11 @@ export const authService = {
         endpoints.auth.login,
         data
       );
+        window.dispatchEvent(new Event('force-socket-disconnect'));
 
-      if (response.data.accessToken && response.data.refreshToken) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        if (response.data.accessToken && response.data.refreshToken) {
         tokenUtils.setTokens(
           response.data.accessToken,
           response.data.refreshToken,
