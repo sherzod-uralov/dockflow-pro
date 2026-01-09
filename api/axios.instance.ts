@@ -28,6 +28,10 @@ const processQueue = (error: any, token: string | null = null) => {
 
 axiosInstance.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
+    if (config.url?.includes("/auth/refresh-token")) {
+      return config;
+    }
+
     const token = authService.getAccessToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
