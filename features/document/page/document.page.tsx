@@ -7,7 +7,7 @@ import {
 } from "@/components/shared/ui/custom-modal";
 import { ModalState } from "@/types/modal";
 import { IconArrowLeft, IconSend, IconTrash } from "@tabler/icons-react";
-import { useState, FC, ReactElement, useEffect, useCallback } from "react";
+import { useState, FC, ReactNode, useEffect, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { Group } from "@mantine/core";
 import {
@@ -46,7 +46,7 @@ const PRIORITY_OPTIONS = [
   { value: "HIGH", label: "Yuqori" },
 ];
 
-const DocumentPage: FC<{ children: ReactElement }> = ({ children }) => {
+const DocumentPage: FC<{ children: ReactNode }> = ({ children }) => {
   const router = useRouter();
   const params = useParams();
   const documentId = params?.id as string | undefined;

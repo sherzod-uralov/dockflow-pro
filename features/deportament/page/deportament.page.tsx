@@ -131,7 +131,6 @@ const DeportamentPage = () => {
   };
 
   const handleConnectDepartments = (targetId: string, parentId: string) => {
-    console.log("handleConnectDepartments called from deportament.page.tsx", { targetId, parentId });
     updateParentMutation.mutate({ id: targetId, parentId });
   };
 

@@ -44,8 +44,6 @@ export default function (plop) {
     delete: (id: string | number) => \`{{api}}/\${id}\`,
   },`,
       },
-
-      // 3) errorHandlers ga qo‘shish
       {
         type: "modify",
         path: "utils/http-error-handler.ts",
@@ -58,8 +56,6 @@ export default function (plop) {
         pattern: /(export const {[\s\S]*?)(} = errorHandlers;)/,
         template: `$1  {{camelCase name}}: handle{{properCase name}}Error,\n$2`,
       },
-
-      // 4) app/dashboard/admin ichida sahifa yaratish
       {
         type: "add",
         path: "app/dashboard/{{dashCase name}}/page.tsx",
