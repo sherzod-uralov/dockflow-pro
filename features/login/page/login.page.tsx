@@ -67,7 +67,7 @@ export default function LoginPage() {
                             Xush kelibsiz
                         </Title>
                         <Text size="sm" c="dimmed">
-                            Shaxsiy sahifangizga  kirish uchun ma'lumotlaringizni kiriting
+                            Tizimga kirish uchun login va parolni kiriting
                         </Text>
                     </Box>
 
