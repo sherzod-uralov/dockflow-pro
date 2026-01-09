@@ -27,20 +27,20 @@ const processQueue = (error: any, token: string | null = null) => {
 };
 
 axiosInstance.interceptors.request.use(
-  (config: InternalAxiosRequestConfig) => {
-    if (config.url?.includes("/auth/refresh-token")) {
-      return config;
-    }
+    (config: InternalAxiosRequestConfig) => {
+        if (config.url?.includes("/auth/refresh-token")) {
+            return config;
+        }
 
-    const token = authService.getAccessToken();
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  },
+        const token = authService.getAccessToken();
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+    },
+    (error) => {
+        return Promise.reject(error);
+    },
 );
 
 axiosInstance.interceptors.response.use(

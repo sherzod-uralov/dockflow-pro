@@ -32,21 +32,21 @@ export enum WorkflowActionType {
 }
 
 export const ACTION_TYPE_OPTIONS = [
-    {
-        value: WorkflowActionType.SIGN,
-        label: "Imzolash",
-        description: "Hujjatga imzo qo'yish",
-    },
-    {
+  {
+    value: WorkflowActionType.SIGN,
+    label: "Imzolash",
+    description: "Hujjatga imzo qo'yish",
+  },
+  {
     value: WorkflowActionType.VERIFICATION,
-      label: "Ijro uchun",
+    label: "Ijro uchun",
     description: "Ijro uchun fayllar yuklash",
-    },
-    {
-        value: WorkflowActionType.APPROVAL,
-        label: "Tasdiqlash",
-        description: "Hujjatni tasdiqlash jarayoni",
-    },
+  },
+  {
+    value: WorkflowActionType.APPROVAL,
+    label: "Tasdiqlash",
+    description: "Hujjatni tasdiqlash jarayoni",
+  },
 ] as const;
 
 export const WORKFLOW_TYPE_OPTIONS = [
@@ -159,6 +159,7 @@ export type WorkflowStepRejectPayload = {
   rejectionReason: string;
   comment?: string;
   rollbackToUserId?: string;
+  rejectToCreator?: boolean;
 };
 
 export type RollbackUser = {
