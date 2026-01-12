@@ -55,7 +55,7 @@ export const formToApiPayload = (
 export const createEmptyStep = (): WorkflowStepFormData => {
   return {
     assignedToUserId: "",
-    actionType: WorkflowActionType.APPROVAL,
+    actionType: WorkflowActionType.SIGN,
   };
 };
 
