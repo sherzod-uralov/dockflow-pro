@@ -163,12 +163,16 @@ const WorkflowDetailView = memo(({ workflow }: WorkflowDetailViewProps) => {
   const handleConfirmReject = useCallback(() => {
     if (!selectedStep || !rejectReason.trim() || rejectReason.length < 10 || !rollbackUserId) return;
 
+    // Check if the selected user is the creator
+    const isCreator = documentData?.createdBy?.id === rollbackUserId;
+
     rejectMutation.mutate(
       {
         id: selectedStep.id,
         data: {
           rejectionReason: rejectReason.trim(),
           rollbackToUserId: rollbackUserId,
+          rejectToCreator: isCreator,
         },
       },
       {
@@ -180,7 +184,7 @@ const WorkflowDetailView = memo(({ workflow }: WorkflowDetailViewProps) => {
         },
       }
     );
-  }, [selectedStep, rejectReason, rollbackUserId, rejectMutation]);
+  }, [selectedStep, rejectReason, rollbackUserId, rejectMutation, documentData]);
 
   const handlePdfAction = useCallback((actionType: string) => {
     if (documentData?.id) {

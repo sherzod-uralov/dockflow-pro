@@ -9,6 +9,7 @@ export const axiosInstance = axios.create({
 });
 
 let isRefreshing = false;
+let isLoggingOut = false;
 let failedQueue: Array<{
   resolve: (token: string) => void;
   reject: (error: any) => void;
@@ -28,10 +29,6 @@ const processQueue = (error: any, token: string | null = null) => {
 
 axiosInstance.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    if (config.url?.includes("/auth/refresh-token")) {
-      return config;
-    }
-
     const token = authService.getAccessToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -61,6 +58,11 @@ axiosInstance.interceptors.response.use(
       return Promise.reject(error);
     }
 
+    // Agar logout jarayonida bo'lsa, barcha so'rovlarni bekor qilamiz
+    if (isLoggingOut) {
+      return Promise.reject(new Error('Logout in progress'));
+    }
+
     if ((status === 401 || status === 403) && !originalRequest._retry) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
@@ -68,6 +70,8 @@ axiosInstance.interceptors.response.use(
         }).then((token) => {
           originalRequest.headers.Authorization = `Bearer ${token}`;
           return axiosInstance(originalRequest);
+        }).catch((err) => {
+          return Promise.reject(err);
         });
       }
 
@@ -77,13 +81,25 @@ axiosInstance.interceptors.response.use(
       try {
         const newAccessToken = await authService.refreshToken();
 
+        if (!newAccessToken) {
+          throw new Error("Token yangilash muvaffaqiyatsiz");
+        }
+
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
         processQueue(null, newAccessToken);
 
         return axiosInstance(originalRequest);
-      } catch (refreshError) {
+      } catch (refreshError: any) {
         processQueue(refreshError, null);
-        authService.logout();
+
+        // Refresh token ham muddati tugagan bo'lsa, xabar ko'rsatmasdan logout qilamiz
+        // logout() funksiyasi o'zi login sahifasiga yo'naltiradi
+        if (typeof window !== 'undefined' && !isLoggingOut) {
+          isLoggingOut = true;
+          authService.logout().finally(() => {
+            isLoggingOut = false;
+          });
+        }
 
         return Promise.reject(refreshError);
       } finally {

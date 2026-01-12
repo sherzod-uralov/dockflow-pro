@@ -42,7 +42,6 @@ export function PDFViewer({ documentId, action = "edit" }: PDFViewerProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
-  console.log(data)
   useEffect(() => {
     const initializePDF = async () => {
       try {
