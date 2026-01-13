@@ -1,34 +1,22 @@
-import { JournalCreateType } from "@/features/journal/scheme/journal-create";
-import axiosInstance from "@/api/axios.instance";
 import { endpoints } from "@/api/axios.endpoints";
-import { JournalListResponse } from "@/features/journal/types/journal.types";
+import { createCRUDService } from "@/lib/crud-service";
+import { JournalCreateType } from "@/features/journal/scheme/journal.schema";
+import { SingleJournalApiResponse, JournalListResponse } from "@/features/journal/types/journal.types";
 import { GlobalGetAllPaginationProps } from "@/types/global.types";
 
-export const journalService = {
-  getAllJournals: async (params: GlobalGetAllPaginationProps) => {
-    const { data } = await axiosInstance.get<JournalListResponse>(endpoints.journal.list, {
-      params,
-    });
-    return data;
-  },
+export const journalService = createCRUDService<
+  SingleJournalApiResponse,
+  JournalCreateType,
+  Partial<JournalCreateType>,
+  GlobalGetAllPaginationProps,
+  JournalListResponse
+>(endpoints.journal);
 
-  createJournal: async (payload: JournalCreateType) => {
-    const { data } = await axiosInstance.post(endpoints.journal.create, payload);
-    return data;
-  },
-
-  updateJournal: async (id: string, payload: Partial<JournalCreateType>) => {
-    const { data } = await axiosInstance.patch(endpoints.journal.update(id), payload);
-    return data;
-  },
-
-  deleteJournal: async (id: string) => {
-    const { data } = await axiosInstance.delete(endpoints.journal.delete(id));
-    return data;
-  },
-
-  getJournalById: async (id: string) => {
-    const { data } = await axiosInstance.get(endpoints.journal.detail(id));
-    return data;
-  },
-};
+// Backwards compatible aliases
+export const {
+  getAll: getAllJournals,
+  getById: getJournalById,
+  create: createJournal,
+  update: updateJournal,
+  delete: deleteJournal,
+} = journalService;

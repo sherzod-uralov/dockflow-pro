@@ -1,41 +1,28 @@
 import { endpoints } from "@/api/axios.endpoints";
-import axiosInstance from "@/api/axios.instance";
+import { createCRUDService } from "@/lib/crud-service";
 import { RoleZodType } from "../schema/role.schema";
-import { RoleResponse, RoleData } from "../type/role.type";
+import { RoleData, RoleResponse } from "../type/role.type";
+import { GlobalGetAllPaginationProps } from "@/types/global.types";
 
-export const rolesService = {
-  getAllRoles: async ({
-    pageSize,
-    pageNumber,
-    search,
-  }: {
-    pageSize?: number;
-    pageNumber?: number;
-    search?: string;
-  }): Promise<RoleResponse> => {
-    const { data } = await axiosInstance.get<RoleResponse>(endpoints.role.list, {
-      params: { pageSize, pageNumber, search },
-    });
-    return data;
-  },
+export const rolesService = createCRUDService<
+  RoleData,
+  RoleZodType,
+  RoleZodType,
+  GlobalGetAllPaginationProps,
+  RoleResponse
+>(endpoints.role, {
+  transformParams: (params) => ({
+    search: params?.search,
+    pageSize: params?.pageSize,
+    pageNumber: params?.pageNumber,
+  }),
+});
 
-  createRole: async (payload: RoleZodType) => {
-    const { data } = await axiosInstance.post(endpoints.role.create, payload);
-    return data;
-  },
-
-  deleteRole: async (id: string) => {
-    const { data } = await axiosInstance.delete(endpoints.role.delete(id));
-    return data;
-  },
-
-  updateRole: async (id: string, payload: RoleZodType) => {
-    const { data } = await axiosInstance.patch(endpoints.role.update(id), payload);
-    return data;
-  },
-
-  getRoleById: async (id: string): Promise<RoleData> => {
-    const { data } = await axiosInstance.get(endpoints.role.detail(id));
-    return data;
-  },
-};
+// Backwards compatible aliases
+export const {
+  getAll: getAllRoles,
+  getById: getRoleById,
+  create: createRole,
+  update: updateRole,
+  delete: deleteRole,
+} = rolesService;

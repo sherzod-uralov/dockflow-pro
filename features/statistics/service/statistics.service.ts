@@ -1,11 +1,12 @@
 import axiosInstance from "@/api/axios.instance";
 import {
-  AnalyticsFilters,
-  DashboardAnalytics,
-  DocumentAnalytics,
-  WorkflowAnalytics,
-  UserAnalytics,
-} from "../type/statistics.type";
+    AnalyticsFilters,
+    DashboardAnalytics,
+    DocumentAnalytics,
+    UserAnalytics,
+    WorkflowAnalytics
+} from "@/features/statistics";
+
 
 const endpoints = {
   analytics: {

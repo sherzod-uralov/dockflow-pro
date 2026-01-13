@@ -1,71 +1,32 @@
-import { useMutation, useQuery, useQueryClient } from "react-query";
+import { createCRUDHooks } from "@/lib/crud-hooks";
 import { permissionService } from "../service/permission.service";
 import {
-  getAllPermissions,
   Permission,
+  getAllPermissions,
   PermissionQueryParams,
 } from "../type/permission.type";
-import { showError, showSuccess } from "@/utils/show-error";
 
-export const useCreatePermission = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (payload: Permission) =>
-      permissionService.createPermission(payload),
-    onSuccess: () => {
-      queryClient.invalidateQueries(["permissions"]);
-      showSuccess("Ruxsat muvaffaqiyatli yaratildi");
-    },
-    onError: (error: any) => {
-      showError(error);
-    },
-  });
-};
+const permissionHooks = createCRUDHooks<
+  Permission,
+  Permission,
+  Partial<Permission>,
+  PermissionQueryParams,
+  getAllPermissions
+>({
+  service: permissionService,
+  queryKey: "permissions",
+  singleQueryKey: "permission",
+});
 
-export const useGetAllPermissions = (params?: PermissionQueryParams) => {
-  return useQuery<getAllPermissions>({
-    queryKey: ["permissions", params],
-    queryFn: () => permissionService.getAllPermissions(params),
-    keepPreviousData: true,
-  });
-};
+// Export individual hooks for backwards compatibility
+export const useGetAllPermissions = (params?: PermissionQueryParams) =>
+  permissionHooks.useGetAll(params);
 
-export const useUpdatePermission = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<Permission> }) =>
-      permissionService.updatePermission(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries(["permissions"]);
-      showSuccess("Ruxsat muvaffaqiyatli yangilandi");
-    },
-    onError: (error: any) => {
-      showError(error);
-    },
-  });
-};
+export const useGetPermissionById = (id: string) =>
+  permissionHooks.useGetById(id);
 
-export const useDeletePermission = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (id: string) => permissionService.deletePermission(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries(["permissions"]);
-      showSuccess("Ruxsat muvaffaqiyatli o'chirildi");
-    },
-    onError: (error: any) => {
-      showError(error);
-    },
-  });
-};
+export const useCreatePermission = permissionHooks.useCreate;
 
-export const useGetPermissionById = (id: string) => {
-  return useQuery({
-    queryKey: ["permission", id],
-    queryFn: () => permissionService.getPermissionById(id),
-    enabled: !!id,
-    onError: (error: any) => {
-      showError(error);
-    },
-  });
-};
+export const useUpdatePermission = permissionHooks.useUpdate;
+
+export const useDeletePermission = permissionHooks.useDelete;

@@ -1,81 +1,34 @@
-import { useMutation, useQuery, useQueryClient } from "react-query";
-import { showError, showSuccess } from "@/utils/show-error";
+import { createCRUDHooks } from "@/lib/crud-hooks";
 import { workflowTemplateService } from "../service/workflow-template.service";
 import {
-  WorkflowTemplateQueryParams,
+  WorkflowTemplateResponse,
   GetAllWorkflowTemplates,
+  WorkflowTemplateQueryParams,
   WorkflowTemplateCreatePayload,
   WorkflowTemplateUpdatePayload,
-  WorkflowTemplateResponse,
 } from "../type/workflow-template.type";
 
-export const useGetAllWorkflowTemplates = (
-  params?: WorkflowTemplateQueryParams,
-) => {
-  return useQuery<GetAllWorkflowTemplates>({
-    queryKey: ["workflowTemplates", params],
-    queryFn: () => workflowTemplateService.getAllWorkflowTemplates(params),
-    keepPreviousData: true,
-  });
-};
+const workflowTemplateHooks = createCRUDHooks<
+  WorkflowTemplateResponse,
+  WorkflowTemplateCreatePayload,
+  WorkflowTemplateUpdatePayload,
+  WorkflowTemplateQueryParams,
+  GetAllWorkflowTemplates
+>({
+  service: workflowTemplateService,
+  queryKey: "workflowTemplates",
+  singleQueryKey: "workflowTemplate",
+});
 
-export const useCreateWorkflowTemplate = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (payload: WorkflowTemplateCreatePayload) =>
-      workflowTemplateService.createWorkflowTemplate(payload),
-    onSuccess: () => {
-      queryClient.invalidateQueries(["workflowTemplates"]);
-      showSuccess("Workflow shablon muvaffaqiyatli yaratildi");
-    },
-    onError: (error: any) => {
-      showError(error);
-    },
-  });
-};
+// Export individual hooks for backwards compatibility
+export const useGetAllWorkflowTemplates = (params?: WorkflowTemplateQueryParams) =>
+  workflowTemplateHooks.useGetAll(params);
 
-export const useUpdateWorkflowTemplate = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: ({
-      id,
-      data,
-    }: {
-      id: string;
-      data: WorkflowTemplateUpdatePayload;
-    }) => workflowTemplateService.updateWorkflowTemplate(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries(["workflowTemplates"]);
-      showSuccess("Workflow shablon muvaffaqiyatli yangilandi");
-    },
-    onError: (error: any) => {
-      showError(error);
-    },
-  });
-};
+export const useGetWorkflowTemplateById = (id: string) =>
+  workflowTemplateHooks.useGetById(id);
 
-export const useDeleteWorkflowTemplate = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (id: string) =>
-      workflowTemplateService.deleteWorkflowTemplate(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries(["workflowTemplates"]);
-      showSuccess("Workflow shablon muvaffaqiyatli o'chirildi");
-    },
-    onError: (error: any) => {
-      showError(error);
-    },
-  });
-};
+export const useCreateWorkflowTemplate = workflowTemplateHooks.useCreate;
 
-export const useGetWorkflowTemplateById = (id: string) => {
-  return useQuery<WorkflowTemplateResponse>({
-    queryKey: ["workflowTemplate", id],
-    queryFn: () => workflowTemplateService.getWorkflowTemplateById(id),
-    enabled: !!id,
-    onError: (error: any) => {
-      showError(error);
-    },
-  });
-};
+export const useUpdateWorkflowTemplate = workflowTemplateHooks.useUpdate;
+
+export const useDeleteWorkflowTemplate = workflowTemplateHooks.useDelete;

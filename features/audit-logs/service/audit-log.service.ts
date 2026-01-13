@@ -1,35 +1,34 @@
-import axiosInstance from "@/api/axios.instance";
 import { endpoints } from "@/api/axios.endpoints";
+import { createCRUDService } from "@/lib/crud-service";
 import {
+  AuditLog,
+  AuditLogList,
   AuditLogQueryParams,
   CreateAuditLogRequest,
 } from "../type/audit-log.type";
 
+const baseCRUDService = createCRUDService<
+  AuditLog,
+  CreateAuditLogRequest,
+  Partial<CreateAuditLogRequest>,
+  AuditLogQueryParams,
+  AuditLogList
+>(endpoints.auditLog, {
+  transformParams: (params) => ({
+    search: params?.search,
+    pageSize: params?.pageSize,
+    pageNumber: params?.pageNumber,
+    entity: params?.entity,
+    entityId: params?.entityId,
+    action: params?.action,
+    performedByUserId: params?.performedByUserId,
+    startDate: params?.startDate,
+    endDate: params?.endDate,
+  }),
+});
+
 export const auditLogService = {
-  getAllAuditLogs: async (params?: AuditLogQueryParams) => {
-    const { data } = await axiosInstance.get(endpoints.auditLog.list, {
-      params: {
-        search: params?.search,
-        pageSize: params?.pageSize,
-        pageNumber: params?.pageNumber,
-        entity: params?.entity,
-        entityId: params?.entityId,
-        action: params?.action,
-        performedByUserId: params?.performedByUserId,
-        startDate: params?.startDate,
-        endDate: params?.endDate,
-      },
-    });
-    return data;
-  },
-
-  createAuditLog: async (payload: CreateAuditLogRequest) => {
-    const { data } = await axiosInstance.post(endpoints.auditLog.create, payload);
-    return data;
-  },
-
-  getAuditLogById: async (id: string) => {
-    const { data } = await axiosInstance.get(endpoints.auditLog.detail(id));
-    return data;
-  },
+  getAllAuditLogs: baseCRUDService.getAll,
+  getAuditLogById: baseCRUDService.getById,
+  createAuditLog: baseCRUDService.create,
 };

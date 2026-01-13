@@ -122,6 +122,98 @@ export const endpoints = {
     markAllAsRead: "/notifications/read-all",
     delete: (id: string) => `/notifications/${id}`,
   },
+  // Project Management
+  project: {
+    list: "/project",
+    create: "/project",
+    detail: (id: string | number) => `/project/${id}`,
+    update: (id: string | number) => `/project/${id}`,
+    delete: (id: string | number) => `/project/${id}`,
+  },
+  // Task Management
+  task: {
+    list: "/task",
+    create: "/task",
+    detail: (id: string | number) => `/task/${id}`,
+    update: (id: string | number) => `/task/${id}`,
+    delete: (id: string | number) => `/task/${id}`,
+  },
+  // Project Member
+  projectMember: {
+    list: "/project-member",
+    create: "/project-member",
+    detail: (id: string | number) => `/project-member/${id}`,
+    update: (id: string | number) => `/project-member/${id}`,
+    delete: (id: string | number) => `/project-member/${id}`,
+  },
+  // Project Label
+  projectLabel: {
+    list: "/project-label",
+    create: "/project-label",
+    detail: (id: string | number) => `/project-label/${id}`,
+    update: (id: string | number) => `/project-label/${id}`,
+    delete: (id: string | number) => `/project-label/${id}`,
+  },
+  // Task Label
+  taskLabel: {
+    list: "/task-label",
+    create: "/task-label",
+    detail: (id: string | number) => `/task-label/${id}`,
+    delete: (id: string | number) => `/task-label/${id}`,
+  },
+  // Task Comment
+  taskComment: {
+    list: "/task-comment",
+    create: "/task-comment",
+    detail: (id: string | number) => `/task-comment/${id}`,
+    update: (id: string | number) => `/task-comment/${id}`,
+    delete: (id: string | number) => `/task-comment/${id}`,
+  },
+  // Task Attachment
+  taskAttachment: {
+    list: "/task-attachment",
+    create: "/task-attachment",
+    detail: (id: string | number) => `/task-attachment/${id}`,
+    update: (id: string | number) => `/task-attachment/${id}`,
+    delete: (id: string | number) => `/task-attachment/${id}`,
+  },
+  // Task Watcher
+  taskWatcher: {
+    list: "/task-watcher",
+    watch: (taskId: string) => `/task-watcher/watch/${taskId}`,
+    unwatch: (taskId: string) => `/task-watcher/unwatch/${taskId}`,
+  },
+  // Task Checklist
+  taskChecklist: {
+    list: "/task-checklist",
+    create: "/task-checklist",
+    detail: (id: string | number) => `/task-checklist/${id}`,
+    update: (id: string | number) => `/task-checklist/${id}`,
+    delete: (id: string | number) => `/task-checklist/${id}`,
+    // Checklist Items
+    items: (checklistId: string) => `/task-checklist/${checklistId}/items`,
+    item: (checklistId: string, itemId: string) => `/task-checklist/${checklistId}/items/${itemId}`,
+  },
+  // Task Dependency
+  taskDependency: {
+    list: "/task-dependency",
+    create: "/task-dependency",
+    detail: (id: string | number) => `/task-dependency/${id}`,
+    delete: (id: string | number) => `/task-dependency/${id}`,
+  },
+  // Task Time Entry
+  taskTimeEntry: {
+    list: "/task-time-entry",
+    create: "/task-time-entry",
+    detail: (id: string | number) => `/task-time-entry/${id}`,
+    update: (id: string | number) => `/task-time-entry/${id}`,
+    delete: (id: string | number) => `/task-time-entry/${id}`,
+  },
+  // Task Activity
+  taskActivity: {
+    list: "/task-activity",
+    detail: (id: string | number) => `/task-activity/${id}`,
+  },
 } as const;
 
 export type Endpoints = typeof endpoints;

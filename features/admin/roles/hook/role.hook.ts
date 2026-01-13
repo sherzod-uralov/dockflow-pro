@@ -1,66 +1,30 @@
-import { useMutation, useQuery, useQueryClient } from "react-query";
-import { RoleZodType } from "../schema/role.schema";
+import { createCRUDHooks } from "@/lib/crud-hooks";
 import { rolesService } from "../service/role.service";
-import { showError, showSuccess } from "@/utils/show-error";
+import { RoleZodType } from "../schema/role.schema";
+import { RoleData, RoleResponse } from "../type/role.type";
+import { GlobalGetAllPaginationProps } from "@/types/global.types";
 
-export const useRoleCreateMutation = () => {
-  const queryClient = useQueryClient();
+const roleHooks = createCRUDHooks<
+  RoleData,
+  RoleZodType,
+  RoleZodType,
+  GlobalGetAllPaginationProps,
+  RoleResponse
+>({
+  service: rolesService,
+  queryKey: "roles",
+  singleQueryKey: "role",
+});
 
-  return useMutation({
-    mutationFn: async (data: RoleZodType) => rolesService.createRole(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["roles"] });
-      showSuccess("Rol muvaffaqiyatli yaratildi");
-    },
-    onError: (error: any) => {
-      showError(error);
-    },
-  });
-};
+// Export individual hooks for backwards compatibility
+export const useGetRoles = ({ pageSize = 7, pageNumber = 1, search = "" }) =>
+  roleHooks.useGetAll({ pageSize, pageNumber, search });
 
-export const useGetRoles = ({ pageSize = 7, pageNumber = 1, search = "" }) => {
-  return useQuery({
-    queryKey: ["roles", pageNumber, pageSize, search],
-    queryFn: async () =>
-      rolesService.getAllRoles({ pageSize, pageNumber, search }),
-  });
-};
+export const useGetRoleByIdQuery = (id: string) =>
+  roleHooks.useGetById(id);
 
-export const useDeleteRole = () => {
-  const queryClient = useQueryClient();
+export const useRoleCreateMutation = roleHooks.useCreate;
 
-  return useMutation({
-    mutationFn: async (id: string) => rolesService.deleteRole(id),
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["roles"] });
-      showSuccess("Rol muvaffaqiyatli o'chirildi");
-    },
-    onError: (error: any) => {
-      showError(error);
-    },
-  });
-};
+export const useUpdateRole = roleHooks.useUpdate;
 
-export const useUpdateRole = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: RoleZodType }) =>
-      rolesService.updateRole(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["roles"] });
-      showSuccess("Rol muvaffaqiyatli yangilandi");
-    },
-    onError: (error: any) => {
-      showError(error);
-    },
-  });
-};
-
-export const useGetRoleByIdQuery = (id: string) => {
-  return useQuery({
-    queryKey: ["role", id],
-    queryFn: () => rolesService.getRoleById(id),
-    enabled: !!id,
-  });
-};
+export const useDeleteRole = roleHooks.useDelete;

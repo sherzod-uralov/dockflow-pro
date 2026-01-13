@@ -1,4 +1,6 @@
 import axiosInstance from "@/api/axios.instance";
+import { endpoints } from "@/api/axios.endpoints";
+import { createCRUDService } from "@/lib/crud-service";
 import {
   WorkflowQueryParams,
   WorkflowListResponse,
@@ -11,61 +13,56 @@ import {
   WorkflowFromTemplatePayload,
 } from "@/features/workflow/type/workflow.type";
 import { WorkflowCreateType } from "../schema/workflow.schema";
-import { endpoints } from "@/api/axios.endpoints";
+
+const baseCRUDService = createCRUDService<
+  WorkflowApiResponse,
+  WorkflowCreateType,
+  Partial<WorkflowCreateType>,
+  WorkflowQueryParams,
+  WorkflowListResponse
+>(endpoints.workflow, {
+  transformParams: (params) => ({
+    documentId: params?.documentId,
+    status: params?.status,
+    type: params?.type,
+    page: params?.page,
+    limit: params?.limit,
+  }),
+});
 
 export const workflowService = {
-  getAllWorkflows: async (params?: WorkflowQueryParams) => {
-    const { data } = await axiosInstance.get<WorkflowListResponse>(endpoints.workflow.list, {
-      params: {
-        documentId: params?.documentId,
-        status: params?.status,
-        type: params?.type,
-        page: params?.page,
-        limit: params?.limit,
-      },
-    });
-    return data;
-  },
-
-  createWorkflow: async (payload: WorkflowCreateType) => {
-    const { data } = await axiosInstance.post<WorkflowApiResponse>(endpoints.workflow.create, payload);
-    return data;
-  },
+  getAllWorkflows: baseCRUDService.getAll,
+  getWorkflowById: baseCRUDService.getById,
+  createWorkflow: baseCRUDService.create,
+  updateWorkflow: baseCRUDService.update,
+  deleteWorkflow: baseCRUDService.delete,
 
   createWorkflowFromTemplate: async (payload: WorkflowFromTemplatePayload) => {
-    const { data } = await axiosInstance.post<WorkflowApiResponse>(endpoints.workflow.create, payload);
-    return data;
-  },
-
-  updateWorkflow: async (id: string, payload: Partial<WorkflowCreateType>) => {
-    const { data } = await axiosInstance.patch<WorkflowApiResponse>(endpoints.workflow.update(id), payload);
-    return data;
-  },
-
-  deleteWorkflow: async (id: string) => {
-    const { data } = await axiosInstance.delete(endpoints.workflow.delete(id));
-    return data;
-  },
-
-  getWorkflowById: async (id: string) => {
-    const { data } = await axiosInstance.get<WorkflowApiResponse>(endpoints.workflow.detail(id));
+    const { data } = await axiosInstance.post<WorkflowApiResponse>(
+      endpoints.workflow.create,
+      payload
+    );
     return data;
   },
 
   getWorkflowSteps: async (workflowId: string) => {
-    const { data } = await axiosInstance.get(`/api/v1/workflow-step/workflow/${workflowId}`);
+    const { data } = await axiosInstance.get(
+      `/api/v1/workflow-step/workflow/${workflowId}`
+    );
     return data;
   },
-
   updateWorkflowStep: async (id: string, payload: WorkflowStepUpdateType) => {
-    const { data } = await axiosInstance.patch<WorkflowStepApiResponse>(endpoints.workflowStep.update(id), payload);
+    const { data } = await axiosInstance.patch<WorkflowStepApiResponse>(
+      endpoints.workflowStep.update(id),
+      payload
+    );
     return data;
   },
 
   completeWorkflowStep: async (id: string, comment?: string) => {
     const { data } = await axiosInstance.patch<WorkflowStepApiResponse>(
       endpoints.workflowStep.complete(id),
-      comment ? { comment } : {},
+      comment ? { comment } : {}
     );
     return data;
   },
@@ -73,7 +70,7 @@ export const workflowService = {
   rejectWorkflowStep: async (id: string, payload?: WorkflowStepRejectPayload) => {
     const { data } = await axiosInstance.patch<WorkflowStepApiResponse>(
       endpoints.workflowStep.reject(id),
-      payload || {},
+      payload || {}
     );
     return data;
   },
@@ -82,17 +79,13 @@ export const workflowService = {
     const { data } = await axiosInstance.post(
       endpoints.workflowStep.verify(id),
       formData,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      }
+      { headers: { "Content-Type": "multipart/form-data" } }
     );
     return data;
   },
 
   getMyTasks: async (params?: MyTasksQueryParams) => {
-    const queryParams: Record<string, any> = {
+    const queryParams: Record<string, unknown> = {
       pageNumber: params?.page ?? 1,
       pageSize: params?.limit ?? 9,
     };
@@ -100,22 +93,23 @@ export const workflowService = {
     if (params?.status) queryParams.status = params.status;
     if (params?.actionType) queryParams.actionType = params.actionType;
 
-    const { data } = await axiosInstance.get<MyTasksResponse>(endpoints.workflowStep.list, {
-      params: queryParams,
-    });
+    const { data } = await axiosInstance.get<MyTasksResponse>(
+      endpoints.workflowStep.list,
+      { params: queryParams }
+    );
     return data;
   },
 
   downloadDocument: async (documentId: string, filename?: string) => {
-    const response = await axiosInstance.get(endpoints.document.download(documentId), {
-      responseType: 'blob',
-    });
+    const response = await axiosInstance.get(
+      endpoints.document.download(documentId),
+      { responseType: "blob" }
+    );
 
-    // Create blob link to download
     const url = window.URL.createObjectURL(new Blob([response.data]));
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = url;
-    link.setAttribute('download', filename || `document-${documentId}.pdf`);
+    link.setAttribute("download", filename || `document-${documentId}.pdf`);
     document.body.appendChild(link);
     link.click();
     link.parentNode?.removeChild(link);
@@ -124,7 +118,11 @@ export const workflowService = {
     return response.data;
   },
 
-  getCalendarView: async (params?: { startDate?: string; endDate?: string; status?: string }) => {
+  getCalendarView: async (params?: {
+    startDate?: string;
+    endDate?: string;
+    status?: string;
+  }) => {
     const { data } = await axiosInstance.get(endpoints.workflowStep.calendarView, {
       params,
     });

@@ -94,22 +94,18 @@ const WorkflowDetailView = memo(({ workflow }: WorkflowDetailViewProps) => {
 
   const isLoading = completeMutation.isLoading || rejectMutation.isLoading || downloadMutation.isLoading;
 
-  // Progress
   const totalSteps = workflow.workflowSteps?.length || 0;
   const completedSteps = workflow.workflowSteps?.filter(s => s.status === "COMPLETED").length || 0;
   const progress = totalSteps > 0 ? (completedSteps / totalSteps) * 100 : 0;
 
-  // Current step
   const currentStep = workflow.workflowSteps?.find(
     step => step.order === workflow.currentStepOrder
   );
 
-  // Current action config
   const currentActionLabel = currentStep
     ? ACTION_LABELS[currentStep.actionType] || ACTION_LABELS.APPROVAL
     : null;
 
-  // Can edit document
   const canEditDocument = documentData?.attachments && documentData.attachments.length > 0;
 
   // Is current user assigned

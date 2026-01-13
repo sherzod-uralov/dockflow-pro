@@ -1,43 +1,35 @@
-import axiosInstance from "@/api/axios.instance";
 import { endpoints } from "@/api/axios.endpoints";
+import { createCRUDService } from "@/lib/crud-service";
 import {
-  DocumentTemplateCreatePayload,
+  DocumentTemplateResponse,
+  GetAllDocumentTemplates,
   DocumentTemplateQueryParams,
+  DocumentTemplateCreatePayload,
   DocumentTemplateUpdatePayload,
-} from "@/features/document-template";
+} from "@/features/document-template/type/document-template.type";
 
-export const documentTemplateService = {
-  getAllDocumentTemplates: async (params?: DocumentTemplateQueryParams) => {
-    const { data } = await axiosInstance.get(endpoints.documentTemplate.list, {
-      params: {
-        search: params?.search,
-        pageNumber: params?.pageNumber,
-        pageSize: params?.pageSize,
-        documentTypeId: params?.documentTypeId,
-        isActive: params?.isActive,
-        isPublic: params?.isPublic,
-      },
-    });
-    return data;
-  },
+export const documentTemplateService = createCRUDService<
+  DocumentTemplateResponse,
+  DocumentTemplateCreatePayload,
+  DocumentTemplateUpdatePayload,
+  DocumentTemplateQueryParams,
+  GetAllDocumentTemplates
+>(endpoints.documentTemplate, {
+  transformParams: (params) => ({
+    search: params?.search,
+    pageNumber: params?.pageNumber,
+    pageSize: params?.pageSize,
+    documentTypeId: params?.documentTypeId,
+    isActive: params?.isActive,
+    isPublic: params?.isPublic,
+  }),
+});
 
-  createDocumentTemplate: async (payload: DocumentTemplateCreatePayload) => {
-    const { data } = await axiosInstance.post(endpoints.documentTemplate.create, payload);
-    return data;
-  },
-
-  updateDocumentTemplate: async (id: string, payload: DocumentTemplateUpdatePayload) => {
-    const { data } = await axiosInstance.patch(endpoints.documentTemplate.update(id), payload);
-    return data;
-  },
-
-  deleteDocumentTemplate: async (id: string) => {
-    const { data } = await axiosInstance.delete(endpoints.documentTemplate.delete(id));
-    return data;
-  },
-
-  getDocumentTemplateById: async (id: string) => {
-    const { data } = await axiosInstance.get(endpoints.documentTemplate.detail(id));
-    return data;
-  },
-};
+// Backwards compatible aliases
+export const {
+  getAll: getAllDocumentTemplates,
+  getById: getDocumentTemplateById,
+  create: createDocumentTemplate,
+  update: updateDocumentTemplate,
+  delete: deleteDocumentTemplate,
+} = documentTemplateService;

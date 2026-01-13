@@ -35,7 +35,7 @@ describe('document hooks', () => {
 
     describe('useCreateDocument', () => {
         test('muvaffaqiyatli yaratish', async () => {
-            ; (documentService.createDocument as jest.Mock).mockResolvedValue({})
+            ; (documentService.create as jest.Mock).mockResolvedValue({})
 
             const { result } = renderHook(() => useCreateDocument(), {
                 wrapper: createWrapper(),
@@ -46,7 +46,6 @@ describe('document hooks', () => {
                 description: 'Desc',
                 documentNumber: 'DOC-001',
                 status: 'DRAFT',
-                priority: 'LOW',
                 documentTypeId: 'type1',
                 journalId: 'journal1',
                 templateId: 'temp1',
@@ -65,7 +64,7 @@ describe('document hooks', () => {
     describe('useGetAllDocuments', () => {
         test('ma\'lumotlarni olib keladi', async () => {
             const mockData = { data: [], total: 0 }
-                ; (documentService.getAllDocuments as jest.Mock).mockResolvedValue(mockData)
+                ; (documentService.getAll as jest.Mock).mockResolvedValue(mockData)
 
             const { result } = renderHook(() => useGetAllDocuments(), {
                 wrapper: createWrapper(),
@@ -81,7 +80,7 @@ describe('document hooks', () => {
 
     describe('useUpdateDocument', () => {
         test('muvaffaqiyatli yangilash', async () => {
-            ; (documentService.updateDocument as jest.Mock).mockResolvedValue({})
+            ; (documentService.update as jest.Mock).mockResolvedValue({})
 
             const { result } = renderHook(() => useUpdateDocument(), {
                 wrapper: createWrapper(),
@@ -102,7 +101,7 @@ describe('document hooks', () => {
 
     describe('useDeleteDocument', () => {
         test('muvaffaqiyatli o\'chirish', async () => {
-            ; (documentService.deleteDocument as jest.Mock).mockResolvedValue({})
+            ; (documentService.delete as jest.Mock).mockResolvedValue({})
 
             const { result } = renderHook(() => useDeleteDocument(), {
                 wrapper: createWrapper(),
@@ -121,7 +120,7 @@ describe('document hooks', () => {
     describe('useGetDocumentById', () => {
         test('ID bo\'yicha olib keladi', async () => {
             const mockData = { id: '1', title: 'Doc 1' }
-                ; (documentService.getDocumentById as jest.Mock).mockResolvedValue(mockData)
+                ; (documentService.getById as jest.Mock).mockResolvedValue(mockData)
 
             const { result } = renderHook(() => useGetDocumentById('1'), {
                 wrapper: createWrapper(),

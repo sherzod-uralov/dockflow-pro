@@ -120,9 +120,6 @@ export const workflowUpdateSchema = z
     });
   });
 
-// ============================================
-// LEGACY SCHEMA
-// ============================================
 
 export const workflowScheme = z.object({
   name: z
@@ -130,15 +127,11 @@ export const workflowScheme = z.object({
     .min(2, "Workflow nomi kamida 2 ta belgidan iborat bo'lishi kerak"),
 });
 
-// ============================================
-// TYPE EXPORTS
-// ============================================
 
 export type WorkflowCreateType = z.infer<typeof workflowCreateSchema>;
 export type WorkflowUpdateType = z.infer<typeof workflowUpdateSchema>;
 export type WorkflowStepFormType = z.infer<typeof workflowStepSchema>;
 
-// ✅ ОБНОВЛЕНО: используем union type для создания и редактирования
 export type WorkflowFormType = (WorkflowCreateType | WorkflowUpdateType) & {
   deadline?: string;
 };

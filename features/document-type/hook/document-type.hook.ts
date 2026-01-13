@@ -1,64 +1,32 @@
-import { useMutation, useQuery, useQueryClient } from "react-query";
+import { createCRUDHooks } from "@/lib/crud-hooks";
+import { documentTypeService } from "@/features/document-type/service/document-type.service";
 import {
-  DocumentTypeQueryParams,
-  documentTypeService,
+  DocumentType,
   GetAllDocumentTypes,
-  DocumentType as DocumentTypeModel,
-} from "@/features/document-type";
-import { showError, showSuccess } from "@/utils/show-error";
+  DocumentTypeQueryParams,
+} from "@/features/document-type/type/document-type.type";
 
-export const useCreateDocumentType = () => {
-  const queryClient = useQueryClient();
+const documentTypeHooks = createCRUDHooks<
+  DocumentType,
+  DocumentType,
+  Partial<DocumentType>,
+  DocumentTypeQueryParams,
+  GetAllDocumentTypes
+>({
+  service: documentTypeService,
+  queryKey: "documentTypes",
+  singleQueryKey: "documentType",
+});
 
-  return useMutation({
-    mutationFn: (payload: DocumentTypeModel) => documentTypeService.createDocumentType(payload),
-    onSuccess: () => {
-      queryClient?.invalidateQueries(["documentTypes"]);
-      showSuccess("Hujjat turi yaratildi");
-    },
-    onError: showError,
-  });
-};
+// Export individual hooks for backwards compatibility
+export const useGetAllDocumentTypes = (params?: DocumentTypeQueryParams) =>
+  documentTypeHooks.useGetAll(params);
 
-export const useGetAllDocumentTypes = (params?: DocumentTypeQueryParams) => {
-  return useQuery<GetAllDocumentTypes>({
-    queryKey: ["documentTypes", params],
-    queryFn: () => documentTypeService.getAllDocumentTypes(params),
-    keepPreviousData: true,
-  });
-};
+export const useGetDocumentTypeById = (id: string) =>
+  documentTypeHooks.useGetById(id);
 
-export const useUpdateDocumentType = () => {
-  const queryClient = useQueryClient();
+export const useCreateDocumentType = documentTypeHooks.useCreate;
 
-  return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<DocumentTypeModel> }) =>
-      documentTypeService.updateDocumentType(id, data),
-    onSuccess: () => {
-      queryClient?.invalidateQueries(["documentTypes"]);
-      showSuccess("Hujjat turi yangilandi");
-    },
-    onError: showError,
-  });
-};
+export const useUpdateDocumentType = documentTypeHooks.useUpdate;
 
-export const useDeleteDocumentType = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (id: string) => documentTypeService.deleteDocumentType(id),
-    onSuccess: () => {
-      queryClient?.invalidateQueries(["documentTypes"]);
-      showSuccess("Hujjat turi o'chirildi");
-    },
-    onError: showError,
-  });
-};
-
-export const useGetDocumentTypeById = (id: string) => {
-  return useQuery<DocumentTypeModel>({
-    queryKey: ["documentType", id],
-    queryFn: () => documentTypeService.getDocumentTypeById(id),
-    enabled: !!id,
-  });
-};
+export const useDeleteDocumentType = documentTypeHooks.useDelete;

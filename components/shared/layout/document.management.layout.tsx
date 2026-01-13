@@ -33,7 +33,6 @@ interface Tab {
   label: string;
   badge?: number;
 }
-//dfd
 
 interface ListItem {
   id: string;
@@ -276,7 +275,6 @@ export const SplitLayoutWithTabs = ({
 }: SplitLayoutWithTabsProps) => {
   const [filtersOpen, setFiltersOpen] = useState(showFilters);
 
-  // Filter out tabs with empty values as Mantine doesn't accept empty string
   const validTabs = tabs.filter((tab) => tab.value && tab.value.trim() !== "");
   const effectiveDefaultTab = defaultTab || validTabs[0]?.value || "default";
 
@@ -287,7 +285,6 @@ export const SplitLayoutWithTabs = ({
     [onItemClick]
   );
 
-  // Active filter count
   const activeFilterCount = filters
     ? [
         filters.status?.value,
@@ -659,5 +656,4 @@ export const SplitLayoutWithTabs = ({
   );
 };
 
-// Export badges for use in other components
 export { StatusBadge, PriorityBadge };
