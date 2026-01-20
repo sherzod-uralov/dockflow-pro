@@ -35,7 +35,7 @@ import { useGetAllPermissions } from "@/features/admin/permissions/hook/permissi
 import { useGetAllDocumentTemplates } from "@/features/document-template/hook/document-template.hook";
 import { useGetAllDocuments } from "@/features/document/hook/document.hook";
 import { useGetAllJournals } from "@/features/journal/hook/journal.hook";
-import { useGetAllDeportaments } from "@/features/deportament/hook/deportament.hook";
+import { useGetAllDepartments } from "@/features/department/hook/department.hook";
 import { useGetAllDocumentTypes } from "@/features/document-type/hook/document-type.hook";
 
 const staticPages = [
@@ -101,7 +101,7 @@ export function GlobalSearch() {
     search: debouncedQuery,
   });
 
-  const { data: deportamentsData, isLoading: deportamentsLoading } = useGetAllDeportaments({
+  const { data: departmentsData, isLoading: departmentsLoading } = useGetAllDepartments({
     pageSize: 5,
     pageNumber: 1,
     search: debouncedQuery,
@@ -127,17 +127,17 @@ export function GlobalSearch() {
   const documentTemplates = documentTemplatesData?.data || [];
   const documents = documentsData?.data || [];
   const journals = journalsData?.data || [];
-  const deportaments = deportamentsData?.data || [];
+  const departments = departmentsData?.data || [];
   const documentTypes = documentTypesData?.data || [];
 
   const totalResults =
     filteredPages.length + roles.length + permissions.length + users.length +
     documentTemplates.length + documents.length + journals.length +
-    deportaments.length + documentTypes.length;
+    departments.length + documentTypes.length;
 
   const anyLoading =
     usersLoading || rolesLoading || permissionsLoading || documentTemplatesLoading ||
-    documentsLoading || journalsLoading || deportamentsLoading || documentTypesLoading;
+    documentsLoading || journalsLoading || departmentsLoading || documentTypesLoading;
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -193,8 +193,8 @@ export function GlobalSearch() {
       const documentTemplatesOffset = permissionsOffset + documentTemplates.length;
       const documentsOffset = documentTemplatesOffset + documents.length;
       const journalsOffset = documentsOffset + journals.length;
-      const deportamentsOffset = journalsOffset + deportaments.length;
-      const documentTypesOffset = deportamentsOffset + documentTypes.length;
+      const departmentsOffset = journalsOffset + departments.length;
+      const documentTypesOffset = departmentsOffset + documentTypes.length;
 
       if (index < rolesOffset) {
         router.push(`/dashboard/admin/roles?roleId=${roles[index - pagesOffset].id}`);
@@ -206,10 +206,10 @@ export function GlobalSearch() {
         router.push(`/dashboard/document?documentId=${documents[index - documentTemplatesOffset].id}`);
       } else if (index < journalsOffset) {
         router.push(`/dashboard/journal?journalId=${journals[index - documentsOffset].id}`);
-      } else if (index < deportamentsOffset) {
-        router.push(`/dashboard/deportament?deportamentId=${deportaments[index - journalsOffset].id}`);
+      } else if (index < departmentsOffset) {
+        router.push(`/dashboard/department?departmentId=${departments[index - journalsOffset].id}`);
       } else if (index < documentTypesOffset) {
-        router.push(`/dashboard/document-type?documentTypeId=${documentTypes[index - deportamentsOffset].id}`);
+        router.push(`/dashboard/document-type?documentTypeId=${documentTypes[index - departmentsOffset].id}`);
       } else {
         router.push(`/dashboard/admin/users?userId=${users[index - documentTypesOffset].id}`);
       }
@@ -459,13 +459,13 @@ export function GlobalSearch() {
                 </Box>
               )}
 
-              {deportaments.length > 0 && (
+              {departments.length > 0 && (
                 <Box p="xs">
                   <Divider mb="xs" />
                   <Text size="xs" fw={500} c="dimmed" tt="uppercase" px="sm" mb={4}>
                     Bo'limlar
                   </Text>
-                  {deportaments.map((d, idx) => (
+                  {departments.map((d, idx) => (
                     <SearchItem
                       key={d.id}
                       icon={<IconBuilding size={14} color="#868e96" />}
@@ -489,7 +489,7 @@ export function GlobalSearch() {
                       icon={<IconCategory size={14} color="#868e96" />}
                       title={dt.name}
                       subtitle={dt.description || "-"}
-                      index={filteredPages.length + roles.length + permissions.length + documentTemplates.length + documents.length + journals.length + deportaments.length + idx}
+                      index={filteredPages.length + roles.length + permissions.length + documentTemplates.length + documents.length + journals.length + departments.length + idx}
                     />
                   ))}
                 </Box>
@@ -502,7 +502,7 @@ export function GlobalSearch() {
                     Foydalanuvchilar
                   </Text>
                   {users.map((user, idx) => {
-                    const globalIdx = filteredPages.length + roles.length + permissions.length + documentTemplates.length + documents.length + journals.length + deportaments.length + documentTypes.length + idx;
+                    const globalIdx = filteredPages.length + roles.length + permissions.length + documentTemplates.length + documents.length + journals.length + departments.length + documentTypes.length + idx;
                     return (
                       <SearchItem
                         key={user.id}

@@ -7,7 +7,7 @@ import { Sidebar } from "@/components/shared/layout/sidebar";
 import { Header } from "@/components/shared/layout/header";
 import { PermissionProvider } from "@/providers/permission-provider";
 import { OnboardingProvider } from "@/hooks/use-onboarding";
-import { NotificationProvider } from "@/context/notification.provider";
+import { SocketProvider } from "@/providers/socket.provider";
 import { TelegramConnectModal } from "@/features/telegram/component/telegram-connect-modal";
 import { useGetProfileQuery } from "@/features/login/hook/login.hook";
 
@@ -18,7 +18,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   return (
     <PermissionProvider>
       <OnboardingProvider>
-        <NotificationProvider>
+        <SocketProvider>
           <Box
             style={{
               display: "flex",
@@ -51,7 +51,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             </Box>
           </Box>
           {user?.id && <TelegramConnectModal userId={user.id} />}
-        </NotificationProvider>
+        </SocketProvider>
       </OnboardingProvider>
     </PermissionProvider >
   );

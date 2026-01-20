@@ -1,10 +1,10 @@
-import { deportamentService } from '../service/deportament.service'
+import { departmentService } from '../service/department.service'
 import axiosInstance from '@/api/axios.instance'
 import { endpoints } from '@/api/axios.endpoints'
 
 jest.mock('@/api/axios.instance')
 
-describe('deportamentService', () => {
+describe('departmentService', () => {
     beforeEach(() => {
         jest.clearAllMocks()
     })
@@ -20,10 +20,10 @@ describe('deportamentService', () => {
                 ; (axiosInstance.get as jest.Mock).mockResolvedValue(mockResponse)
 
             const params = { search: 'test', pageNumber: 1, pageSize: 10 }
-            const result = await deportamentService.getAll(params)
+            const result = await departmentService.getAll(params)
 
             expect(result).toEqual(mockResponse.data)
-            expect(axiosInstance.get).toHaveBeenCalledWith(endpoints.deportament.list, {
+            expect(axiosInstance.get).toHaveBeenCalledWith(endpoints.department.list, {
                 params: {
                     search: 'test',
                     pageNumber: 1,
@@ -45,10 +45,10 @@ describe('deportamentService', () => {
             const mockResponse = { data: { id: '1', ...mockPayload } }
                 ; (axiosInstance.post as jest.Mock).mockResolvedValue(mockResponse)
 
-            const result = await deportamentService.create(mockPayload)
+            const result = await departmentService.create(mockPayload)
 
             expect(result).toEqual(mockResponse.data)
-            expect(axiosInstance.post).toHaveBeenCalledWith(endpoints.deportament.create, mockPayload)
+            expect(axiosInstance.post).toHaveBeenCalledWith(endpoints.department.create, mockPayload)
         })
     })
 
@@ -58,10 +58,10 @@ describe('deportamentService', () => {
             const mockResponse = { data: { id: '1', ...mockPayload } }
                 ; (axiosInstance.patch as jest.Mock).mockResolvedValue(mockResponse)
 
-            const result = await deportamentService.update('1', mockPayload)
+            const result = await departmentService.update('1', mockPayload)
 
             expect(result).toEqual(mockResponse.data)
-            expect(axiosInstance.patch).toHaveBeenCalledWith(endpoints.deportament.update('1'), mockPayload)
+            expect(axiosInstance.patch).toHaveBeenCalledWith(endpoints.department.update('1'), mockPayload)
         })
     })
 
@@ -70,9 +70,9 @@ describe('deportamentService', () => {
             const mockResponse = { data: { success: true } }
                 ; (axiosInstance.delete as jest.Mock).mockResolvedValue(mockResponse)
 
-            await deportamentService.delete('1')
+            await departmentService.delete('1')
 
-            expect(axiosInstance.delete).toHaveBeenCalledWith(endpoints.deportament.delete('1'))
+            expect(axiosInstance.delete).toHaveBeenCalledWith(endpoints.department.delete('1'))
         })
     })
 
@@ -81,10 +81,10 @@ describe('deportamentService', () => {
             const mockResponse = { data: { id: '1', name: 'Dept' } }
                 ; (axiosInstance.get as jest.Mock).mockResolvedValue(mockResponse)
 
-            const result = await deportamentService.getById('1')
+            const result = await departmentService.getById('1')
 
             expect(result).toEqual(mockResponse.data)
-            expect(axiosInstance.get).toHaveBeenCalledWith(endpoints.deportament.detail('1'))
+            expect(axiosInstance.get).toHaveBeenCalledWith(endpoints.department.detail('1'))
         })
     })
 })

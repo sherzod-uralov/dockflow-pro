@@ -1,16 +1,16 @@
 import { renderHook, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from 'react-query'
 import {
-    useCreateDeportament,
-    useGetAllDeportaments,
-    useUpdateDeportament,
-    useDeleteDeportament,
-    useGetDeportamentById
-} from '../hook/deportament.hook'
-import { deportamentService } from '../service/deportament.service'
+    useCreateDepartment,
+    useGetAllDepartments,
+    useUpdateDepartment,
+    useDeleteDepartment,
+    useGetDepartmentById
+} from '../hook/department.hook'
+import { departmentService } from '../service/department.service'
 import { showSuccess } from '@/utils/show-error'
 
-jest.mock('../service/deportament.service')
+jest.mock('../service/department.service')
 jest.mock('@/utils/show-error', () => ({
     showSuccess: jest.fn(),
     showError: jest.fn()
@@ -28,16 +28,16 @@ const createWrapper = () => {
     )
 }
 
-describe('deportament hooks', () => {
+describe('department hooks', () => {
     beforeEach(() => {
         jest.clearAllMocks()
     })
 
-    describe('useCreateDeportament', () => {
+    describe('useCreateDepartment', () => {
         test('muvaffaqiyatli yaratish', async () => {
-            ; (deportamentService.create as jest.Mock).mockResolvedValue({})
+            ; (departmentService.create as jest.Mock).mockResolvedValue({})
 
-            const { result } = renderHook(() => useCreateDeportament(), {
+            const { result } = renderHook(() => useCreateDepartment(), {
                 wrapper: createWrapper(),
             })
 
@@ -57,12 +57,12 @@ describe('deportament hooks', () => {
         })
     })
 
-    describe('useGetAllDeportaments', () => {
+    describe('useGetAllDepartments', () => {
         test('ma\'lumotlarni olib keladi', async () => {
             const mockData = { data: [], total: 0 }
-                ; (deportamentService.getAll as jest.Mock).mockResolvedValue(mockData)
+                ; (departmentService.getAll as jest.Mock).mockResolvedValue(mockData)
 
-            const { result } = renderHook(() => useGetAllDeportaments(), {
+            const { result } = renderHook(() => useGetAllDepartments(), {
                 wrapper: createWrapper(),
             })
 
@@ -74,11 +74,11 @@ describe('deportament hooks', () => {
         })
     })
 
-    describe('useUpdateDeportament', () => {
+    describe('useUpdateDepartment', () => {
         test('muvaffaqiyatli yangilash', async () => {
-            ; (deportamentService.update as jest.Mock).mockResolvedValue({})
+            ; (departmentService.update as jest.Mock).mockResolvedValue({})
 
-            const { result } = renderHook(() => useUpdateDeportament(), {
+            const { result } = renderHook(() => useUpdateDepartment(), {
                 wrapper: createWrapper(),
             })
 
@@ -100,11 +100,11 @@ describe('deportament hooks', () => {
         })
     })
 
-    describe('useDeleteDeportament', () => {
+    describe('useDeleteDepartment', () => {
         test('muvaffaqiyatli o\'chirish', async () => {
-            ; (deportamentService.delete as jest.Mock).mockResolvedValue({})
+            ; (departmentService.delete as jest.Mock).mockResolvedValue({})
 
-            const { result } = renderHook(() => useDeleteDeportament(), {
+            const { result } = renderHook(() => useDeleteDepartment(), {
                 wrapper: createWrapper(),
             })
 
@@ -118,12 +118,12 @@ describe('deportament hooks', () => {
         })
     })
 
-    describe('useGetDeportamentById', () => {
+    describe('useGetDepartmentById', () => {
         test('ID bo\'yicha olib keladi', async () => {
             const mockData = { id: '1', name: 'Dept' }
-                ; (deportamentService.getById as jest.Mock).mockResolvedValue(mockData)
+                ; (departmentService.getById as jest.Mock).mockResolvedValue(mockData)
 
-            const { result } = renderHook(() => useGetDeportamentById('1'), {
+            const { result } = renderHook(() => useGetDepartmentById('1'), {
                 wrapper: createWrapper(),
             })
 

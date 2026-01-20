@@ -28,7 +28,7 @@ import {
 } from "@tabler/icons-react";
 import { useDebounce } from "@/hooks/use-debaunce";
 import { useGetUserQuery } from "@/features/admin/admin-users/hook/user.hook";
-import { useGetDeportamentById } from "@/features/deportament/hook/deportament.hook";
+import { useGetDepartmentById } from "@/features/department/hook/department.hook";
 import { User } from "@/features/admin/admin-users/type/user.types";
 import { handleCopyToClipboard } from "@/utils/copy-text";
 import { DataTable, DataTableColumn } from "@/components/shared/ui/custom-table";
@@ -44,7 +44,7 @@ const DepartmentUsersPage = () => {
     const [pageSize, setPageSize] = useState(10);
 
     // Queries
-    const { data: department, isLoading: isDepartmentLoading } = useGetDeportamentById(departmentId);
+    const { data: department, isLoading: isDepartmentLoading } = useGetDepartmentById(departmentId);
 
     const { data: usersData, isLoading: isUsersLoading } = useGetUserQuery({
         departmentId: departmentId,

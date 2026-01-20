@@ -106,10 +106,10 @@ export default function TaskDetailPage() {
                             </Group>
                         )}
 
-                        {task.assignedToUsers && task.assignedToUsers.length > 0 && (
+                        {task.assignees && task.assignees.length > 0 && (
                             <Group>
                                 <Text fw={500} c="#495057">Mas'ul shaxslar:</Text>
-                                <Text c="dimmed">{task.assignedToUsers.map(u => u.fullname).join(", ")}</Text>
+                                <Text c="dimmed">{task.assignees.map((a) => a.user.fullname).join(", ")}</Text>
                             </Group>
                         )}
 

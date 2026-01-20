@@ -1,12 +1,12 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import { MantineProvider } from '@mantine/core'
-import DeportamentView from '../component/deportament.view'
+import DepartmentView from '../component/department.view'
 
 const renderWithMantine = (component: React.ReactElement) => {
     return render(<MantineProvider>{component}</MantineProvider>)
 }
 
-const mockDeportament = {
+const mockDepartment = {
     id: '123456789',
     name: 'IT Department',
     description: 'Information Technology',
@@ -24,9 +24,9 @@ const mockDeportament = {
     }
 }
 
-describe('DeportamentView', () => {
+describe('DepartmentView', () => {
     test('barcha ma\'lumotlarni to\'g\'ri ko\'rsatadi', () => {
-        renderWithMantine(<DeportamentView deportament={mockDeportament as any} />)
+        renderWithMantine(<DepartmentView department={mockDepartment as any} />)
 
         // Asosiy ma'lumotlar
         expect(screen.getByText('IT Department')).toBeInTheDocument()
@@ -43,7 +43,7 @@ describe('DeportamentView', () => {
     })
 
     test('bo\'sh ma\'lumotlar bilan to\'g\'ri ishlaydi', () => {
-        const emptyDeportament = {
+        const emptyDepartment = {
             id: '1',
             name: 'Empty Dept',
             description: null,
@@ -53,14 +53,14 @@ describe('DeportamentView', () => {
             director: null
         }
 
-        renderWithMantine(<DeportamentView deportament={emptyDeportament as any} />)
+        renderWithMantine(<DepartmentView department={emptyDepartment as any} />)
 
         expect(screen.getByText('Empty Dept')).toBeInTheDocument()
         expect(screen.getAllByText('Kiritilmagan')).toHaveLength(2) // Code va Location uchun
     })
 
     test('ID nusxalash tugmasi mavjud', () => {
-        renderWithMantine(<DeportamentView deportament={mockDeportament as any} />)
+        renderWithMantine(<DepartmentView department={mockDepartment as any} />)
 
         expect(screen.getByText(/ID: 12345678/)).toBeInTheDocument()
     })

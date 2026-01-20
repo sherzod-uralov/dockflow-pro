@@ -34,7 +34,7 @@ import {
     ProjectGetResponse,
     PROJECT_STATUS_OPTIONS,
 } from "@/features/project";
-import { useGetAllDeportaments } from "@/features/deportament/hook/deportament.hook";
+import { useGetAllDepartments } from "@/features/department/hook/department.hook";
 import ProjectForm from "../component/project.form";
 import ProjectCard from "../component/project.card";
 import ProjectTable from "../component/project.table";
@@ -62,7 +62,7 @@ const ProjectPage = () => {
         departmentId: departmentFilter || undefined,
     });
 
-    const { data: departments } = useGetAllDeportaments({
+    const { data: departments } = useGetAllDepartments({
         pageNumber: 1,
         pageSize: 1000,
     });

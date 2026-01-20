@@ -32,7 +32,7 @@ import {
     useCreateProject,
     useUpdateProject,
 } from "../hook/project.hook";
-import { useGetAllDeportaments } from "@/features/deportament/hook/deportament.hook";
+import { useGetAllDepartments } from "@/features/department/hook/department.hook";
 
 interface ProjectFormProps {
     modal: ModalState;
@@ -49,7 +49,7 @@ const ProjectForm = ({
 }: ProjectFormProps) => {
     const createMutation = useCreateProject();
     const updateMutation = useUpdateProject();
-    const { data: departments } = useGetAllDeportaments({
+    const { data: departments } = useGetAllDepartments({
         pageNumber: 1,
         pageSize: 1000,
     });

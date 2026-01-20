@@ -27,7 +27,7 @@ import { GlobalSearch } from "@/components/shared/layout/global-search";
 import Cookie from "js-cookie";
 import { TourSettingsButton } from "@/hooks/use-onboarding";
 import { NotificationBell } from "@/components/shared/notification-bell";
-import { useNotifications } from "@/hooks/use-notifications";
+import { useOnlineUsers } from "@/hooks/socket";
 import { Popover, ScrollArea } from "@mantine/core";
 
 interface HeaderProps {
@@ -38,7 +38,7 @@ export function Header({ onMenuClick }: HeaderProps) {
   const { data, isLoading } = useGetProfileQuery();
   const router = useRouter();
   const logOutMutation = useLogoutMutation();
-  const { onlineUsers } = useNotifications();
+  const { onlineUsers } = useOnlineUsers();
 
   if (isLoading || !data) {
     return (

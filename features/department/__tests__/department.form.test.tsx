@@ -1,29 +1,29 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { MantineProvider } from '@mantine/core'
-import DeportamentFormModal from '../component/deportament.form'
-import { useCreateDeportament, useUpdateDeportament } from '../hook/deportament.hook'
+import DepartmentFormModal from '../component/department.form'
+import { useCreateDepartment, useUpdateDepartment } from '../hook/department.hook'
 import { useGetUserQuery } from '@/features/admin/admin-users/hook/user.hook'
 
 // Mock hooks
-jest.mock('../hook/deportament.hook')
+jest.mock('../hook/department.hook')
 jest.mock('@/features/admin/admin-users/hook/user.hook')
 
 const renderWithMantine = (component: React.ReactElement) => {
     return render(<MantineProvider>{component}</MantineProvider>)
 }
 
-describe('DeportamentFormModal', () => {
+describe('DepartmentFormModal', () => {
     const mockCreateMutate = jest.fn()
     const mockUpdateMutate = jest.fn()
     const mockOnClose = jest.fn()
 
     beforeEach(() => {
         jest.clearAllMocks()
-            ; (useCreateDeportament as jest.Mock).mockReturnValue({
+            ; (useCreateDepartment as jest.Mock).mockReturnValue({
                 mutate: mockCreateMutate,
                 isLoading: false
             })
-            ; (useUpdateDeportament as jest.Mock).mockReturnValue({
+            ; (useUpdateDepartment as jest.Mock).mockReturnValue({
                 mutate: mockUpdateMutate,
                 isLoading: false
             })
@@ -40,7 +40,7 @@ describe('DeportamentFormModal', () => {
 
     test('create rejimida formani to\'g\'ri render qiladi', () => {
         renderWithMantine(
-            <DeportamentFormModal
+            <DepartmentFormModal
                 mode="create"
                 onClose={mockOnClose}
             />
@@ -61,9 +61,9 @@ describe('DeportamentFormModal', () => {
         }
 
         renderWithMantine(
-            <DeportamentFormModal
+            <DepartmentFormModal
                 mode="update"
-                deportament={mockData as any}
+                department={mockData as any}
                 onClose={mockOnClose}
             />
         )
@@ -74,7 +74,7 @@ describe('DeportamentFormModal', () => {
 
     test('validatsiya ishlaydi', async () => {
         renderWithMantine(
-            <DeportamentFormModal
+            <DepartmentFormModal
                 mode="create"
                 onClose={mockOnClose}
             />
@@ -88,7 +88,7 @@ describe('DeportamentFormModal', () => {
 
     test('yangi bo\'lim yaratish', async () => {
         renderWithMantine(
-            <DeportamentFormModal
+            <DepartmentFormModal
                 mode="create"
                 onClose={mockOnClose}
             />
@@ -115,9 +115,9 @@ describe('DeportamentFormModal', () => {
         }
 
         renderWithMantine(
-            <DeportamentFormModal
+            <DepartmentFormModal
                 mode="update"
-                deportament={mockData as any}
+                department={mockData as any}
                 onClose={mockOnClose}
             />
         )

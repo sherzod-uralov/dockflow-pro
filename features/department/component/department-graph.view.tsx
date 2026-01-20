@@ -42,7 +42,7 @@ import {
     IconUnlink,
 } from "@tabler/icons-react"
 
-import { DepartmentResponse } from "../type/deportament.type";
+import { DepartmentResponse } from "../type/department.type";
 
 interface DepartmentGraphViewProps {
     departments: DepartmentResponse[]

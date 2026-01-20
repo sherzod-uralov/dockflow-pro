@@ -36,19 +36,19 @@ import {
   useModal,
 } from "@/components/shared/ui/custom-modal";
 import {
-  useGetAllDeportaments,
-  useDeleteDeportament,
+  useGetAllDepartments,
+  useDeleteDepartment,
   useUpdateDepartmentParent,
-} from "../hook/deportament.hook";
-import { DepartmentResponse } from "../type/deportament.type";
+} from "../hook/department.hook";
+import { DepartmentResponse } from "../type/department.type";
 import { useDebounce } from "@/hooks/use-debaunce";
-import DeportamentFormModal from "../component/deportament.form";
-import DeportamentView from "../component/deportament.view";
-import DepartmentGraphView from "../component/deportament-graph.view";
+import DepartmentFormModal from "../component/department.form";
+import DepartmentView from "../component/department.view";
+import DepartmentGraphView from "../component/department-graph.view";
 import { handleCopyToClipboard } from "@/utils/copy-text";
 import { DataTable, DataTableColumn } from "@/components/shared/ui/custom-table";
 
-const DeportamentPage = () => {
+const DepartmentPage = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -59,61 +59,61 @@ const DeportamentPage = () => {
   const deleteModal = useModal();
 
   // State
-  const [selectedDeportament, setSelectedDeportament] = useState<DepartmentResponse | null>(null);
+  const [selectedDepartment, setSelectedDepartment] = useState<DepartmentResponse | null>(null);
   const [searchQuery, debouncedSearch, setSearchQuery] = useDebounce("", 500);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [activeTab, setActiveTab] = useState<string | null>("table");
 
   // Query
-  const { data, isLoading } = useGetAllDeportaments({
+  const { data, isLoading } = useGetAllDepartments({
     search: debouncedSearch,
     pageSize,
     pageNumber: page,
   });
 
-  const deleteMutation = useDeleteDeportament();
+  const deleteMutation = useDeleteDepartment();
   const updateParentMutation = useUpdateDepartmentParent();
 
   // URL param uchun
   useEffect(() => {
-    const deportamentId = searchParams.get("deportamentId");
-    if (deportamentId && data?.data) {
-      const deportament = data.data.find((d) => d.id === deportamentId);
-      if (deportament) {
-        setSelectedDeportament(deportament);
+    const departmentId = searchParams.get("departmentId");
+    if (departmentId && data?.data) {
+      const department = data.data.find((d) => d.id === departmentId);
+      if (department) {
+        setSelectedDepartment(department);
         viewModal.openModal();
       }
     }
   }, [searchParams, data]);
 
   // Handlers
-  const handleView = (deportament: DepartmentResponse) => {
-    setSelectedDeportament(deportament);
+  const handleView = (department: DepartmentResponse) => {
+    setSelectedDepartment(department);
     viewModal.openModal();
-    router.push(`?deportamentId=${deportament.id}`, { scroll: false });
+    router.push(`?departmentId=${department.id}`, { scroll: false });
   };
 
-  const handleViewUsers = (deportament: DepartmentResponse) => {
-    router.push(`/dashboard/department/${deportament.id}`);
+  const handleViewUsers = (department: DepartmentResponse) => {
+    router.push(`/dashboard/department/${department.id}`);
   };
 
-  const handleEdit = (deportament: DepartmentResponse) => {
-    setSelectedDeportament(deportament);
+  const handleEdit = (department: DepartmentResponse) => {
+    setSelectedDepartment(department);
     editModal.openModal();
   };
 
-  const handleDeleteClick = (deportament: DepartmentResponse) => {
-    setSelectedDeportament(deportament);
+  const handleDeleteClick = (department: DepartmentResponse) => {
+    setSelectedDepartment(department);
     deleteModal.openModal();
   };
 
   const handleDeleteConfirm = () => {
-    if (selectedDeportament) {
-      deleteMutation.mutate(selectedDeportament.id, {
+    if (selectedDepartment) {
+      deleteMutation.mutate(selectedDepartment.id, {
         onSuccess: () => {
           deleteModal.closeModal();
-          setSelectedDeportament(null);
+          setSelectedDepartment(null);
         },
       });
     }
@@ -121,13 +121,13 @@ const DeportamentPage = () => {
 
   const handleCloseView = () => {
     viewModal.closeModal();
-    setSelectedDeportament(null);
+    setSelectedDepartment(null);
     router.push(window.location.pathname, { scroll: false });
   };
 
   const handleEditClose = () => {
     editModal.closeModal();
-    setSelectedDeportament(null);
+    setSelectedDepartment(null);
   };
 
   const handleConnectDepartments = (targetId: string, parentId: string) => {
@@ -388,7 +388,7 @@ const DeportamentPage = () => {
         size="lg"
         closeOnOverlayClick={false}
       >
-        <DeportamentFormModal
+        <DepartmentFormModal
           mode="create"
           onClose={createModal.closeModal}
           onSuccess={createModal.closeModal}
@@ -404,9 +404,9 @@ const DeportamentPage = () => {
         size="lg"
         closeOnOverlayClick={false}
       >
-        <DeportamentFormModal
+        <DepartmentFormModal
           mode="update"
-          deportament={selectedDeportament}
+          department={selectedDepartment}
           onClose={handleEditClose}
           onSuccess={handleEditClose}
         />
@@ -420,8 +420,8 @@ const DeportamentPage = () => {
         description="Bo'lim haqida to'liq ma'lumot"
         size="lg"
       >
-        {selectedDeportament && (
-          <DeportamentView deportament={selectedDeportament} />
+        {selectedDepartment && (
+          <DepartmentView department={selectedDepartment} />
         )}
       </CustomModal>
 
@@ -431,7 +431,7 @@ const DeportamentPage = () => {
         onClose={deleteModal.closeModal}
         onConfirm={handleDeleteConfirm}
         title="Bo'limni o'chirish"
-        description={`"${selectedDeportament?.name}" bo'limini o'chirmoqchimisiz? Bu amalni qaytarib bo'lmaydi.`}
+        description={`"${selectedDepartment?.name}" bo'limini o'chirmoqchimisiz? Bu amalni qaytarib bo'lmaydi.`}
         confirmText="O'chirish"
         cancelText="Bekor qilish"
         variant="destructive"
@@ -440,4 +440,4 @@ const DeportamentPage = () => {
   );
 };
 
-export default DeportamentPage;
+export default DepartmentPage;

@@ -20,9 +20,9 @@ import {
     useJournalCreateMutation,
     useUpdateJournal,
 } from "../hook/journal.hook";
-import { useGetAllDeportaments } from "@/features/deportament/hook/deportament.hook";
+import { useGetAllDepartments } from "@/features/department/hook/department.hook";
 import { useGetUserQuery } from "@/features/admin/admin-users/hook/user.hook";
-import { SingleJournalApiResponse } from "../types/journal.types";
+import { SingleJournalApiResponse } from "../type/journal.types";
 
 interface JournalFormProps {
     mode: "create" | "edit";
@@ -46,7 +46,7 @@ const JournalForm = ({ mode, journal, onClose, onSuccess }: JournalFormProps) =>
     const createMutation = useJournalCreateMutation();
     const updateMutation = useUpdateJournal();
 
-    const { data: departmentsData, isLoading: isLoadingDepartments } = useGetAllDeportaments({
+    const { data: departmentsData, isLoading: isLoadingDepartments } = useGetAllDepartments({
         pageNumber: 1,
         pageSize: 100,
         search: "",

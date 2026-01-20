@@ -1,7 +1,7 @@
 import { endpoints } from "@/api/axios.endpoints";
 import { createCRUDService } from "@/lib/crud-service";
-import { JournalCreateType } from "@/features/journal/scheme/journal.schema";
-import { SingleJournalApiResponse, JournalListResponse } from "@/features/journal/types/journal.types";
+import { JournalCreateType } from "@/features/journal/schema/journal.schema";
+import { SingleJournalApiResponse, JournalListResponse } from "@/features/journal/type/journal.types";
 import { GlobalGetAllPaginationProps } from "@/types/global.types";
 
 export const journalService = createCRUDService<

@@ -20,18 +20,18 @@ import {
 import { useGetUserQuery } from "@/features/admin/admin-users/hook/user.hook";
 import {
     DepartmentResponse,
-    useCreateDeportament,
-    useUpdateDeportament,
-} from "@/features/deportament";
+    useCreateDepartment,
+    useUpdateDepartment,
+} from "@/features/department";
 
-interface DeportamentFormModalProps {
+interface DepartmentFormModalProps {
     mode: "create" | "update";
-    deportament?: DepartmentResponse | null;
+    department?: DepartmentResponse | null;
     onClose: () => void;
     onSuccess?: () => void;
 }
 
-interface DeportamentFormValues {
+interface DepartmentFormValues {
     name: string;
     description: string;
     code: string;
@@ -39,17 +39,17 @@ interface DeportamentFormValues {
     directorId: string;
 }
 
-const DeportamentFormModal = ({
+const DepartmentFormModal = ({
     mode,
-    deportament,
+    department,
     onClose,
     onSuccess,
-}: DeportamentFormModalProps) => {
+}: DepartmentFormModalProps) => {
     const isUpdate = mode === "update";
 
     // Hooks
-    const createMutation = useCreateDeportament();
-    const updateMutation = useUpdateDeportament();
+    const createMutation = useCreateDepartment();
+    const updateMutation = useUpdateDepartment();
 
     const { data: usersData, isLoading: isLoadingUsers } = useGetUserQuery({
         pageNumber: 1,
@@ -58,23 +58,23 @@ const DeportamentFormModal = ({
     });
 
     // Form
-    const form = useForm<DeportamentFormValues>({
+    const form = useForm<DepartmentFormValues>({
         initialValues: {
-            name: deportament?.name || "",
-            description: deportament?.description || "",
-            code: deportament?.code || "",
-            location: deportament?.location || "",
-            directorId: deportament?.director?.id || "",
+            name: department?.name || "",
+            description: department?.description || "",
+            code: department?.code || "",
+            location: department?.location || "",
+            directorId: department?.director?.id || "",
         },
         validate: {
             name: (value) => (!value ? "Bo'lim nomi kiritilishi shart" : null),
         },
     });
 
-    const handleSubmit = (values: DeportamentFormValues) => {
-        if (isUpdate && deportament?.id) {
+    const handleSubmit = (values: DepartmentFormValues) => {
+        if (isUpdate && department?.id) {
             updateMutation.mutate(
-                { id: deportament.id, data: values },
+                { id: department.id, data: values },
                 {
                     onSuccess: () => {
                         onSuccess?.();
@@ -201,4 +201,4 @@ const DeportamentFormModal = ({
     );
 };
 
-export default DeportamentFormModal;
+export default DepartmentFormModal;

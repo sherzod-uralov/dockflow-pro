@@ -1,11 +1,11 @@
-import DeportamentPage from "@/features/deportament/page/deportament.page";
+import DepartmentPage from "@/features/department/page/department.page";
 import { Home } from "lucide-react";
 import { PageHeader } from "@/components/shared/ui/custom-breadcrumb";
 
 const Page = () => {
   return (
     <>
-      <DeportamentPage />
+      <DepartmentPage />
     </>
   );
 };

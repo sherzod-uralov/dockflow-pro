@@ -1,7 +1,7 @@
 import { DataPagination } from "@/types/global.types";
 
 // 2. Определяем точный тип данных для одного департамента
-export interface DeportamentViewPropsData {
+export interface DepartmentViewPropsData {
   id: string;
   name: string;
   description: string | null;
@@ -20,17 +20,17 @@ export interface DeportamentViewPropsData {
 }
 
 // 3. Обновляем интерфейс пропсов
-export interface DeportamentViewProps {
-  departament: DeportamentViewPropsData;
+export interface DepartmentViewProps {
+  departament: DepartmentViewPropsData;
   onClose?: () => void;
 }
 
-export interface Deportament {
+export interface Department {
   id: string;
   name: string;
   description: string;
   code: string;
-  parentId: null | Deportament;
+  parentId: null | Department;
   directorId: string;
 }
 
@@ -56,11 +56,11 @@ export interface DepartmentResponse {
   director: DepartmentDirector | null;
 }
 
-export interface GetAllDeportaments extends DataPagination {
+export interface GetAllDepartments extends DataPagination {
   data: DepartmentResponse[];
 }
 
-export interface DeportamentQueryParams {
+export interface DepartmentQueryParams {
   search?: string;
   pageSize?: number;
   pageNumber?: number;

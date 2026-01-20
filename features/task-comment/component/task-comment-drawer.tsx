@@ -225,7 +225,6 @@ export const TaskCommentDrawer = ({
     setNewComment("");
   };
 
-  // Group comments: top level and replies
   const topLevelComments = comments.filter((c) => !c.parentCommentId);
   const repliesMap = comments.reduce((acc, comment) => {
     if (comment.parentCommentId) {

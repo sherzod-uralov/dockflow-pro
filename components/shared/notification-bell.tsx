@@ -5,16 +5,16 @@ import {
     ActionIcon,
     Indicator,
     Popover,
-    Badge,
     Tooltip
 } from '@mantine/core';
 import { IconBell } from '@tabler/icons-react';
 import { NotificationList } from './notification-list';
-import { useNotificationContext } from '@/context/notification.provider';
+import { useNotifications, useConnectionStatus } from '@/hooks/socket';
 
 export const NotificationBell: React.FC = () => {
     const [opened, setOpened] = useState(false);
-    const { notifications, unreadCount, markAsRead, markAllAsRead, isConnected } = useNotificationContext();
+    const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
+    const { isConnected } = useConnectionStatus();
 
     return (
         <Popover

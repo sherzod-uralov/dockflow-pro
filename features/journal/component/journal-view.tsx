@@ -22,7 +22,7 @@ import {
     IconCopy,
     IconCheck,
 } from "@tabler/icons-react";
-import { SingleJournalApiResponse } from "../types/journal.types";
+import { SingleJournalApiResponse } from "../type/journal.types";
 
 interface JournalViewProps {
     journal: SingleJournalApiResponse;

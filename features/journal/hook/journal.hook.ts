@@ -1,10 +1,10 @@
 import { createCRUDHooks } from "@/lib/crud-hooks";
 import { journalService } from "@/features/journal/service/journal.service";
-import { JournalCreateType } from "@/features/journal/scheme/journal.schema";
+import { JournalCreateType } from "@/features/journal/schema/journal.schema";
 import {
   JournalListResponse,
   SingleJournalApiResponse,
-} from "@/features/journal/types/journal.types";
+} from "@/features/journal/type/journal.types";
 import { GlobalGetAllPaginationProps } from "@/types/global.types";
 
 const journalHooks = createCRUDHooks<

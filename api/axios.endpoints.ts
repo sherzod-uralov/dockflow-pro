@@ -45,7 +45,7 @@ export const endpoints = {
     savePdfAnnotations: (id: string | number) => `/document/${id}/pdf-url`,
     download: (id: string | number) => `/document/${id}/download`,
   },
-  deportament: {
+  department: {
     list: "/department",
     create: "/department",
     detail: (id: string | number) => `/department/${id}`,

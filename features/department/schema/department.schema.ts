@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const deportamentScheme = z.object({
+export const departmentScheme = z.object({
   name: z
     .string(),
   description: z
@@ -14,4 +14,4 @@ export const deportamentScheme = z.object({
   directorId: z.string().nullable().optional(),
 });
 
-export type DeportamentInferType = z.infer<typeof deportamentScheme>;
+export type DepartmentInferType = z.infer<typeof departmentScheme>;

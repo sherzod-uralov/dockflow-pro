@@ -23,13 +23,13 @@ import {
     IconFileDescription,
     IconSitemap,
 } from "@tabler/icons-react";
-import { DepartmentResponse } from "../type/deportament.type";
+import { DepartmentResponse } from "../type/department.type";
 
-interface DeportamentViewProps {
-    deportament: DepartmentResponse;
+interface DepartmentViewProps {
+    department: DepartmentResponse;
 }
 
-const DeportamentView = ({ deportament }: DeportamentViewProps) => {
+const DepartmentView = ({ department }: DepartmentViewProps) => {
     const getInitials = (name: string) => {
         return name
             .split(" ")
@@ -56,14 +56,14 @@ const DeportamentView = ({ deportament }: DeportamentViewProps) => {
                         </Box>
                         <Box>
                             <Text size="xl" fw={600} c="#212529">
-                                {deportament.name}
+                                {department.name}
                             </Text>
                             <Text size="sm" c="dimmed">
                                 Bo'lim haqida batafsil ma'lumotlar
                             </Text>
                         </Box>
                     </Group>
-                    <CopyButton value={deportament.id}>
+                    <CopyButton value={department.id}>
                         {({ copied, copy }) => (
                             <Tooltip label={copied ? "Nusxalandi!" : "ID nusxalash"}>
                                 <Badge
@@ -81,7 +81,7 @@ const DeportamentView = ({ deportament }: DeportamentViewProps) => {
                                         )
                                     }
                                 >
-                                    ID: {deportament.id.slice(0, 8)}...
+                                    ID: {department.id.slice(0, 8)}...
                                 </Badge>
                             </Tooltip>
                         )}
@@ -92,7 +92,7 @@ const DeportamentView = ({ deportament }: DeportamentViewProps) => {
             <Divider />
 
             {/* Description */}
-            {deportament.description && (
+            {department.description && (
                 <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
                     <Group gap="xs" mb="sm">
                         <IconFileDescription size={16} color="#868e96" />
@@ -101,7 +101,7 @@ const DeportamentView = ({ deportament }: DeportamentViewProps) => {
                         </Text>
                     </Group>
                     <Text size="sm" c="#495057" style={{ lineHeight: 1.6 }}>
-                        {deportament.description}
+                        {department.description}
                     </Text>
                 </Paper>
             )}
@@ -115,8 +115,8 @@ const DeportamentView = ({ deportament }: DeportamentViewProps) => {
                             Kod
                         </Text>
                     </Group>
-                    {deportament.code ? (
-                        <CopyButton value={deportament.code}>
+                    {department.code ? (
+                        <CopyButton value={department.code}>
                             {({ copied, copy }) => (
                                 <Paper
                                     p="sm"
@@ -130,7 +130,7 @@ const DeportamentView = ({ deportament }: DeportamentViewProps) => {
                                 >
                                     <Group justify="space-between">
                                         <Text size="md" fw={600} c={copied ? "#2b8a3e" : "#1e3a5f"} ff="monospace">
-                                            {deportament.code}
+                                            {department.code}
                                         </Text>
                                         {copied ? (
                                             <IconCheck size={16} color="#2b8a3e" />
@@ -154,14 +154,14 @@ const DeportamentView = ({ deportament }: DeportamentViewProps) => {
                         </Text>
                     </Group>
                     <Text size="md" c="#495057">
-                        {deportament.location || "Kiritilmagan"}
+                        {department.location || "Kiritilmagan"}
                     </Text>
                 </Paper>
             </SimpleGrid>
 
             {/* Parent Department and Director */}
             <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
-                {deportament.parent && (
+                {department.parent && (
                     <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
                         <Group gap="xs" mb="sm">
                             <IconSitemap size={16} color="#868e96" />
@@ -175,12 +175,12 @@ const DeportamentView = ({ deportament }: DeportamentViewProps) => {
                             size="lg"
                             radius="sm"
                         >
-                            {deportament.parent.name}
+                            {department.parent.name}
                         </Badge>
                     </Paper>
                 )}
 
-                {deportament.director && (
+                {department.director && (
                     <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
                         <Group gap="xs" mb="sm">
                             <IconUser size={16} color="#868e96" />
@@ -192,19 +192,19 @@ const DeportamentView = ({ deportament }: DeportamentViewProps) => {
                             <Avatar
                                 size="md"
                                 radius="xl"
-                                src={deportament.director.avatarUrl}
+                                src={department.director.avatarUrl}
                                 style={{ backgroundColor: "#e7f5ff" }}
                             >
                                 <Text size="sm" c="#1e3a5f" fw={500}>
-                                    {getInitials(deportament.director.fullname)}
+                                    {getInitials(department.director.fullname)}
                                 </Text>
                             </Avatar>
                             <Box>
                                 <Text size="md" fw={500} c="#212529">
-                                    {deportament.director.fullname}
+                                    {department.director.fullname}
                                 </Text>
                                 <Text size="xs" c="dimmed">
-                                    @{deportament.director.username}
+                                    @{department.director.username}
                                 </Text>
                             </Box>
                         </Group>
@@ -215,4 +215,4 @@ const DeportamentView = ({ deportament }: DeportamentViewProps) => {
     );
 };
 
-export default DeportamentView;
+export default DepartmentView;

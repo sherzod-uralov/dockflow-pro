@@ -24,7 +24,7 @@ import {
   useUpdateUserMutation,
 } from "../hook/user.hook";
 import { useGetRoles } from "../../roles/hook/role.hook";
-import { useGetAllDeportaments } from "@/features/deportament";
+import { useGetAllDepartments } from "@/features/department";
 import type { UserFormProps } from "../type/user.types";
 import { z } from "zod";
 import { useCreateAttachment } from "@/features/attachment/hook/attachment.hook";
@@ -42,7 +42,7 @@ export default function UserForm({ mode, modal, userData }: UserFormProps) {
     search: "",
   });
 
-  const { data: departments, isLoading: isLoadingDepartments } = useGetAllDeportaments({
+  const { data: departments, isLoading: isLoadingDepartments } = useGetAllDepartments({
     pageNumber: 1,
     pageSize: 100,
     search: "",

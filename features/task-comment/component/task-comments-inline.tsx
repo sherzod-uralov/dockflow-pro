@@ -199,16 +199,16 @@ const EmojiPicker = ({
 
 const CommentItem = ({
   comment,
+  parentComment,
   onReply,
   onEdit,
   onDelete,
-  isReply = false,
 }: {
   comment: TaskCommentGetResponse;
+  parentComment?: TaskCommentGetResponse;
   onReply: (comment: TaskCommentGetResponse) => void;
   onEdit: (comment: TaskCommentGetResponse) => void;
   onDelete: (id: string) => void;
-  isReply?: boolean;
 }) => {
   const timeAgo = formatDistanceToNow(new Date(comment.createdAt), {
     addSuffix: true,
@@ -216,70 +216,96 @@ const CommentItem = ({
   });
 
   return (
-    <Box style={{ paddingLeft: isReply ? 40 : 0 }}>
-      <Group align="flex-start" gap="sm" wrap="nowrap">
-        <Avatar size="sm" radius="xl" color="blue">
-          {comment.user?.fullname?.charAt(0) || "?"}
-        </Avatar>
-        <Box style={{ flex: 1, minWidth: 0 }}>
-          <Group justify="space-between" wrap="nowrap">
-            <Group gap="xs">
-              <Text size="sm" fw={600} c="#212529">
-                {comment.user?.fullname || "Noma'lum"}
+    <Group align="flex-start" gap="sm" wrap="nowrap">
+      <Avatar size="sm" radius="xl" color="blue">
+        {comment.user?.fullname?.charAt(0) || "?"}
+      </Avatar>
+      <Box style={{ flex: 1, minWidth: 0 }}>
+        <Group justify="space-between" wrap="nowrap">
+          <Group gap="xs">
+            <Text size="sm" fw={600} c="#212529">
+              {comment.user?.fullname || "Noma'lum"}
+            </Text>
+            <Text size="xs" c="dimmed">
+              {timeAgo}
+            </Text>
+            {comment.isEdited && (
+              <Text size="xs" c="dimmed" fs="italic">
+                (tahrirlangan)
               </Text>
-              <Text size="xs" c="dimmed">
-                {timeAgo}
-              </Text>
-              {comment.isEdited && (
-                <Text size="xs" c="dimmed" fs="italic">
-                  (tahrirlangan)
-                </Text>
-              )}
-            </Group>
-            <Menu shadow="md" width={150} position="bottom-end">
-              <Menu.Target>
-                <ActionIcon variant="subtle" size="xs" color="gray">
-                  <IconDots size={14} />
-                </ActionIcon>
-              </Menu.Target>
-              <Menu.Dropdown>
-                <Menu.Item
-                  leftSection={<IconCornerDownRight size={14} />}
-                  onClick={() => onReply(comment)}
-                >
-                  Javob berish
-                </Menu.Item>
-                <Menu.Item
-                  leftSection={<IconEdit size={14} />}
-                  onClick={() => onEdit(comment)}
-                >
-                  Tahrirlash
-                </Menu.Item>
-                <Menu.Item
-                  leftSection={<IconTrash size={14} />}
-                  color="red"
-                  onClick={() => onDelete(comment.id)}
-                >
-                  O'chirish
-                </Menu.Item>
-              </Menu.Dropdown>
-            </Menu>
+            )}
           </Group>
-          <Text
-            size={isOnlyEmojis(comment.content) ? "xl" : "sm"}
-            c="#495057"
+          <Menu shadow="md" width={150} position="bottom-end" withinPortal>
+            <Menu.Target>
+              <ActionIcon variant="subtle" size="xs" color="gray">
+                <IconDots size={14} />
+              </ActionIcon>
+            </Menu.Target>
+            <Menu.Dropdown>
+              <Menu.Item
+                leftSection={<IconCornerDownRight size={14} />}
+                onClick={() => onReply(comment)}
+              >
+                Javob berish
+              </Menu.Item>
+              <Menu.Item
+                leftSection={<IconEdit size={14} />}
+                onClick={() => onEdit(comment)}
+              >
+                Tahrirlash
+              </Menu.Item>
+              <Menu.Item
+                leftSection={<IconTrash size={14} />}
+                color="red"
+                onClick={() => onDelete(comment.id)}
+              >
+                O'chirish
+              </Menu.Item>
+            </Menu.Dropdown>
+          </Menu>
+        </Group>
+
+        {/* Reply quote - Telegram style */}
+        {parentComment && (
+          <Box
+            mb={6}
+            pl="sm"
+            py={4}
             style={{
-              whiteSpace: "pre-wrap",
-              wordBreak: "break-word",
-              fontSize: isOnlyEmojis(comment.content) ? 32 : undefined,
-              lineHeight: isOnlyEmojis(comment.content) ? 1.2 : undefined,
+              borderLeft: "2px solid #1e3a5f",
+              backgroundColor: "#f8f9fa",
+              borderRadius: "0 4px 4px 0",
+              cursor: "pointer",
             }}
           >
-            {comment.content}
+            <Text size="xs" fw={600} c="#1e3a5f" lineClamp={1}>
+              {parentComment.user?.fullname}
+            </Text>
+            <Text size="xs" c="dimmed" lineClamp={1}>
+              {parentComment.content}
+            </Text>
+          </Box>
+        )}
+
+        <Text
+          size={isOnlyEmojis(comment.content) ? "xl" : "sm"}
+          c="#495057"
+          style={{
+            whiteSpace: "pre-wrap",
+            wordBreak: "break-word",
+            fontSize: isOnlyEmojis(comment.content) ? 32 : undefined,
+            lineHeight: isOnlyEmojis(comment.content) ? 1.2 : undefined,
+          }}
+        >
+          {comment.content}
+        </Text>
+        {comment.repliesCount > 0 && (
+          <Text size="xs" c="dimmed" mt={4}>
+            {comment.repliesCount} ta javob
           </Text>
-        </Box>
-      </Group>
-    </Box>
+        )}
+      </Box>
+    </Group>
   );
 };
 
@@ -379,17 +405,44 @@ export const TaskCommentsInline = ({ taskId }: TaskCommentsInlineProps) => {
     setNewComment("");
   };
 
-  // Group comments
+  // Group comments - build comments map and find root parent for nested replies
+  const commentsById = comments.reduce((acc, comment) => {
+    acc[comment.id] = comment;
+    return acc;
+  }, {} as Record<string, TaskCommentGetResponse>);
+
+  // Find root parent (top-level comment) for any reply
+  const findRootParent = (commentId: string): string | null => {
+    const comment = commentsById[commentId];
+    if (!comment || !comment.parentCommentId) return commentId;
+    const parent = commentsById[comment.parentCommentId];
+    if (!parent) return commentId;
+    if (!parent.parentCommentId) return parent.id;
+    return findRootParent(parent.id);
+  };
+
   const topLevelComments = comments.filter((c) => !c.parentCommentId);
+
+  // Group all replies under their root parent (top-level comment)
   const repliesMap = comments.reduce((acc, comment) => {
     if (comment.parentCommentId) {
-      if (!acc[comment.parentCommentId]) {
-        acc[comment.parentCommentId] = [];
+      const rootParentId = findRootParent(comment.parentCommentId);
+      if (rootParentId) {
+        if (!acc[rootParentId]) {
+          acc[rootParentId] = [];
+        }
+        acc[rootParentId].push(comment);
       }
-      acc[comment.parentCommentId].push(comment);
     }
     return acc;
   }, {} as Record<string, TaskCommentGetResponse[]>);
+
+  // Sort replies by creation date
+  Object.keys(repliesMap).forEach((key) => {
+    repliesMap[key].sort(
+      (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+    );
+  });
 
   return (
     <Stack gap={0} style={{ height: "100%" }}>
@@ -437,10 +490,10 @@ export const TaskCommentsInline = ({ taskId }: TaskCommentsInlineProps) => {
                   <Box key={reply.id} mt="sm">
                     <CommentItem
                       comment={reply}
+                      parentComment={reply.parentCommentId ? commentsById[reply.parentCommentId] : undefined}
                       onReply={handleReply}
                       onEdit={handleEdit}
                       onDelete={handleDelete}
-                      isReply
                     />
                   </Box>
                 ))}

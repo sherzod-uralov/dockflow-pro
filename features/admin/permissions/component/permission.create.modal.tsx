@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { permissionScheme } from "../scheme/permission.scheme";
+import { permissionScheme } from "../schema/permission.schema";
 import {
   Form,
   FormControl,

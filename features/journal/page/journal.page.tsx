@@ -35,7 +35,7 @@ import {
   useGetAllJournals,
   useDeleteJournal,
 } from "@/features/journal/hook/journal.hook";
-import { SingleJournalApiResponse } from "@/features/journal/types/journal.types";
+import { SingleJournalApiResponse } from "@/features/journal/type/journal.types";
 import { useDebounce } from "@/hooks/use-debaunce";
 import JournalForm from "../component/journal-form";
 import JournalView from "../component/journal-view";

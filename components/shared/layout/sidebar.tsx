@@ -33,7 +33,7 @@ import { useState, useEffect, useMemo } from "react";
 import Cookie from "js-cookie";
 import { useLogoutMutation } from "@/features/login/hook/login.hook";
 import { usePermission } from "@/providers/permission-provider";
-import { useNotificationContext } from "@/context/notification.provider";
+import { useActiveWorkflows } from "@/hooks/socket";
 import Image from "next/image";
 import { useGetAllProjects } from "@/features/project/hook/project.hook";
 import { CustomModal, useModal } from "@/components/shared/ui/custom-modal";
@@ -183,19 +183,13 @@ const SidebarBody = ({
   return (
     <Box
       h="100%"
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        backgroundColor: "#1e3a5f",
-      }}
+      className="flex flex-col bg-sidebar-bg"
     >
       {/* Header */}
       <Box
         px="md"
         py="sm"
-        style={{
-          borderBottom: "1px solid rgba(255,255,255,0.1)",
-        }}
+        className="border-b border-sidebar-border"
       >
         <div className="flex flex-col gap-4">
           <div className="relative">
@@ -222,7 +216,7 @@ const SidebarBody = ({
                 <NavLink
                   label={
                     <Group justify="space-between" wrap="nowrap">
-                      <Text size="sm" c="rgba(255,255,255,0.9)">
+                      <Text size="sm" c="var(--sidebar-text)">
                         {item.label}
                       </Text>
                       {item.label === "Hujjat aylanmasi" && activeWorkflowsCount > 0 && (
@@ -241,13 +235,13 @@ const SidebarBody = ({
                     <item.icon
                       size={18}
                       stroke={1.5}
-                      color="rgba(255,255,255,0.7)"
+                      color="var(--sidebar-text-muted)"
                     />
                   }
                   rightSection={
                     <IconChevronRight
                       size={14}
-                      color="rgba(255,255,255,0.5)"
+                      color="var(--sidebar-text-dim)"
                       style={{
                         transform:
                           openMenu === item.label
@@ -265,10 +259,10 @@ const SidebarBody = ({
                       borderRadius: 4,
                       backgroundColor:
                         openMenu === item.label
-                          ? "rgba(255,255,255,0.1)"
+                          ? "var(--sidebar-open)"
                           : "transparent",
                       "&:hover": {
-                        backgroundColor: "rgba(255,255,255,0.08)",
+                        backgroundColor: "var(--sidebar-hover)",
                       },
                     },
                   }}
@@ -279,7 +273,7 @@ const SidebarBody = ({
                     mt={4}
                     pl="xs"
                     style={{
-                      borderLeft: "1px solid rgba(255,255,255,0.15)",
+                      borderLeft: "1px solid var(--sidebar-border-accent)",
                     }}
                   >
                     {item.subItems.map((sub) => (
@@ -292,7 +286,7 @@ const SidebarBody = ({
                               c={
                                 isActive(sub.href)
                                   ? "white"
-                                  : "rgba(255,255,255,0.75)"
+                                  : "var(--sidebar-text-secondary)"
                               }
                             >
                               {sub.label}
@@ -316,10 +310,10 @@ const SidebarBody = ({
                           root: {
                             borderRadius: 4,
                             backgroundColor: isActive(sub.href)
-                              ? "rgba(255,255,255,0.15)"
+                              ? "var(--sidebar-active)"
                               : "transparent",
                             "&:hover": {
-                              backgroundColor: "rgba(255,255,255,0.08)",
+                              backgroundColor: "var(--sidebar-hover)",
                             },
                           },
                         }}
@@ -333,7 +327,7 @@ const SidebarBody = ({
                 label={
                   <Text
                     size="sm"
-                    c={isActive(item.href) ? "white" : "rgba(255,255,255,0.9)"}
+                    c={isActive(item.href) ? "white" : "var(--sidebar-text)"}
                     fw={isActive(item.href) ? 500 : 400}
                   >
                     {item.label}
@@ -344,7 +338,7 @@ const SidebarBody = ({
                     size={18}
                     stroke={1.5}
                     color={
-                      isActive(item.href) ? "white" : "rgba(255,255,255,0.7)"
+                      isActive(item.href) ? "white" : "var(--sidebar-text-muted)"
                     }
                   />
                 }
@@ -355,10 +349,10 @@ const SidebarBody = ({
                   root: {
                     borderRadius: 4,
                     backgroundColor: isActive(item.href)
-                      ? "rgba(255,255,255,0.15)"
+                      ? "var(--sidebar-active)"
                       : "transparent",
                     "&:hover": {
-                      backgroundColor: "rgba(255,255,255,0.08)",
+                      backgroundColor: "var(--sidebar-hover)",
                     },
                   },
                 }}
@@ -372,7 +366,7 @@ const SidebarBody = ({
           <NavLink
             label={
               <Group justify="space-between" wrap="nowrap" style={{ width: "100%" }}>
-                <Text size="sm" c="rgba(255,255,255,0.9)">
+                <Text size="sm" c="var(--sidebar-text)">
                   Vazifalar
                 </Text>
                 <Tooltip label="Yangi loyiha" position="right" withArrow>
@@ -384,7 +378,7 @@ const SidebarBody = ({
                       onCreateProject();
                     }}
                     style={{
-                      color: "rgba(255,255,255,0.7)",
+                      color: "var(--sidebar-text-muted)",
                     }}
                   >
                     <IconPlus size={14} />
@@ -396,13 +390,13 @@ const SidebarBody = ({
               <IconLayoutKanban
                 size={18}
                 stroke={1.5}
-                color="rgba(255,255,255,0.7)"
+                color="var(--sidebar-text-muted)"
               />
             }
             rightSection={
               <IconChevronRight
                 size={14}
-                color="rgba(255,255,255,0.5)"
+                color="var(--sidebar-text-dim)"
                 style={{
                   transform:
                     openMenu === "Vazifalar boshqaruvi"
@@ -420,10 +414,10 @@ const SidebarBody = ({
                 borderRadius: 4,
                 backgroundColor:
                   openMenu === "Vazifalar boshqaruvi"
-                    ? "rgba(255,255,255,0.1)"
+                    ? "var(--sidebar-open)"
                     : "transparent",
                 "&:hover": {
-                  backgroundColor: "rgba(255,255,255,0.08)",
+                  backgroundColor: "var(--sidebar-hover)",
                 },
               },
             }}
@@ -434,7 +428,7 @@ const SidebarBody = ({
               mt={4}
               pl="xs"
               style={{
-                borderLeft: "1px solid rgba(255,255,255,0.15)",
+                borderLeft: "1px solid var(--sidebar-border-accent)",
               }}
             >
               {/* Barcha vazifalar link */}
@@ -442,7 +436,7 @@ const SidebarBody = ({
                 label={
                   <Text
                     size="sm"
-                    c={isActive("/dashboard/task") ? "white" : "rgba(255,255,255,0.75)"}
+                    c={isActive("/dashboard/task") ? "white" : "var(--sidebar-text-secondary)"}
                   >
                     Barcha vazifalar
                   </Text>
@@ -454,10 +448,10 @@ const SidebarBody = ({
                   root: {
                     borderRadius: 4,
                     backgroundColor: isActive("/dashboard/task")
-                      ? "rgba(255,255,255,0.15)"
+                      ? "var(--sidebar-active)"
                       : "transparent",
                     "&:hover": {
-                      backgroundColor: "rgba(255,255,255,0.08)",
+                      backgroundColor: "var(--sidebar-hover)",
                     },
                   },
                 }}
@@ -468,7 +462,7 @@ const SidebarBody = ({
                 label={
                   <Text
                     size="sm"
-                    c={isActive("/dashboard/project") && !isActive("/dashboard/project/") ? "white" : "rgba(255,255,255,0.75)"}
+                    c={isActive("/dashboard/project") && !isActive("/dashboard/project/") ? "white" : "var(--sidebar-text-secondary)"}
                   >
                     Barcha loyihalar
                   </Text>
@@ -480,10 +474,10 @@ const SidebarBody = ({
                   root: {
                     borderRadius: 4,
                     backgroundColor: isActive("/dashboard/project") && window.location.pathname === "/dashboard/project"
-                      ? "rgba(255,255,255,0.15)"
+                      ? "var(--sidebar-active)"
                       : "transparent",
                     "&:hover": {
-                      backgroundColor: "rgba(255,255,255,0.08)",
+                      backgroundColor: "var(--sidebar-hover)",
                     },
                   },
                 }}
@@ -493,14 +487,14 @@ const SidebarBody = ({
               <Box
                 my="xs"
                 style={{
-                  borderTop: "1px solid rgba(255,255,255,0.1)",
+                  borderTop: "1px solid var(--sidebar-open)",
                 }}
               />
 
               {/* Dynamic Projects */}
               {isProjectsLoading ? (
                 <Box py="xs" style={{ display: "flex", justifyContent: "center" }}>
-                  <Loader size="xs" color="rgba(255,255,255,0.5)" />
+                  <Loader size="xs" color="var(--sidebar-text-dim)" />
                 </Box>
               ) : projects.length > 0 ? (
                 projects.map((project) => (
@@ -513,7 +507,7 @@ const SidebarBody = ({
                             width: 8,
                             height: 8,
                             borderRadius: "50%",
-                            backgroundColor: project.color || "#3498db",
+                            backgroundColor: project.color || "var(--primary)",
                             flexShrink: 0,
                           }}
                         />
@@ -522,7 +516,7 @@ const SidebarBody = ({
                           c={
                             isActive(`/dashboard/project/${project.id}/tasks`)
                               ? "white"
-                              : "rgba(255,255,255,0.75)"
+                              : "var(--sidebar-text-secondary)"
                           }
                           style={{
                             overflow: "hidden",
@@ -541,17 +535,17 @@ const SidebarBody = ({
                       root: {
                         borderRadius: 4,
                         backgroundColor: isActive(`/dashboard/project/${project.id}/tasks`)
-                          ? "rgba(255,255,255,0.15)"
+                          ? "var(--sidebar-active)"
                           : "transparent",
                         "&:hover": {
-                          backgroundColor: "rgba(255,255,255,0.08)",
+                          backgroundColor: "var(--sidebar-hover)",
                         },
                       },
                     }}
                   />
                 ))
               ) : (
-                <Text size="xs" c="rgba(255,255,255,0.5)" ta="center" py="xs">
+                <Text size="xs" c="var(--sidebar-text-dim)" ta="center" py="xs">
                   Loyihalar mavjud emas
                 </Text>
               )}
@@ -565,17 +559,17 @@ const SidebarBody = ({
         px="xs"
         py="sm"
         style={{
-          borderTop: "1px solid rgba(255,255,255,0.1)",
+          borderTop: "1px solid var(--sidebar-open)",
         }}
       >
         <NavLink
           label={
-            <Text size="sm" c="rgba(255,255,255,0.9)">
+            <Text size="sm" c="var(--sidebar-text)">
               Chiqish
             </Text>
           }
           leftSection={
-            <IconLogout size={18} stroke={1.5} color="rgba(255,255,255,0.7)" />
+            <IconLogout size={18} stroke={1.5} color="var(--sidebar-text-muted)" />
           }
           onClick={handleLogout}
           variant="subtle"
@@ -585,7 +579,7 @@ const SidebarBody = ({
               transition: "background-color 0.2s ease",
             },
             label: {
-              color: "rgba(255,255,255,0.9)",
+              color: "var(--sidebar-text)",
             },
           }}
         />
@@ -599,7 +593,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
   const logOutMutation = useLogoutMutation();
   const { hasPermission } = usePermission();
-  const { activeWorkflowsCount } = useNotificationContext();
+  const { activeWorkflowsCount } = useActiveWorkflows();
   const createProjectModal = useModal();
 
   const [openMenu, setOpenMenu] = useState<string | null>(null);
@@ -695,7 +689,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
           left={0}
           right={0}
           bottom={0}
-          bg="rgba(0,0,0,0.5)"
+          className="bg-black/50"
           style={{ zIndex: 100 }}
           onClick={onClose}
           hiddenFrom="lg"
