@@ -468,12 +468,12 @@ const SidebarBody = ({
                   </Text>
                 }
                 onClick={() => handleItemClick("/dashboard/project")}
-                active={isActive("/dashboard/project") && window.location.pathname === "/dashboard/project"}
+                active={isActive("/dashboard/project") && pathname === "/dashboard/project"}
                 variant="subtle"
                 styles={{
                   root: {
                     borderRadius: 4,
-                    backgroundColor: isActive("/dashboard/project") && window.location.pathname === "/dashboard/project"
+                    backgroundColor: isActive("/dashboard/project") && pathname === "/dashboard/project"
                       ? "var(--sidebar-active)"
                       : "transparent",
                     "&:hover": {
