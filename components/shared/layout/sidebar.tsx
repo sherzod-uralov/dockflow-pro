@@ -166,6 +166,7 @@ interface SidebarBodyProps {
   projects: ProjectGetResponse[];
   isProjectsLoading: boolean;
   onCreateProject: () => void;
+  pathname: string | null;
 }
 
 const SidebarBody = ({
@@ -179,6 +180,7 @@ const SidebarBody = ({
   projects,
   isProjectsLoading,
   onCreateProject,
+  pathname,
 }: SidebarBodyProps) => {
   return (
     <Box
@@ -677,6 +679,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
     projects,
     isProjectsLoading,
     onCreateProject: handleCreateProject,
+    pathname,
   };
 
   return (
