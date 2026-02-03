@@ -41,6 +41,12 @@ export function usePDFViewer(documentId?: string) {
     };
 
     initializePDF();
+
+    return () => {
+      if (instance) {
+        instance.UI.dispose();
+      }
+    };
   }, [documentId, toast]);
 
   const saveAnnotations = async () => {

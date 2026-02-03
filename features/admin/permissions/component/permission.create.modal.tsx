@@ -1,24 +1,16 @@
-import { zodResolver } from "@hookform/resolvers/zod";
+"use client";
+
+import { useEffect, useCallback } from "react";
 import { useForm } from "react-hook-form";
-import { permissionScheme } from "../schema/permission.schema";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Button } from "@/components/ui/button";
+import { Stack, TextInput, Textarea, Button, Group, SimpleGrid } from "@mantine/core";
+import { permissionScheme } from "../schema/permission.schema";
 import { ModalState } from "@/types/modal";
 import {
   useCreatePermission,
   useUpdatePermission,
 } from "../hook/permission.hook";
-import { useEffect } from "react";
 import { Permission } from "../type/permission.type";
 
 type PermissionFormType = z.infer<typeof permissionScheme>;
@@ -82,7 +74,7 @@ const PermissionFormModal = ({
             form.reset();
             onSuccess?.();
           },
-        },
+        }
       );
     } else {
       createPermissionMutation.mutate(values, {
@@ -95,106 +87,156 @@ const PermissionFormModal = ({
     }
   };
 
-  const handleCancel = () => {
+  const handleCancel = useCallback(() => {
     modal.closeModal();
     form.reset();
-  };
+  }, [modal, form]);
 
   return (
-    <Form {...form}>
-      <form className="space-y-5" onSubmit={form.handleSubmit(handleSubmit)}>
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Ruxsat nomi</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Ruxsat nomi"
-                  disabled={isLoading}
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+    <form onSubmit={form.handleSubmit(handleSubmit)}>
+      <Stack gap="md">
+        <TextInput
+          label="Ruxsat nomi"
+          placeholder="Ruxsat nomini kiriting"
+          size="sm"
+          radius="sm"
+          disabled={isLoading}
+          error={form.formState.errors.name?.message}
+          {...form.register("name")}
+          styles={{
+            input: {
+              backgroundColor: "#f8f9fa",
+              border: "1px solid #e9ecef",
+              "&:focus": {
+                borderColor: "#1e3a5f",
+              },
+            },
+            label: {
+              color: "#495057",
+              fontWeight: 500,
+              marginBottom: 4,
+            },
+          }}
         />
 
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Ruxsat tavsifi</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Ruxsat tavsifi"
-                  disabled={isLoading}
-                  rows={3}
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+        <Textarea
+          label="Tavsif"
+          placeholder="Ruxsat haqida qisqacha tavsif"
+          size="sm"
+          radius="sm"
+          minRows={3}
+          disabled={isLoading}
+          error={form.formState.errors.description?.message}
+          {...form.register("description")}
+          styles={{
+            input: {
+              backgroundColor: "#f8f9fa",
+              border: "1px solid #e9ecef",
+              "&:focus": {
+                borderColor: "#1e3a5f",
+              },
+            },
+            label: {
+              color: "#495057",
+              fontWeight: 500,
+              marginBottom: 4,
+            },
+          }}
         />
 
-        <div className="flex items-start gap-4">
-          <FormField
-            control={form.control}
-            name="key"
-            render={({ field }) => (
-              <FormItem className="flex-1">
-                <FormLabel>Ruxsat kalit so'zi</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="permission.read"
-                    disabled={isLoading}
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+        <SimpleGrid cols={2}>
+          <TextInput
+            label="Kalit so'z"
+            placeholder="permission.read"
+            size="sm"
+            radius="sm"
+            disabled={isLoading}
+            error={form.formState.errors.key?.message}
+            {...form.register("key")}
+            styles={{
+              input: {
+                backgroundColor: "#f8f9fa",
+                border: "1px solid #e9ecef",
+                fontFamily: "monospace",
+                "&:focus": {
+                  borderColor: "#1e3a5f",
+                },
+              },
+              label: {
+                color: "#495057",
+                fontWeight: 500,
+                marginBottom: 4,
+              },
+            }}
           />
-          <FormField
-            control={form.control}
-            name="module"
-            render={({ field }) => (
-              <FormItem className="flex-1">
-                <FormLabel>Ruxsat modul nomi</FormLabel>
-                <FormControl>
-                  <Input placeholder="users" disabled={isLoading} {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
 
-        <div className="flex justify-end gap-2 pt-4">
+          <TextInput
+            label="Modul"
+            placeholder="users"
+            size="sm"
+            radius="sm"
+            disabled={isLoading}
+            error={form.formState.errors.module?.message}
+            {...form.register("module")}
+            styles={{
+              input: {
+                backgroundColor: "#f8f9fa",
+                border: "1px solid #e9ecef",
+                "&:focus": {
+                  borderColor: "#1e3a5f",
+                },
+              },
+              label: {
+                color: "#495057",
+                fontWeight: 500,
+                marginBottom: 4,
+              },
+            }}
+          />
+        </SimpleGrid>
+
+        <Group
+          justify="flex-end"
+          gap="xs"
+          pt="md"
+          style={{ borderTop: "1px solid #e9ecef" }}
+        >
           <Button
-            className="hover:text-text-on-dark"
-            type="button"
             variant="outline"
+            size="sm"
+            radius="sm"
             onClick={handleCancel}
             disabled={isLoading}
+            styles={{
+              root: {
+                borderColor: "#e9ecef",
+                color: "#495057",
+                "&:hover": {
+                  backgroundColor: "#f8f9fa",
+                },
+              },
+            }}
           >
             Bekor qilish
           </Button>
-          <Button type="submit" disabled={isLoading}>
+          <Button
+            type="submit"
+            size="sm"
+            radius="sm"
+            loading={isLoading}
+            style={{ backgroundColor: "#1e3a5f" }}
+          >
             {isLoading
               ? isUpdate
                 ? "Yangilanmoqda..."
                 : "Qo'shilmoqda..."
               : isUpdate
-                ? "Yangilash"
-                : "Qo'shish"}
+              ? "Yangilash"
+              : "Qo'shish"}
           </Button>
-        </div>
-      </form>
-    </Form>
+        </Group>
+      </Stack>
+    </form>
   );
 };
 

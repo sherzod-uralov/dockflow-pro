@@ -1,33 +1,29 @@
+"use client";
+
+import { useEffect, useCallback } from "react";
 import { useForm } from "react-hook-form";
-import { roleSchema, RoleZodType } from "../schema/role.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { Stack, TextInput, Textarea, Button, Group, Text, Box } from "@mantine/core";
+import { roleSchema, RoleZodType } from "../schema/role.schema";
 import { useGetAllPermissions } from "../../permissions/hook/permission.hook";
-import { Button } from "@/components/ui/button";
 import PermissionSelector from "./permission-selector";
 import { useRoleCreateMutation, useUpdateRole } from "../hook/role.hook";
 import { RoleFormProps } from "../type/role.type";
-import { useEffect } from "react";
 
 const RoleForm = ({ modal, mode, role }: RoleFormProps) => {
-  const { data: permissions, isLoading } = useGetAllPermissions({
+  const { data: permissions, isLoading: permissionsLoading } = useGetAllPermissions({
     pageNumber: 1,
     pageSize: 1000,
   });
   const roleCreateMutation = useRoleCreateMutation();
   const roleUpdateMutation = useUpdateRole();
 
+  const isUpdate = mode === "edit";
+  const isLoading = roleCreateMutation.isLoading || roleUpdateMutation.isLoading;
+
   const form = useForm<RoleZodType>({
     resolver: zodResolver(roleSchema),
+    mode: "onChange",
     defaultValues: {
       name: "",
       description: "",
@@ -36,136 +32,182 @@ const RoleForm = ({ modal, mode, role }: RoleFormProps) => {
   });
 
   useEffect(() => {
-    if (mode === "edit" && role) {
+    if (isUpdate && role) {
       form.reset({
-        name: role.name,
-        description: role.description,
-        permissions: role.permissions.map((permission) => permission.id),
+        name: role.name || "",
+        description: role.description || "",
+        permissions: role.permissions?.map((permission) => permission.id) || [],
+      });
+    } else if (!isUpdate) {
+      form.reset({
+        name: "",
+        description: "",
+        permissions: [],
       });
     }
-  }, [mode, role]);
+  }, [role, isUpdate, form, modal.isOpen]);
 
-  const onSubmitHandler = (values: RoleZodType) => {
-    if (mode === "edit" && role) {
+  const handleSubmit = (values: RoleZodType) => {
+    if (isUpdate && role) {
       roleUpdateMutation.mutate(
         { data: values, id: role.id },
         {
           onSuccess: () => {
             modal.closeModal();
+            form.reset();
           },
-        },
+        }
       );
     } else {
       roleCreateMutation.mutate(values, {
         onSuccess: () => {
           modal.closeModal();
+          form.reset();
         },
       });
     }
   };
 
+  const handleCancel = useCallback(() => {
+    modal.closeModal();
+    form.reset();
+  }, [modal, form]);
+
   const totalPermissions =
     permissions?.data?.reduce(
       (acc, module) => acc + module.permissions.length,
-      0,
+      0
     ) || 0;
 
+  const selectedCount = form.watch("permissions")?.length || 0;
+
   return (
-    <div className="space-y-4">
-      <Form {...form}>
-        <form
-          className="space-y-4"
-          onSubmit={form.handleSubmit(onSubmitHandler)}
-        >
-          <div className="grid grid-cols-1 gap-4">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Rol nomi</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Rol nomi kiriting..." {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Tavsif</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Rol haqida qisqacha tavsif..."
-                      {...field}
-                      rows={2}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
+    <form onSubmit={form.handleSubmit(handleSubmit)}>
+      <Stack gap="md">
+        <TextInput
+          label="Rol nomi"
+          placeholder="Rol nomini kiriting"
+          size="sm"
+          radius="sm"
+          disabled={isLoading}
+          error={form.formState.errors.name?.message}
+          {...form.register("name")}
+          styles={{
+            input: {
+              backgroundColor: "#f8f9fa",
+              border: "1px solid #e9ecef",
+              "&:focus": {
+                borderColor: "#1e3a5f",
+              },
+            },
+            label: {
+              color: "#495057",
+              fontWeight: 500,
+              marginBottom: 4,
+            },
+          }}
+        />
 
-          <FormField
-            control={form.control}
-            name="permissions"
-            render={({ field }) => (
-              <FormItem>
-                <div className="flex items-center justify-between">
-                  <FormLabel>Ruxsatlar</FormLabel>
-                  <div className="text-xs text-muted-foreground">
-                    {field.value.length}/{totalPermissions} tanlangan
-                  </div>
-                </div>
-                <FormControl>
-                  <div className="border rounded-lg p-3">
-                    {isLoading ? (
-                      <div className="flex items-center justify-center py-4">
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
-                        <span className="ml-2 text-sm text-muted-foreground">
-                          Yuklanmoqda...
-                        </span>
-                      </div>
-                    ) : (
-                      <PermissionSelector
-                        permissions={permissions}
-                        selectedPermissions={field.value}
-                        onPermissionChange={(permissionIds) => {
-                          field.onChange(permissionIds);
-                        }}
-                      />
-                    )}
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+        <Textarea
+          label="Tavsif"
+          placeholder="Rol haqida qisqacha tavsif"
+          size="sm"
+          radius="sm"
+          minRows={2}
+          disabled={isLoading}
+          error={form.formState.errors.description?.message}
+          {...form.register("description")}
+          styles={{
+            input: {
+              backgroundColor: "#f8f9fa",
+              border: "1px solid #e9ecef",
+              "&:focus": {
+                borderColor: "#1e3a5f",
+              },
+            },
+            label: {
+              color: "#495057",
+              fontWeight: 500,
+              marginBottom: 4,
+            },
+          }}
+        />
 
-          <div className="flex justify-end gap-2 pt-3 border-t">
-            <Button
-              className="hover:text-text-on-dark"
-              type="button"
-              variant="destructive"
-              onClick={() => {
-                form.reset();
-                modal.closeModal();
+        <Box>
+          <Group justify="space-between" mb="xs">
+            <Text size="sm" fw={500} c="#495057">
+              Ruxsatlar
+            </Text>
+            <Text size="xs" c="dimmed">
+              {selectedCount}/{totalPermissions} tanlangan
+            </Text>
+          </Group>
+          <Box
+            p="sm"
+            style={{
+              border: "1px solid #e9ecef",
+              borderRadius: 6,
+              backgroundColor: "#f8f9fa",
+            }}
+          >
+            <PermissionSelector
+              permissions={permissions}
+              selectedPermissions={form.watch("permissions") || []}
+              onPermissionChange={(permissionIds) => {
+                form.setValue("permissions", permissionIds, { shouldValidate: true });
               }}
-              size="sm"
-            >
-              Bekor qilish
-            </Button>
-            <Button type="submit" disabled={isLoading} size="sm">
-              {isLoading ? "Saqlanmoqda..." : "Saqlash"}
-            </Button>
-          </div>
-        </form>
-      </Form>
-    </div>
+              isLoading={permissionsLoading}
+            />
+          </Box>
+          {form.formState.errors.permissions && (
+            <Text size="xs" c="red" mt={4}>
+              {form.formState.errors.permissions.message}
+            </Text>
+          )}
+        </Box>
+
+        <Group
+          justify="flex-end"
+          gap="xs"
+          pt="md"
+          style={{ borderTop: "1px solid #e9ecef" }}
+        >
+          <Button
+            variant="outline"
+            size="sm"
+            radius="sm"
+            onClick={handleCancel}
+            disabled={isLoading}
+            styles={{
+              root: {
+                borderColor: "#e9ecef",
+                color: "#495057",
+                "&:hover": {
+                  backgroundColor: "#f8f9fa",
+                },
+              },
+            }}
+          >
+            Bekor qilish
+          </Button>
+          <Button
+            type="submit"
+            size="sm"
+            radius="sm"
+            loading={isLoading}
+            style={{ backgroundColor: "#1e3a5f" }}
+          >
+            {isLoading
+              ? isUpdate
+                ? "Yangilanmoqda..."
+                : "Qo'shilmoqda..."
+              : isUpdate
+              ? "Yangilash"
+              : "Qo'shish"}
+          </Button>
+        </Group>
+      </Stack>
+    </form>
   );
 };
 

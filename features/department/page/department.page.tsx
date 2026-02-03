@@ -44,7 +44,12 @@ import { DepartmentResponse } from "../type/department.type";
 import { useDebounce } from "@/hooks/use-debaunce";
 import DepartmentFormModal from "../component/department.form";
 import DepartmentView from "../component/department.view";
-import DepartmentGraphView from "../component/department-graph.view";
+import dynamic from "next/dynamic";
+
+const DepartmentGraphView = dynamic(
+  () => import("../component/department-graph.view"),
+  { ssr: false }
+);
 import { handleCopyToClipboard } from "@/utils/copy-text";
 import { DataTable, DataTableColumn } from "@/components/shared/ui/custom-table";
 

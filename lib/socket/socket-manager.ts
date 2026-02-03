@@ -20,7 +20,7 @@ const SOCKET_CONFIG = {
   reconnection: true,
   reconnectionDelay: 1000,
   reconnectionDelayMax: 5000,
-  reconnectionAttempts: Infinity,
+  reconnectionAttempts: 10,
   timeout: 20000,
   autoConnect: false,
 } as const;
@@ -57,8 +57,9 @@ class SocketManager {
 
     this.token = token;
 
-    // Disconnect existing socket if any
+    // Disconnect existing socket and remove listeners
     if (this.socket) {
+      this.socket.removeAllListeners();
       this.socket.disconnect();
     }
 
@@ -75,6 +76,7 @@ class SocketManager {
     this.clearIntervals();
 
     if (this.socket) {
+      this.socket.removeAllListeners();
       this.socket.disconnect();
       this.socket = null;
     }
@@ -195,12 +197,12 @@ class SocketManager {
       }
     }, 30000);
 
-    // Refresh online users every 10 seconds
+    // Refresh online users every 30 seconds
     this.onlineUsersInterval = setInterval(() => {
       if (this.socket?.connected) {
         this.requestOnlineUsers();
       }
-    }, 10000);
+    }, 30000);
   }
 
   private clearIntervals(): void {

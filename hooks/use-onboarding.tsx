@@ -8,8 +8,7 @@ import React, {
     useContext,
     ReactNode,
 } from "react";
-import {driver, DriveStep, Driver} from "driver.js";
-import "driver.js/dist/driver.css";
+import type {DriveStep, Driver} from "driver.js";
 import {
     IconHelp,
     IconRefresh,
@@ -331,11 +330,14 @@ export const TOUR_CONFIGS: Record<string, OnboardingConfig> = {
 };
 
 // ==================== DRIVER HELPER ====================
-function createDriver(
+async function createDriver(
     config: OnboardingConfig,
     tourKey: string,
     onComplete: () => void
 ) {
+    const { driver } = await import("driver.js");
+    // @ts-expect-error -- CSS module has no type declarations
+    await import("driver.js/dist/driver.css");
     return driver({
         showProgress: true,
         showButtons: ["next", "previous", "close"],
@@ -392,13 +394,13 @@ export function OnboardingProvider({children}: { children: ReactNode }) {
     }, []);
 
     const startTour = useCallback(
-        (tourKey: string) => {
+        async (tourKey: string) => {
             if (!isGlobalEnabled) return;
 
             const config = TOUR_CONFIGS[tourKey];
             if (!config) return;
 
-            const driverObj = createDriver(config, tourKey, () => {
+            const driverObj = await createDriver(config, tourKey, () => {
                 saveTourCompleted(tourKey);
                 driverObj.destroy();
             });
@@ -416,11 +418,11 @@ export function OnboardingProvider({children}: { children: ReactNode }) {
                 return filtered;
             });
 
-            setTimeout(() => {
+            setTimeout(async () => {
                 const config = TOUR_CONFIGS[tourKey];
                 if (!config) return;
 
-                const driverObj = createDriver(config, tourKey, () => {
+                const driverObj = await createDriver(config, tourKey, () => {
                     saveTourCompleted(tourKey);
                     driverObj.destroy();
                 });
@@ -510,13 +512,13 @@ export function useOnboarding(tourKey: string) {
         setIsCompleted(true);
     }, [tourKey]);
 
-    const startTour = useCallback(() => {
+    const startTour = useCallback(async () => {
         if (!isGlobalEnabled) return;
 
         const config = TOUR_CONFIGS[tourKey];
         if (!config) return;
 
-        const driverObj = createDriver(config, tourKey, () => {
+        const driverObj = await createDriver(config, tourKey, () => {
             saveTourCompleted();
             driverObj.destroy();
         });
@@ -525,7 +527,7 @@ export function useOnboarding(tourKey: string) {
         setTimeout(() => driverObj.drive(), 300);
     }, [tourKey, isGlobalEnabled, saveTourCompleted]);
 
-    const restartTour = useCallback(() => {
+    const restartTour = useCallback(async () => {
         const completed = localStorage.getItem(ONBOARDING_KEY);
         if (completed) {
             const completedTours = JSON.parse(completed) as string[];
@@ -537,7 +539,7 @@ export function useOnboarding(tourKey: string) {
         const config = TOUR_CONFIGS[tourKey];
         if (!config) return;
 
-        const driverObj = createDriver(config, tourKey, () => {
+        const driverObj = await createDriver(config, tourKey, () => {
             saveTourCompleted();
             driverObj.destroy();
         });
@@ -720,14 +722,14 @@ export function TourSettingsDrawer({opened, onClose}: TourSettingsDrawerProps) {
     const handleStartTour = (tourKey: string) => {
         onClose();
 
-        setTimeout(() => {
+        setTimeout(async () => {
             const config = TOUR_CONFIGS[tourKey];
             if (!config) return;
 
             const filtered = completedTours.filter((t) => t !== tourKey);
             localStorage.setItem(ONBOARDING_KEY, JSON.stringify(filtered));
 
-            const driverObj = createDriver(config, tourKey, () => {
+            const driverObj = await createDriver(config, tourKey, () => {
                 const completed = localStorage.getItem(ONBOARDING_KEY);
                 const completedTours = completed ? JSON.parse(completed) : [];
                 if (!completedTours.includes(tourKey)) {

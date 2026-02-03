@@ -57,7 +57,7 @@ describe('document hooks', () => {
                 expect(result.current.isSuccess).toBe(true)
             })
 
-            expect(showSuccess).toHaveBeenCalledWith("Hujjat yaratildi")
+            expect(showSuccess).toHaveBeenCalledWith("Hujjat muvaffaqiyatli yaratildi")
         })
     })
 
@@ -95,7 +95,7 @@ describe('document hooks', () => {
                 expect(result.current.isSuccess).toBe(true)
             })
 
-            expect(showSuccess).toHaveBeenCalledWith("Hujjat yangilandi")
+            expect(showSuccess).toHaveBeenCalledWith("Hujjat muvaffaqiyatli yangilandi")
         })
     })
 
@@ -113,7 +113,7 @@ describe('document hooks', () => {
                 expect(result.current.isSuccess).toBe(true)
             })
 
-            expect(showSuccess).toHaveBeenCalledWith("Hujjat o'chirildi")
+            expect(showSuccess).toHaveBeenCalledWith("Hujjat muvaffaqiyatli o'chirildi")
         })
     })
 

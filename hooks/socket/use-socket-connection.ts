@@ -59,6 +59,8 @@ export const useSocketConnection = () => {
       window.removeEventListener('socket-auth-error', handleAuthError);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('beforeunload', handleBeforeUnload);
+      socketManager.disconnect();
+      isInitialized.current = false;
     };
   }, []);
 };

@@ -146,6 +146,12 @@ export function PDFViewer({ documentId, action = "edit" }: PDFViewerProps) {
     };
 
     initializePDF();
+
+    return () => {
+      if (instance) {
+        instance.UI.dispose();
+      }
+    };
   }, [documentId]);
 
   const handleAddQRCode = async () => {

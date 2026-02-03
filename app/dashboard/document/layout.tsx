@@ -1,14 +1,6 @@
-"use client";
+import type { ReactNode } from "react";
+import DocumentPage from "@/features/document/page/document.page";
 
-import React, { FC, ReactNode } from "react";
-import { DocumentPage } from "@/features/document";
-
-const Layout: FC<{ children: ReactNode }> = ({ children }) => {
-  return (
-    <>
-      <DocumentPage children={children} />
-    </>
-  );
-};
-
-export default Layout;
+export default function Layout({ children }: { children: ReactNode }) {
+  return <DocumentPage>{children}</DocumentPage>;
+}

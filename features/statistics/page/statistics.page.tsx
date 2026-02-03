@@ -26,11 +26,25 @@ import {
   IconAlertCircle,
   IconActivity,
 } from "@tabler/icons-react";
+import dynamic from "next/dynamic";
 import { StatCard } from "../component/stat-card";
-import { DocumentTypeChart } from "../component/document-type-chart";
-import { DocumentStatusChart } from "../component/document-status-chart";
-import { MonthlyTrendChart } from "../component/monthly-trend-chart";
-import { DepartmentStatsChart } from "../component/department-stats-chart";
+
+const DocumentTypeChart = dynamic(
+  () => import("../component/document-type-chart").then((m) => ({ default: m.DocumentTypeChart })),
+  { ssr: false }
+);
+const DocumentStatusChart = dynamic(
+  () => import("../component/document-status-chart").then((m) => ({ default: m.DocumentStatusChart })),
+  { ssr: false }
+);
+const MonthlyTrendChart = dynamic(
+  () => import("../component/monthly-trend-chart").then((m) => ({ default: m.MonthlyTrendChart })),
+  { ssr: false }
+);
+const DepartmentStatsChart = dynamic(
+  () => import("../component/department-stats-chart").then((m) => ({ default: m.DepartmentStatsChart })),
+  { ssr: false }
+);
 import {
   useDashboardAnalytics,
   useDocumentAnalytics,

@@ -115,54 +115,61 @@ const RolesPage = () => {
   const columns: DataTableColumn<RoleData>[] = [
     {
       accessorKey: "name",
-      header: "NOMI",
+      header: "Nomi",
       cell: ({ row }) => (
-        <Text size="sm" fw={500} c="#212529">
-          {row.original.name}
+        <Group gap="sm" wrap="nowrap">
+          <IconShieldLock size={18} color="#1e3a5f" style={{ flexShrink: 0 }} />
+          <Text size="sm" fw={500} c="#212529">
+            {row.original.name}
+          </Text>
+        </Group>
+      ),
+      meta: { minWidth: 180 },
+    },
+    {
+      accessorKey: "description",
+      header: "Tavsif",
+      cell: ({ row }) => (
+        <Text size="sm" c="#495057" lineClamp={1}>
+          {row.original.description || "—"}
         </Text>
       ),
       meta: { minWidth: 200 },
     },
     {
-      accessorKey: "description",
-      header: "TAVSIFI",
-      cell: ({ row }) => (
-        <Text size="sm" c="#495057" lineClamp={1}>
-          {row.original.description || "-"}
-        </Text>
-      ),
-      meta: { minWidth: 250 },
-    },
-    {
       accessorKey: "permissions",
-      header: "RUXSATLAR",
+      header: "Ruxsatlar",
       cell: ({ row }) => {
         const permissions = row.original.permissions;
         return (
           <Group gap={4}>
             {permissions.length > 0 ? (
               <>
-                {permissions.slice(0, 2).map((permission) => (
+                {permissions.slice(0, 1).map((permission) => (
                   <Text
                     key={permission.id}
                     size="xs"
-                    bg="blue.1"
-                    c="blue.8"
-                    px={6}
+                    px={8}
                     py={2}
-                    style={{ borderRadius: 4 }}
+                    style={{
+                      backgroundColor: "#f1f3f5",
+                      color: "#495057",
+                      borderRadius: 4,
+                    }}
                   >
                     {permission.name}
                   </Text>
                 ))}
-                {permissions.length > 2 && (
+                {permissions.length > 1 && (
                   <Text
                     size="xs"
-                    bg="gray.1"
-                    c="gray.7"
-                    px={6}
+                    px={8}
                     py={2}
-                    style={{ borderRadius: 4 }}
+                    style={{
+                      backgroundColor: "#e9ecef",
+                      color: "#868e96",
+                      borderRadius: 4,
+                    }}
                   >
                     +{permissions.length - 2}
                   </Text>
@@ -170,7 +177,7 @@ const RolesPage = () => {
               </>
             ) : (
               <Text size="sm" c="dimmed">
-                Ruxsat yo'q
+                —
               </Text>
             )}
           </Group>
@@ -180,24 +187,28 @@ const RolesPage = () => {
     },
     {
       accessorKey: "users",
-      header: "FOYDALANUVCHILAR",
+      header: "Foydalanuvchilar",
       cell: ({ row }) => (
         <Text
-          size="sm"
-          bg="green.1"
-          c="green.9"
-          px={8}
-          py={2}
-          style={{ borderRadius: 12, display: "inline-block" }}
+          size="xs"
+          px={10}
+          py={4}
+          style={{
+            backgroundColor: "#e9ecef",
+            color: "#495057",
+            borderRadius: 12,
+            display: "inline-block",
+            fontWeight: 500,
+          }}
         >
           {row.original.users} ta
         </Text>
       ),
-      meta: { minWidth: 150 },
+      meta: { minWidth: 140 },
     },
     {
-      accessorKey: "actions",
-      header: "AMALLAR",
+      id: "actions",
+      header: "Amallar",
       cell: ({ row }) => (
         <Menu shadow="md" width={180} position="bottom-end">
           <Menu.Target>

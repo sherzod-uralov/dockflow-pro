@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, ReactNode } from "react";
+import React, { createContext, useContext, useCallback, useMemo, ReactNode } from "react";
 import { useGetProfileQuery } from "@/features/login/hook/login.hook";
 
 interface PermissionContextType {
@@ -20,25 +20,34 @@ const PermissionContext = createContext<PermissionContextType | undefined>(
 export const PermissionProvider = ({ children }: { children: ReactNode }) => {
   const { data: profile, isLoading } = useGetProfileQuery();
 
-  const hasPermission = (key: string): boolean => {
-    if (!profile?.permissions?.raw) return false;
-    return profile.permissions.raw.includes(key);
-  };
+  const hasPermission = useCallback(
+    (key: string): boolean => {
+      if (!profile?.permissions?.raw) return false;
+      return profile.permissions.raw.includes(key);
+    },
+    [profile?.permissions?.raw],
+  );
 
-  const can = (resource: string, action: string): boolean => {
-    if (!profile?.permissions?.resources) return false;
-    return profile.permissions.resources[resource]?.[action] === true;
-  };
+  const can = useCallback(
+    (resource: string, action: string): boolean => {
+      if (!profile?.permissions?.resources) return false;
+      return profile.permissions.resources[resource]?.[action] === true;
+    },
+    [profile?.permissions?.resources],
+  );
+
+  const value = useMemo(
+    () => ({
+      permissions: profile?.permissions || null,
+      isLoading,
+      hasPermission,
+      can,
+    }),
+    [profile?.permissions, isLoading, hasPermission, can],
+  );
 
   return (
-    <PermissionContext.Provider
-      value={{
-        permissions: profile?.permissions || null,
-        isLoading,
-        hasPermission,
-        can,
-      }}
-    >
+    <PermissionContext.Provider value={value}>
       {children}
     </PermissionContext.Provider>
   );

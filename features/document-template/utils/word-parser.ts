@@ -1,5 +1,3 @@
-import mammoth from "mammoth";
-
 export interface ExtractedTag {
   name: string;
   type: string;
@@ -41,6 +39,7 @@ export const parseWordFile = async (file: File): Promise<ExtractedTags> => {
     reader.onload = async (event) => {
       try {
         const arrayBuffer = event.target?.result as ArrayBuffer;
+        const mammoth = (await import("mammoth")).default;
         const result = await mammoth.extractRawText({ arrayBuffer });
         const text = result.value;
         const tags = extractTagsFromText(text);

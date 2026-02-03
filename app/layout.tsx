@@ -35,8 +35,7 @@ export default function RootLayout({
         <ColorSchemeScript />
         <Script
           src="https://cdn.cloud.pspdfkit.com/pspdfkit-web@1.7.0/nutrient-viewer.js"
-          // Load before the page becomes interactive to reference `window.NutrientViewer` in the client.
-          strategy="beforeInteractive"
+          strategy="lazyOnload"
         />
       </head>
       <body

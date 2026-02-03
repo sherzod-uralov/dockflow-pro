@@ -1,4 +1,4 @@
-import { create } from 'zustand';
+import { create, type StateCreator } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import type {
   Notification,
@@ -40,115 +40,75 @@ const initialState: SocketState = {
   activeWorkflowsCount: 0,
 };
 
-export const useSocketStore = create<SocketStore>()(
-  devtools(
-    (set) => ({
-      ...initialState,
-      setConnected: (connected) =>
-        set(
-          { isConnected: connected, connectionError: null },
-          false,
-          'socket/setConnected'
-        ),
+const storeCreator: StateCreator<SocketStore> = (set) => ({
+  ...initialState,
 
-      setConnectionError: (error) =>
-        set(
-          { connectionError: error },
-          false,
-          'socket/setConnectionError'
-        ),
+  setConnected: (connected) =>
+    set({ isConnected: connected, connectionError: null }),
 
-      setNotifications: (notifications) =>
-        set(
-          {
-            notifications,
-            unreadCount: notifications.filter((n) => !n.isRead).length,
-          },
-          false,
-          'notifications/set'
-        ),
+  setConnectionError: (error) =>
+    set({ connectionError: error }),
 
-      addNotification: (notification) =>
-        set(
-          (state) => ({
-            notifications: [notification, ...state.notifications],
-            unreadCount: state.unreadCount + 1,
-          }),
-          false,
-          'notifications/add'
-        ),
-
-      markAsRead: (ids) =>
-        set(
-          (state) => ({
-            notifications: state.notifications.map((n) =>
-              ids.includes(n.id)
-                ? { ...n, isRead: true, readAt: new Date().toISOString() }
-                : n
-            ),
-            unreadCount: Math.max(0, state.unreadCount - ids.length),
-          }),
-          false,
-          'notifications/markAsRead'
-        ),
-
-      markAllAsRead: () =>
-        set(
-          (state) => ({
-            notifications: state.notifications.map((n) => ({
-              ...n,
-              isRead: true,
-              readAt: new Date().toISOString(),
-            })),
-            unreadCount: 0,
-          }),
-          false,
-          'notifications/markAllAsRead'
-        ),
-
-      clearNotifications: () =>
-        set(
-          { notifications: [], unreadCount: 0 },
-          false,
-          'notifications/clear'
-        ),
-
-      setOnlineUsers: (users) =>
-        set({ onlineUsers: users }, false, 'onlineUsers/set'),
-
-      addOnlineUser: (user) =>
-        set(
-          (state) => ({
-            onlineUsers: state.onlineUsers.some((u) => u.id === user.id)
-              ? state.onlineUsers
-              : [...state.onlineUsers, user],
-          }),
-          false,
-          'onlineUsers/add'
-        ),
-
-      removeOnlineUser: (userId) =>
-        set(
-          (state) => ({
-            onlineUsers: state.onlineUsers.filter((u) => u.id !== userId),
-          }),
-          false,
-          'onlineUsers/remove'
-        ),
-
-
-      setActiveWorkflowsCount: (count) =>
-        set(
-          { activeWorkflowsCount: count },
-          false,
-          'workflows/setActiveCount'
-        ),
-
-      reset: () => set(initialState, false, 'socket/reset'),
+  setNotifications: (notifications) =>
+    set({
+      notifications,
+      unreadCount: notifications.filter((n) => !n.isRead).length,
     }),
-    { name: 'SocketStore' }
-  )
-);
+
+  addNotification: (notification) =>
+    set((state) => ({
+      notifications: [notification, ...state.notifications],
+      unreadCount: state.unreadCount + 1,
+    })),
+
+  markAsRead: (ids) =>
+    set((state) => ({
+      notifications: state.notifications.map((n) =>
+        ids.includes(n.id)
+          ? { ...n, isRead: true, readAt: new Date().toISOString() }
+          : n
+      ),
+      unreadCount: Math.max(0, state.unreadCount - ids.length),
+    })),
+
+  markAllAsRead: () =>
+    set((state) => ({
+      notifications: state.notifications.map((n) => ({
+        ...n,
+        isRead: true,
+        readAt: new Date().toISOString(),
+      })),
+      unreadCount: 0,
+    })),
+
+  clearNotifications: () =>
+    set({ notifications: [], unreadCount: 0 }),
+
+  setOnlineUsers: (users) =>
+    set({ onlineUsers: users }),
+
+  addOnlineUser: (user) =>
+    set((state) => ({
+      onlineUsers: state.onlineUsers.some((u) => u.id === user.id)
+        ? state.onlineUsers
+        : [...state.onlineUsers, user],
+    })),
+
+  removeOnlineUser: (userId) =>
+    set((state) => ({
+      onlineUsers: state.onlineUsers.filter((u) => u.id !== userId),
+    })),
+
+  setActiveWorkflowsCount: (count) =>
+    set({ activeWorkflowsCount: count }),
+
+  reset: () => set(initialState),
+});
+
+export const useSocketStore =
+  process.env.NODE_ENV === 'development'
+    ? create<SocketStore>()(devtools(storeCreator, { name: 'SocketStore' }))
+    : create<SocketStore>()(storeCreator);
 
 // ============================================================================
 // Selectors (for better performance)

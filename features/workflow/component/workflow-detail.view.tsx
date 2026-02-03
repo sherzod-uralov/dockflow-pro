@@ -28,11 +28,13 @@ import {
   IconEye,
   IconAlertCircle,
   IconSignature,
-  IconQrcode,
   IconClipboardCheck,
   IconBookmark,
-  IconCheck, IconDownload,
+  IconCheck,
+  IconDownload,
   IconFile,
+  IconCalendar,
+  IconUserCheck,
 } from "@tabler/icons-react";
 import { formatDateTime } from "@/lib/date-utils";
 import {
@@ -46,7 +48,6 @@ import {
 } from "../hook/workflow.hook";
 import { useGetDocumentById } from "@/features/document";
 import { useGetProfileQuery } from "@/features/login/hook/login.hook";
-import Link from "next/link";
 import { VerificationStep } from "@/features/workflow/component/verification-step";
 
 interface WorkflowDetailViewProps {
@@ -77,8 +78,15 @@ const STEP_STATUS_LABELS: Record<string, { label: string; color: string }> = {
   REJECTED: { label: "Rad etildi", color: "red" },
 };
 
+const formatFileSize = (bytes: number): string => {
+  if (bytes === 0) return "0 B";
+  const k = 1024;
+  const sizes = ["B", "KB", "MB", "GB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
+};
+
 const WorkflowDetailView = memo(({ workflow }: WorkflowDetailViewProps) => {
-  console.log(workflow);
   const router = useRouter();
   const completeMutation = useCompleteWorkflowStep();
   const rejectMutation = useRejectWorkflowStep();
@@ -427,6 +435,35 @@ const WorkflowDetailView = memo(({ workflow }: WorkflowDetailViewProps) => {
                           </Group>
                         )}
 
+                        {/* Creator Badge */}
+                        {step.isCreator && (
+                          <Group gap="xs" mb="sm">
+                            <Badge
+                              variant="light"
+                              color="violet"
+                              size="sm"
+                              leftSection={<IconUserCheck size={12} />}
+                            >
+                              Hujjat yaratuvchisi
+                            </Badge>
+                          </Group>
+                        )}
+
+                        {/* Due Date */}
+                        {step.dueDate && (
+                          <Group gap="xs" mb="sm">
+                            <IconCalendar size={14} color={new Date(step.dueDate) < new Date() && step.status !== "COMPLETED" ? "#c92a2a" : "#868e96"} />
+                            <Text
+                              size="xs"
+                              c={new Date(step.dueDate) < new Date() && step.status !== "COMPLETED" ? "red" : "dimmed"}
+                              fw={new Date(step.dueDate) < new Date() && step.status !== "COMPLETED" ? 500 : 400}
+                            >
+                              Muddat: {formatDateTime(step.dueDate)}
+                              {new Date(step.dueDate) < new Date() && step.status !== "COMPLETED" && " (O'tgan)"}
+                            </Text>
+                          </Group>
+                        )}
+
                         {/* Rejection reason */}
                         {step.isRejected && step.rejectionReason && (
                           <Box
@@ -450,7 +487,53 @@ const WorkflowDetailView = memo(({ workflow }: WorkflowDetailViewProps) => {
                           </Box>
                         )}
 
-
+                        {/* Ijro natijalari - faqat VERIFICATION stepi uchun */}
+                        {step.actionType === "VERIFICATION" && step.attachments && step.attachments.length > 0 && (
+                          <Box mt="sm">
+                            <Text size="xs" fw={500} c="dimmed" mb="xs">
+                              Ijro natijalari ({step.attachments.length})
+                            </Text>
+                            <Stack gap={6}>
+                              {step.attachments.map((att) => (
+                                <Group
+                                  key={att.id}
+                                  justify="space-between"
+                                  wrap="nowrap"
+                                  p="xs"
+                                  style={{
+                                    backgroundColor: "#f8f9fa",
+                                    borderRadius: 6,
+                                  }}
+                                >
+                                  <Group gap="xs" style={{ flex: 1, minWidth: 0 }}>
+                                    <IconFile size={16} color="#868e96" />
+                                    <Box style={{ minWidth: 0, flex: 1 }}>
+                                      <Text size="xs" fw={500} c="#212529" truncate>
+                                        {att.attachment.fileName}
+                                      </Text>
+                                      <Text size="xs" c="dimmed">
+                                        {formatFileSize(att.attachment.fileSize)} • {att.uploadedBy?.fullname}
+                                      </Text>
+                                    </Box>
+                                  </Group>
+                                  <Button
+                                    component="a"
+                                    href={att.attachment.fileUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    variant="subtle"
+                                    size="xs"
+                                    radius="sm"
+                                    color="dark"
+                                    leftSection={<IconDownload size={14} />}
+                                  >
+                                    Yuklab olish
+                                  </Button>
+                                </Group>
+                              ))}
+                            </Stack>
+                          </Box>
+                        )}
                       </Paper>
                     </Timeline.Item>
                   );

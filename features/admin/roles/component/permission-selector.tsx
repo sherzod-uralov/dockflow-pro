@@ -1,11 +1,25 @@
 "use client";
 
-import React, { useState } from "react";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { ChevronDown, ChevronRight, Search } from "lucide-react";
+import { useState } from "react";
+import {
+  Box,
+  Text,
+  Group,
+  Checkbox,
+  TextInput,
+  Badge,
+  Stack,
+  UnstyledButton,
+  Collapse,
+  Center,
+  Loader,
+} from "@mantine/core";
+import {
+  IconSearch,
+  IconChevronDown,
+  IconChevronRight,
+  IconX,
+} from "@tabler/icons-react";
 import {
   getAllPermissions,
   Permission,
@@ -15,12 +29,14 @@ interface PermissionSelectorProps {
   permissions: getAllPermissions | undefined;
   selectedPermissions: string[];
   onPermissionChange: (permissionIds: string[]) => void;
+  isLoading?: boolean;
 }
 
 const PermissionSelector = ({
   permissions,
   selectedPermissions,
   onPermissionChange,
+  isLoading,
 }: PermissionSelectorProps) => {
   const [expandedModules, setExpandedModules] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -33,7 +49,7 @@ const PermissionSelector = ({
       permissions: moduleData.permissions.filter(
         (permission: Permission) =>
           permission.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          permission.key.toLowerCase().includes(searchTerm.toLowerCase()),
+          permission.key.toLowerCase().includes(searchTerm.toLowerCase())
       ),
     }))
     .filter((moduleData) => moduleData.permissions.length > 0);
@@ -42,7 +58,7 @@ const PermissionSelector = ({
     setExpandedModules((prev) =>
       prev.includes(moduleName)
         ? prev.filter((name) => name !== moduleName)
-        : [...prev, moduleName],
+        : [...prev, moduleName]
     );
   };
 
@@ -59,17 +75,17 @@ const PermissionSelector = ({
       .filter((p: Permission) => p.id)
       .map((p: Permission) => p.id!);
     const selectedInModule = modulePermissionIds.filter((id: string) =>
-      selectedPermissions.includes(id),
+      selectedPermissions.includes(id)
     ).length;
 
     let newSelections: string[];
     if (selectedInModule === modulePermissionIds.length) {
       newSelections = selectedPermissions.filter(
-        (id) => !modulePermissionIds.includes(id),
+        (id) => !modulePermissionIds.includes(id)
       );
     } else {
       const otherPermissions = selectedPermissions.filter(
-        (id) => !modulePermissionIds.includes(id),
+        (id) => !modulePermissionIds.includes(id)
       );
       newSelections = [...otherPermissions, ...modulePermissionIds];
     }
@@ -77,117 +93,186 @@ const PermissionSelector = ({
     onPermissionChange(newSelections);
   };
 
+  const handleClearAll = () => {
+    onPermissionChange([]);
+  };
+
+  if (isLoading) {
+    return (
+      <Center py="xl">
+        <Group gap="xs">
+          <Loader size="sm" color="dark" />
+          <Text size="sm" c="dimmed">
+            Yuklanmoqda...
+          </Text>
+        </Group>
+      </Center>
+    );
+  }
+
   return (
-    <div className="space-y-3">
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-        <Input
-          placeholder="Qidirish..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10 h-9"
-          size={1}
-        />
-      </div>
-      <div className="flex items-center justify-between text-sm">
-        <span className="text-muted-foreground">
-          Tanlangan:
-          <Badge variant="secondary" className="text-text-on-dark ml-1">
+    <Stack gap="sm">
+      {/* Search */}
+      <TextInput
+        placeholder="Qidirish..."
+        leftSection={<IconSearch size={16} color="#868e96" />}
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        size="xs"
+        radius="sm"
+        styles={{
+          input: {
+            backgroundColor: "white",
+            border: "1px solid #e9ecef",
+          },
+        }}
+      />
+
+      {/* Selected count & clear */}
+      <Group justify="space-between">
+        <Group gap="xs">
+          <Text size="xs" c="dimmed">
+            Tanlangan:
+          </Text>
+          <Badge size="sm" variant="light" color="dark">
             {selectedPermissions.length}
           </Badge>
-        </span>
-        <div className="flex gap-1">
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => onPermissionChange([])}
-            className="h-7 hover:text-text-on-dark px-2 text-xs"
-          >
-            Tozalash
-          </Button>
-        </div>
-      </div>
-
-      <div className="space-y-2 max-h-64 overflow-y-auto">
-        {filteredPermissions.length === 0 ? (
-          <div className="text-center py-4 text-muted-foreground text-sm">
-            Hech qanday ruxsat topilmadi
-          </div>
-        ) : (
-          filteredPermissions.map((moduleData) => {
-            const isExpanded = expandedModules.includes(moduleData.module);
-            const modulePermissionIds = moduleData.permissions
-              .filter((p: Permission) => p.id)
-              .map((p: Permission) => p.id!);
-            const selectedInModule = modulePermissionIds.filter((id: string) =>
-              selectedPermissions.includes(id),
-            ).length;
-
-            return (
-              <div key={moduleData.module} className="border rounded-lg">
-                <div className="flex items-center justify-between p-3 bg-muted/30">
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => toggleModule(moduleData.module)}
-                      className="p-0.5 hover:bg-muted rounded"
-                    >
-                      {isExpanded ? (
-                        <ChevronDown className="h-3 w-3" />
-                      ) : (
-                        <ChevronRight className="h-3 w-3" />
-                      )}
-                    </button>
-                    <Checkbox
-                      checked={selectedInModule === modulePermissionIds.length}
-                      onCheckedChange={() => handleModuleToggle(moduleData)}
-                      className="h-3.5 w-3.5 border-primary"
-                    />
-                    <span className="font-medium text-sm capitalize">
-                      {moduleData.module}
-                    </span>
-                  </div>
-                  <Badge variant="outline" className="text-xs">
-                    {selectedInModule}/{modulePermissionIds.length}
-                  </Badge>
-                </div>
-                {isExpanded && (
-                  <div className="p-3 pt-0 space-y-2">
-                    {moduleData.permissions
-                      .filter((permission: Permission) => permission.id)
-                      .map((permission: Permission) => (
-                        <div
-                          key={permission.id}
-                          className="flex items-center space-x-2 p-2 hover:bg-muted/50 rounded"
-                        >
-                          <Checkbox
-                            checked={selectedPermissions.includes(
-                              permission.id!,
-                            )}
-                            onCheckedChange={() =>
-                              handlePermissionToggle(permission.id!)
-                            }
-                            className="h-3.5 w-3.5 border-primary"
-                          />
-                          <div className="flex-1 min-w-0">
-                            <div className="text-sm font-medium truncate">
-                              {permission.name}
-                            </div>
-                            <div className="text-xs text-muted-foreground font-mono">
-                              {permission.key}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                  </div>
-                )}
-              </div>
-            );
-          })
+        </Group>
+        {selectedPermissions.length > 0 && (
+          <UnstyledButton onClick={handleClearAll}>
+            <Group gap={4}>
+              <IconX size={12} color="#868e96" />
+              <Text size="xs" c="dimmed">
+                Tozalash
+              </Text>
+            </Group>
+          </UnstyledButton>
         )}
-      </div>
-    </div>
+      </Group>
+
+      {/* Permissions list */}
+      <Box
+        style={{
+          maxHeight: 280,
+          overflowY: "auto",
+        }}
+      >
+        {filteredPermissions.length === 0 ? (
+          <Center py="lg">
+            <Text size="sm" c="dimmed">
+              Hech qanday ruxsat topilmadi
+            </Text>
+          </Center>
+        ) : (
+          <Stack gap="xs">
+            {filteredPermissions.map((moduleData) => {
+              const isExpanded = expandedModules.includes(moduleData.module);
+              const modulePermissionIds = moduleData.permissions
+                .filter((p: Permission) => p.id)
+                .map((p: Permission) => p.id!);
+              const selectedInModule = modulePermissionIds.filter((id: string) =>
+                selectedPermissions.includes(id)
+              ).length;
+              const isAllSelected = selectedInModule === modulePermissionIds.length;
+              const isPartiallySelected = selectedInModule > 0 && !isAllSelected;
+
+              return (
+                <Box
+                  key={moduleData.module}
+                  style={{
+                    border: "1px solid #e9ecef",
+                    borderRadius: 6,
+                    backgroundColor: "white",
+                  }}
+                >
+                  {/* Module header */}
+                  <Group
+                    justify="space-between"
+                    p="xs"
+                    style={{
+                      backgroundColor: isExpanded ? "#f8f9fa" : "transparent",
+                      borderRadius: isExpanded ? "6px 6px 0 0" : 6,
+                    }}
+                  >
+                    <Group gap="xs">
+                      <UnstyledButton
+                        onClick={() => toggleModule(moduleData.module)}
+                        style={{ display: "flex", alignItems: "center" }}
+                      >
+                        {isExpanded ? (
+                          <IconChevronDown size={14} color="#495057" />
+                        ) : (
+                          <IconChevronRight size={14} color="#495057" />
+                        )}
+                      </UnstyledButton>
+                      <Checkbox
+                        checked={isAllSelected}
+                        indeterminate={isPartiallySelected}
+                        onChange={() => handleModuleToggle(moduleData)}
+                        size="xs"
+                        color="dark"
+                      />
+                      <Text size="sm" fw={500} c="#212529" tt="capitalize">
+                        {moduleData.module}
+                      </Text>
+                    </Group>
+                    <Badge size="xs" variant="outline" color="gray">
+                      {selectedInModule}/{modulePermissionIds.length}
+                    </Badge>
+                  </Group>
+
+                  {/* Permissions */}
+                  <Collapse in={isExpanded}>
+                    <Stack gap={0} p="xs" pt={0}>
+                      {moduleData.permissions
+                        .filter((permission: Permission) => permission.id)
+                        .map((permission: Permission) => (
+                          <UnstyledButton
+                            key={permission.id}
+                            onClick={() => handlePermissionToggle(permission.id!)}
+                            p="xs"
+                            style={{
+                              borderRadius: 4,
+                              backgroundColor: selectedPermissions.includes(permission.id!)
+                                ? "#f1f3f5"
+                                : "transparent",
+                              "&:hover": {
+                                backgroundColor: "#f8f9fa",
+                              },
+                            }}
+                          >
+                            <Group gap="xs" wrap="nowrap">
+                              <Checkbox
+                                checked={selectedPermissions.includes(permission.id!)}
+                                onChange={() => handlePermissionToggle(permission.id!)}
+                                size="xs"
+                                color="dark"
+                                styles={{ input: { cursor: "pointer" } }}
+                              />
+                              <Box style={{ flex: 1, minWidth: 0 }}>
+                                <Text size="xs" fw={500} c="#212529">
+                                  {permission.name}
+                                </Text>
+                                <Text
+                                  size="xs"
+                                  c="dimmed"
+                                  style={{ fontFamily: "monospace" }}
+                                >
+                                  {permission.key}
+                                </Text>
+                              </Box>
+                            </Group>
+                          </UnstyledButton>
+                        ))}
+                    </Stack>
+                  </Collapse>
+                </Box>
+              );
+            })}
+          </Stack>
+        )}
+      </Box>
+    </Stack>
   );
 };
 

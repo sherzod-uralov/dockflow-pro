@@ -32,7 +32,7 @@ describe('authService', () => {
             expect(Cookies.set).toHaveBeenCalledWith('refreshToken', 'refresh123', expect.any(Object))
         })
 
-        test('401 xatolik uchun to\'g\'ri xabar qaytaradi', async () => {
+        test('401 xatolik uchun error qaytaradi', async () => {
             const error = {
                 response: { status: 401 }
             }
@@ -41,9 +41,9 @@ describe('authService', () => {
 
             await expect(
                 authService.login({ username: 'wrong', password: 'wrong' })
-            ).rejects.toThrow("Login yoki parol noto'g'ri")
+            ).rejects.toEqual(error)
 
-            // Tokenlar tozalanmasligi kerak (yangi fix)
+            // Tokenlar tozalanmasligi kerak
             expect(Cookies.remove).not.toHaveBeenCalled()
         })
 

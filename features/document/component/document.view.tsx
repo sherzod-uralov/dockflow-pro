@@ -24,7 +24,7 @@ import {
   IconAlertCircle,
 } from "@tabler/icons-react";
 import { useGetDocumentById } from "@/features/document";
-import { useGetAllWorkflows } from "@/features/workflow";
+import { useGetAllWorkflows, useDownloadDocument } from "@/features/workflow";
 import DocumentStepper from "@/features/document/component/document.stepper";
 
 const formatDate = (dateString: string | undefined): string => {
@@ -204,9 +204,15 @@ const DocumentView = ({ id }: { id: string }) => {
     documentId: id,
   });
   const { data, isLoading, isFetching } = useGetDocumentById(id);
+  const downloadMutation = useDownloadDocument();
 
-  const handleDownload = (fileUrl: string) => {
-    window.open(fileUrl, "_blank");
+  const handleDownloadPdf = () => {
+    if (data?.id) {
+      downloadMutation.mutate({
+        documentId: data.id,
+        filename: `${data.title || "document"}.pdf`,
+      });
+    }
   };
 
   if (isLoading || isFetching) {
@@ -344,7 +350,8 @@ const DocumentView = ({ id }: { id: string }) => {
                           radius="sm"
                           variant="outline"
                           leftSection={<IconDownload size={14} />}
-                          onClick={() => handleDownload(file.fileUrl)}
+                          onClick={handleDownloadPdf}
+                          loading={downloadMutation.isLoading}
                           styles={{
                             root: {
                               borderColor: "#e9ecef",

@@ -53,7 +53,7 @@ describe('department hooks', () => {
                 expect(result.current.isSuccess).toBe(true)
             })
 
-            expect(showSuccess).toHaveBeenCalledWith("Bo'lim yaratildi")
+            expect(showSuccess).toHaveBeenCalledWith("Bo'lim muvaffaqiyatli qo'shildi")
         })
     })
 
@@ -96,7 +96,7 @@ describe('department hooks', () => {
                 expect(result.current.isSuccess).toBe(true)
             })
 
-            expect(showSuccess).toHaveBeenCalledWith("Bo'lim yangilandi")
+            expect(showSuccess).toHaveBeenCalledWith("Bo'lim muvaffaqiyatli yangilandi")
         })
     })
 

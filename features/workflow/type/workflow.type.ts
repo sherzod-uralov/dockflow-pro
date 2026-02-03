@@ -89,14 +89,43 @@ export type AssignedUser = {
   username: string;
 };
 
+export type WorkflowStepActionType =
+  | "APPROVED"
+  | "REJECTED"
+  | "REVIEWED"
+  | "SIGNED"
+  | "NOTIFIED"
+  | "COMMENTED"
+  | "STARTED";
+
 export type WorkflowStepAction = {
   id: string;
   workflowStepId: string;
-  actionType: "APPROVED" | "REJECTED" | "REVIEWED" | "SIGNED" | "NOTIFIED";
+  actionType: WorkflowStepActionType;
   performedByUserId: string;
-  performedBy?: AssignedUser;
+  performedBy?: AssignedUser & { avatarUrl?: string };
   comment: string | null;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown> | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type WorkflowStepAttachmentFile = {
+  id: string;
+  fileName: string;
+  fileUrl: string;
+  fileSize: number;
+  mimeType: string;
+};
+
+export type WorkflowStepAttachment = {
+  id: string;
+  workflowStepId: string;
+  attachmentId: string;
+  comment: string | null;
+  uploadedByUserId: string;
+  uploadedBy?: AssignedUser;
+  attachment: WorkflowStepAttachmentFile;
   createdAt: string;
   updatedAt: string;
 };
@@ -115,7 +144,9 @@ export type WorkflowStepApiResponse = {
   isRejected: boolean;
   rejectionReason: string | null;
   rejectedAt: string | null;
+  isCreator?: boolean;
   actions?: WorkflowStepAction[];
+  attachments?: WorkflowStepAttachment[];
   createdAt: string;
   updatedAt: string;
 };

@@ -29,14 +29,12 @@ import {
   CustomModal,
   useModal,
 } from "@/components/shared/ui/custom-modal";
-import { UserToolbar } from "@/components/shared/ui/custom-dashboard-toolbar";
 import { ModalState } from "@/types/modal";
 import {
   useDeletePermission,
   useGetAllPermissions,
 } from "../hook/permission.hook";
-import { DataTable } from "@/components/shared/ui/custom-table";
-import { Badge } from "@/components/ui/badge";
+import { DataTable, DataTableColumn } from "@/components/shared/ui/custom-table";
 import { Permission } from "../type/permission.type";
 import PermissionFormModal from "../component/permission.create.modal";
 import PermissionView from "../component/permission.view";
@@ -215,61 +213,76 @@ const PermissionPage = () => {
             currentPage={pageNumber}
             columns={[
               {
-                header: "NOM",
+                header: "Nomi",
                 accessorKey: "name",
                 cell: ({ row }) => (
-                  <Text size="sm" fw={500} c="#212529">
-                    {row.original.name}
-                  </Text>
+                  <Group gap="sm" wrap="nowrap">
+                    <IconKey size={18} color="#1e3a5f" style={{ flexShrink: 0 }} />
+                    <Text size="sm" fw={500} c="#212529">
+                      {row.original.name}
+                    </Text>
+                  </Group>
                 ),
                 meta: { minWidth: 200 },
               },
               {
-                header: "TAVSIF",
+                header: "Tavsif",
                 accessorKey: "description",
                 cell: ({ row }) => (
-                  <div
-                    className="max-w-xs truncate"
-                    title={row.original.description}
-                  >
-                    <Text size="sm" c="#495057">
-                      {row.original.description}
-                    </Text>
-                  </div>
+                  <Text size="sm" c="#495057" lineClamp={1}>
+                    {row.original.description || "—"}
+                  </Text>
                 ),
                 meta: { minWidth: 250 },
               },
               {
-                header: "KALIT",
+                header: "Kalit",
                 accessorKey: "key",
                 cell: ({ row }) => (
-                  <Badge
-                    variant="outline"
-                    className="bg-blue-100 text-blue-700 cursor-pointer hover:bg-blue-200"
+                  <Text
+                    size="xs"
+                    px={8}
+                    py={4}
                     onClick={() => handleCopyToClipboard(row.original.key, "KEY")}
                     title="Nusxalash uchun bosing"
+                    style={{
+                      backgroundColor: "#f1f3f5",
+                      color: "#495057",
+                      borderRadius: 4,
+                      fontFamily: "monospace",
+                      cursor: "pointer",
+                      display: "inline-block",
+                    }}
                   >
                     {row.original.key}
-                  </Badge>
+                  </Text>
                 ),
                 meta: { minWidth: 150 },
               },
               {
-                header: "MODUL",
+                header: "Modul",
                 accessorKey: "module",
                 cell: ({ row }) => (
-                  <Badge
-                    variant="outline"
-                    className="bg-green-100 text-green-700 capitalize"
+                  <Text
+                    size="xs"
+                    px={8}
+                    py={4}
+                    tt="capitalize"
+                    style={{
+                      backgroundColor: "#e9ecef",
+                      color: "#495057",
+                      borderRadius: 4,
+                      display: "inline-block",
+                    }}
                   >
                     {row.original.module}
-                  </Badge>
+                  </Text>
                 ),
                 meta: { minWidth: 100 },
               },
               {
-                header: "AMALLAR",
-                accessorKey: "actions",
+                id: "actions",
+                header: "Amallar",
                 cell: ({ row }) => (
                   <Menu shadow="md" width={180} position="bottom-end">
                     <Menu.Target>

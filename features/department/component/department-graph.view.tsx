@@ -329,7 +329,6 @@ export default function DepartmentGraphView({
         target: string
     } | null>(null)
 
-    console.log(departments)
     const CARD_WIDTH = 320
     const CARD_HEIGHT = 250
     const HORIZONTAL_GAP = 150
@@ -547,8 +546,6 @@ export default function DepartmentGraphView({
 
     const onConnect = useCallback(
         (params: Connection) => {
-            console.log('onConnect called:', params)
-            console.log('onConnectDepartments function exists:', !!onConnectDepartments)
 
             if (params.source && params.target) {
                 // Check if connection already exists
@@ -556,7 +553,6 @@ export default function DepartmentGraphView({
                     (edge) => edge.source === params.source && edge.target === params.target
                 )
 
-                console.log('Connection exists:', connectionExists)
 
                 if (!connectionExists) {
                     setSelectedConnection({
@@ -571,17 +567,7 @@ export default function DepartmentGraphView({
     )
 
     const handleConnectConfirm = () => {
-        console.log('handleConnectConfirm called')
-        console.log('selectedConnection:', selectedConnection)
-        console.log('onConnectDepartments:', onConnectDepartments)
-
         if (selectedConnection && onConnectDepartments) {
-            console.log('Calling onConnectDepartments with:', {
-                targetId: selectedConnection.target,
-                parentId: selectedConnection.source
-            })
-
-            // Call the backend update function
             // target node gets the source node as parent
             // target = child, source = parent
             onConnectDepartments(selectedConnection.target, selectedConnection.source)
@@ -589,8 +575,6 @@ export default function DepartmentGraphView({
             // Close modal
             setConnectModalOpen(false)
             setSelectedConnection(null)
-        } else {
-            console.error('Cannot confirm connection: Missing selection or callback')
         }
     }
 
