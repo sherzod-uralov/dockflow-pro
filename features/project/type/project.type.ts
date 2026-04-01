@@ -52,8 +52,13 @@ export interface ProjectGetResponse {
         fullname: string;
         username: string;
     };
+    isArchived?: boolean;
     createdAt: string;
     updatedAt: string;
+    _count?: {
+        tasks: number;
+        members: number;
+    };
 }
 
 export interface GetAllProjects extends DataPagination {
@@ -88,9 +93,4 @@ export interface ProjectUpdatePayload {
     description?: string;
     status?: ProjectStatus;
     departmentId?: string;
-    startDate?: string;
-    endDate?: string;
-    budget?: number;
-    color?: string;
-    icon?: string;
 }

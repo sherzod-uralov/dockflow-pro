@@ -27,6 +27,7 @@ import {
   IconUser,
   IconPlus,
   IconLayoutKanban,
+  IconChartBar,
 } from "@tabler/icons-react";
 import { useRouter, usePathname } from "next/navigation";
 import { useState, useEffect, useMemo } from "react";
@@ -121,6 +122,28 @@ const menuItems: MenuItem[] = [
     label: "Audit jurnali",
     href: "/dashboard/audit-log",
     permission: "admin:view_audit_logs",
+  },
+  {
+    icon: IconChartBar,
+    label: "KPI",
+    subItems: [
+      {
+        label: "Ball sozlamalari",
+        href: "/dashboard/kpi/task-score-config",
+      },
+      {
+        label: "Mukofot darajalari",
+        href: "/dashboard/kpi/reward-tiers",
+      },
+      {
+        label: "Oylik KPI",
+        href: "/dashboard/kpi/monthly-kpi",
+      },
+      {
+        label: "Mukofotlar",
+        href: "/dashboard/kpi/rewards",
+      },
+    ],
   },
   {
     icon: IconSettings,

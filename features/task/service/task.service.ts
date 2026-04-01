@@ -22,9 +22,10 @@ export const taskService = createCRUDService<
     projectId: params?.projectId,
     status: params?.status,
     priority: params?.priority,
-    assigneeIds: params?.assigneeIds,
+    assigneeId: params?.assigneeId,
     createdById: params?.createdById,
     categoryId: params?.categoryId,
+    parentTaskId: params?.parentTaskId,
   }),
 });
 

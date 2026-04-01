@@ -73,6 +73,8 @@ const ERROR_MESSAGES: Record<string, string> = {
 
   "Permission key already used": "Bu kalit allaqachon mavjud",
 
+  "Project not found": "Loyiha topilmadi",
+  "Task not found": "Vazifa topilmadi",
   "Journal not found": "Jurnal topilmadi",
 
   "This user is already assigned as a director of another department": "Bu foydalanuvchi boshqa bo'limda direktor",

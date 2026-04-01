@@ -43,6 +43,7 @@ interface TaskCardProps {
     onEdit?: (task: TaskGetResponse) => void;
     onDelete?: (id: string) => void;
     onClick?: (task: TaskGetResponse) => void;
+    onAddSubtask?: (task: TaskGetResponse) => void;
     draggable?: boolean;
 }
 
@@ -52,9 +53,10 @@ const PRIORITY_COLORS: Record<TaskPriority, string> = {
     [TaskPriority.MEDIUM]: "#3498db",
     [TaskPriority.HIGH]: "#f39c12",
     [TaskPriority.URGENT]: "#e74c3c",
+    [TaskPriority.CRITICAL]: "#c0392b",
 };
 
-const TaskCard = ({ task, onEdit, onDelete, onClick, draggable = false }: TaskCardProps) => {
+const TaskCard = ({ task, onEdit, onDelete, onClick, onAddSubtask, draggable = false }: TaskCardProps) => {
     const [isHovered, setIsHovered] = useState(false);
     const [assigneePopoverOpen, setAssigneePopoverOpen] = useState(false);
     const [isEditingTitle, setIsEditingTitle] = useState(false);
@@ -144,6 +146,16 @@ const TaskCard = ({ task, onEdit, onDelete, onClick, draggable = false }: TaskCa
             }}
             onClick={() => !isEditingTitle && onClick?.(task)}
         >
+            {/* Parent task indicator */}
+            {task.parentTaskId && task.parentTask && (
+                <Group gap={4} mb={4} style={{ opacity: 0.7 }}>
+                    <IconSubtask size={12} color="#868e96" />
+                    <Text size="xs" c="dimmed" lineClamp={1}>
+                        {task.parentTask.title}
+                    </Text>
+                </Group>
+            )}
+
             {/* Top row: Project key + Priority + Edit + Menu */}
             <Group justify="space-between" mb={8}>
                 <Group gap={8}>
@@ -195,6 +207,16 @@ const TaskCard = ({ task, onEdit, onDelete, onClick, draggable = false }: TaskCa
                             </ActionIcon>
                         </Menu.Target>
                         <Menu.Dropdown>
+                            <Menu.Item
+                                leftSection={<IconSubtask size={14} />}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onAddSubtask?.(task);
+                                }}
+                            >
+                                Ichki vazifa qo'shish
+                            </Menu.Item>
+                            <Menu.Divider />
                             <Menu.Item
                                 leftSection={<IconTrash size={14} />}
                                 color="red"

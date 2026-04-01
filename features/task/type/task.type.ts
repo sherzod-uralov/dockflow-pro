@@ -2,11 +2,11 @@ import { DataPagination } from "@/types/global.types";
 
 export enum TaskStatus {
     NOT_STARTED = "NOT_STARTED",
-    ACTIVE = "ACTIVE",
+    IN_PROGRESS = "IN_PROGRESS",
     IN_REVIEW = "IN_REVIEW",
     COMPLETED = "COMPLETED",
+    BLOCKED = "BLOCKED",
     CANCELLED = "CANCELLED",
-    ARCHIVED = "ARCHIVED",
 }
 
 export enum TaskPriority {
@@ -14,15 +14,16 @@ export enum TaskPriority {
     MEDIUM = "MEDIUM",
     HIGH = "HIGH",
     URGENT = "URGENT",
+    CRITICAL = "CRITICAL",
 }
 
 export const TASK_STATUS_OPTIONS = [
     { value: TaskStatus.NOT_STARTED, label: "Boshlanmagan", color: "#95a5a6" },
-    { value: TaskStatus.ACTIVE, label: "Faol", color: "#3498db" },
+    { value: TaskStatus.IN_PROGRESS, label: "Jarayonda", color: "#3498db" },
     { value: TaskStatus.IN_REVIEW, label: "Ko'rib chiqilmoqda", color: "#f39c12" },
     { value: TaskStatus.COMPLETED, label: "Yakunlangan", color: "#2ecc71" },
+    { value: TaskStatus.BLOCKED, label: "Bloklangan", color: "#8e44ad" },
     { value: TaskStatus.CANCELLED, label: "Bekor qilingan", color: "#e74c3c" },
-    { value: TaskStatus.ARCHIVED, label: "Arxivlangan", color: "#6c757d" },
 ] as const;
 
 export const TASK_PRIORITY_OPTIONS = [
@@ -30,6 +31,7 @@ export const TASK_PRIORITY_OPTIONS = [
     { value: TaskPriority.MEDIUM, label: "O'rta", color: "#3498db" },
     { value: TaskPriority.HIGH, label: "Yuqori", color: "#f39c12" },
     { value: TaskPriority.URGENT, label: "Shoshilinch", color: "#e74c3c" },
+    { value: TaskPriority.CRITICAL, label: "Juda muhim", color: "#c0392b" },
 ] as const;
 
 export interface TaskAssigneeUser {
@@ -42,6 +44,13 @@ export interface TaskAssigneeUser {
 export interface TaskAssignee {
     id: string;
     user: TaskAssigneeUser;
+}
+
+export interface TaskSubtaskInline {
+    id: string;
+    title: string;
+    status: TaskStatus;
+    priority: TaskPriority;
 }
 
 export interface TaskGetResponse {
@@ -68,15 +77,32 @@ export interface TaskGetResponse {
         id: string;
         title: string;
     };
+    subtasks?: TaskSubtaskInline[];
     startDate?: string;
     dueDate?: string;
     estimatedHours?: number;
     position?: number;
+    completedAt?: string;
+    isArchived?: boolean;
+    createdById?: string;
     createdBy?: {
         id: string;
         fullname: string;
         username: string;
     };
+    boardColumnId?: string;
+    boardColumn?: {
+        id: string;
+        name: string;
+        color?: string;
+    };
+    sprintId?: string;
+    sprint?: {
+        id: string;
+        name: string;
+    };
+    storyPoints?: number;
+    coverImageUrl?: string;
     createdAt: string;
     updatedAt: string;
     _count?: {
@@ -98,7 +124,7 @@ export interface TaskQueryParams {
     projectId?: string;
     status?: TaskStatus;
     priority?: TaskPriority;
-    assigneeIds?: string;
+    assigneeId?: string;
     createdById?: string;
     categoryId?: string;
     parentTaskId?: string;
@@ -117,6 +143,10 @@ export interface TaskFormData {
     dueDate?: string;
     estimatedHours?: number;
     position?: number;
+    boardColumnId?: string;
+    sprintId?: string;
+    storyPoints?: number;
+    coverImageUrl?: string;
 }
 
 export interface TaskCreatePayload extends TaskFormData { }
@@ -128,11 +158,11 @@ export interface TaskUpdatePayload {
     status?: TaskStatus;
     priority?: TaskPriority;
     assigneeIds?: string[];
-    parentTaskId?: string;
-    startDate?: string;
-    dueDate?: string;
-    estimatedHours?: number;
-    position?: number;
+    parentTaskId?: string | null;
+    boardColumnId?: string;
+    sprintId?: string;
+    storyPoints?: number;
+    coverImageUrl?: string;
 }
 
 // Kanban board types

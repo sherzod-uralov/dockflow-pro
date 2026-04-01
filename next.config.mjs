@@ -2,6 +2,10 @@
 const nextConfig = {
   output: "standalone",
 
+  turbopack: {
+    root: ".",
+  },
+
   experimental: {
     optimizePackageImports: [
       "@mantine/core",

@@ -87,17 +87,15 @@ const ProjectForm = ({
     });
 
     const handleSubmit = (values: ProjectCreateInput) => {
-        const data = {
-            ...values,
-            departmentId: values.departmentId || undefined,
-            startDate: values.startDate || undefined,
-            endDate: values.endDate || undefined,
-            budget: values.budget || undefined,
-        };
-
         if (isUpdate && project) {
+            const updateData = {
+                name: values.name,
+                description: values.description || undefined,
+                status: values.status,
+                departmentId: values.departmentId || undefined,
+            };
             updateMutation.mutate(
-                { id: project.id, data },
+                { id: project.id, data: updateData },
                 {
                     onSuccess: () => {
                         modal.closeModal();
@@ -106,7 +104,14 @@ const ProjectForm = ({
                 }
             );
         } else {
-            createMutation.mutate(data as any, {
+            const createData = {
+                ...values,
+                departmentId: values.departmentId || undefined,
+                startDate: values.startDate || undefined,
+                endDate: values.endDate || undefined,
+                budget: values.budget || undefined,
+            };
+            createMutation.mutate(createData as any, {
                 onSuccess: () => {
                     modal.closeModal();
                     onSuccess?.();

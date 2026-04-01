@@ -31,11 +31,6 @@ export const projectUpdateSchema = z.object({
     description: z.string().optional(),
     status: z.nativeEnum(ProjectStatus).optional(),
     departmentId: z.string().uuid("Noto'g'ri bo'lim ID").optional().nullable(),
-    startDate: z.string().optional().nullable(),
-    endDate: z.string().optional().nullable(),
-    budget: z.number().min(0, "Byudjet manfiy bo'lishi mumkin emas").optional().nullable(),
-    color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Noto'g'ri rang formati").optional(),
-    icon: z.string().optional(),
 });
 
 export const projectQuerySchema = z.object({

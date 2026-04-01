@@ -113,7 +113,7 @@ const TaskPage = () => {
         projectId: projectFilter || undefined,
         status: statusFilter as any,
         priority: priorityFilter as any,
-        assigneeIds: assigneeFilter || undefined,
+        assigneeId: assigneeFilter || undefined,
     });
 
     const { data: projects } = useGetAllProjects({

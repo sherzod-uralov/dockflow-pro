@@ -44,7 +44,7 @@ export const taskQuerySchema = z.object({
     projectId: z.string().uuid().optional(),
     status: z.nativeEnum(TaskStatus).optional(),
     priority: z.nativeEnum(TaskPriority).optional(),
-    assigneeIds: z.string().uuid().optional(),
+    assigneeId: z.string().uuid().optional(),
     createdById: z.string().uuid().optional(),
     categoryId: z.string().uuid().optional(),
 });

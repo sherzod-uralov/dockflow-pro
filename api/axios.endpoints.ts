@@ -214,6 +214,79 @@ export const endpoints = {
     list: "/task-activity",
     detail: (id: string | number) => `/task-activity/${id}`,
   },
+  // Task Category
+  taskCategory: {
+    list: "/task-category",
+    create: "/task-category",
+    detail: (id: string | number) => `/task-category/${id}`,
+    update: (id: string | number) => `/task-category/${id}`,
+    delete: (id: string | number) => `/task-category/${id}`,
+  },
+  // Board Column
+  boardColumn: {
+    list: "/board-column",
+    create: "/board-column",
+    detail: (id: string | number) => `/board-column/${id}`,
+    update: (id: string | number) => `/board-column/${id}`,
+    delete: (id: string | number) => `/board-column/${id}`,
+    reorder: "/board-column/reorder",
+  },
+  // Sprint
+  sprint: {
+    list: "/sprint",
+    create: "/sprint",
+    detail: (id: string | number) => `/sprint/${id}`,
+    update: (id: string | number) => `/sprint/${id}`,
+    delete: (id: string | number) => `/sprint/${id}`,
+    start: (id: string | number) => `/sprint/${id}/start`,
+    complete: (id: string | number) => `/sprint/${id}/complete`,
+    cancel: (id: string | number) => `/sprint/${id}/cancel`,
+  },
+  // Sessions
+  sessions: {
+    list: "/sessions",
+    detail: (id: string | number) => `/sessions/${id}`,
+    delete: (id: string | number) => `/sessions/${id}`,
+    revokeAll: "/sessions/revoke-all",
+  },
+  // Task Score Config
+  taskScoreConfig: {
+    list: "/task-score-config",
+    create: "/task-score-config",
+    detail: (id: string | number) => `/task-score-config/${id}`,
+    update: (id: string | number) => `/task-score-config/${id}`,
+    delete: (id: string | number) => `/task-score-config/${id}`,
+    byPriority: (priorityLevel: string) => `/task-score-config/priority/${priorityLevel}`,
+  },
+  // KPI Reward Tier
+  kpiRewardTier: {
+    list: "/kpi-reward-tier",
+    create: "/kpi-reward-tier",
+    detail: (id: string | number) => `/kpi-reward-tier/${id}`,
+    update: (id: string | number) => `/kpi-reward-tier/${id}`,
+    delete: (id: string | number) => `/kpi-reward-tier/${id}`,
+  },
+  // User Monthly KPI
+  userMonthlyKpi: {
+    list: "/user-monthly-kpi",
+    detail: (id: string | number) => `/user-monthly-kpi/${id}`,
+    me: "/user-monthly-kpi/me",
+    history: "/user-monthly-kpi/history",
+    leaderboard: "/user-monthly-kpi/leaderboard",
+    taskScores: "/user-monthly-kpi/task-scores",
+    finalize: "/user-monthly-kpi/finalize",
+  },
+  // KPI Reward
+  kpiReward: {
+    list: "/kpi-reward",
+    detail: (id: string | number) => `/kpi-reward/${id}`,
+    pending: "/kpi-reward/pending",
+    my: "/kpi-reward/my",
+    approve: (id: string | number) => `/kpi-reward/${id}/approve`,
+    pay: (id: string | number) => `/kpi-reward/${id}/pay`,
+    reject: (id: string | number) => `/kpi-reward/${id}/reject`,
+    bulkApprove: "/kpi-reward/bulk-approve",
+  },
 } as const;
 
 export type Endpoints = typeof endpoints;

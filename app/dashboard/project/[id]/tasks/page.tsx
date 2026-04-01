@@ -82,7 +82,7 @@ export default function ProjectTasksPage() {
         projectId: projectId,
         status: statusFilter as any,
         priority: priorityFilter as any,
-        assigneeIds: assigneeFilter || undefined,
+        assigneeId: assigneeFilter || undefined,
     });
 
     const { data: users } = useGetUserQuery({

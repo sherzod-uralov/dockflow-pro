@@ -111,19 +111,18 @@ const TaskForm = ({
     });
 
     const handleSubmit = (values: TaskCreateInput) => {
-        const data = {
-            ...values,
-            categoryId: values.categoryId || undefined,
-            assigneeIds: values.assigneeIds?.length ? values.assigneeIds : undefined,
-            parentTaskId: values.parentTaskId || undefined,
-            startDate: values.startDate || undefined,
-            dueDate: values.dueDate || undefined,
-            estimatedHours: values.estimatedHours || undefined,
-        };
-
         if (isUpdate && task) {
+            const updateData = {
+                title: values.title,
+                description: values.description || undefined,
+                categoryId: values.categoryId || undefined,
+                status: values.status,
+                priority: values.priority,
+                assigneeIds: values.assigneeIds?.length ? values.assigneeIds : undefined,
+                parentTaskId: values.parentTaskId || undefined,
+            };
             updateMutation.mutate(
-                { id: task.id, data },
+                { id: task.id, data: updateData },
                 {
                     onSuccess: () => {
                         modal.closeModal();
@@ -132,7 +131,16 @@ const TaskForm = ({
                 }
             );
         } else {
-            createMutation.mutate(data as any, {
+            const createData = {
+                ...values,
+                categoryId: values.categoryId || undefined,
+                assigneeIds: values.assigneeIds?.length ? values.assigneeIds : undefined,
+                parentTaskId: values.parentTaskId || undefined,
+                startDate: values.startDate || undefined,
+                dueDate: values.dueDate || undefined,
+                estimatedHours: values.estimatedHours || undefined,
+            };
+            createMutation.mutate(createData as any, {
                 onSuccess: () => {
                     modal.closeModal();
                     onSuccess?.();
