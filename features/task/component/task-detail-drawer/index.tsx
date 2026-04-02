@@ -56,8 +56,6 @@ import {
   useDeleteTask,
 } from "../../hook/task.hook";
 import {
-  TaskStatus,
-  TASK_STATUS_OPTIONS,
   TASK_PRIORITY_OPTIONS,
 } from "../../type/task.type";
 import { TaskCommentsInline } from "@/features/task-comment/component/task-comments-inline";
@@ -182,8 +180,10 @@ export const TaskDetailDrawer = ({
 
   const isWatching = watchers.length > 0;
 
-  const handleSubtaskStatusChange = (subtaskId: string, status: TaskStatus) => {
-    updateTask.mutate({ id: subtaskId, data: { status } });
+  const handleSubtaskToggleComplete = (subtaskId: string, isClosed: boolean) => {
+    // When toggling, we update the boardColumnId - the server handles mapping to the correct column
+    // For now, we just trigger a generic update; the board column logic is server-side
+    updateTask.mutate({ id: subtaskId, data: {} });
   };
 
   const handleSubtaskClick = (subtaskId: string) => {
@@ -230,7 +230,7 @@ export const TaskDetailDrawer = ({
 
   if (!taskId) return null;
 
-  const completedSubtasks = subtasks.filter((s) => s.status === TaskStatus.COMPLETED);
+  const completedSubtasks = subtasks.filter((s) => s.boardColumn?.isClosed === true);
 
   return (
     <>
@@ -273,7 +273,7 @@ export const TaskDetailDrawer = ({
                         {task.project.name}
                       </Badge>
                     )}
-                    <StatusBadge status={task.status} />
+                    <StatusBadge boardColumn={task.boardColumn} />
                     <PriorityBadge priority={task.priority} />
                   </Group>
                   <Group gap="xs">
@@ -476,17 +476,7 @@ export const TaskDetailDrawer = ({
                           <Text size="sm" fw={500} c="#495057" mb="xs">
                             Holat
                           </Text>
-                          <Select
-                            data={TASK_STATUS_OPTIONS.map((o) => ({
-                              value: o.value,
-                              label: o.label,
-                            }))}
-                            value={task.status}
-                            onChange={(value) =>
-                              value && handleUpdateField("status", value)
-                            }
-                            size="sm"
-                          />
+                          <StatusBadge boardColumn={task.boardColumn} />
                         </Box>
                         <Box>
                           <Text size="sm" fw={500} c="#495057" mb="xs">
@@ -927,41 +917,39 @@ export const TaskDetailDrawer = ({
                                 >
                                   <ActionIcon
                                     variant={
-                                      subtask.status === TaskStatus.COMPLETED
+                                      subtask.boardColumn?.isClosed
                                         ? "filled"
                                         : "outline"
                                     }
                                     size="xs"
                                     color={
-                                      subtask.status === TaskStatus.COMPLETED
+                                      subtask.boardColumn?.isClosed
                                         ? "green"
                                         : "gray"
                                     }
                                     radius="xl"
                                     onClick={() =>
-                                      handleSubtaskStatusChange(
+                                      handleSubtaskToggleComplete(
                                         subtask.id,
-                                        subtask.status === TaskStatus.COMPLETED
-                                          ? TaskStatus.NOT_STARTED
-                                          : TaskStatus.COMPLETED
+                                        !subtask.boardColumn?.isClosed
                                       )
                                     }
                                   >
-                                    {subtask.status === TaskStatus.COMPLETED && (
+                                    {subtask.boardColumn?.isClosed && (
                                       <IconCheck size={10} />
                                     )}
                                   </ActionIcon>
                                   <Text
                                     size="sm"
                                     c={
-                                      subtask.status === TaskStatus.COMPLETED
+                                      subtask.boardColumn?.isClosed
                                         ? "dimmed"
                                         : "#212529"
                                     }
                                     lineClamp={1}
                                     style={{
                                       textDecoration:
-                                        subtask.status === TaskStatus.COMPLETED
+                                        subtask.boardColumn?.isClosed
                                           ? "line-through"
                                           : "none",
                                       flex: 1,

@@ -2,7 +2,7 @@
 
 import { Box, Table, Text, Badge, Group, Avatar, ActionIcon, Menu, rem } from "@mantine/core";
 import { IconDots, IconPencil, IconTrash } from "@tabler/icons-react";
-import { TaskGetResponse, TASK_PRIORITY_OPTIONS, TASK_STATUS_OPTIONS } from "../type/task.type";
+import { TaskGetResponse, TASK_PRIORITY_OPTIONS } from "../type/task.type";
 
 interface TaskListViewProps {
     tasks: TaskGetResponse[];
@@ -11,19 +11,14 @@ interface TaskListViewProps {
 }
 
 const TaskListView = ({ tasks, onEditTask, onDeleteTask }: TaskListViewProps) => {
-    // Helper to get labels and colors
-    const getStatusConfig = (statusValue: string) => {
-        return TASK_STATUS_OPTIONS.find((s) => s.value === statusValue);
-    };
-
     const getPriorityConfig = (priorityValue: string) => {
         return TASK_PRIORITY_OPTIONS.find((p) => p.value === priorityValue);
     };
 
     const rows = tasks.map((task) => {
-        const statusConfig = getStatusConfig(task.status);
         const priorityConfig = getPriorityConfig(task.priority);
-        const isOverdue = task.dueDate && new Date(task.dueDate) < new Date() && task.status !== "COMPLETED";
+        const boardColumn = task.boardColumn;
+        const isOverdue = task.dueDate && new Date(task.dueDate) < new Date() && !boardColumn?.isClosed;
 
         return (
             <Table.Tr
@@ -44,13 +39,17 @@ const TaskListView = ({ tasks, onEditTask, onDeleteTask }: TaskListViewProps) =>
 
                 <Table.Td>
                     <Badge
-                        color={statusConfig?.color || "gray"}
                         variant="light"
                         size="md"
                         radius="md"
-                        style={{ textTransform: 'capitalize', fontWeight: 600 }}
+                        style={{
+                            textTransform: 'capitalize',
+                            fontWeight: 600,
+                            backgroundColor: `${boardColumn?.color || "#95a5a6"}20`,
+                            color: boardColumn?.color || "#95a5a6",
+                        }}
                     >
-                        {statusConfig?.label || task.status}
+                        {boardColumn?.name || "Noma'lum"}
                     </Badge>
                 </Table.Td>
 

@@ -1,14 +1,5 @@
 import { DataPagination } from "@/types/global.types";
 
-export enum TaskStatus {
-    NOT_STARTED = "NOT_STARTED",
-    IN_PROGRESS = "IN_PROGRESS",
-    IN_REVIEW = "IN_REVIEW",
-    COMPLETED = "COMPLETED",
-    BLOCKED = "BLOCKED",
-    CANCELLED = "CANCELLED",
-}
-
 export enum TaskPriority {
     LOW = "LOW",
     MEDIUM = "MEDIUM",
@@ -16,15 +7,6 @@ export enum TaskPriority {
     URGENT = "URGENT",
     CRITICAL = "CRITICAL",
 }
-
-export const TASK_STATUS_OPTIONS = [
-    { value: TaskStatus.NOT_STARTED, label: "Boshlanmagan", color: "#95a5a6" },
-    { value: TaskStatus.IN_PROGRESS, label: "Jarayonda", color: "#3498db" },
-    { value: TaskStatus.IN_REVIEW, label: "Ko'rib chiqilmoqda", color: "#f39c12" },
-    { value: TaskStatus.COMPLETED, label: "Yakunlangan", color: "#2ecc71" },
-    { value: TaskStatus.BLOCKED, label: "Bloklangan", color: "#8e44ad" },
-    { value: TaskStatus.CANCELLED, label: "Bekor qilingan", color: "#e74c3c" },
-] as const;
 
 export const TASK_PRIORITY_OPTIONS = [
     { value: TaskPriority.LOW, label: "Past", color: "#95a5a6" },
@@ -49,7 +31,6 @@ export interface TaskAssignee {
 export interface TaskSubtaskInline {
     id: string;
     title: string;
-    status: TaskStatus;
     priority: TaskPriority;
 }
 
@@ -57,6 +38,7 @@ export interface TaskGetResponse {
     id: string;
     title: string;
     description?: string;
+    taskNumber: number;
     projectId: string;
     project?: {
         id: string;
@@ -69,8 +51,8 @@ export interface TaskGetResponse {
         id: string;
         name: string;
     };
-    status: TaskStatus;
     priority: TaskPriority;
+    score: number | null;
     assignees?: TaskAssignee[];
     parentTaskId?: string;
     parentTask?: {
@@ -95,13 +77,8 @@ export interface TaskGetResponse {
         id: string;
         name: string;
         color?: string;
+        isClosed?: boolean;
     };
-    sprintId?: string;
-    sprint?: {
-        id: string;
-        name: string;
-    };
-    storyPoints?: number;
     coverImageUrl?: string;
     createdAt: string;
     updatedAt: string;
@@ -122,12 +99,12 @@ export interface TaskQueryParams {
     pageSize?: number;
     search?: string;
     projectId?: string;
-    status?: TaskStatus;
     priority?: TaskPriority;
     assigneeId?: string;
     createdById?: string;
     categoryId?: string;
     parentTaskId?: string;
+    boardColumnId?: string;
 }
 
 export interface TaskFormData {
@@ -135,8 +112,8 @@ export interface TaskFormData {
     description?: string;
     projectId: string;
     categoryId?: string;
-    status: TaskStatus;
     priority: TaskPriority;
+    score?: number;
     assigneeIds?: string[];
     parentTaskId?: string;
     startDate?: string;
@@ -144,46 +121,32 @@ export interface TaskFormData {
     estimatedHours?: number;
     position?: number;
     boardColumnId?: string;
-    sprintId?: string;
-    storyPoints?: number;
     coverImageUrl?: string;
 }
 
-export interface TaskCreatePayload extends TaskFormData { }
+export interface TaskCreatePayload extends TaskFormData {}
 
 export interface TaskUpdatePayload {
     title?: string;
     description?: string;
     categoryId?: string;
-    status?: TaskStatus;
     priority?: TaskPriority;
+    score?: number;
     assigneeIds?: string[];
     parentTaskId?: string | null;
     boardColumnId?: string;
-    sprintId?: string;
-    storyPoints?: number;
     coverImageUrl?: string;
-}
-
-// Kanban board types
-export interface KanbanColumn {
-    id: TaskStatus;
-    title: string;
-    tasks: TaskGetResponse[];
-    color: string;
-}
-
-export interface KanbanBoardData {
-    columns: KanbanColumn[];
 }
 
 // Calendar types
 export interface CalendarTask {
     id: string;
     title: string;
+    taskNumber: number;
     priority: TaskPriority;
     project?: {
         name: string;
+        key: string;
         color?: string;
     };
     dueDate: string;

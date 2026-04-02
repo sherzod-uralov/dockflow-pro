@@ -5,7 +5,7 @@ import { Container, Text, Loader, Center, Stack, Group, Button, Badge } from "@m
 import { IconArrowLeft } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
 import { useGetTaskById } from "@/features/task/hook/task.hook";
-import { TASK_STATUS_OPTIONS, TASK_PRIORITY_OPTIONS } from "@/features/task/type/task.type";
+import { TASK_PRIORITY_OPTIONS } from "@/features/task/type/task.type";
 
 export default function TaskDetailPage() {
     const params = useParams();
@@ -30,7 +30,6 @@ export default function TaskDetailPage() {
         );
     }
 
-    const statusOption = TASK_STATUS_OPTIONS.find((s) => s.value === task.status);
     const priorityOption = TASK_PRIORITY_OPTIONS.find((p) => p.value === task.priority);
 
     return (
@@ -60,18 +59,20 @@ export default function TaskDetailPage() {
                         </div>
 
                         <Group>
-                            <Badge
-                                variant="light"
-                                size="lg"
-                                styles={{
-                                    root: {
-                                        backgroundColor: `${statusOption?.color || "#95a5a6"}15`,
-                                        color: statusOption?.color || "#95a5a6",
-                                    },
-                                }}
-                            >
-                                {statusOption?.label}
-                            </Badge>
+                            {task.boardColumn && (
+                                <Badge
+                                    variant="light"
+                                    size="lg"
+                                    styles={{
+                                        root: {
+                                            backgroundColor: `${task.boardColumn.color || "#95a5a6"}15`,
+                                            color: task.boardColumn.color || "#95a5a6",
+                                        },
+                                    }}
+                                >
+                                    {task.boardColumn.name}
+                                </Badge>
+                            )}
                             <Badge
                                 variant="light"
                                 size="lg"

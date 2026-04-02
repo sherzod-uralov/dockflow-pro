@@ -1,4 +1,5 @@
-import { useQuery } from "react-query";
+import { useQuery, useMutation, useQueryClient } from "react-query";
+import { showError, showSuccess } from "@/utils/show-error";
 import { telegramService } from "../service/telegram.service";
 
 export const useTelegramLinkInfo = (userId: string | undefined, options?: { enabled?: boolean }) => {
@@ -15,5 +16,18 @@ export const useTelegramStatus = (userId: string | undefined, refetchInterval: n
         queryFn: () => telegramService.checkStatus(userId!),
         enabled: !!userId,
         refetchInterval,
+    });
+};
+
+export const useTelegramUnlink = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (userId: string) => telegramService.unlink(userId),
+        onSuccess: (_data, userId) => {
+            queryClient.invalidateQueries(["telegram-status", userId]);
+            queryClient.invalidateQueries(["telegram-link-info", userId]);
+            showSuccess("Telegram akkaunt uzildi");
+        },
+        onError: showError,
     });
 };

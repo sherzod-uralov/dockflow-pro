@@ -1,23 +1,23 @@
 import { Badge } from "@mantine/core";
-import { TaskStatus, TASK_STATUS_OPTIONS } from "../../type/task.type";
 
 interface StatusBadgeProps {
-  status: TaskStatus;
+  boardColumn?: { name: string; color?: string; isClosed?: boolean };
 }
 
-export const StatusBadge = ({ status }: StatusBadgeProps) => {
-  const option = TASK_STATUS_OPTIONS.find((o) => o.value === status);
+export const StatusBadge = ({ boardColumn }: StatusBadgeProps) => {
+  const color = boardColumn?.color || "#95a5a6";
+  const label = boardColumn?.name || "Noma'lum";
 
   return (
     <Badge
       size="sm"
       variant="light"
       style={{
-        backgroundColor: `${option?.color}20`,
-        color: option?.color,
+        backgroundColor: `${color}20`,
+        color: color,
       }}
     >
-      {option?.label || status}
+      {label}
     </Badge>
   );
 };

@@ -2,23 +2,21 @@ import { Paper, Group, Text, Badge, ActionIcon } from "@mantine/core";
 import { IconCheck, IconChevronRight } from "@tabler/icons-react";
 import {
   TaskGetResponse,
-  TaskStatus,
-  TASK_STATUS_OPTIONS,
   TASK_PRIORITY_OPTIONS,
 } from "../../type/task.type";
 
 interface SubtaskItemProps {
   subtask: TaskGetResponse;
-  onStatusChange: (id: string, status: TaskStatus) => void;
+  onToggleComplete: (id: string, isClosed: boolean) => void;
   onClick: (id: string) => void;
 }
 
 export const SubtaskItem = ({
   subtask,
-  onStatusChange,
+  onToggleComplete,
   onClick,
 }: SubtaskItemProps) => {
-  const isCompleted = subtask.status === TaskStatus.COMPLETED;
+  const isCompleted = subtask.boardColumn?.isClosed === true;
   const priorityOption = TASK_PRIORITY_OPTIONS.find(
     (p) => p.value === subtask.priority
   );
@@ -43,10 +41,7 @@ export const SubtaskItem = ({
             radius="xl"
             onClick={(e) => {
               e.stopPropagation();
-              onStatusChange(
-                subtask.id,
-                isCompleted ? TaskStatus.NOT_STARTED : TaskStatus.COMPLETED
-              );
+              onToggleComplete(subtask.id, !isCompleted);
             }}
           >
             {isCompleted && <IconCheck size={10} />}

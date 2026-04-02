@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useCallback, useMemo, useEffect, useRef } from "react";
-import { Stack, Text, Group, Button, ScrollArea, Box, ActionIcon, Collapse } from "@mantine/core";
-import { IconPlus, IconChevronDown, IconChevronRight, IconSubtask, IconX, IconCheck } from "@tabler/icons-react";
+import { Stack, Text, Group, Button, ScrollArea, Box, ActionIcon, Collapse, TextInput, ColorInput, Menu, Tooltip } from "@mantine/core";
+import { IconPlus, IconChevronDown, IconChevronRight, IconSubtask, IconX, IconCheck, IconDotsVertical, IconEdit, IconTrash, IconColumnInsertRight } from "@tabler/icons-react";
 import { useDisclosure } from "@mantine/hooks";
 import {
     DndContext,
@@ -20,7 +20,6 @@ import {
     useDroppable,
 } from "@dnd-kit/core";
 import {
-    arrayMove,
     SortableContext,
     sortableKeyboardCoordinates,
     verticalListSortingStrategy,
@@ -29,34 +28,42 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import {
     TaskGetResponse,
-    TaskStatus,
     TaskPriority,
-    TASK_STATUS_OPTIONS,
 } from "../type/task.type";
+import {
+    useGetAllBoardColumns,
+    useCreateBoardColumn,
+    useUpdateBoardColumn,
+    useDeleteBoardColumn,
+} from "@/features/board-column/hook/board-column.hook";
 import TaskCard from "./task.card";
 import { useUpdateTask, useCreateTask } from "../hook/task.hook";
 
-// Terminal statuses — subtasks in these states won't cascade when parent moves
-const TERMINAL_STATUSES = new Set([TaskStatus.COMPLETED, TaskStatus.CANCELLED]);
 
 interface TaskKanbanBoardProps {
     tasks: TaskGetResponse[];
+    projectId?: string;
     onEditTask?: (task: TaskGetResponse) => void;
     onDeleteTask?: (id: string) => void;
-    onCreateTask?: (status: TaskStatus) => void;
+    onCreateTask?: () => void;
     onClickTask?: (task: TaskGetResponse) => void;
 }
 
-// Inline subtask input
+interface KanbanColumnData {
+    id: string;
+    name: string;
+    color: string;
+    isDynamic: boolean;
+}
+
+// ─── Inline subtask input ────────────────────────────────────────────
 const InlineSubtaskInput = ({
     parentTaskId,
     projectId,
-    parentStatus,
     onClose,
 }: {
     parentTaskId: string;
     projectId: string;
-    parentStatus: TaskStatus;
     onClose: () => void;
 }) => {
     const [title, setTitle] = useState("");
@@ -74,7 +81,6 @@ const InlineSubtaskInput = ({
                 title: title.trim(),
                 projectId,
                 parentTaskId,
-                status: parentStatus,
                 priority: TaskPriority.MEDIUM,
             },
             {
@@ -126,12 +132,7 @@ const InlineSubtaskInput = ({
                     minWidth: 0,
                 }}
             />
-            <ActionIcon
-                variant="subtle"
-                size="xs"
-                color="gray"
-                onClick={onClose}
-            >
+            <ActionIcon variant="subtle" size="xs" color="gray" onClick={onClose}>
                 <IconX size={12} />
             </ActionIcon>
             <ActionIcon
@@ -147,7 +148,7 @@ const InlineSubtaskInput = ({
     );
 };
 
-// Sortable Task Card Wrapper
+// ─── Sortable Task Card Wrapper ──────────────────────────────────────
 const SortableTaskItem = ({
     task,
     onEdit,
@@ -174,20 +175,12 @@ const SortableTaskItem = ({
         isDragging,
     } = useSortable({
         id: task.id,
-        data: {
-            type: "Task",
-            task,
-        },
-        transition: {
-            duration: 200,
-            easing: "ease",
-        },
+        data: { type: "Task", task },
+        transition: { duration: 200, easing: "ease" },
     });
 
     useEffect(() => {
-        if (isDragging) {
-            setWasDragged(true);
-        }
+        if (isDragging) setWasDragged(true);
     }, [isDragging]);
 
     const style: React.CSSProperties = {
@@ -198,9 +191,7 @@ const SortableTaskItem = ({
     };
 
     const handleClick = (clickedTask: TaskGetResponse) => {
-        if (!wasDragged) {
-            onClick?.(clickedTask);
-        }
+        if (!wasDragged) onClick?.(clickedTask);
         setWasDragged(false);
     };
 
@@ -212,9 +203,7 @@ const SortableTaskItem = ({
             {...listeners}
             onPointerUp={() => {
                 setTimeout(() => {
-                    if (wasDragged) {
-                        setWasDragged(false);
-                    }
+                    if (wasDragged) setWasDragged(false);
                 }, 0);
             }}
         >
@@ -265,48 +254,32 @@ const SortableTaskItem = ({
     );
 };
 
-// Subtask connector line component with smooth rounded corners
-const SubtaskConnector = ({
-    isLast,
-    children,
-}: {
-    isLast: boolean;
-    children: React.ReactNode;
-}) => {
-    return (
-        <Box style={{ position: "relative", paddingLeft: 22 }}>
-            {/* Curved L-branch: vertical down then smooth curve to horizontal */}
+// ─── Subtask connector line ──────────────────────────────────────────
+const SubtaskConnector = ({ isLast, children }: { isLast: boolean; children: React.ReactNode }) => (
+    <Box style={{ position: "relative", paddingLeft: 22 }}>
+        <Box
+            style={{
+                position: "absolute",
+                left: 8, top: 0, height: "50%", width: 14,
+                borderLeft: "2px solid #dee2e6",
+                borderBottom: "2px solid #dee2e6",
+                borderBottomLeftRadius: 10,
+            }}
+        />
+        {!isLast && (
             <Box
                 style={{
                     position: "absolute",
-                    left: 8,
-                    top: 0,
-                    height: "50%",
-                    width: 14,
-                    borderLeft: "2px solid #dee2e6",
-                    borderBottom: "2px solid #dee2e6",
-                    borderBottomLeftRadius: 10,
+                    left: 8, top: "50%", bottom: 0, width: 2,
+                    backgroundColor: "#dee2e6",
                 }}
             />
-            {/* Continuing vertical line for non-last items */}
-            {!isLast && (
-                <Box
-                    style={{
-                        position: "absolute",
-                        left: 8,
-                        top: "50%",
-                        bottom: 0,
-                        width: 2,
-                        backgroundColor: "#dee2e6",
-                    }}
-                />
-            )}
-            {children}
-        </Box>
-    );
-};
+        )}
+        {children}
+    </Box>
+);
 
-// Helper: recursively check if targetId is a descendant of parentId
+// ─── Helper: descendant check ────────────────────────────────────────
 const hasDescendant = (
     subtaskMap: Map<string, TaskGetResponse[]>,
     parentId: string,
@@ -320,18 +293,10 @@ const hasDescendant = (
     return false;
 };
 
-// Recursive subtask item — renders a subtask card + its children tree
+// ─── Recursive subtask tree item ─────────────────────────────────────
 const RecursiveSubtaskItem = ({
-    task,
-    subtaskMap,
-    isLast,
-    subtaskDropTargetId,
-    addingSubtaskForId,
-    onEdit,
-    onDelete,
-    onClick,
-    onAddSubtask,
-    onCloseSubtaskInput,
+    task, subtaskMap, isLast, subtaskDropTargetId, addingSubtaskForId,
+    onEdit, onDelete, onClick, onAddSubtask, onCloseSubtaskInput,
 }: {
     task: TaskGetResponse;
     subtaskMap: Map<string, TaskGetResponse[]>;
@@ -346,7 +311,6 @@ const RecursiveSubtaskItem = ({
 }) => {
     const children = subtaskMap.get(task.id) || [];
     const isAddingToThis = addingSubtaskForId === task.id;
-    const hasChildren = children.length > 0;
 
     return (
         <SubtaskConnector isLast={isLast}>
@@ -359,34 +323,27 @@ const RecursiveSubtaskItem = ({
                     onAddSubtask={onAddSubtask}
                     isSubtaskTarget={subtaskDropTargetId === task.id}
                 />
-                {/* Render nested children */}
-                {(hasChildren || isAddingToThis) && (
+                {(children.length > 0 || isAddingToThis) && (
                     <Box mt={4}>
-                        {children.map((child, index) => {
-                            const childIsLast = index === children.length - 1 && !isAddingToThis;
-                            return (
-                                <RecursiveSubtaskItem
-                                    key={child.id}
-                                    task={child}
-                                    subtaskMap={subtaskMap}
-                                    isLast={childIsLast}
-                                    subtaskDropTargetId={subtaskDropTargetId}
-                                    addingSubtaskForId={addingSubtaskForId}
-                                    onEdit={onEdit}
-                                    onDelete={onDelete}
-                                    onClick={onClick}
-                                    onAddSubtask={onAddSubtask}
-                                    onCloseSubtaskInput={onCloseSubtaskInput}
-                                />
-                            );
-                        })}
+                        {children.map((child, index) => (
+                            <RecursiveSubtaskItem
+                                key={child.id}
+                                task={child}
+                                subtaskMap={subtaskMap}
+                                isLast={index === children.length - 1 && !isAddingToThis}
+                                subtaskDropTargetId={subtaskDropTargetId}
+                                addingSubtaskForId={addingSubtaskForId}
+                                onEdit={onEdit} onDelete={onDelete} onClick={onClick}
+                                onAddSubtask={onAddSubtask} onCloseSubtaskInput={onCloseSubtaskInput}
+                            />
+                        ))}
                         {isAddingToThis && (task.project?.id || task.projectId) && (
                             <SubtaskConnector isLast>
                                 <Box py={2}>
                                     <InlineSubtaskInput
                                         parentTaskId={task.id}
                                         projectId={task.project?.id || task.projectId}
-                                        parentStatus={task.status}
+
                                         onClose={onCloseSubtaskInput}
                                     />
                                 </Box>
@@ -399,17 +356,10 @@ const RecursiveSubtaskItem = ({
     );
 };
 
-// Parent task with expandable subtasks (recursive tree)
+// ─── Parent task with expandable subtask tree ────────────────────────
 const ParentTaskWithSubtasks = ({
-    task,
-    subtaskMap,
-    subtaskDropTargetId,
-    addingSubtaskForId,
-    onEdit,
-    onDelete,
-    onClick,
-    onAddSubtask,
-    onCloseSubtaskInput,
+    task, subtaskMap, subtaskDropTargetId, addingSubtaskForId,
+    onEdit, onDelete, onClick, onAddSubtask, onCloseSubtaskInput,
 }: {
     task: TaskGetResponse;
     subtaskMap: Map<string, TaskGetResponse[]>;
@@ -425,79 +375,52 @@ const ParentTaskWithSubtasks = ({
     const directChildren = subtaskMap.get(task.id) || [];
     const isAddingToParent = addingSubtaskForId === task.id;
     const isAddingToDescendant = addingSubtaskForId
-        ? hasDescendant(subtaskMap, task.id, addingSubtaskForId)
-        : false;
-    const isAddingAnywhere = isAddingToParent || isAddingToDescendant;
+        ? hasDescendant(subtaskMap, task.id, addingSubtaskForId) : false;
 
-    // Auto-open when adding subtask anywhere in the tree
     useEffect(() => {
-        if (isAddingAnywhere) open();
-    }, [isAddingAnywhere, open]);
+        if (isAddingToParent || isAddingToDescendant) open();
+    }, [isAddingToParent, isAddingToDescendant, open]);
 
     return (
         <Box>
             <Box style={{ position: "relative" }}>
                 <SortableTaskItem
-                    task={task}
-                    onEdit={onEdit}
-                    onDelete={onDelete}
-                    onClick={onClick}
-                    onAddSubtask={onAddSubtask}
+                    task={task} onEdit={onEdit} onDelete={onDelete}
+                    onClick={onClick} onAddSubtask={onAddSubtask}
                     isSubtaskTarget={subtaskDropTargetId === task.id}
                 />
                 <ActionIcon
-                    variant="filled"
-                    size={18}
-                    radius="xl"
-                    color="gray"
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        toggle();
-                    }}
+                    variant="filled" size={18} radius="xl" color="gray"
+                    onClick={(e) => { e.stopPropagation(); toggle(); }}
                     style={{
-                        position: "absolute",
-                        bottom: -9,
-                        left: "50%",
-                        transform: "translateX(-50%)",
-                        zIndex: 10,
-                        backgroundColor: "#e9ecef",
-                        border: "2px solid #f8f9fa",
+                        position: "absolute", bottom: -9, left: "50%",
+                        transform: "translateX(-50%)", zIndex: 10,
+                        backgroundColor: "#e9ecef", border: "2px solid #f8f9fa",
                     }}
                 >
-                    {opened ? (
-                        <IconChevronDown size={10} color="#495057" />
-                    ) : (
-                        <IconChevronRight size={10} color="#495057" />
-                    )}
+                    {opened ? <IconChevronDown size={10} color="#495057" /> : <IconChevronRight size={10} color="#495057" />}
                 </ActionIcon>
             </Box>
             <Collapse in={opened}>
                 <Box mt={4}>
-                    {directChildren.map((subtask, index) => {
-                        const isLast = index === directChildren.length - 1 && !isAddingToParent;
-                        return (
-                            <RecursiveSubtaskItem
-                                key={subtask.id}
-                                task={subtask}
-                                subtaskMap={subtaskMap}
-                                isLast={isLast}
-                                subtaskDropTargetId={subtaskDropTargetId}
-                                addingSubtaskForId={addingSubtaskForId}
-                                onEdit={onEdit}
-                                onDelete={onDelete}
-                                onClick={onClick}
-                                onAddSubtask={onAddSubtask}
-                                onCloseSubtaskInput={onCloseSubtaskInput}
-                            />
-                        );
-                    })}
+                    {directChildren.map((subtask, index) => (
+                        <RecursiveSubtaskItem
+                            key={subtask.id}
+                            task={subtask}
+                            subtaskMap={subtaskMap}
+                            isLast={index === directChildren.length - 1 && !isAddingToParent}
+                            subtaskDropTargetId={subtaskDropTargetId}
+                            addingSubtaskForId={addingSubtaskForId}
+                            onEdit={onEdit} onDelete={onDelete} onClick={onClick}
+                            onAddSubtask={onAddSubtask} onCloseSubtaskInput={onCloseSubtaskInput}
+                        />
+                    ))}
                     {isAddingToParent && (task.project?.id || task.projectId) && (
                         <SubtaskConnector isLast>
                             <Box py={2}>
                                 <InlineSubtaskInput
                                     parentTaskId={task.id}
                                     projectId={task.project?.id || task.projectId}
-                                    parentStatus={task.status}
                                     onClose={onCloseSubtaskInput}
                                 />
                             </Box>
@@ -509,41 +432,217 @@ const ParentTaskWithSubtasks = ({
     );
 };
 
-// Kanban Column Component with Droppable
-const KanbanColumn = ({
-    status,
-    tasks,
-    allTasks,
-    subtaskDropTargetId,
-    addingSubtaskForId,
-    onEditTask,
-    onDeleteTask,
-    onCreateTask,
-    onClickTask,
-    onAddSubtask,
-    onCloseSubtaskInput,
+// ─── Inline Add Column ───────────────────────────────────────────────
+const AddColumnCard = ({
+    projectId,
+    nextPosition,
+    onCreate,
 }: {
-    status: { value: TaskStatus; label: string; color: string };
+    projectId: string;
+    nextPosition: number;
+    onCreate: (payload: { projectId: string; name: string; color: string; position: number }) => void;
+}) => {
+    const [isAdding, setIsAdding] = useState(false);
+    const [name, setName] = useState("");
+    const [color, setColor] = useState("#3B82F6");
+    const inputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        if (isAdding) inputRef.current?.focus();
+    }, [isAdding]);
+
+    const handleSubmit = () => {
+        if (!name.trim()) return;
+        onCreate({ projectId, name: name.trim(), color, position: nextPosition });
+        setName("");
+        setColor("#3B82F6");
+        setIsAdding(false);
+    };
+
+    if (!isAdding) {
+        return (
+            <Box style={{ minWidth: 300, maxWidth: 300, flex: "0 0 300px" }}>
+                <Button
+                    variant="subtle"
+                    color="gray"
+                    fullWidth
+                    leftSection={<IconPlus size={16} />}
+                    onClick={() => setIsAdding(true)}
+                    style={{
+                        height: 48,
+                        border: "2px dashed #dee2e6",
+                        borderRadius: 8,
+                        color: "#868e96",
+                        fontWeight: 500,
+                    }}
+                >
+                    Ustun qo'shish
+                </Button>
+            </Box>
+        );
+    }
+
+    return (
+        <Box style={{ minWidth: 300, maxWidth: 300, flex: "0 0 300px" }}>
+            <Stack gap="xs" p="sm" style={{ backgroundColor: "#f8f9fa", borderRadius: 8, border: "1px solid #e9ecef" }}>
+                <TextInput
+                    ref={inputRef}
+                    placeholder="Ustun nomi"
+                    size="sm"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    onKeyDown={(e) => {
+                        if (e.key === "Enter") handleSubmit();
+                        if (e.key === "Escape") setIsAdding(false);
+                    }}
+                    styles={{ input: { backgroundColor: "#fff", border: "1px solid #e9ecef" } }}
+                />
+                <ColorInput
+                    placeholder="Rang"
+                    size="sm"
+                    value={color}
+                    onChange={setColor}
+                    swatches={["#3B82F6", "#22C55E", "#F59E0B", "#EF4444", "#8B5CF6", "#EC4899", "#14B8A6", "#F97316", "#6366F1", "#95a5a6"]}
+                    styles={{ input: { backgroundColor: "#fff", border: "1px solid #e9ecef" } }}
+                />
+                <Group gap="xs">
+                    <Button size="xs" style={{ backgroundColor: "#1e3a5f" }} onClick={handleSubmit} disabled={!name.trim()}>
+                        Qo'shish
+                    </Button>
+                    <Button size="xs" variant="subtle" color="gray" onClick={() => setIsAdding(false)}>
+                        Bekor
+                    </Button>
+                </Group>
+            </Stack>
+        </Box>
+    );
+};
+
+// ─── Column Header with Edit/Delete actions ──────────────────────────
+const ColumnHeaderActions = ({
+    column,
+    taskCount,
+    onUpdate,
+    onDelete,
+    onCreateTask,
+}: {
+    column: KanbanColumnData;
+    taskCount: number;
+    onUpdate: (id: string, data: { name?: string; color?: string }) => void;
+    onDelete: (id: string) => void;
+    onCreateTask?: () => void;
+}) => {
+    const [isEditing, setIsEditing] = useState(false);
+    const [editName, setEditName] = useState(column.name);
+    const [editColor, setEditColor] = useState(column.color);
+    const editInputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        if (isEditing) editInputRef.current?.focus();
+    }, [isEditing]);
+
+    const handleSave = () => {
+        if (!editName.trim()) return;
+        onUpdate(column.id, { name: editName.trim(), color: editColor });
+        setIsEditing(false);
+    };
+
+    if (isEditing) {
+        return (
+            <Stack gap={4} pb="sm" mb="sm" style={{ borderBottom: "1px solid #e9ecef" }}>
+                <TextInput
+                    ref={editInputRef}
+                    size="xs"
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    onKeyDown={(e) => {
+                        if (e.key === "Enter") handleSave();
+                        if (e.key === "Escape") setIsEditing(false);
+                    }}
+                    styles={{ input: { backgroundColor: "#fff", border: "1px solid #e9ecef" } }}
+                />
+                <ColorInput
+                    size="xs"
+                    value={editColor}
+                    onChange={setEditColor}
+                    swatches={["#3B82F6", "#22C55E", "#F59E0B", "#EF4444", "#8B5CF6", "#EC4899", "#14B8A6", "#F97316", "#6366F1", "#95a5a6"]}
+                    styles={{ input: { backgroundColor: "#fff", border: "1px solid #e9ecef" } }}
+                />
+                <Group gap={4}>
+                    <ActionIcon size="xs" color="green" onClick={handleSave}><IconCheck size={12} /></ActionIcon>
+                    <ActionIcon size="xs" variant="subtle" color="gray" onClick={() => setIsEditing(false)}><IconX size={12} /></ActionIcon>
+                </Group>
+            </Stack>
+        );
+    }
+
+    return (
+        <Group justify="space-between" pb="sm" mb="sm" style={{ borderBottom: "1px solid #e9ecef" }}>
+            <Group gap={8}>
+                <Box w={10} h={10} style={{ borderRadius: "50%", backgroundColor: column.color || "#95a5a6" }} />
+                <Text fw={600} size="sm" c="#495057">{column.name}</Text>
+                <Text size="sm" c="dimmed" fw={500}>{taskCount}</Text>
+            </Group>
+            <Group gap={4}>
+                <Button
+                    size="xs" variant="subtle" color="gray" p={4}
+                    onClick={() => onCreateTask?.()}
+                >
+                    <IconPlus size={16} />
+                </Button>
+                {column.isDynamic && (
+                    <Menu position="bottom-end" shadow="md" width={160}>
+                        <Menu.Target>
+                            <ActionIcon size="sm" variant="subtle" color="gray">
+                                <IconDotsVertical size={14} />
+                            </ActionIcon>
+                        </Menu.Target>
+                        <Menu.Dropdown>
+                            <Menu.Item
+                                leftSection={<IconEdit size={14} />}
+                                onClick={() => setIsEditing(true)}
+                            >
+                                Tahrirlash
+                            </Menu.Item>
+                            <Menu.Item
+                                leftSection={<IconTrash size={14} />}
+                                color="red"
+                                onClick={() => onDelete(column.id)}
+                            >
+                                O'chirish
+                            </Menu.Item>
+                        </Menu.Dropdown>
+                    </Menu>
+                )}
+            </Group>
+        </Group>
+    );
+};
+
+// ─── Single Kanban Column with Droppable ─────────────────────────────
+const KanbanColumnView = ({
+    column, tasks, subtaskDropTargetId, addingSubtaskForId,
+    onEditTask, onDeleteTask, onCreateTask, onClickTask, onAddSubtask, onCloseSubtaskInput,
+    onUpdateColumn, onDeleteColumn,
+}: {
+    column: KanbanColumnData;
     tasks: TaskGetResponse[];
-    allTasks: TaskGetResponse[];
     subtaskDropTargetId: string | null;
     addingSubtaskForId: string | null;
     onEditTask?: (task: TaskGetResponse) => void;
     onDeleteTask?: (id: string) => void;
-    onCreateTask?: (status: TaskStatus) => void;
+    onCreateTask?: () => void;
     onClickTask?: (task: TaskGetResponse) => void;
     onAddSubtask?: (task: TaskGetResponse) => void;
     onCloseSubtaskInput: () => void;
+    onUpdateColumn: (id: string, data: { name?: string; color?: string }) => void;
+    onDeleteColumn: (id: string) => void;
 }) => {
     const { setNodeRef } = useDroppable({
-        id: status.value,
-        data: {
-            type: "Column",
-            status: status.value,
-        },
+        id: column.id,
+        data: { type: "Column", columnId: column.id, isDynamic: column.isDynamic },
     });
 
-    // Build parent-subtask tree for this column
     const { rootItems, subtaskMap } = useMemo(() => {
         const taskIdsInColumn = new Set(tasks.map((t) => t.id));
         const parentMap = new Map<string, TaskGetResponse[]>();
@@ -558,127 +657,56 @@ const KanbanColumn = ({
 
         const groupedSubtaskIds = new Set<string>();
         for (const children of parentMap.values()) {
-            for (const child of children) {
-                groupedSubtaskIds.add(child.id);
-            }
+            for (const child of children) groupedSubtaskIds.add(child.id);
         }
 
-        const roots = tasks.filter((t) => !groupedSubtaskIds.has(t.id));
-
-        return { rootItems: roots, subtaskMap: parentMap };
+        return {
+            rootItems: tasks.filter((t) => !groupedSubtaskIds.has(t.id)),
+            subtaskMap: parentMap,
+        };
     }, [tasks]);
 
     return (
-        <Box
-            style={{
-                minWidth: 300,
-                maxWidth: 300,
-                flex: "0 0 300px",
-            }}
-        >
+        <Box style={{ minWidth: 300, maxWidth: 300, flex: "0 0 300px" }}>
             <Stack gap={0}>
-                {/* Column Header */}
-                <Group
-                    justify="space-between"
-                    pb="sm"
-                    mb="sm"
-                    style={{
-                        borderBottom: "1px solid #e9ecef",
-                    }}
-                >
-                    <Group gap={8}>
-                        <Box
-                            w={10}
-                            h={10}
-                            style={{
-                                borderRadius: "50%",
-                                backgroundColor: status.color,
-                            }}
-                        />
-                        <Text fw={600} size="sm" c="#495057">
-                            {status.label}
-                        </Text>
-                        <Text size="sm" c="dimmed" fw={500}>
-                            {tasks.length}
-                        </Text>
-                    </Group>
+                <ColumnHeaderActions
+                    column={column}
+                    taskCount={tasks.length}
+                    onUpdate={onUpdateColumn}
+                    onDelete={onDeleteColumn}
+                    onCreateTask={onCreateTask}
+                />
 
-                    <Button
-                        size="xs"
-                        variant="subtle"
-                        color="gray"
-                        p={4}
-                        onClick={() => onCreateTask?.(status.value)}
-                    >
-                        <IconPlus size={16} />
-                    </Button>
-                </Group>
-
-                {/* Droppable Area */}
-                <Box
-                    ref={setNodeRef}
-                    style={{
-                        height: "calc(100vh - 260px)",
-                        backgroundColor: "#f8f9fa",
-                        borderRadius: 8,
-                        padding: 8,
-                    }}
-                >
-                    <SortableContext
-                        id={status.value}
-                        items={tasks.map((t) => t.id)}
-                        strategy={verticalListSortingStrategy}
-                    >
+                <Box ref={setNodeRef} style={{ height: "calc(100vh - 260px)", backgroundColor: "#f8f9fa", borderRadius: 8, padding: 8 }}>
+                    <SortableContext id={column.id} items={tasks.map((t) => t.id)} strategy={verticalListSortingStrategy}>
                         <ScrollArea h="100%">
                             <Stack gap={8} pb="md" style={{ minHeight: 80 }}>
-                                {rootItems.length > 0 ? (
-                                    rootItems.map((task) => {
-                                        const childSubtasks = subtaskMap.get(task.id) || [];
-                                        const isAddingHere = addingSubtaskForId === task.id;
-                                        const isAddingToDescendant = addingSubtaskForId
-                                            ? hasDescendant(subtaskMap, task.id, addingSubtaskForId)
-                                            : false;
+                                {rootItems.length > 0 ? rootItems.map((task) => {
+                                    const childSubtasks = subtaskMap.get(task.id) || [];
+                                    const isAddingHere = addingSubtaskForId === task.id;
+                                    const isAddingToDesc = addingSubtaskForId ? hasDescendant(subtaskMap, task.id, addingSubtaskForId) : false;
 
-                                        if (childSubtasks.length > 0 || isAddingHere || isAddingToDescendant) {
-                                            return (
-                                                <ParentTaskWithSubtasks
-                                                    key={task.id}
-                                                    task={task}
-                                                    subtaskMap={subtaskMap}
-                                                    subtaskDropTargetId={subtaskDropTargetId}
-                                                    addingSubtaskForId={addingSubtaskForId}
-                                                    onEdit={onEditTask}
-                                                    onDelete={onDeleteTask}
-                                                    onClick={onClickTask}
-                                                    onAddSubtask={onAddSubtask}
-                                                    onCloseSubtaskInput={onCloseSubtaskInput}
-                                                />
-                                            );
-                                        }
+                                    if (childSubtasks.length > 0 || isAddingHere || isAddingToDesc) {
                                         return (
-                                            <SortableTaskItem
-                                                key={task.id}
-                                                task={task}
-                                                onEdit={onEditTask}
-                                                onDelete={onDeleteTask}
-                                                onClick={onClickTask}
-                                                onAddSubtask={onAddSubtask}
-                                                isSubtaskTarget={subtaskDropTargetId === task.id}
+                                            <ParentTaskWithSubtasks
+                                                key={task.id} task={task} subtaskMap={subtaskMap}
+                                                subtaskDropTargetId={subtaskDropTargetId} addingSubtaskForId={addingSubtaskForId}
+                                                onEdit={onEditTask} onDelete={onDeleteTask} onClick={onClickTask}
+                                                onAddSubtask={onAddSubtask} onCloseSubtaskInput={onCloseSubtaskInput}
                                             />
                                         );
-                                    })
-                                ) : tasks.length === 0 ? (
-                                    <Box
-                                        p="lg"
-                                        style={{
-                                            textAlign: "center",
-                                            borderRadius: 8,
-                                            border: "2px dashed #dee2e6",
-                                        }}
-                                    >
-                                        <Text size="xs" c="dimmed">
-                                            Vazifalar yo'q
-                                        </Text>
+                                    }
+                                    return (
+                                        <SortableTaskItem
+                                            key={task.id} task={task}
+                                            onEdit={onEditTask} onDelete={onDeleteTask}
+                                            onClick={onClickTask} onAddSubtask={onAddSubtask}
+                                            isSubtaskTarget={subtaskDropTargetId === task.id}
+                                        />
+                                    );
+                                }) : tasks.length === 0 ? (
+                                    <Box p="lg" style={{ textAlign: "center", borderRadius: 8, border: "2px dashed #dee2e6" }}>
+                                        <Text size="xs" c="dimmed">Vazifalar yo'q</Text>
                                     </Box>
                                 ) : null}
                             </Stack>
@@ -690,27 +718,64 @@ const KanbanColumn = ({
     );
 };
 
+// ─── Main Kanban Board ───────────────────────────────────────────────
 const TaskKanbanBoard = ({
-    tasks,
-    onEditTask,
-    onDeleteTask,
-    onCreateTask,
-    onClickTask,
+    tasks, projectId, onEditTask, onDeleteTask, onCreateTask, onClickTask,
 }: TaskKanbanBoardProps) => {
     const updateTaskMutation = useUpdateTask();
+    const createColumnMutation = useCreateBoardColumn();
+    const updateColumnMutation = useUpdateBoardColumn();
+    const deleteColumnMutation = useDeleteBoardColumn();
+
     const [activeTask, setActiveTask] = useState<TaskGetResponse | null>(null);
     const [optimisticTasks, setOptimisticTasks] = useState<TaskGetResponse[]>(tasks);
 
-    // Subtask drop state — only activates when Shift is held
+    // Fetch dynamic board columns when projectId is provided
+    const { data: boardColumnsData } = useGetAllBoardColumns(
+        projectId ? { projectId } : undefined
+    );
+
+    // Columns from board-column API
+    const columns: KanbanColumnData[] = useMemo(() => {
+        const cols = boardColumnsData?.data;
+        if (!cols || cols.length === 0) return [];
+        return [...cols]
+            .sort((a, b) => a.position - b.position)
+            .map((col) => ({ id: col.id, name: col.name, color: col.color || "#95a5a6", isDynamic: true }));
+    }, [boardColumnsData]);
+
+    // Board column CRUD handlers
+    const handleCreateColumn = useCallback(
+        (payload: { projectId: string; name: string; color: string; position: number }) => {
+            createColumnMutation.mutate(payload);
+        },
+        [createColumnMutation]
+    );
+
+    const handleUpdateColumn = useCallback(
+        (id: string, data: { name?: string; color?: string }) => {
+            updateColumnMutation.mutate({ id, data });
+        },
+        [updateColumnMutation]
+    );
+
+    const handleDeleteColumn = useCallback(
+        (id: string) => {
+            deleteColumnMutation.mutate(id);
+        },
+        [deleteColumnMutation]
+    );
+
+    const nextPosition = columns.length;
+
+    // Subtask drop state
     const [subtaskDropTargetId, setSubtaskDropTargetId] = useState<string | null>(null);
     const isShiftHeldRef = useRef(false);
     const isDraggingRef = useRef(false);
     const currentOverTaskIdRef = useRef<string | null>(null);
-
-    // Inline subtask add state
     const [addingSubtaskForId, setAddingSubtaskForId] = useState<string | null>(null);
 
-    // Pre-compute descendant map from stable tasks prop for cascade logic
+    // Descendant map for cascade logic
     const descendantMap = useMemo(() => {
         const childrenMap = new Map<string, string[]>();
         for (const task of tasks) {
@@ -720,183 +785,131 @@ const TaskKanbanBoard = ({
                 childrenMap.set(task.parentTaskId, children);
             }
         }
-
         const cache = new Map<string, string[]>();
         const getAll = (id: string, visited: Set<string> = new Set()): string[] => {
             if (cache.has(id)) return cache.get(id)!;
-            if (visited.has(id)) return []; // cycle detected
+            if (visited.has(id)) return [];
             visited.add(id);
-            const children = childrenMap.get(id) || [];
             const all: string[] = [];
-            for (const childId of children) {
+            for (const childId of childrenMap.get(id) || []) {
                 all.push(childId);
                 all.push(...getAll(childId, visited));
             }
             cache.set(id, all);
             return all;
         };
-
-        for (const task of tasks) {
-            getAll(task.id);
-        }
-
+        for (const task of tasks) getAll(task.id);
         return cache;
     }, [tasks]);
 
-    // Store descendant IDs of dragged task (computed once at drag start)
     const dragDescendantsRef = useRef<string[]>([]);
     const movableDescendantCountRef = useRef(0);
 
-    // Track Shift key globally
+    // Track Shift key
     useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => {
+        const down = (e: KeyboardEvent) => {
             if (e.key === "Shift" && !isShiftHeldRef.current) {
                 isShiftHeldRef.current = true;
-                // If currently dragging over a task, activate subtask mode
                 if (isDraggingRef.current && currentOverTaskIdRef.current) {
                     setSubtaskDropTargetId(currentOverTaskIdRef.current);
                 }
             }
         };
-        const handleKeyUp = (e: KeyboardEvent) => {
-            if (e.key === "Shift") {
-                isShiftHeldRef.current = false;
-                // Deactivate subtask mode when Shift is released
-                setSubtaskDropTargetId(null);
-            }
+        const up = (e: KeyboardEvent) => {
+            if (e.key === "Shift") { isShiftHeldRef.current = false; setSubtaskDropTargetId(null); }
         };
-
-        document.addEventListener("keydown", handleKeyDown);
-        document.addEventListener("keyup", handleKeyUp);
-        return () => {
-            document.removeEventListener("keydown", handleKeyDown);
-            document.removeEventListener("keyup", handleKeyUp);
-        };
+        document.addEventListener("keydown", down);
+        document.addEventListener("keyup", up);
+        return () => { document.removeEventListener("keydown", down); document.removeEventListener("keyup", up); };
     }, []);
 
-    useEffect(() => {
-        setOptimisticTasks(tasks);
-    }, [tasks]);
+    useEffect(() => { setOptimisticTasks(tasks); }, [tasks]);
 
-    const tasksByStatus = useMemo(() => {
-        return TASK_STATUS_OPTIONS.reduce((acc, status) => {
-            acc[status.value] = optimisticTasks.filter(
-                (task) => task.status === status.value
-            );
-            return acc;
-        }, {} as Record<TaskStatus, TaskGetResponse[]>);
-    }, [optimisticTasks]);
+    // Group tasks by boardColumnId
+    const tasksByColumn = useMemo(() => {
+        const map: Record<string, TaskGetResponse[]> = {};
+        for (const col of columns) map[col.id] = [];
+
+        for (const task of optimisticTasks) {
+            const colId = task.boardColumnId;
+            if (colId && map[colId]) {
+                map[colId].push(task);
+            } else if (columns[0]) {
+                map[columns[0].id].push(task);
+            }
+        }
+        return map;
+    }, [optimisticTasks, columns]);
 
     const sensors = useSensors(
-        useSensor(PointerSensor, {
-            activationConstraint: {
-                distance: 10,
-            },
-        }),
-        useSensor(KeyboardSensor, {
-            coordinateGetter: sortableKeyboardCoordinates,
-        })
+        useSensor(PointerSensor, { activationConstraint: { distance: 10 } }),
+        useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
     );
 
-    const handleAddSubtask = useCallback((task: TaskGetResponse) => {
-        setAddingSubtaskForId(task.id);
-    }, []);
+    const handleAddSubtask = useCallback((task: TaskGetResponse) => setAddingSubtaskForId(task.id), []);
+    const handleCloseSubtaskInput = useCallback(() => setAddingSubtaskForId(null), []);
 
-    const handleCloseSubtaskInput = useCallback(() => {
-        setAddingSubtaskForId(null);
-    }, []);
-
+    // ── Drag handlers ────────────────────────────────────────────────
     const onDragStart = (event: DragStartEvent) => {
-        if (event.active.data.current?.type === "Task") {
-            setActiveTask(event.active.data.current.task);
-        }
+        if (event.active.data.current?.type === "Task") setActiveTask(event.active.data.current.task);
         isDraggingRef.current = true;
         setSubtaskDropTargetId(null);
         setAddingSubtaskForId(null);
         currentOverTaskIdRef.current = null;
 
-        // Pre-compute descendants for cascade
-        const taskId = event.active.id as string;
-        const allDescendants = descendantMap.get(taskId) || [];
-        dragDescendantsRef.current = allDescendants;
-        movableDescendantCountRef.current = allDescendants.filter((id) => {
-            const t = tasks.find((task) => task.id === id);
-            return t && !TERMINAL_STATUSES.has(t.status);
-        }).length;
+        const allDesc = descendantMap.get(event.active.id as string) || [];
+        dragDescendantsRef.current = allDesc;
+        movableDescendantCountRef.current = allDesc.length;
     };
 
     const onDragOver = (event: DragOverEvent) => {
         const { active, over } = event;
-        if (!over) {
-            currentOverTaskIdRef.current = null;
-            setSubtaskDropTargetId(null);
-            return;
-        }
+        if (!over) { currentOverTaskIdRef.current = null; setSubtaskDropTargetId(null); return; }
 
         const activeId = active.id as string;
         const overId = over.id as string;
-
-        const isActiveTask = active.data.current?.type === "Task";
         const isOverTask = over.data.current?.type === "Task";
         const isOverColumn = over.data.current?.type === "Column";
-
-        if (!isActiveTask) return;
+        if (active.data.current?.type !== "Task") return;
 
         const activeTaskData = optimisticTasks.find((t) => t.id === activeId);
         if (!activeTaskData) return;
 
-        // --- Shift + hover over task = subtask mode ---
+        // Shift + hover = subtask mode
         if (isOverTask && overId !== activeId) {
             const overTask = optimisticTasks.find((t) => t.id === overId);
-            const isCircular = overTask?.parentTaskId === activeId;
-
-            if (overTask && !isCircular) {
+            if (overTask && overTask.parentTaskId !== activeId) {
                 currentOverTaskIdRef.current = overId;
-                if (isShiftHeldRef.current) {
-                    setSubtaskDropTargetId(overId);
-                } else {
-                    setSubtaskDropTargetId(null);
-                }
+                setSubtaskDropTargetId(isShiftHeldRef.current ? overId : null);
             } else {
                 currentOverTaskIdRef.current = null;
                 setSubtaskDropTargetId(null);
             }
         } else {
             currentOverTaskIdRef.current = null;
-            if (subtaskDropTargetId !== null) {
-                setSubtaskDropTargetId(null);
-            }
+            if (subtaskDropTargetId) setSubtaskDropTargetId(null);
         }
 
-        // --- Normal status change logic (only if not in subtask mode) ---
+        // Column change (not in subtask mode)
         if (!subtaskDropTargetId || !isShiftHeldRef.current) {
-            let overStatus: TaskStatus | undefined;
-
+            let overColumnId: string | undefined;
             if (isOverColumn) {
-                overStatus = over.id as TaskStatus;
+                overColumnId = overId;
             } else if (isOverTask) {
                 const overTask = optimisticTasks.find((t) => t.id === overId);
-                if (overTask) overStatus = overTask.status;
+                if (overTask) overColumnId = overTask.boardColumnId || columns[0]?.id;
             }
+            if (!overColumnId) return;
 
-            if (overStatus && activeTaskData.status !== overStatus) {
-                const descendantIds = dragDescendantsRef.current;
-                const descendantSet = new Set(descendantIds);
-                setOptimisticTasks((prev) => {
-                    return prev.map((t) => {
-                        if (t.id === activeId) {
-                            return { ...t, status: overStatus! };
-                        }
-                        // Cascade to non-terminal descendants
-                        if (descendantSet.has(t.id)) {
-                            const origTask = tasks.find((orig) => orig.id === t.id);
-                            if (origTask && !TERMINAL_STATUSES.has(origTask.status)) {
-                                return { ...t, status: overStatus! };
-                            }
-                        }
-                        return t;
-                    });
-                });
+            const currentColId = activeTaskData.boardColumnId || columns[0]?.id;
+            if (overColumnId !== currentColId) {
+                const descSet = new Set(dragDescendantsRef.current);
+                setOptimisticTasks((prev) => prev.map((t) => {
+                    if (t.id === activeId || descSet.has(t.id)) {
+                        return { ...t, boardColumnId: overColumnId };
+                    }
+                    return t;
+                }));
             }
         }
     };
@@ -906,258 +919,129 @@ const TaskKanbanBoard = ({
         setActiveTask(null);
         isDraggingRef.current = false;
         currentOverTaskIdRef.current = null;
-
-        if (!over) {
-            setSubtaskDropTargetId(null);
-            return;
-        }
+        if (!over) { setSubtaskDropTargetId(null); return; }
 
         const activeId = active.id as string;
         const overId = over.id as string;
 
-        // --- Subtask drop (only if Shift was held) ---
+        // Subtask drop (Shift held)
         if (subtaskDropTargetId && isShiftHeldRef.current) {
             const targetId = subtaskDropTargetId;
             setSubtaskDropTargetId(null);
-
             if (targetId === activeId) return;
 
             const targetTask = optimisticTasks.find((t) => t.id === targetId);
-            const targetStatus = targetTask?.status;
-            const descendantIds = dragDescendantsRef.current;
-            const descendantSet = new Set(descendantIds);
-
-            setOptimisticTasks((prev) =>
-                prev.map((t) => {
-                    if (t.id === activeId) {
-                        return {
-                            ...t,
-                            parentTaskId: targetId,
-                            parentTask: (() => {
-                                const parent = prev.find((p) => p.id === targetId);
-                                return parent
-                                    ? { id: parent.id, title: parent.title }
-                                    : undefined;
-                            })(),
-                            ...(targetStatus ? { status: targetStatus } : {}),
-                        };
-                    }
-                    // Cascade: move descendants to same status
-                    if (targetStatus && descendantSet.has(t.id)) {
-                        const origTask = tasks.find((orig) => orig.id === t.id);
-                        if (origTask && !TERMINAL_STATUSES.has(origTask.status)) {
-                            return { ...t, status: targetStatus };
-                        }
-                    }
-                    return t;
-                })
-            );
-
-            // API: update dragged task (parentTaskId + status)
-            updateTaskMutation.mutate({
-                id: activeId,
-                data: {
-                    parentTaskId: targetId,
-                    ...(targetStatus ? { status: targetStatus } : {}),
-                },
-            });
-
-            // API: cascade status to non-terminal descendants
-            if (targetStatus) {
-                for (const descId of descendantIds) {
-                    const origDesc = tasks.find((t) => t.id === descId);
-                    if (
-                        origDesc &&
-                        !TERMINAL_STATUSES.has(origDesc.status) &&
-                        origDesc.status !== targetStatus
-                    ) {
-                        updateTaskMutation.mutate({
-                            id: descId,
-                            data: { status: targetStatus },
-                        });
-                    }
+            setOptimisticTasks((prev) => prev.map((t) => {
+                if (t.id === activeId) {
+                    return {
+                        ...t,
+                        parentTaskId: targetId,
+                        parentTask: targetTask ? { id: targetTask.id, title: targetTask.title } : undefined,
+                        ...(targetTask?.boardColumnId ? { boardColumnId: targetTask.boardColumnId } : {}),
+                    };
                 }
-            }
+                return t;
+            }));
+
+            const updateData: Record<string, unknown> = { parentTaskId: targetId };
+            if (targetTask?.boardColumnId) updateData.boardColumnId = targetTask.boardColumnId;
+            updateTaskMutation.mutate({ id: activeId, data: updateData as any });
             return;
         }
-
         setSubtaskDropTargetId(null);
 
-        // --- Normal status change drop ---
-        const isOverColumn = over.data.current?.type === "Column";
-        const isOverTask = over.data.current?.type === "Task";
-
-        let finalStatus: TaskStatus | undefined;
-
-        if (isOverColumn) {
-            finalStatus = over.id as TaskStatus;
-        } else if (isOverTask) {
+        // Normal column change
+        let finalColId: string | undefined;
+        if (over.data.current?.type === "Column") finalColId = overId;
+        else if (over.data.current?.type === "Task") {
             const overTask = optimisticTasks.find((t) => t.id === overId);
-            if (overTask) finalStatus = overTask.status;
+            if (overTask) finalColId = overTask.boardColumnId || columns[0]?.id;
         }
+        if (!finalColId) return;
 
-        if (finalStatus) {
-            const originalTask = tasks.find((t) => t.id === activeId);
-            if (originalTask && originalTask.status !== finalStatus) {
-                // If dragged task is a subtask, detach it from parent
-                const shouldDetach = !!originalTask.parentTaskId;
+        const origTask = tasks.find((t) => t.id === activeId);
+        if (!origTask) return;
+        const origColId = origTask.boardColumnId || columns[0]?.id;
 
-                // Update task: status + detach from parent if needed
-                updateTaskMutation.mutate({
-                    id: activeId,
-                    data: {
-                        status: finalStatus,
-                        ...(shouldDetach ? { parentTaskId: null } : {}),
-                    },
-                });
+        if (finalColId !== origColId) {
+            const shouldDetach = !!origTask.parentTaskId;
 
-                // Optimistic: clear parentTaskId
-                if (shouldDetach) {
-                    setOptimisticTasks((prev) =>
-                        prev.map((t) =>
-                            t.id === activeId
-                                ? { ...t, parentTaskId: undefined, parentTask: undefined }
-                                : t
-                        )
-                    );
-                }
+            updateTaskMutation.mutate({
+                id: activeId,
+                data: { boardColumnId: finalColId, ...(shouldDetach ? { parentTaskId: null } : {}) },
+            });
 
-                // Cascade status to non-terminal descendants
-                const descendantIds = dragDescendantsRef.current;
-                for (const descId of descendantIds) {
-                    const origDesc = tasks.find((t) => t.id === descId);
-                    if (
-                        origDesc &&
-                        !TERMINAL_STATUSES.has(origDesc.status) &&
-                        origDesc.status !== finalStatus
-                    ) {
-                        updateTaskMutation.mutate({
-                            id: descId,
-                            data: { status: finalStatus },
-                        });
-                    }
-                }
+            if (shouldDetach) {
+                setOptimisticTasks((prev) =>
+                    prev.map((t) => t.id === activeId ? { ...t, parentTaskId: undefined, parentTask: undefined } : t)
+                );
             }
         }
     };
 
     const dropAnimation: DropAnimation = {
-        duration: 200,
-        easing: "ease",
-        sideEffects: defaultDropAnimationSideEffects({
-            styles: {
-                active: {
-                    opacity: "0.5",
-                },
-            },
-        }),
+        duration: 200, easing: "ease",
+        sideEffects: defaultDropAnimationSideEffects({ styles: { active: { opacity: "0.5" } } }),
     };
 
     return (
-        <DndContext
-            sensors={sensors}
-            collisionDetection={closestCorners}
-            onDragStart={onDragStart}
-            onDragOver={onDragOver}
-            onDragEnd={onDragEnd}
-        >
+        <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={onDragStart} onDragOver={onDragOver} onDragEnd={onDragEnd}>
             <Group align="flex-start" gap="md" wrap="nowrap" style={{ overflowX: "auto" }}>
-                {TASK_STATUS_OPTIONS.map((status) => (
-                    <KanbanColumn
-                        key={status.value}
-                        status={status}
-                        tasks={tasksByStatus[status.value] || []}
-                        allTasks={optimisticTasks}
-                        subtaskDropTargetId={subtaskDropTargetId}
-                        addingSubtaskForId={addingSubtaskForId}
-                        onEditTask={onEditTask}
-                        onDeleteTask={onDeleteTask}
-                        onCreateTask={onCreateTask}
-                        onClickTask={onClickTask}
-                        onAddSubtask={handleAddSubtask}
-                        onCloseSubtaskInput={handleCloseSubtaskInput}
+                {columns.map((column) => (
+                    <KanbanColumnView
+                        key={column.id} column={column}
+                        tasks={tasksByColumn[column.id] || []}
+                        subtaskDropTargetId={subtaskDropTargetId} addingSubtaskForId={addingSubtaskForId}
+                        onEditTask={onEditTask} onDeleteTask={onDeleteTask}
+                        onCreateTask={onCreateTask} onClickTask={onClickTask}
+                        onAddSubtask={handleAddSubtask} onCloseSubtaskInput={handleCloseSubtaskInput}
+                        onUpdateColumn={handleUpdateColumn} onDeleteColumn={handleDeleteColumn}
                     />
                 ))}
+                {projectId && (
+                    <AddColumnCard
+                        projectId={projectId}
+                        nextPosition={nextPosition}
+                        onCreate={handleCreateColumn}
+                    />
+                )}
             </Group>
 
             <DragOverlay dropAnimation={dropAnimation}>
                 {activeTask ? (
-                    <div
-                        style={{
-                            transform: subtaskDropTargetId ? "rotate(1deg) scale(0.95)" : "rotate(2deg)",
-                            boxShadow: subtaskDropTargetId
-                                ? "0 8px 24px rgba(34, 139, 230, 0.25)"
-                                : "0 8px 24px rgba(0, 0, 0, 0.12)",
-                            cursor: "grabbing",
-                            transition: "transform 0.2s ease, box-shadow 0.2s ease",
-                            position: "relative",
-                        }}
-                    >
+                    <div style={{
+                        transform: subtaskDropTargetId ? "rotate(1deg) scale(0.95)" : "rotate(2deg)",
+                        boxShadow: subtaskDropTargetId ? "0 8px 24px rgba(34, 139, 230, 0.25)" : "0 8px 24px rgba(0, 0, 0, 0.12)",
+                        cursor: "grabbing", transition: "transform 0.2s ease, box-shadow 0.2s ease", position: "relative",
+                    }}>
                         {subtaskDropTargetId ? (
-                            <Box
-                                style={{
-                                    position: "absolute",
-                                    top: -14,
-                                    right: 8,
-                                    zIndex: 20,
-                                    backgroundColor: "#228be6",
-                                    color: "white",
-                                    borderRadius: 4,
-                                    padding: "2px 8px",
-                                    fontSize: 10,
-                                    fontWeight: 600,
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: 4,
-                                }}
-                            >
-                                <IconSubtask size={10} />
-                                Subtask qilish
+                            <Box style={{
+                                position: "absolute", top: -14, right: 8, zIndex: 20,
+                                backgroundColor: "#228be6", color: "white", borderRadius: 4,
+                                padding: "2px 8px", fontSize: 10, fontWeight: 600,
+                                display: "flex", alignItems: "center", gap: 4,
+                            }}>
+                                <IconSubtask size={10} /> Subtask qilish
                             </Box>
                         ) : (
-                            <Box
-                                style={{
-                                    position: "absolute",
-                                    bottom: -16,
-                                    left: "50%",
-                                    transform: "translateX(-50%)",
-                                    zIndex: 20,
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: 6,
-                                }}
-                            >
+                            <Box style={{
+                                position: "absolute", bottom: -16, left: "50%",
+                                transform: "translateX(-50%)", zIndex: 20,
+                                display: "flex", alignItems: "center", gap: 6,
+                            }}>
                                 {movableDescendantCountRef.current > 0 && (
-                                    <Box
-                                        style={{
-                                            backgroundColor: "#228be6",
-                                            color: "white",
-                                            borderRadius: 4,
-                                            padding: "2px 8px",
-                                            fontSize: 9,
-                                            fontWeight: 600,
-                                            whiteSpace: "nowrap",
-                                            display: "flex",
-                                            alignItems: "center",
-                                            gap: 3,
-                                        }}
-                                    >
-                                        <IconSubtask size={9} />
-                                        +{movableDescendantCountRef.current} subtask
+                                    <Box style={{
+                                        backgroundColor: "#228be6", color: "white", borderRadius: 4,
+                                        padding: "2px 8px", fontSize: 9, fontWeight: 600,
+                                        whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: 3,
+                                    }}>
+                                        <IconSubtask size={9} /> +{movableDescendantCountRef.current} subtask
                                     </Box>
                                 )}
-                                <Box
-                                    style={{
-                                        backgroundColor: "#495057",
-                                        color: "#e9ecef",
-                                        borderRadius: 4,
-                                        padding: "2px 8px",
-                                        fontSize: 9,
-                                        fontWeight: 500,
-                                        whiteSpace: "nowrap",
-                                        opacity: 0.8,
-                                    }}
-                                >
+                                <Box style={{
+                                    backgroundColor: "#495057", color: "#e9ecef", borderRadius: 4,
+                                    padding: "2px 8px", fontSize: 9, fontWeight: 500, whiteSpace: "nowrap", opacity: 0.8,
+                                }}>
                                     Shift = subtask
                                 </Box>
                             </Box>

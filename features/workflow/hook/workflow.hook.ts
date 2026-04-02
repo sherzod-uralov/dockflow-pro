@@ -113,6 +113,26 @@ export const useUpdateWorkflowStep = () => {
   });
 };
 
+export const useAssignWorkflowStep = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => workflowService.assignWorkflowStep(id),
+    onSuccess: (response) => {
+      queryClient?.invalidateQueries(["workflows"]);
+      queryClient?.invalidateQueries(["workflow-steps"]);
+      queryClient?.invalidateQueries(["my-tasks"]);
+
+      if (response?.workflowId) {
+        queryClient?.invalidateQueries(["workflow", response.workflowId]);
+      }
+
+      showSuccess("Vazifa tayinlandi");
+    },
+    onError: showError,
+  });
+};
+
 export const useCompleteWorkflowStep = () => {
   const queryClient = useQueryClient();
 

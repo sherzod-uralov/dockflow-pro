@@ -32,7 +32,6 @@ import {
 import {
     TaskGetResponse,
     TASK_PRIORITY_OPTIONS,
-    TaskStatus,
     TaskPriority,
 } from "../type/task.type";
 import { useUpdateTask } from "../hook/task.hook";
@@ -65,7 +64,7 @@ const TaskCard = ({ task, onEdit, onDelete, onClick, onAddSubtask, draggable = f
     const inputRef = useRef<HTMLInputElement>(null);
 
     const priorityColor = PRIORITY_COLORS[task.priority] || "#95a5a6";
-    const isOverdue = task.dueDate && new Date(task.dueDate) < new Date() && task.status !== TaskStatus.COMPLETED;
+    const isOverdue = task.dueDate && new Date(task.dueDate) < new Date() && !task.boardColumn?.isClosed;
 
     // Users and update mutation
     const { data: usersData } = useGetUserQuery({
@@ -156,12 +155,12 @@ const TaskCard = ({ task, onEdit, onDelete, onClick, onAddSubtask, draggable = f
                 </Group>
             )}
 
-            {/* Top row: Project key + Priority + Edit + Menu */}
+            {/* Top row: Task number + Priority + Score + Edit + Menu */}
             <Group justify="space-between" mb={8}>
                 <Group gap={8}>
                     {task.project && (
                         <Text size="xs" fw={600} c="dimmed" tt="uppercase">
-                            {task.project.key}
+                            {task.project.key}-{task.taskNumber}
                         </Text>
                     )}
                     <Tooltip label={TASK_PRIORITY_OPTIONS.find(p => p.value === task.priority)?.label}>
@@ -174,6 +173,16 @@ const TaskCard = ({ task, onEdit, onDelete, onClick, onAddSubtask, draggable = f
                             }}
                         />
                     </Tooltip>
+                    {task.score != null && task.score > 0 && (
+                        <Badge
+                            size="xs"
+                            variant="light"
+                            color="blue"
+                            style={{ fontWeight: 600 }}
+                        >
+                            {task.score} ball
+                        </Badge>
+                    )}
                 </Group>
 
                 <Group

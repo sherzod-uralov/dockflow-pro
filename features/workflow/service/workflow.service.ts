@@ -59,6 +59,13 @@ export const workflowService = {
     return data;
   },
 
+  assignWorkflowStep: async (id: string) => {
+    const { data } = await axiosInstance.patch<WorkflowStepApiResponse>(
+      endpoints.workflowStep.assign(id)
+    );
+    return data;
+  },
+
   completeWorkflowStep: async (id: string, comment?: string) => {
     const { data } = await axiosInstance.patch<WorkflowStepApiResponse>(
       endpoints.workflowStep.complete(id),

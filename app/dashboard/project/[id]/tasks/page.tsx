@@ -36,9 +36,7 @@ import {
     useGetAllTasks,
     useDeleteTask,
     TaskGetResponse,
-    TASK_STATUS_OPTIONS,
     TASK_PRIORITY_OPTIONS,
-    TaskStatus,
 } from "@/features/task";
 import { useGetProjectById } from "@/features/project/hook/project.hook";
 import { useGetUserQuery } from "@/features/admin/admin-users/hook/user.hook";
@@ -63,11 +61,9 @@ export default function ProjectTasksPage() {
     const [detailTaskId, setDetailTaskId] = useState<string | null>(null);
     const [searchQuery, debouncedSearch, setSearchQuery] = useDebounce("", 500);
     const [viewMode, setViewMode] = useState<"kanban" | "list" | "calendar">("kanban");
-    const [defaultStatus, setDefaultStatus] = useState<TaskStatus | undefined>(undefined);
     const [defaultDueDate, setDefaultDueDate] = useState<Date | undefined>(undefined);
 
     // Filters
-    const [statusFilter, setStatusFilter] = useState<string | null>(null);
     const [priorityFilter, setPriorityFilter] = useState<string | null>(null);
     const [assigneeFilter, setAssigneeFilter] = useState<string | null>(null);
 
@@ -80,7 +76,6 @@ export default function ProjectTasksPage() {
         pageSize: 1000,
         pageNumber: 1,
         projectId: projectId,
-        status: statusFilter as any,
         priority: priorityFilter as any,
         assigneeId: assigneeFilter || undefined,
     });
@@ -93,8 +88,7 @@ export default function ProjectTasksPage() {
     const deleteTaskMutation = useDeleteTask();
 
     const handleCreateTask = useCallback(
-        (status?: TaskStatus, date?: Date) => {
-            setDefaultStatus(status);
+        (_status?: string, date?: Date) => {
             setDefaultDueDate(date);
             createModal.openModal();
         },
@@ -125,14 +119,6 @@ export default function ProjectTasksPage() {
         },
         [tasksData, deleteModal]
     );
-
-    const statusOptions = [
-        { value: "", label: "Barcha holatlar" },
-        ...TASK_STATUS_OPTIONS.map((s) => ({
-            value: s.value,
-            label: s.label,
-        })),
-    ];
 
     const priorityOptions = [
         { value: "", label: "Barcha muhimliklar" },
@@ -236,21 +222,6 @@ export default function ProjectTasksPage() {
                         />
 
                         <Select
-                            placeholder="Holat"
-                            data={statusOptions}
-                            value={statusFilter || ""}
-                            onChange={(value) => setStatusFilter(value || null)}
-                            clearable
-                            style={{ width: 180 }}
-                            styles={{
-                                input: {
-                                    backgroundColor: "#f8f9fa",
-                                    border: "1px solid #e9ecef",
-                                },
-                            }}
-                        />
-
-                        <Select
                             placeholder="Muhimlik"
                             data={priorityOptions}
                             value={priorityFilter || ""}
@@ -319,11 +290,12 @@ export default function ProjectTasksPage() {
                     <Center py="xl">
                         <Loader color="#1e3a5f" />
                     </Center>
-                ) : tasksData?.data && tasksData.data.length > 0 ? (
+                ) : (
                     <>
                         {viewMode === "kanban" && (
                             <TaskKanbanBoard
-                                tasks={tasksData.data}
+                                tasks={tasksData?.data || []}
+                                projectId={projectId}
                                 onDeleteTask={handleDeleteClick}
                                 onCreateTask={handleCreateTask}
                                 onClickTask={handleEdit}
@@ -331,34 +303,19 @@ export default function ProjectTasksPage() {
                         )}
                         {viewMode === "list" && (
                             <TaskListView
-                                tasks={tasksData.data}
+                                tasks={tasksData?.data || []}
                                 onEditTask={handleEdit}
                                 onDeleteTask={handleDeleteClick}
                             />
                         )}
                         {viewMode === "calendar" && (
                             <TaskCalendarView
-                                tasks={tasksData.data}
+                                tasks={tasksData?.data || []}
                                 onEditTask={handleEdit}
                                 onCreateTask={(date) => handleCreateTask(undefined, date)}
                             />
                         )}
                     </>
-                ) : (
-                    <Center py="xl">
-                        <Stack align="center" gap="md">
-                            <Text size="lg" c="dimmed">
-                                Bu loyihada hech qanday vazifa topilmadi
-                            </Text>
-                            <Button
-                                leftSection={<IconPlus size={16} />}
-                                onClick={() => handleCreateTask()}
-                                style={{ backgroundColor: "#1e3a5f" }}
-                            >
-                                Birinchi vazifani yaratish
-                            </Button>
-                        </Stack>
-                    </Center>
                 )}
             </Stack>
 
@@ -371,7 +328,6 @@ export default function ProjectTasksPage() {
                 isOpen={createModal.isOpen}
                 onClose={() => {
                     createModal.closeModal();
-                    setDefaultStatus(undefined);
                     setDefaultDueDate(undefined);
                 }}
             >
@@ -379,7 +335,6 @@ export default function ProjectTasksPage() {
                     modal={createModal}
                     mode="create"
                     defaultProjectId={projectId}
-                    defaultStatus={defaultStatus}
                     defaultDueDate={defaultDueDate}
                 />
             </CustomModal>

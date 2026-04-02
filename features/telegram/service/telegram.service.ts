@@ -22,4 +22,9 @@ export const telegramService = {
         const { data } = await axiosInstance.get<TelegramStatus>(endpoints.user.telegram.status(userId));
         return data;
     },
+
+    unlink: async (userId: string) => {
+        const { data } = await axiosInstance.delete(endpoints.user.telegram.unlink(userId));
+        return data;
+    },
 };

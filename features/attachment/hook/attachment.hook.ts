@@ -62,3 +62,15 @@ export const useCreateAttachment = () => {
     onError: showError,
   });
 };
+
+export const useRepairFilenames = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => attachmentService.repairFilenames(),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["attachments"]);
+      showSuccess("Fayl nomlari tuzatildi");
+    },
+    onError: showError,
+  });
+};

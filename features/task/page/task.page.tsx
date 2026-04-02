@@ -30,9 +30,7 @@ import {
     useGetAllTasks,
     useDeleteTask,
     TaskGetResponse,
-    TASK_STATUS_OPTIONS,
     TASK_PRIORITY_OPTIONS,
-    TaskStatus,
 } from "@/features/task";
 import { useGetAllProjects } from "@/features/project/hook/project.hook";
 import { useGetUserQuery } from "@/features/admin/admin-users/hook/user.hook";
@@ -65,44 +63,18 @@ const TaskPage = () => {
         params.set("view", mode);
         router.replace(`${pathname}?${params.toString()}`);
     };
-    const [defaultStatus, setDefaultStatus] = useState<TaskStatus | undefined>(undefined);
     const [defaultDueDate, setDefaultDueDate] = useState<Date | undefined>(undefined);
 
     // Filters
     const [projectFilter, setProjectFilter] = useState<string | null>(null);
-    // ... existing code ...
+
     const handleCreateTask = useCallback(
-        (status?: TaskStatus, date?: Date) => {
-            setDefaultStatus(status);
+        (_status?: string, date?: Date) => {
             setDefaultDueDate(date);
             createModal.openModal();
         },
         [createModal]
     );
-    // ... existing code ...
-
-    // ... existing code ...
-    {/* Create Modal */ }
-    <CustomModal
-        size="xl"
-        closeOnOverlayClick={false}
-        title="Yangi vazifa"
-        description="Yangi vazifa yaratish uchun maydonlarni to'ldiring"
-        isOpen={createModal.isOpen}
-        onClose={() => {
-            createModal.closeModal();
-            setDefaultStatus(undefined);
-            setDefaultDueDate(undefined);
-        }}
-    >
-        <TaskForm
-            modal={createModal}
-            mode="create"
-            defaultStatus={defaultStatus}
-            defaultDueDate={defaultDueDate}
-        />
-    </CustomModal>
-    const [statusFilter, setStatusFilter] = useState<string | null>(null);
     const [priorityFilter, setPriorityFilter] = useState<string | null>(null);
     const [assigneeFilter, setAssigneeFilter] = useState<string | null>(null);
 
@@ -111,7 +83,6 @@ const TaskPage = () => {
         pageSize: 1000,
         pageNumber: 1,
         projectId: projectFilter || undefined,
-        status: statusFilter as any,
         priority: priorityFilter as any,
         assigneeId: assigneeFilter || undefined,
     });
@@ -169,14 +140,6 @@ const TaskPage = () => {
             value: p.id,
             label: `${p.key} - ${p.name}`,
         })) || []),
-    ];
-
-    const statusOptions = [
-        { value: "", label: "Barcha holatlar" },
-        ...TASK_STATUS_OPTIONS.map((s) => ({
-            value: s.value,
-            label: s.label,
-        })),
     ];
 
     const priorityOptions = [
@@ -238,21 +201,6 @@ const TaskPage = () => {
                             onChange={(value) => setProjectFilter(value || null)}
                             clearable
                             style={{ width: 200 }}
-                            styles={{
-                                input: {
-                                    backgroundColor: "#f8f9fa",
-                                    border: "1px solid #e9ecef",
-                                },
-                            }}
-                        />
-
-                        <Select
-                            placeholder="Holat"
-                            data={statusOptions}
-                            value={statusFilter || ""}
-                            onChange={(value) => setStatusFilter(value || null)}
-                            clearable
-                            style={{ width: 180 }}
                             styles={{
                                 input: {
                                     backgroundColor: "#f8f9fa",
@@ -330,11 +278,11 @@ const TaskPage = () => {
                     <Center py="xl">
                         <Loader color="#1e3a5f" />
                     </Center>
-                ) : data?.data && data.data.length > 0 ? (
+                ) : (
                     <>
                         {viewMode === "kanban" && (
                             <TaskKanbanBoard
-                                tasks={data.data}
+                                tasks={data?.data || []}
                                 onEditTask={handleOpenEditModal}
                                 onDeleteTask={handleDeleteClick}
                                 onCreateTask={handleCreateTask}
@@ -343,34 +291,19 @@ const TaskPage = () => {
                         )}
                         {viewMode === "list" && (
                             <TaskListView
-                                tasks={data.data}
+                                tasks={data?.data || []}
                                 onEditTask={handleEdit}
                                 onDeleteTask={handleDeleteClick}
                             />
                         )}
                         {viewMode === "calendar" && (
                             <TaskCalendarView
-                                tasks={data.data}
+                                tasks={data?.data || []}
                                 onEditTask={handleEdit}
                                 onCreateTask={(date) => handleCreateTask(undefined, date)}
                             />
                         )}
                     </>
-                ) : (
-                    <Center py="xl">
-                        <Stack align="center" gap="md">
-                            <Text size="lg" c="dimmed">
-                                Hech qanday vazifa topilmadi
-                            </Text>
-                            <Button
-                                leftSection={<IconPlus size={16} />}
-                                onClick={() => handleCreateTask()}
-                                style={{ backgroundColor: "#1e3a5f" }}
-                            >
-                                Birinchi vazifani yaratish
-                            </Button>
-                        </Stack>
-                    </Center>
                 )}
             </Stack>
 
@@ -383,14 +316,12 @@ const TaskPage = () => {
                 isOpen={createModal.isOpen}
                 onClose={() => {
                     createModal.closeModal();
-                    setDefaultStatus(undefined);
                     setDefaultDueDate(undefined);
                 }}
             >
                 <TaskForm
                     modal={createModal}
                     mode="create"
-                    defaultStatus={defaultStatus}
                     defaultDueDate={defaultDueDate}
                 />
             </CustomModal>

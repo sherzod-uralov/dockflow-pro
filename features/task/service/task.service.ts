@@ -20,12 +20,12 @@ export const taskService = createCRUDService<
     pageSize: params?.pageSize,
     pageNumber: params?.pageNumber,
     projectId: params?.projectId,
-    status: params?.status,
     priority: params?.priority,
     assigneeId: params?.assigneeId,
     createdById: params?.createdById,
     categoryId: params?.categoryId,
     parentTaskId: params?.parentTaskId,
+    boardColumnId: params?.boardColumnId,
   }),
 });
 

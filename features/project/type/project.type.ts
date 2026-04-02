@@ -52,6 +52,7 @@ export interface ProjectGetResponse {
         fullname: string;
         username: string;
     };
+    penaltyPerDay: number;
     isArchived?: boolean;
     createdAt: string;
     updatedAt: string;

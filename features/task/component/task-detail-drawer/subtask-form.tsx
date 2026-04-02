@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Paper, Group, TextInput, ActionIcon } from "@mantine/core";
 import { IconX, IconCheck } from "@tabler/icons-react";
 import { useCreateTask } from "../../hook/task.hook";
-import { TaskStatus, TaskPriority } from "../../type/task.type";
+import { TaskPriority } from "../../type/task.type";
 
 interface SubtaskFormProps {
   parentTaskId: string;
@@ -29,7 +29,6 @@ export const SubtaskForm = ({
         title: title.trim(),
         projectId,
         parentTaskId,
-        status: TaskStatus.NOT_STARTED,
         priority: TaskPriority.MEDIUM,
       },
       {

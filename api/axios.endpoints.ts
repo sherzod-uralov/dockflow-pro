@@ -23,6 +23,7 @@ export const endpoints = {
     list: "/workflow-step",
     update: (id: string | number) => `/workflow-step/${id}`,
     detail: (id: string | number) => `/workflow-step/${id}`,
+    assign: (id: string | number) => `/workflow-step/${id}/assign`,
     complete: (id: string | number) => `/workflow-step/${id}/complete`,
     reject: (id: string | number) => `/workflow-step/${id}/reject`,
     verify: (id: string | number) => `/workflow-step/${id}/verify`,
@@ -78,6 +79,7 @@ export const endpoints = {
       linkInfo: (id: string | number) => `/user/${id}/telegram/link-info`,
       link: (id: string | number) => `/user/${id}/telegram/link`,
       status: (id: string | number) => `/user/${id}/telegram/status`,
+      unlink: (id: string | number) => `/user/${id}/telegram`,
     },
   },
   role: {
@@ -107,6 +109,7 @@ export const endpoints = {
     update: (id: string) => `/attachment/${id}`,
     delete: (id: string) => `/attachment/${id}`,
     detail: (id: string) => `/attachment/${id}`,
+    repairFilenames: "/attachment/repair-filenames",
   },
   wopi: {
     token: "/wopi/token",

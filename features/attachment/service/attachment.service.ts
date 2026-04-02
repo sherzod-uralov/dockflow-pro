@@ -39,10 +39,17 @@ const createAttachment = async (file: File) => {
   return data;
 };
 
+// Repair filenames utility
+const repairFilenames = async () => {
+  const { data } = await axiosInstance.post(endpoints.attachment.repairFilenames);
+  return data;
+};
+
 // Export service with standard CRUD interface + custom create
 export const attachmentService = {
   ...baseCRUDService,
   create: createAttachment,
+  repairFilenames,
 };
 
 // Backwards compatible aliases
