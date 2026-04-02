@@ -13,6 +13,7 @@ import {
     IconUserCheck,
     IconUserX,
     IconClipboardCheck,
+    IconListCheck,
 } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 import { Group, Text, Box, ThemeIcon, Stack } from '@mantine/core';
@@ -43,6 +44,8 @@ const getNotificationIconConfig = (type: NotificationType) => {
             return { icon: <IconFileCheck {...iconProps} />, color: 'green' };
         case NotificationType.DOCUMENT_REJECTED:
             return { icon: <IconFileX {...iconProps} />, color: 'red' };
+        case NotificationType.TASK_ASSIGNED:
+            return { icon: <IconListCheck {...iconProps} />, color: 'teal' };
         default:
             return { icon: <IconCheck {...iconProps} />, color: 'gray' };
     }
@@ -53,6 +56,11 @@ const getNavigationUrl = (notification: Notification): string | null => {
     const metadata = notification.metadata as any;
 
     if (!metadata) return null;
+
+    // Task-related notifications
+    if (metadata.taskId && metadata.projectId) {
+        return `/dashboard/project/${metadata.projectId}/tasks`;
+    }
 
     // Workflow-related notifications
     if (metadata.workflowId) {

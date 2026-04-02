@@ -9,6 +9,7 @@ export enum NotificationType {
     WORKFLOW_STEP_STARTED = 'workflow_step_started',
     DOCUMENT_APPROVED = 'document_approved',
     DOCUMENT_REJECTED = 'document_rejected',
+    TASK_ASSIGNED = 'task_assigned',
 }
 
 export interface WorkflowStepAssignedMetadata {
@@ -69,6 +70,14 @@ export interface DocumentRejectedMetadata {
     rejectionReason: string;
 }
 
+export interface TaskAssignedMetadata {
+    taskId: string;
+    taskNumber: number;
+    projectId: string;
+    projectKey: string;
+    assignedBy: string;
+}
+
 // Union type for all metadata
 export type NotificationMetadata =
     | WorkflowStepAssignedMetadata
@@ -78,7 +87,8 @@ export type NotificationMetadata =
     | WorkflowCompletedMetadata
     | WorkflowStepCommentMetadata
     | DocumentApprovedMetadata
-    | DocumentRejectedMetadata;
+    | DocumentRejectedMetadata
+    | TaskAssignedMetadata;
 
 export interface Notification {
     id: string;
