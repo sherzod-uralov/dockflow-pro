@@ -218,29 +218,69 @@ const KpiRewardPage = () => {
           {row.original.year}
         </Text>
       ),
-      meta: { width: 140 },
+      meta: { width: 130 },
     },
     {
-      accessorKey: "totalScore",
+      accessorKey: "finalScore",
       header: "Ball",
       cell: ({ row }) => (
         <Badge variant="light" color="blue" radius="sm">
-          {row.original.totalScore}
+          {row.original.finalScore}
         </Badge>
       ),
-      meta: { width: 90, truncate: false },
+      meta: { width: 80, truncate: false },
+    },
+    {
+      accessorKey: "rewardTier",
+      header: "Daraja",
+      cell: ({ row }) => {
+        const tier = row.original.rewardTier;
+        return tier ? (
+          <Badge
+            variant="light"
+            radius="sm"
+            style={{ backgroundColor: `${tier.color}20`, color: tier.color }}
+          >
+            {tier.name}
+          </Badge>
+        ) : (
+          <Text size="sm" c="dimmed">—</Text>
+        );
+      },
+      meta: { width: 110, truncate: false },
     },
     {
       accessorKey: "rewardAmount",
       header: "Mukofot (so'm)",
       cell: ({ row }) => (
-        <Text size="sm" c="#495057">
-          {row.original.rewardAmount != null
-            ? row.original.rewardAmount.toLocaleString("uz-UZ")
-            : "—"}
+        <Text size="sm" fw={500} c="#212529">
+          {row.original.rewardAmount.toLocaleString("uz-UZ")}
         </Text>
       ),
-      meta: { width: 130 },
+      meta: { width: 140 },
+    },
+    {
+      accessorKey: "rewardBhm",
+      header: "BHM",
+      cell: ({ row }) => (
+        <Text size="sm" c="#495057">{row.original.rewardBhm}</Text>
+      ),
+      meta: { width: 70 },
+    },
+    {
+      accessorKey: "isPenalty",
+      header: "Turi",
+      cell: ({ row }) => (
+        <Badge
+          variant="light"
+          color={row.original.isPenalty ? "red" : "green"}
+          radius="sm"
+          size="sm"
+        >
+          {row.original.isPenalty ? "Jarima" : "Mukofot"}
+        </Badge>
+      ),
+      meta: { width: 90, truncate: false },
     },
     {
       accessorKey: "status",
@@ -250,7 +290,7 @@ const KpiRewardPage = () => {
     },
     {
       id: "actions",
-      header: "Amallar",
+      header: "",
       cell: ({ row }) => {
         const reward = row.original;
         return (
@@ -298,7 +338,7 @@ const KpiRewardPage = () => {
           </Menu>
         );
       },
-      meta: { width: 80, truncate: false },
+      meta: { width: 60, truncate: false },
     },
   ];
 
@@ -312,39 +352,69 @@ const KpiRewardPage = () => {
           {row.original.year}
         </Text>
       ),
-      meta: { width: 140 },
+      meta: { width: 130 },
     },
     {
-      accessorKey: "totalScore",
+      accessorKey: "finalScore",
       header: "Ball",
       cell: ({ row }) => (
         <Badge variant="light" color="blue" radius="sm">
-          {row.original.totalScore}
+          {row.original.finalScore}
         </Badge>
       ),
-      meta: { width: 90, truncate: false },
+      meta: { width: 80, truncate: false },
+    },
+    {
+      accessorKey: "rewardTier",
+      header: "Daraja",
+      cell: ({ row }) => {
+        const tier = row.original.rewardTier;
+        return tier ? (
+          <Badge
+            variant="light"
+            radius="sm"
+            style={{ backgroundColor: `${tier.color}20`, color: tier.color }}
+          >
+            {tier.name}
+          </Badge>
+        ) : (
+          <Text size="sm" c="dimmed">—</Text>
+        );
+      },
+      meta: { width: 110, truncate: false },
     },
     {
       accessorKey: "rewardAmount",
       header: "Mukofot (so'm)",
       cell: ({ row }) => (
-        <Text size="sm" c="#495057">
-          {row.original.rewardAmount != null
-            ? row.original.rewardAmount.toLocaleString("uz-UZ")
-            : "—"}
+        <Text size="sm" fw={500} c="#212529">
+          {row.original.rewardAmount.toLocaleString("uz-UZ")}
         </Text>
       ),
-      meta: { width: 130 },
+      meta: { width: 140 },
     },
     {
       accessorKey: "rewardBhm",
-      header: "Mukofot (BHM)",
+      header: "BHM",
       cell: ({ row }) => (
-        <Text size="sm" c="#495057">
-          {row.original.rewardBhm ?? "—"}
-        </Text>
+        <Text size="sm" c="#495057">{row.original.rewardBhm}</Text>
       ),
-      meta: { width: 120 },
+      meta: { width: 70 },
+    },
+    {
+      accessorKey: "isPenalty",
+      header: "Turi",
+      cell: ({ row }) => (
+        <Badge
+          variant="light"
+          color={row.original.isPenalty ? "red" : "green"}
+          radius="sm"
+          size="sm"
+        >
+          {row.original.isPenalty ? "Jarima" : "Mukofot"}
+        </Badge>
+      ),
+      meta: { width: 90, truncate: false },
     },
     {
       accessorKey: "status",
@@ -354,7 +424,7 @@ const KpiRewardPage = () => {
     },
     {
       id: "actions",
-      header: "Amallar",
+      header: "",
       cell: ({ row }) => (
         <ActionIcon
           variant="subtle"

@@ -23,12 +23,12 @@ interface UserMonthlyKpiTaskScoresViewProps {
   month: number;
 }
 
-const formatDate = (dateString: string) =>
-  new Date(dateString).toLocaleDateString("uz-UZ", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString);
+  const day = date.getDate();
+  const months = ["yan", "fev", "mar", "apr", "may", "iyun", "iyul", "avg", "sen", "okt", "noy", "dek"];
+  return `${day}-${months[date.getMonth()]} ${date.getFullYear()}`;
+};
 
 const UserMonthlyKpiTaskScoresView = ({ userId, year, month }: UserMonthlyKpiTaskScoresViewProps) => {
   const { data: taskScores, isLoading } = useGetUserMonthlyKpiTaskScores({ userId, year, month });

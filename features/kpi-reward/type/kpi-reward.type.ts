@@ -16,6 +16,13 @@ export const KPI_REWARD_STATUS_OPTIONS = [
 
 export interface KpiRewardGetResponse {
   id: string;
+  userMonthlyKpiId: string;
+  rewardTierId: string;
+  rewardTier?: {
+    id: string;
+    name: string;
+    color: string;
+  };
   userId: string;
   user?: {
     id: string;
@@ -25,11 +32,16 @@ export interface KpiRewardGetResponse {
   };
   year: number;
   month: number;
-  totalScore: number;
-  rewardAmount?: number;
-  rewardBhm?: number;
+  finalScore: number;
+  rewardAmount: number;
+  rewardBhm: number;
+  isPenalty: boolean;
   status: KpiRewardStatus;
-  approvedBy?: string;
+  approvedById?: string;
+  approvedBy?: {
+    id: string;
+    fullname: string;
+  };
   approvedAt?: string;
   paidAt?: string;
   rejectedAt?: string;

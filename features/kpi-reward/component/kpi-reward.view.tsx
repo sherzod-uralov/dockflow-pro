@@ -103,8 +103,8 @@ const KpiRewardView = ({ reward }: KpiRewardViewProps) => {
 
       <Divider />
 
-      {/* Period and Score */}
-      <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="lg">
+      {/* Period, Score, Reward, Tier */}
+      <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
         <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
           <Group gap="xs" mb="sm">
             <IconCalendar size={16} color="#868e96" />
@@ -121,11 +121,11 @@ const KpiRewardView = ({ reward }: KpiRewardViewProps) => {
           <Group gap="xs" mb="sm">
             <IconTrophy size={16} color="#868e96" />
             <Text size="xs" c="dimmed" tt="uppercase" fw={600}>
-              Umumiy ball
+              Yakuniy ball
             </Text>
           </Group>
           <Badge variant="light" color="blue" size="xl" radius="sm">
-            {reward.totalScore}
+            {reward.finalScore}
           </Badge>
         </Paper>
 
@@ -137,20 +137,44 @@ const KpiRewardView = ({ reward }: KpiRewardViewProps) => {
             </Text>
           </Group>
           <Stack gap={4}>
-            {reward.rewardAmount != null && (
-              <Text size="lg" fw={600} c="#212529">
-                {reward.rewardAmount.toLocaleString("uz-UZ")} so'm
-              </Text>
-            )}
-            {reward.rewardBhm != null && (
-              <Text size="sm" c="#495057">
-                {reward.rewardBhm} BHM
-              </Text>
-            )}
-            {reward.rewardAmount == null && reward.rewardBhm == null && (
+            <Text size="lg" fw={600} c="#212529">
+              {reward.rewardAmount.toLocaleString("uz-UZ")} so'm
+            </Text>
+            <Text size="sm" c="#495057">
+              {reward.rewardBhm} BHM
+            </Text>
+          </Stack>
+        </Paper>
+
+        <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+          <Group gap="xs" mb="sm">
+            <IconTrophy size={16} color={reward.rewardTier?.color || "#868e96"} />
+            <Text size="xs" c="dimmed" tt="uppercase" fw={600}>
+              Daraja
+            </Text>
+          </Group>
+          <Group gap="sm">
+            {reward.rewardTier ? (
+              <Badge
+                variant="light"
+                size="lg"
+                radius="sm"
+                style={{ backgroundColor: `${reward.rewardTier.color}20`, color: reward.rewardTier.color }}
+              >
+                {reward.rewardTier.name}
+              </Badge>
+            ) : (
               <Text size="sm" c="dimmed">—</Text>
             )}
-          </Stack>
+            <Badge
+              variant="light"
+              color={reward.isPenalty ? "red" : "green"}
+              radius="sm"
+              size="sm"
+            >
+              {reward.isPenalty ? "Jarima" : "Mukofot"}
+            </Badge>
+          </Group>
         </Paper>
       </SimpleGrid>
 
@@ -161,11 +185,12 @@ const KpiRewardView = ({ reward }: KpiRewardViewProps) => {
             <Group gap="xs" mb="sm">
               <IconCalendar size={16} color="#3498db" />
               <Text size="xs" c="dimmed" tt="uppercase" fw={600}>
-                Tasdiqlangan sana
+                Tasdiqlangan
               </Text>
             </Group>
             <Text size="sm" c="#495057">
               {new Date(reward.approvedAt).toLocaleDateString("uz-UZ")}
+              {reward.approvedBy && ` — ${reward.approvedBy.fullname}`}
             </Text>
           </Paper>
         )}
