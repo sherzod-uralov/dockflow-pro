@@ -23,6 +23,13 @@ interface UserMonthlyKpiTaskScoresViewProps {
   month: number;
 }
 
+const formatDate = (dateString: string) =>
+  new Date(dateString).toLocaleDateString("uz-UZ", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+
 const UserMonthlyKpiTaskScoresView = ({ userId, year, month }: UserMonthlyKpiTaskScoresViewProps) => {
   const { data: taskScores, isLoading } = useGetUserMonthlyKpiTaskScores({ userId, year, month });
 
@@ -49,58 +56,85 @@ const UserMonthlyKpiTaskScoresView = ({ userId, year, month }: UserMonthlyKpiTas
     );
   }
 
-  const totalScore = taskScores.reduce((sum, ts) => sum + ts.score, 0);
+  const totalEarned = taskScores.reduce((sum, ts) => sum + ts.earnedScore, 0);
+  const totalBase = taskScores.reduce((sum, ts) => sum + ts.baseScore, 0);
+  const totalPenalty = taskScores.reduce((sum, ts) => sum + ts.penaltyApplied, 0);
 
   return (
     <Stack gap="md">
+      {/* Summary */}
+      <Group gap="md">
+        <Paper p="sm" radius="sm" withBorder style={{ borderColor: "#e9ecef", flex: 1 }}>
+          <Text size="xs" c="dimmed">Asosiy ball</Text>
+          <Text size="lg" fw={700} c="#495057">{totalBase}</Text>
+        </Paper>
+        <Paper p="sm" radius="sm" withBorder style={{ borderColor: "#e9ecef", flex: 1 }}>
+          <Text size="xs" c="dimmed">Jarima</Text>
+          <Text size="lg" fw={700} c={totalPenalty > 0 ? "#e74c3c" : "#495057"}>
+            {totalPenalty > 0 ? `-${totalPenalty}` : "0"}
+          </Text>
+        </Paper>
+        <Paper p="sm" radius="sm" withBorder style={{ borderColor: "#e9ecef", flex: 1 }}>
+          <Text size="xs" c="dimmed">Yakuniy ball</Text>
+          <Text size="lg" fw={700} c="#1e3a5f">{totalEarned}</Text>
+        </Paper>
+      </Group>
+
+      {/* Table */}
       <Paper radius="sm" withBorder style={{ borderColor: "#e9ecef", overflow: "auto" }}>
         <Table striped highlightOnHover>
           <Table.Thead>
             <Table.Tr>
-              <Table.Th>Vazifa</Table.Th>
+              <Table.Th>#</Table.Th>
               <Table.Th>Asosiy ball</Table.Th>
+              <Table.Th>Olingan ball</Table.Th>
               <Table.Th>Jarima</Table.Th>
-              <Table.Th>Kechikish (kun)</Table.Th>
-              <Table.Th>Yakuniy ball</Table.Th>
-              <Table.Th>Bajarilgan sana</Table.Th>
+              <Table.Th>Kechikish</Table.Th>
+              <Table.Th>Muddat</Table.Th>
+              <Table.Th>Bajarilgan</Table.Th>
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
-            {taskScores.map((ts) => (
+            {taskScores.map((ts, index) => (
               <Table.Tr key={ts.id}>
                 <Table.Td>
-                  <Text size="sm" fw={500} c="#212529">
-                    {ts.task?.title || "—"}
-                  </Text>
+                  <Text size="sm" c="dimmed">{index + 1}</Text>
                 </Table.Td>
                 <Table.Td>
                   <Text size="sm" c="#495057">{ts.baseScore}</Text>
                 </Table.Td>
                 <Table.Td>
-                  {ts.penalty > 0 ? (
+                  <Badge
+                    variant="light"
+                    color={ts.earnedScore >= ts.baseScore ? "green" : "blue"}
+                    radius="sm"
+                  >
+                    {ts.earnedScore}
+                  </Badge>
+                </Table.Td>
+                <Table.Td>
+                  {ts.penaltyApplied > 0 ? (
                     <Group gap={4}>
                       <IconAlertTriangle size={14} color="#e74c3c" />
-                      <Text size="sm" c="red" fw={500}>-{ts.penalty}</Text>
+                      <Text size="sm" c="red" fw={500}>-{ts.penaltyApplied}</Text>
                     </Group>
                   ) : (
                     <Text size="sm" c="dimmed">0</Text>
                   )}
                 </Table.Td>
                 <Table.Td>
-                  <Text size="sm" c={ts.daysLate ? "#e74c3c" : "#495057"}>
-                    {ts.daysLate ?? 0}
+                  <Text size="sm" c={ts.daysLate > 0 ? "#e74c3c" : "#495057"} fw={ts.daysLate > 0 ? 500 : 400}>
+                    {ts.daysLate > 0 ? `${ts.daysLate} kun` : "—"}
                   </Text>
                 </Table.Td>
                 <Table.Td>
-                  <Badge variant="light" color="blue" radius="sm">
-                    {ts.score}
-                  </Badge>
+                  <Text size="sm" c="#495057">
+                    {formatDate(ts.dueDate)}
+                  </Text>
                 </Table.Td>
                 <Table.Td>
                   <Text size="sm" c="#495057">
-                    {ts.completedAt
-                      ? new Date(ts.completedAt).toLocaleDateString("uz-UZ")
-                      : "—"}
+                    {formatDate(ts.completedDate)}
                   </Text>
                 </Table.Td>
               </Table.Tr>
@@ -108,17 +142,23 @@ const UserMonthlyKpiTaskScoresView = ({ userId, year, month }: UserMonthlyKpiTas
           </Table.Tbody>
           <Table.Tfoot>
             <Table.Tr>
-              <Table.Td colSpan={4}>
-                <Text size="sm" fw={600} c="#212529">
-                  Jami
-                </Text>
+              <Table.Td>
+                <Text size="sm" fw={600} c="#212529">Jami</Text>
+              </Table.Td>
+              <Table.Td>
+                <Text size="sm" fw={600}>{totalBase}</Text>
               </Table.Td>
               <Table.Td>
                 <Badge variant="filled" color="blue" radius="sm" size="lg">
-                  {totalScore}
+                  {totalEarned}
                 </Badge>
               </Table.Td>
-              <Table.Td />
+              <Table.Td>
+                {totalPenalty > 0 && (
+                  <Text size="sm" fw={600} c="red">-{totalPenalty}</Text>
+                )}
+              </Table.Td>
+              <Table.Td colSpan={3} />
             </Table.Tr>
           </Table.Tfoot>
         </Table>

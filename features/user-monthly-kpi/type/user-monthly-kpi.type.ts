@@ -9,14 +9,25 @@ export interface UserMonthlyKpiGetResponse {
     username: string;
     avatarUrl?: string;
   };
+  departmentId?: string;
+  department?: {
+    id: string;
+    name: string;
+  };
   year: number;
   month: number;
-  totalScore: number;
-  completedTasks?: number;
-  onTimeTasks?: number;
-  lateTasks?: number;
+  totalBaseScore: number;
+  totalEarnedScore: number;
+  totalPenalty: number;
+  tasksCompleted: number;
+  tasksOnTime: number;
+  tasksLate: number;
+  finalScore: number;
+  isFullScore: boolean;
+  consecutiveFullMonths: number;
   isFinalized: boolean;
   finalizedAt?: string;
+  scoreBreakdown?: Record<string, { count: number; earned: number }>;
   createdAt: string;
   updatedAt: string;
 }
@@ -38,15 +49,23 @@ export interface UserMonthlyKpiQueryParams {
 export interface UserMonthlyKpiTaskScore {
   id: string;
   taskId: string;
-  task?: {
-    id: string;
-    title: string;
-  };
-  score: number;
+  userId: string;
   baseScore: number;
-  penalty: number;
-  daysLate?: number;
-  completedAt?: string;
+  earnedScore: number;
+  penaltyApplied: number;
+  dueDate: string;
+  completedDate: string;
+  daysLate: number;
+  periodYear: number;
+  periodMonth: number;
+  breakdown: {
+    earned: number;
+    daysLate: number;
+    baseScore: number;
+    totalPenalty: number;
+    penaltyPerDay: number;
+  };
+  createdAt: string;
 }
 
 export interface UserMonthlyKpiLeaderboardEntry {

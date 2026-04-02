@@ -126,27 +126,36 @@ const UserMonthlyKpiPage = () => {
     {
       accessorKey: "user",
       header: "Foydalanuvchi",
-      cell: ({ row }) =>
-        row.original.user ? (
+      cell: ({ row }) => {
+        const { user, department } = row.original;
+        return user ? (
           <Group gap="sm" wrap="nowrap">
             <Avatar
               size="sm"
               radius="xl"
-              src={row.original.user.avatarUrl}
+              src={user.avatarUrl}
               style={{ backgroundColor: "#e7f5ff", flexShrink: 0 }}
             >
               <Text size="xs" c="#1e3a5f" fw={500}>
-                {getInitials(row.original.user.fullname)}
+                {getInitials(user.fullname)}
               </Text>
             </Avatar>
-            <Text size="sm" fw={500} c="#212529" lineClamp={1}>
-              {row.original.user.fullname}
-            </Text>
+            <Box>
+              <Text size="sm" fw={500} c="#212529" lineClamp={1}>
+                {user.fullname}
+              </Text>
+              {department && (
+                <Text size="xs" c="dimmed" lineClamp={1}>
+                  {department.name}
+                </Text>
+              )}
+            </Box>
           </Group>
         ) : (
           <Text size="sm" c="dimmed">—</Text>
-        ),
-      meta: { minWidth: 180 },
+        );
+      },
+      meta: { minWidth: 220 },
     },
     {
       accessorKey: "period",
@@ -157,51 +166,76 @@ const UserMonthlyKpiPage = () => {
           {row.original.year}
         </Text>
       ),
-      meta: { width: 140 },
+      meta: { width: 130 },
     },
     {
-      accessorKey: "totalScore",
-      header: "Umumiy ball",
+      accessorKey: "finalScore",
+      header: "Yakuniy ball",
       cell: ({ row }) => (
-        <Badge variant="light" color="blue" radius="sm" size="lg">
-          {row.original.totalScore}
+        <Badge
+          variant="light"
+          color={row.original.finalScore > 0 ? "blue" : "gray"}
+          radius="sm"
+          size="lg"
+        >
+          {row.original.finalScore}
         </Badge>
       ),
-      meta: { width: 120, truncate: false },
+      meta: { width: 110, truncate: false },
     },
     {
-      accessorKey: "completedTasks",
-      header: "Bajarilgan",
+      accessorKey: "totalBaseScore",
+      header: "Asosiy ball",
       cell: ({ row }) => (
-        <Text size="sm" c="#495057">
-          {row.original.completedTasks ?? 0}
-        </Text>
+        <Text size="sm" c="#495057">{row.original.totalBaseScore}</Text>
       ),
       meta: { width: 100 },
     },
     {
-      accessorKey: "onTimeTasks",
+      accessorKey: "totalPenalty",
+      header: "Jarima",
+      cell: ({ row }) => (
+        <Badge
+          variant="light"
+          color={row.original.totalPenalty > 0 ? "red" : "gray"}
+          radius="sm"
+        >
+          {row.original.totalPenalty > 0 ? `-${row.original.totalPenalty}` : "0"}
+        </Badge>
+      ),
+      meta: { width: 90, truncate: false },
+    },
+    {
+      accessorKey: "tasksCompleted",
+      header: "Bajarilgan",
+      cell: ({ row }) => (
+        <Text size="sm" c="#495057">{row.original.tasksCompleted}</Text>
+      ),
+      meta: { width: 90 },
+    },
+    {
+      accessorKey: "tasksOnTime",
       header: "O'z vaqtida",
       cell: ({ row }) => (
         <Badge variant="light" color="green" radius="sm">
-          {row.original.onTimeTasks ?? 0}
+          {row.original.tasksOnTime}
         </Badge>
       ),
       meta: { width: 100, truncate: false },
     },
     {
-      accessorKey: "lateTasks",
+      accessorKey: "tasksLate",
       header: "Kechikkan",
       cell: ({ row }) => (
         <Badge
           variant="light"
-          color={row.original.lateTasks ? "red" : "gray"}
+          color={row.original.tasksLate > 0 ? "red" : "gray"}
           radius="sm"
         >
-          {row.original.lateTasks ?? 0}
+          {row.original.tasksLate}
         </Badge>
       ),
-      meta: { width: 100, truncate: false },
+      meta: { width: 90, truncate: false },
     },
     {
       accessorKey: "isFinalized",
@@ -219,7 +253,7 @@ const UserMonthlyKpiPage = () => {
     },
     {
       id: "actions",
-      header: "Amallar",
+      header: "",
       cell: ({ row }) => (
         <Menu shadow="md" width={200} position="bottom-end">
           <Menu.Target>
@@ -245,7 +279,7 @@ const UserMonthlyKpiPage = () => {
           </Menu.Dropdown>
         </Menu>
       ),
-      meta: { width: 80, truncate: false },
+      meta: { width: 60, truncate: false },
     },
   ];
 
