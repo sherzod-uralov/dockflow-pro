@@ -17,11 +17,6 @@ const documentHooks = createCRUDHooks<
   service: documentService,
   queryKey: "documents",
   singleQueryKey: "document",
-  messages: {
-    created: "Hujjat muvaffaqiyatli yaratildi",
-    updated: "Hujjat muvaffaqiyatli yangilandi",
-    deleted: "Hujjat muvaffaqiyatli o'chirildi",
-  },
 });
 
 export const useGetAllDocuments = (params?: DocumentQueryParams) =>

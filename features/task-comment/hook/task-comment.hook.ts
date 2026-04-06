@@ -18,11 +18,6 @@ const hooks = createCRUDHooks<
   service: taskCommentService,
   queryKey: "task-comments",
   singleQueryKey: "task-comment",
-  messages: {
-    created: "Izoh qo'shildi",
-    updated: "Izoh yangilandi",
-    deleted: "Izoh o'chirildi",
-  },
 });
 
 export const useGetAllTaskComments = hooks.useGetAll;

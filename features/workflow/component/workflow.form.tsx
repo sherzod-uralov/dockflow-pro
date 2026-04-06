@@ -478,14 +478,17 @@ const WorkflowForm = ({
                         label="Amal turi"
                         placeholder="Amal turini tanlang"
                         data={actionTypeOptions}
-                        value={form.watch(`steps.${index}.actionType`)}
-                        onChange={(value) =>
-                          form.setValue(
-                            `steps.${index}.actionType`,
-                            (value as WorkflowActionType) || "",
-                            { shouldValidate: true }
-                          )
-                        }
+                        value={form.watch(`steps.${index}.actionType`) || null}
+                        allowDeselect={false}
+                        onChange={(value) => {
+                          if (value) {
+                            form.setValue(
+                              `steps.${index}.actionType`,
+                              value as WorkflowActionType,
+                              { shouldValidate: true }
+                            );
+                          }
+                        }}
                         size="sm"
                         radius="sm"
                         error={

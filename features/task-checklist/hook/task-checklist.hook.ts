@@ -32,9 +32,9 @@ export const useCreateTaskChecklist = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (payload: TaskChecklistCreatePayload) => taskChecklistService.create(payload),
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries(["task-checklists"]);
-      showSuccess("Checklist yaratildi");
+      showSuccess(data);
     },
     onError: showError,
   });
@@ -45,10 +45,10 @@ export const useUpdateTaskChecklist = () => {
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: TaskChecklistUpdatePayload }) =>
       taskChecklistService.update(id, data),
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries(["task-checklists"]);
       queryClient.invalidateQueries(["task-checklist"]);
-      showSuccess("Checklist yangilandi");
+      showSuccess(data);
     },
     onError: showError,
   });
@@ -58,9 +58,9 @@ export const useDeleteTaskChecklist = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => taskChecklistService.delete(id),
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries(["task-checklists"]);
-      showSuccess("Checklist o'chirildi");
+      showSuccess(data);
     },
     onError: showError,
   });
@@ -86,10 +86,10 @@ export const useCreateChecklistItem = () => {
       checklistId: string;
       data: TaskChecklistItemCreatePayload;
     }) => taskChecklistService.createItem(checklistId, data),
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries(["task-checklists"]);
       queryClient.invalidateQueries(["checklist-items"]);
-      showSuccess("Element qo'shildi");
+      showSuccess(data);
     },
     onError: showError,
   });
@@ -120,10 +120,10 @@ export const useDeleteChecklistItem = () => {
   return useMutation({
     mutationFn: ({ checklistId, itemId }: { checklistId: string; itemId: string }) =>
       taskChecklistService.deleteItem(checklistId, itemId),
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries(["task-checklists"]);
       queryClient.invalidateQueries(["checklist-items"]);
-      showSuccess("Element o'chirildi");
+      showSuccess(data);
     },
     onError: showError,
   });

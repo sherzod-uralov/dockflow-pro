@@ -8,8 +8,8 @@ import { showError, showSuccess } from "@/utils/show-error";
 export const useLoginMutation = () => {
   return useMutation({
     mutationFn: (payload: LoginBody) => authService.login(payload),
-    onSuccess: () => {
-      showSuccess("Muvaffaqiyatli kirdingiz");
+    onSuccess: (data) => {
+      showSuccess(data);
     },
     onError: (error) => {
       showError(error);
@@ -29,9 +29,9 @@ export const useLogoutMutation = () => {
   const router = useRouter();
   return useMutation({
     mutationFn: () => authService.logout(),
-    onSuccess: () => {
+    onSuccess: (data) => {
       Cookie.remove("accessToken");
-      showSuccess("Tizimdan muvaffaqiyatli chiqdingiz");
+      showSuccess(data);
       router.push("/login");
     },
     onError: () => {
@@ -43,8 +43,8 @@ export const useLogoutMutation = () => {
 export const useProfileUpdateMutation = () => {
   return useMutation({
     mutationFn: (payload: any) => authService.updateProfile(payload),
-    onSuccess: () => {
-      showSuccess("Profil muvaffaqiyatli yangilandi");
+    onSuccess: (data) => {
+      showSuccess(data);
     },
     onError: (error: any) => {
       throw new Error(error.message);

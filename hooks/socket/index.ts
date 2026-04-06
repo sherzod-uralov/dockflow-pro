@@ -10,3 +10,6 @@ export { useOnlineUsers, useIsUserOnline } from './use-online-users';
 
 // Workflows
 export { useActiveWorkflows } from './use-workflows';
+
+// Task Board (real-time)
+export { useTaskSocket } from './use-task-socket';

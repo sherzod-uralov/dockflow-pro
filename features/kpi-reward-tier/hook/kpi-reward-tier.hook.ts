@@ -18,11 +18,6 @@ const kpiRewardTierHooks = createCRUDHooks<
   service: kpiRewardTierService,
   queryKey: "kpiRewardTiers",
   singleQueryKey: "kpiRewardTier",
-  messages: {
-    created: "Mukofot darajasi yaratildi",
-    updated: "Mukofot darajasi yangilandi",
-    deleted: "Mukofot darajasi o'chirildi",
-  },
 });
 
 export const useGetAllKpiRewardTiers = (params?: KpiRewardTierQueryParams) =>

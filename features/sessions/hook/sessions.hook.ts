@@ -23,9 +23,9 @@ export const useDeleteSession = () => {
   const queryClient = useQueryClient();
   return useMutation<void, unknown, string>({
     mutationFn: (id) => sessionsService.delete(id),
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries(["sessions"]);
-      showSuccess("Sessiya o'chirildi");
+      showSuccess(data);
     },
     onError: showError,
   });
@@ -35,9 +35,9 @@ export const useRevokeAllSessions = () => {
   const queryClient = useQueryClient();
   return useMutation<void, unknown, void>({
     mutationFn: () => sessionsService.revokeAll(),
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries(["sessions"]);
-      showSuccess("Barcha sessiyalar bekor qilindi");
+      showSuccess(data);
     },
     onError: showError,
   });

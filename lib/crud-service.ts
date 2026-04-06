@@ -111,7 +111,8 @@ export function createCRUDService<
       if (!endpoints.delete) {
         throw new Error("Delete endpoint not configured for this service");
       }
-      await axiosInstance.delete(endpoints.delete(id));
+      const { data } = await axiosInstance.delete(endpoints.delete(id));
+      return data;
     },
   };
 }

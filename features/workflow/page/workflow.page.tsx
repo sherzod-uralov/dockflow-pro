@@ -2,6 +2,7 @@
 
 import React, { useCallback, memo, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useUrlFilter } from "@/hooks/use-url-filters";
 import {
   Box,
   Text,
@@ -21,7 +22,9 @@ import {
   Menu,
   Collapse,
   SimpleGrid,
+  Checkbox,
 } from "@mantine/core";
+import { DatePickerInput } from "@mantine/dates";
 import {
   IconPlus,
   IconSearch,
@@ -41,7 +44,7 @@ import {
   IconHourglass,
   IconFilter,
   IconFilterOff,
-  IconPlayerPause,
+
 } from "@tabler/icons-react";
 import {
   ConfirmationModal,
@@ -64,13 +67,15 @@ import WorkflowForm from "@/features/workflow/component/workflow.form";
 import WorkflowFromTemplateForm from "@/features/workflow/component/workflow-from-template.form";
 import { formatDate } from "@/lib/date-utils";
 import { useGetAllDocuments } from "@/features/document";
+import { useGetAllDocumentTypes } from "@/features/document-type/hook/document-type.hook";
+import { useGetUserQuery } from "@/features/admin/admin-users/hook/user.hook";
 import { useOnboarding, TourButton } from "@/hooks/use-onboarding";
+import { ACTION_TYPE_OPTIONS } from "@/features/workflow/type/workflow.type";
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; icon: any }> = {
   ACTIVE: { label: "Faol", color: "#1971c2", bg: "#e7f5ff", icon: IconPlayerPlay },
   COMPLETED: { label: "Tugallangan", color: "#2b8a3e", bg: "#ebfbee", icon: IconCircleCheck },
   CANCELLED: { label: "Bekor qilingan", color: "#c92a2a", bg: "#fff5f5", icon: IconCircleX },
-  PAUSED: { label: "To'xtatilgan", color: "#e67700", bg: "#fff4e6", icon: IconPlayerPause },
   DRAFT: { label: "Tayyorlanmoqda", color: "#868e96", bg: "#f8f9fa", icon: IconHourglass },
 };
 
@@ -320,14 +325,33 @@ const WorkflowPage = () => {
     React.useState<WorkflowApiResponse | null>(null);
 
   const [search, debouncedSearch, setSearch] = useDebounce("", 500);
-  const [activeStatus, setActiveStatus] = useState<string | null>(null);
+  const [activeStatus, setActiveStatus] = useUrlFilter("status");
   const [filtersOpen, setFiltersOpen] = useState(false);
 
-  // Filter states
-  const [documentFilter, setDocumentFilter] = useState<string | null>(null);
-  const [typeFilter, setTypeFilter] = useState<string | null>(null);
+  // Filter states (URL-persisted)
+  const [documentFilter, setDocumentFilter] = useUrlFilter("document");
+  const [typeFilter, setTypeFilter] = useUrlFilter("type");
+  const [documentTypeFilter, setDocumentTypeFilter] = useUrlFilter("documentTypeId");
+  const [assigneeFilter, setAssigneeFilter] = useUrlFilter("assignee");
+  const [creatorFilter, setCreatorFilter] = useUrlFilter("creator");
+  const [stepActionFilter, setStepActionFilter] = useUrlFilter("stepAction");
+  const [dateFrom, setDateFrom] = useUrlFilter("dateFrom");
+  const [dateTo, setDateTo] = useUrlFilter("dateTo");
+  const [overdueFilter, setOverdueFilter] = useUrlFilter("overdue");
+  const [sortBy, setSortBy] = useUrlFilter("sortBy");
+  const [sortOrder, setSortOrder] = useUrlFilter("sortOrder");
 
   const { data: documentsData } = useGetAllDocuments({
+    pageNumber: 1,
+    pageSize: 100,
+  });
+
+  const { data: documentTypesData } = useGetAllDocumentTypes({
+    pageNumber: 1,
+    pageSize: 100,
+  });
+
+  const { data: usersData } = useGetUserQuery({
     pageNumber: 1,
     pageSize: 100,
   });
@@ -340,19 +364,29 @@ const WorkflowPage = () => {
 
   // Set default tab based on active workflows
   useEffect(() => {
-    if (activeStatus === null && activeWorkflowsCheck !== undefined) {
+    if (!activeStatus && activeWorkflowsCheck !== undefined) {
       if (activeWorkflowsCheck.count > 0) {
         setActiveStatus(WorkflowStatus.ACTIVE);
       } else {
         setActiveStatus("all");
       }
     }
-  }, [activeWorkflowsCheck, activeStatus]);
+  }, [activeWorkflowsCheck, activeStatus, setActiveStatus]);
 
   const { data, isLoading } = useGetAllWorkflows({
-    documentId: documentFilter || debouncedSearch || undefined,
-    status: activeStatus !== "all" && activeStatus !== null ? (activeStatus as WorkflowStatus) : undefined,
+    search: debouncedSearch || undefined,
+    documentId: documentFilter || undefined,
+    status: activeStatus && activeStatus !== "all" ? (activeStatus as WorkflowStatus) : undefined,
     type: typeFilter || undefined,
+    documentTypeId: documentTypeFilter || undefined,
+    assignedToUserId: assigneeFilter || undefined,
+    createdById: creatorFilter || undefined,
+    stepActionType: stepActionFilter || undefined,
+    dateFrom: dateFrom || undefined,
+    dateTo: dateTo || undefined,
+    overdue: overdueFilter === "true" ? true : undefined,
+    sortBy: sortBy || undefined,
+    sortOrder: sortOrder || undefined,
     page: pageNumber,
     limit: pageSize,
   });
@@ -387,12 +421,24 @@ const WorkflowPage = () => {
   const totalPages = Math.ceil((data?.count || 0) / pageSize);
 
   // Active filter count
-  const activeFilterCount = [documentFilter, typeFilter].filter(Boolean).length;
+  const activeFilterCount = [
+    documentFilter, typeFilter, documentTypeFilter, assigneeFilter,
+    creatorFilter, stepActionFilter, dateFrom, dateTo, overdueFilter, sortBy,
+  ].filter(Boolean).length;
 
   // Clear all filters
   const clearAllFilters = () => {
-    setDocumentFilter(null);
-    setTypeFilter(null);
+    setDocumentFilter("");
+    setTypeFilter("");
+    setDocumentTypeFilter("");
+    setAssigneeFilter("");
+    setCreatorFilter("");
+    setStepActionFilter("");
+    setDateFrom("");
+    setDateTo("");
+    setOverdueFilter("");
+    setSortBy("");
+    setSortOrder("");
   };
 
   return (
@@ -526,13 +572,6 @@ const WorkflowPage = () => {
               >
                 Bekor qilingan
               </Tabs.Tab>
-              <Tabs.Tab
-                value={WorkflowStatus.PAUSED}
-                leftSection={<IconPlayerPause size={14} />}
-                style={{ fontWeight: 500 }}
-              >
-                To'xtatilgan
-              </Tabs.Tab>
             </Tabs.List>
           </Tabs>
         </Group>
@@ -560,11 +599,11 @@ const WorkflowPage = () => {
                   leftSection={<IconFilterOff size={12} />}
                   onClick={clearAllFilters}
                 >
-                  Tozalash
+                  Tozalash ({activeFilterCount})
                 </Button>
               )}
             </Group>
-            <SimpleGrid cols={2} spacing="sm">
+            <SimpleGrid cols={3} spacing="sm">
               <Select
                 size="sm"
                 radius="sm"
@@ -572,8 +611,8 @@ const WorkflowPage = () => {
                 label="Hujjat"
                 clearable
                 searchable
-                value={documentFilter}
-                onChange={setDocumentFilter}
+                value={documentFilter || null}
+                onChange={(val) => setDocumentFilter(val || "")}
                 data={
                   documentsData?.data?.map((doc) => ({
                     value: doc.id || "",
@@ -591,15 +630,172 @@ const WorkflowPage = () => {
                 placeholder="Turi bo'yicha"
                 label="Aylanma turi"
                 clearable
-                value={typeFilter}
-                onChange={setTypeFilter}
+                value={typeFilter || null}
+                onChange={(val) => setTypeFilter(val || "")}
                 data={TYPE_OPTIONS}
                 styles={{
                   label: { fontSize: 12, fontWeight: 500, marginBottom: 4 },
                   input: { backgroundColor: "#fff" },
                 }}
               />
+              <Select
+                size="sm"
+                radius="sm"
+                placeholder="Hujjat turi bo'yicha"
+                label="Hujjat turi"
+                clearable
+                searchable
+                value={documentTypeFilter || null}
+                onChange={(val) => setDocumentTypeFilter(val || "")}
+                data={
+                  documentTypesData?.data?.map((dt: any) => ({
+                    value: dt.id,
+                    label: dt.name,
+                  })) || []
+                }
+                styles={{
+                  label: { fontSize: 12, fontWeight: 500, marginBottom: 4 },
+                  input: { backgroundColor: "#fff" },
+                }}
+              />
+              <Select
+                size="sm"
+                radius="sm"
+                placeholder="Tayinlangan shaxs"
+                label="Tayinlangan"
+                clearable
+                searchable
+                value={assigneeFilter || null}
+                onChange={(val) => setAssigneeFilter(val || "")}
+                data={
+                  usersData?.data?.map((user: any) => ({
+                    value: user.id,
+                    label: `${user.fullname} (@${user.username})`,
+                  })) || []
+                }
+                styles={{
+                  label: { fontSize: 12, fontWeight: 500, marginBottom: 4 },
+                  input: { backgroundColor: "#fff" },
+                }}
+              />
+              <Select
+                size="sm"
+                radius="sm"
+                placeholder="Yaratuvchi"
+                label="Yaratuvchi"
+                clearable
+                searchable
+                value={creatorFilter || null}
+                onChange={(val) => setCreatorFilter(val || "")}
+                data={
+                  usersData?.data?.map((user: any) => ({
+                    value: user.id,
+                    label: `${user.fullname} (@${user.username})`,
+                  })) || []
+                }
+                styles={{
+                  label: { fontSize: 12, fontWeight: 500, marginBottom: 4 },
+                  input: { backgroundColor: "#fff" },
+                }}
+              />
+              <Select
+                size="sm"
+                radius="sm"
+                placeholder="Amal turi"
+                label="Bosqich amal turi"
+                clearable
+                value={stepActionFilter || null}
+                onChange={(val) => setStepActionFilter(val || "")}
+                data={ACTION_TYPE_OPTIONS.map((o) => ({
+                  value: o.value,
+                  label: o.label,
+                }))}
+                styles={{
+                  label: { fontSize: 12, fontWeight: 500, marginBottom: 4 },
+                  input: { backgroundColor: "#fff" },
+                }}
+              />
+              <DatePickerInput
+                size="sm"
+                radius="sm"
+                label="Boshlanish sanasi"
+                placeholder="Dan"
+                clearable
+                value={dateFrom ? new Date(dateFrom) : null}
+                onChange={(val) => setDateFrom(val ? new Date(val as unknown as Date).toISOString().split("T")[0] : "")}
+                maxDate={dateTo ? new Date(dateTo) : undefined}
+                styles={{
+                  label: { fontSize: 12, fontWeight: 500, marginBottom: 4 },
+                  input: { backgroundColor: "#fff" },
+                }}
+              />
+              <DatePickerInput
+                size="sm"
+                radius="sm"
+                label="Tugash sanasi"
+                placeholder="Gacha"
+                clearable
+                value={dateTo ? new Date(dateTo) : null}
+                onChange={(val) => setDateTo(val ? new Date(val as unknown as Date).toISOString().split("T")[0] : "")}
+                minDate={dateFrom ? new Date(dateFrom) : undefined}
+                styles={{
+                  label: { fontSize: 12, fontWeight: 500, marginBottom: 4 },
+                  input: { backgroundColor: "#fff" },
+                }}
+              />
+              <Select
+                size="sm"
+                radius="sm"
+                placeholder="Saralash"
+                label="Saralash"
+                clearable
+                value={sortBy || null}
+                onChange={(val) => {
+                  setSortBy(val || "");
+                  if (!val) setSortOrder("");
+                  else if (!sortOrder) setSortOrder("desc");
+                }}
+                data={[
+                  { value: "createdAt", label: "Yaratilgan sana" },
+                  { value: "updatedAt", label: "Yangilangan sana" },
+                  { value: "deadline", label: "Muddat" },
+                  { value: "status", label: "Status" },
+                ]}
+                styles={{
+                  label: { fontSize: 12, fontWeight: 500, marginBottom: 4 },
+                  input: { backgroundColor: "#fff" },
+                }}
+              />
             </SimpleGrid>
+            <Group mt="sm" gap="md">
+              <Checkbox
+                size="sm"
+                label="Muddati o'tganlar"
+                checked={overdueFilter === "true"}
+                onChange={(e) => setOverdueFilter(e.currentTarget.checked ? "true" : "")}
+                styles={{
+                  label: { fontSize: 12, fontWeight: 500, color: "#495057" },
+                }}
+              />
+              {sortBy && (
+                <Select
+                  size="sm"
+                  radius="sm"
+                  label="Tartib"
+                  value={sortOrder || "desc"}
+                  onChange={(val) => setSortOrder(val || "desc")}
+                  data={[
+                    { value: "desc", label: "Kamayish" },
+                    { value: "asc", label: "O'sish" },
+                  ]}
+                  styles={{
+                    label: { fontSize: 12, fontWeight: 500, marginBottom: 4 },
+                    input: { backgroundColor: "#fff" },
+                  }}
+                  w={150}
+                />
+              )}
+            </Group>
           </Box>
         </Collapse>
       </Paper>

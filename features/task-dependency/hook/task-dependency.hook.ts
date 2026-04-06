@@ -17,10 +17,6 @@ const hooks = createCRUDHooks<
   service: taskDependencyService,
   queryKey: "task-dependencies",
   singleQueryKey: "task-dependency",
-  messages: {
-    created: "Bog'liqlik qo'shildi",
-    deleted: "Bog'liqlik olib tashlandi",
-  },
 });
 
 export const useGetAllTaskDependencies = hooks.useGetAll;

@@ -12,12 +12,8 @@ export interface CRUDHooksConfig<
   service: CRUDService<TEntity, TCreatePayload, TUpdatePayload, TQueryParams, TListResponse>;
   queryKey: string;
   singleQueryKey?: string;
-  /** Optional success messages. If not provided, no success toast will be shown */
-  messages?: {
-    created?: string;
-    updated?: string;
-    deleted?: string;
-  };
+  /** Set to false to disable toasts entirely. By default, backend message is used. */
+  messages?: false;
 }
 
 export interface CRUDHooks<
@@ -48,6 +44,7 @@ export function createCRUDHooks<
 ): CRUDHooks<TEntity, TCreatePayload, TUpdatePayload, TQueryParams, TListResponse> {
   const { service, queryKey, singleQueryKey, messages } = config;
   const itemQueryKey = singleQueryKey || queryKey.replace(/s$/, "");
+  const showToast = messages !== false;
 
   return {
     useGetAll: (params?: TQueryParams) => {
@@ -70,9 +67,9 @@ export function createCRUDHooks<
       const queryClient = useQueryClient();
       return useMutation<TEntity, unknown, TCreatePayload>({
         mutationFn: (payload: TCreatePayload) => service.create(payload),
-        onSuccess: () => {
+        onSuccess: (data) => {
           queryClient.invalidateQueries([queryKey]);
-          if (messages?.created) showSuccess(messages.created);
+          if (showToast) showSuccess(data);
         },
         onError: showError,
       });
@@ -82,10 +79,10 @@ export function createCRUDHooks<
       const queryClient = useQueryClient();
       return useMutation<TEntity, unknown, { id: string; data: TUpdatePayload }>({
         mutationFn: ({ id, data }) => service.update(id, data),
-        onSuccess: () => {
+        onSuccess: (data) => {
           queryClient.invalidateQueries([queryKey]);
           queryClient.invalidateQueries([itemQueryKey]);
-          if (messages?.updated) showSuccess(messages.updated);
+          if (showToast) showSuccess(data);
         },
         onError: showError,
       });
@@ -95,9 +92,9 @@ export function createCRUDHooks<
       const queryClient = useQueryClient();
       return useMutation<void, unknown, string>({
         mutationFn: (id: string) => service.delete(id),
-        onSuccess: () => {
+        onSuccess: (data) => {
           queryClient.invalidateQueries([queryKey]);
-          if (messages?.deleted) showSuccess(messages.deleted);
+          if (showToast) showSuccess(data);
         },
         onError: showError,
       });

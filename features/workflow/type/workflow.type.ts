@@ -342,11 +342,21 @@ export interface WorkflowListResponse extends DataPagination {
 }
 
 export interface WorkflowQueryParams {
-  documentId?: string; // ✨ Filter by document ID
-  status?: WorkflowStatus; // ✨ Filter by status
-  type?: string; // ✨ Filter by workflow type (CONSECUTIVE | PARALLEL)
-  page?: number; // ✨ ИЗМЕНЕНО: было pageNumber
-  limit?: number; // ✨ ИЗМЕНЕНО: было pageSize
+  search?: string;
+  documentId?: string;
+  status?: WorkflowStatus;
+  type?: string;
+  documentTypeId?: string;
+  assignedToUserId?: string;
+  createdById?: string;
+  stepActionType?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  overdue?: boolean;
+  sortBy?: string;
+  sortOrder?: string;
+  page?: number;
+  limit?: number;
 }
 
 // ============================================

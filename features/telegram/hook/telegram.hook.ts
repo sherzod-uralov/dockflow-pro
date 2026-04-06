@@ -23,10 +23,10 @@ export const useTelegramUnlink = () => {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: (userId: string) => telegramService.unlink(userId),
-        onSuccess: (_data, userId) => {
+        onSuccess: (data, userId) => {
             queryClient.invalidateQueries(["telegram-status", userId]);
             queryClient.invalidateQueries(["telegram-link-info", userId]);
-            showSuccess("Telegram akkaunt uzildi");
+            showSuccess(data);
         },
         onError: showError,
     });

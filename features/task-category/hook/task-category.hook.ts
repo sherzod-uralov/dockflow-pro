@@ -18,11 +18,6 @@ const taskCategoryHooks = createCRUDHooks<
   service: taskCategoryService,
   queryKey: "taskCategories",
   singleQueryKey: "taskCategory",
-  messages: {
-    created: "Kategoriya yaratildi",
-    updated: "Kategoriya yangilandi",
-    deleted: "Kategoriya o'chirildi",
-  },
 });
 
 export const useGetAllTaskCategories = (params?: TaskCategoryQueryParams) =>

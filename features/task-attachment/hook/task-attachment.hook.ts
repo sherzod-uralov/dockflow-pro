@@ -18,11 +18,6 @@ const hooks = createCRUDHooks<
   service: taskAttachmentService,
   queryKey: "task-attachments",
   singleQueryKey: "task-attachment",
-  messages: {
-    created: "Fayl biriktirildi",
-    updated: "Fayl ma'lumotlari yangilandi",
-    deleted: "Fayl olib tashlandi",
-  },
 });
 
 export const useGetAllTaskAttachments = hooks.useGetAll;

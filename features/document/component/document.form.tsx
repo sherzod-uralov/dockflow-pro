@@ -86,7 +86,6 @@ const DocumentFormModal = ({
       ? {
         title: document?.title ?? "",
         description: document?.description ?? "",
-        documentNumber: document?.documentNumber ?? "",
         documentTypeId: document?.documentType?.id ?? "",
         journalId: document?.journal?.id ?? "",
         templateId: document?.template?.id ?? "",
@@ -96,7 +95,6 @@ const DocumentFormModal = ({
       : {
         title: "",
         description: "",
-        documentNumber: "",
         documentTypeId: undefined,
         journalId: undefined,
         templateId: undefined,

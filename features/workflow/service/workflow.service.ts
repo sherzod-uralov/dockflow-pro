@@ -22,9 +22,19 @@ const baseCRUDService = createCRUDService<
   WorkflowListResponse
 >(endpoints.workflow, {
   transformParams: (params) => ({
+    search: params?.search,
     documentId: params?.documentId,
     status: params?.status,
     type: params?.type,
+    documentTypeId: params?.documentTypeId,
+    assignedToUserId: params?.assignedToUserId,
+    createdById: params?.createdById,
+    stepActionType: params?.stepActionType,
+    dateFrom: params?.dateFrom,
+    dateTo: params?.dateTo,
+    overdue: params?.overdue,
+    sortBy: params?.sortBy,
+    sortOrder: params?.sortOrder,
     page: params?.page,
     limit: params?.limit,
   }),
@@ -108,21 +118,34 @@ export const workflowService = {
   },
 
   downloadDocument: async (documentId: string, filename?: string) => {
-    const response = await axiosInstance.get(
-      endpoints.document.download(documentId),
-      { responseType: "blob" }
-    );
+    try {
+      const response = await axiosInstance.get(
+        endpoints.document.download(documentId),
+        { responseType: "blob" }
+      );
 
-    const url = window.URL.createObjectURL(new Blob([response.data]));
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute("download", filename || `document-${documentId}.pdf`);
-    document.body.appendChild(link);
-    link.click();
-    link.parentNode?.removeChild(link);
-    window.URL.revokeObjectURL(url);
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", filename || `document-${documentId}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode?.removeChild(link);
+      window.URL.revokeObjectURL(url);
 
-    return response.data;
+      return response.data;
+    } catch (error: any) {
+      if (error?.response?.data instanceof Blob) {
+        const text = await error.response.data.text();
+        let message = text;
+        try {
+          const json = JSON.parse(text);
+          message = json.message || text;
+        } catch {}
+        error.response.data = { message };
+      }
+      throw error;
+    }
   },
 
   getCalendarView: async (params?: {

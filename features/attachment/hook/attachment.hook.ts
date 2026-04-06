@@ -30,9 +30,9 @@ export const useUpdateAttachment = () => {
   return useMutation({
     mutationFn: ({ id, payload }: { id: string; payload: Partial<AttachmentInferType> }) =>
       attachmentService.update(id, payload),
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries(["attachments"]);
-      showSuccess("Fayl yangilandi");
+      showSuccess(data);
     },
     onError: showError,
   });
@@ -42,9 +42,9 @@ export const useDeleteAttachment = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => attachmentService.delete(id),
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries(["attachments"]);
-      showSuccess("Fayl o'chirildi");
+      showSuccess(data);
     },
     onError: showError,
   });
@@ -55,9 +55,9 @@ export const useCreateAttachment = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (file: File) => attachmentService.create(file),
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries(["attachments"]);
-      showSuccess("Fayl yuklandi");
+      showSuccess(data);
     },
     onError: showError,
   });
@@ -67,9 +67,9 @@ export const useRepairFilenames = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: () => attachmentService.repairFilenames(),
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries(["attachments"]);
-      showSuccess("Fayl nomlari tuzatildi");
+      showSuccess(data);
     },
     onError: showError,
   });
