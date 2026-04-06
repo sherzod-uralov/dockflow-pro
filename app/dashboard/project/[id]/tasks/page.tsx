@@ -32,6 +32,7 @@ import {
     useModal,
 } from "@/components/shared/ui/custom-modal";
 import { useDebounce } from "@/hooks/use-debaunce";
+import { useTaskSocket } from "@/hooks/socket";
 import {
     useGetAllTasks,
     useDeleteTask,
@@ -51,6 +52,9 @@ export default function ProjectTasksPage() {
     const params = useParams();
     const router = useRouter();
     const projectId = params?.id as string;
+
+    // Real-time task updates via WebSocket
+    useTaskSocket(projectId);
 
     const createModal = useModal();
     const editModal = useModal();

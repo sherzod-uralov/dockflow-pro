@@ -17,10 +17,6 @@ const hooks = createCRUDHooks<
   service: taskLabelService,
   queryKey: "task-labels",
   singleQueryKey: "task-label",
-  messages: {
-    created: "Yorliq vazifaga biriktirildi",
-    deleted: "Yorliq vazifadan olib tashlandi",
-  },
 });
 
 export const useGetAllTaskLabels = hooks.useGetAll;

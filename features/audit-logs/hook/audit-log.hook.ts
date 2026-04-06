@@ -12,9 +12,9 @@ export const useCreateAuditLog = () => {
   return useMutation({
     mutationFn: (payload: CreateAuditLogRequest) =>
       auditLogService.createAuditLog(payload),
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries(["audit-logs"]);
-      showSuccess("Audit log muvaffaqiyatli yaratildi");
+      showSuccess(data);
     },
     onError: (error: any) => {
       showError(error);

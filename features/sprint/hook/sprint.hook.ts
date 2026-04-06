@@ -20,11 +20,6 @@ const sprintHooks = createCRUDHooks<
   service: sprintService,
   queryKey: "sprints",
   singleQueryKey: "sprint",
-  messages: {
-    created: "Sprint yaratildi",
-    updated: "Sprint yangilandi",
-    deleted: "Sprint o'chirildi",
-  },
 });
 
 export const useGetAllSprints = (params?: SprintQueryParams) =>
@@ -43,10 +38,10 @@ export const useStartSprint = () => {
   const queryClient = useQueryClient();
   return useMutation<SprintGetResponse, unknown, string>({
     mutationFn: (id) => sprintService.start(id),
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries(["sprints"]);
       queryClient.invalidateQueries(["sprint"]);
-      showSuccess("Sprint boshlandi");
+      showSuccess(data);
     },
     onError: showError,
   });
@@ -56,10 +51,10 @@ export const useCompleteSprint = () => {
   const queryClient = useQueryClient();
   return useMutation<SprintGetResponse, unknown, string>({
     mutationFn: (id) => sprintService.complete(id),
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries(["sprints"]);
       queryClient.invalidateQueries(["sprint"]);
-      showSuccess("Sprint yakunlandi");
+      showSuccess(data);
     },
     onError: showError,
   });
@@ -69,10 +64,10 @@ export const useCancelSprint = () => {
   const queryClient = useQueryClient();
   return useMutation<SprintGetResponse, unknown, string>({
     mutationFn: (id) => sprintService.cancel(id),
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries(["sprints"]);
       queryClient.invalidateQueries(["sprint"]);
-      showSuccess("Sprint bekor qilindi");
+      showSuccess(data);
     },
     onError: showError,
   });

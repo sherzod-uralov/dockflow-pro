@@ -43,10 +43,10 @@ export const useApproveKpiReward = () => {
   const queryClient = useQueryClient();
   return useMutation<KpiRewardGetResponse, unknown, string>({
     mutationFn: (id) => kpiRewardService.approve(id),
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries(["kpiRewards"]);
       queryClient.invalidateQueries(["kpiReward"]);
-      showSuccess("Mukofot tasdiqlandi");
+      showSuccess(data);
     },
     onError: showError,
   });
@@ -56,10 +56,10 @@ export const usePayKpiReward = () => {
   const queryClient = useQueryClient();
   return useMutation<KpiRewardGetResponse, unknown, string>({
     mutationFn: (id) => kpiRewardService.pay(id),
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries(["kpiRewards"]);
       queryClient.invalidateQueries(["kpiReward"]);
-      showSuccess("Mukofot to'landi");
+      showSuccess(data);
     },
     onError: showError,
   });
@@ -69,10 +69,10 @@ export const useRejectKpiReward = () => {
   const queryClient = useQueryClient();
   return useMutation<KpiRewardGetResponse, unknown, { id: string; data?: KpiRewardRejectPayload }>({
     mutationFn: ({ id, data }) => kpiRewardService.reject(id, data),
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries(["kpiRewards"]);
       queryClient.invalidateQueries(["kpiReward"]);
-      showSuccess("Mukofot rad etildi");
+      showSuccess(data);
     },
     onError: showError,
   });
@@ -82,9 +82,9 @@ export const useBulkApproveKpiRewards = () => {
   const queryClient = useQueryClient();
   return useMutation<void, unknown, KpiRewardBulkApprovePayload>({
     mutationFn: (payload) => kpiRewardService.bulkApprove(payload),
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries(["kpiRewards"]);
-      showSuccess("Mukofotlar tasdiqlandi");
+      showSuccess(data);
     },
     onError: showError,
   });

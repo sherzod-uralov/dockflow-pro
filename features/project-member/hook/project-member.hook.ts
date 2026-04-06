@@ -18,11 +18,6 @@ const hooks = createCRUDHooks<
   service: projectMemberService,
   queryKey: "project-members",
   singleQueryKey: "project-member",
-  messages: {
-    created: "A'zo muvaffaqiyatli qo'shildi",
-    updated: "A'zo muvaffaqiyatli yangilandi",
-    deleted: "A'zo muvaffaqiyatli o'chirildi",
-  },
 });
 
 export const useGetAllProjectMembers = hooks.useGetAll;

@@ -18,11 +18,6 @@ const hooks = createCRUDHooks<
   service: taskTimeEntryService,
   queryKey: "task-time-entries",
   singleQueryKey: "task-time-entry",
-  messages: {
-    created: "Vaqt yozuvi qo'shildi",
-    updated: "Vaqt yozuvi yangilandi",
-    deleted: "Vaqt yozuvi o'chirildi",
-  },
 });
 
 export const useGetAllTaskTimeEntries = hooks.useGetAll;

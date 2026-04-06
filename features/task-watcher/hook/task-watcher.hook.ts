@@ -15,9 +15,9 @@ export const useWatchTask = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (taskId: string) => taskWatcherService.watch(taskId),
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries(["task-watchers"]);
-      showSuccess("Vazifa kuzatuvga qo'shildi");
+      showSuccess(data);
     },
     onError: showError,
   });
@@ -27,9 +27,9 @@ export const useUnwatchTask = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (taskId: string) => taskWatcherService.unwatch(taskId),
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries(["task-watchers"]);
-      showSuccess("Vazifa kuzatuvdan olib tashlandi");
+      showSuccess(data);
     },
     onError: showError,
   });

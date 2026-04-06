@@ -20,10 +20,10 @@ export const useCreateWorkflow = () => {
 
   return useMutation({
     mutationFn: (payload: WorkflowCreateType) => workflowService.createWorkflow(payload),
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient?.invalidateQueries(["workflows"]);
       queryClient?.invalidateQueries(["my-tasks"]);
-      showSuccess("Hujjat aylanmasi yaratildi");
+      showSuccess(data);
     },
     onError: showError,
   });
@@ -35,10 +35,10 @@ export const useCreateWorkflowFromTemplate = () => {
   return useMutation({
     mutationFn: (payload: WorkflowFromTemplatePayload) =>
       workflowService.createWorkflowFromTemplate(payload),
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient?.invalidateQueries(["workflows"]);
       queryClient?.invalidateQueries(["my-tasks"]);
-      showSuccess("Hujjat aylanmasi yaratildi");
+      showSuccess(data);
     },
     onError: showError,
   });
@@ -58,10 +58,10 @@ export const useUpdateWorkflow = () => {
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<WorkflowCreateType> }) =>
       workflowService.updateWorkflow(id, data),
-    onSuccess: (_, variables) => {
+    onSuccess: (data, variables) => {
       queryClient?.invalidateQueries(["workflows"]);
       queryClient?.invalidateQueries(["workflow", variables.id]);
-      showSuccess("Hujjat aylanmasi yangilandi");
+      showSuccess(data);
     },
     onError: showError,
   });
@@ -72,9 +72,9 @@ export const useDeleteWorkflow = () => {
 
   return useMutation({
     mutationFn: (id: string) => workflowService.deleteWorkflow(id),
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient?.invalidateQueries(["workflows"]);
-      showSuccess("Hujjat aylanmasi o'chirildi");
+      showSuccess(data);
     },
     onError: showError,
   });
@@ -127,7 +127,7 @@ export const useAssignWorkflowStep = () => {
         queryClient?.invalidateQueries(["workflow", response.workflowId]);
       }
 
-      showSuccess("Vazifa tayinlandi");
+      showSuccess(response);
     },
     onError: showError,
   });
@@ -147,7 +147,7 @@ export const useCompleteWorkflowStep = () => {
         queryClient?.invalidateQueries(["workflow", response.workflowId]);
       }
 
-      showSuccess("Vazifa tasdiqlandi");
+      showSuccess(response);
     },
     onError: showError,
   });
@@ -168,7 +168,7 @@ export const useRejectWorkflowStep = () => {
         queryClient?.invalidateQueries(["workflow", response.workflowId]);
       }
 
-      showSuccess("Vazifa rad etildi");
+      showSuccess(response);
     },
     onError: showError,
   });
@@ -261,7 +261,7 @@ export const useVerifyWorkflowStep = () => {
         queryClient?.invalidateQueries(["workflow", response.workflowId]);
       }
 
-      showSuccess("Vazifa muvaffaqiyatli tasdiqlandi");
+      showSuccess(response);
     },
     onError: showError,
   });

@@ -18,11 +18,6 @@ const hooks = createCRUDHooks<
   service: projectLabelService,
   queryKey: "project-labels",
   singleQueryKey: "project-label",
-  messages: {
-    created: "Yorliq muvaffaqiyatli yaratildi",
-    updated: "Yorliq muvaffaqiyatli yangilandi",
-    deleted: "Yorliq muvaffaqiyatli o'chirildi",
-  },
 });
 
 export const useGetAllProjectLabels = hooks.useGetAll;

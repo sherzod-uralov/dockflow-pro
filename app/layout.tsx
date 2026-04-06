@@ -4,6 +4,7 @@ import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import { Analytics } from "@vercel/analytics/next";
 import { Suspense } from "react";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { ThemeProvider } from "@/components/shared/theme-provider";
 import { MantineProviderWrapper } from "@/providers/mantine-provider";
 import { ColorSchemeScript } from "@mantine/core";
@@ -28,20 +29,22 @@ export default function RootLayout({
       <body
         className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}
       >
-        <ReactQueryProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="light"
-            forcedTheme="light"
-            disableTransitionOnChange
-          >
-            <MantineProviderWrapper>
-              <Suspense fallback={null}>
-                {children}
-              </Suspense>
-            </MantineProviderWrapper>
-          </ThemeProvider>
-        </ReactQueryProvider>
+        <NuqsAdapter>
+          <ReactQueryProvider>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="light"
+              forcedTheme="light"
+              disableTransitionOnChange
+            >
+              <MantineProviderWrapper>
+                <Suspense fallback={null}>
+                  {children}
+                </Suspense>
+              </MantineProviderWrapper>
+            </ThemeProvider>
+          </ReactQueryProvider>
+        </NuqsAdapter>
         <Analytics />
       </body>
     </html>

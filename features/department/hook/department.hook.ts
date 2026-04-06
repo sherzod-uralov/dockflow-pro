@@ -19,11 +19,6 @@ const departmentHooks = createCRUDHooks<
   service: departmentService,
   queryKey: "departments",
   singleQueryKey: "department",
-  messages: {
-    created: "Bo'lim muvaffaqiyatli qo'shildi",
-    updated: "Bo'lim muvaffaqiyatli yangilandi",
-    deleted: "Bo'lim muvaffaqiyatli o'chirildi",
-  },
 });
 
 export const useGetAllDepartments = (params?: DepartmentQueryParams) =>
@@ -43,9 +38,9 @@ export const useUpdateDepartmentParent = () => {
   return useMutation({
     mutationFn: ({ id, parentId }: { id: string; parentId: string | null }) =>
       departmentService.update(id, { parentId } as Partial<DepartmentInferType>),
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries(["departments"]);
-      showSuccess("Bo'lim muvaffaqiyatli ko'chirildi");
+      showSuccess(data);
     },
     onError: showError,
   });

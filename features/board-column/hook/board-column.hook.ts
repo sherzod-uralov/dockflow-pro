@@ -21,11 +21,6 @@ const boardColumnHooks = createCRUDHooks<
   service: boardColumnService,
   queryKey: "boardColumns",
   singleQueryKey: "boardColumn",
-  messages: {
-    created: "Ustun yaratildi",
-    updated: "Ustun yangilandi",
-    deleted: "Ustun o'chirildi",
-  },
 });
 
 export const useGetAllBoardColumns = (params?: BoardColumnQueryParams) =>
@@ -44,9 +39,9 @@ export const useReorderBoardColumns = () => {
   const queryClient = useQueryClient();
   return useMutation<void, unknown, BoardColumnReorderPayload>({
     mutationFn: (payload) => boardColumnService.reorder(payload),
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries(["boardColumns"]);
-      showSuccess("Ustunlar tartibi yangilandi");
+      showSuccess(data);
     },
     onError: showError,
   });

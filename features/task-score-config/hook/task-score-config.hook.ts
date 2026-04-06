@@ -19,11 +19,6 @@ const taskScoreConfigHooks = createCRUDHooks<
   service: taskScoreConfigService,
   queryKey: "taskScoreConfigs",
   singleQueryKey: "taskScoreConfig",
-  messages: {
-    created: "Ball konfiguratsiyasi yaratildi",
-    updated: "Ball konfiguratsiyasi yangilandi",
-    deleted: "Ball konfiguratsiyasi o'chirildi",
-  },
 });
 
 export const useGetAllTaskScoreConfigs = (params?: TaskScoreConfigQueryParams) =>

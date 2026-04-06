@@ -67,10 +67,10 @@ export const useFinalizeUserMonthlyKpi = () => {
   const queryClient = useQueryClient();
   return useMutation<UserMonthlyKpiGetResponse, unknown, UserMonthlyKpiFinalizeParams>({
     mutationFn: (params) => userMonthlyKpiService.finalize(params),
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries(["userMonthlyKpis"]);
       queryClient.invalidateQueries(["userMonthlyKpi"]);
-      showSuccess("KPI yakunlandi");
+      showSuccess(data);
     },
     onError: showError,
   });

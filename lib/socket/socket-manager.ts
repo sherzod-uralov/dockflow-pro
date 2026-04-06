@@ -13,7 +13,7 @@ import type {
 // Configuration
 // ============================================================================
 
-const WS_URL = process.env.NEXT_PUBLIC_WS_URL || 'https://docflow-back.nordicuniversity.org';
+const WS_URL = (process.env.NEXT_PUBLIC_WS_URL || 'https://docflow-back.nordicuniversity.org').replace(/\/+$/, '');
 const NAMESPACE = '/notifications';
 
 const SOCKET_CONFIG = {
