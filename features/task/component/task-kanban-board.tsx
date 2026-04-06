@@ -71,7 +71,10 @@ const InlineSubtaskInput = ({
     const inputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
-        inputRef.current?.focus();
+        setTimeout(() => {
+            inputRef.current?.focus();
+            inputRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }, 50);
     }, []);
 
     const handleSubmit = () => {

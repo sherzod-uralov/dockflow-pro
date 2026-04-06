@@ -65,7 +65,7 @@ import {
 } from "../../type/task.type";
 import { TaskCommentsInline } from "@/features/task-comment/component/task-comments-inline";
 import { TaskAttachments } from "@/features/task-attachment/component/task-attachments";
-import { useGetAllBoardColumns } from "@/features/board-column/hook/board-column.hook";
+
 import { TaskChecklist } from "@/features/task-checklist/component/task-checklist";
 import {
   useGetAllTaskTimeEntries,
@@ -144,10 +144,6 @@ export const TaskDetailDrawer = ({
     pageSize: 100,
   });
 
-  const { data: boardColumnsData } = useGetAllBoardColumns(
-    task?.projectId ? { projectId: task.projectId } : undefined,
-  );
-
   const { data: parentTask } = useGetTaskById(task?.parentTaskId || "", {
     enabled: !!task?.parentTaskId,
   });
@@ -166,7 +162,7 @@ export const TaskDetailDrawer = ({
   const dependencies = dependenciesData?.data || [];
   const subtasks = subtasksData?.data || [];
   const isWatching = watchers.length > 0;
-  const completedSubtasks = subtasks.filter((s) => s.boardColumn?.isClosed === true);
+  const completedSubtasks = subtasks.filter((s) => !!s.completedAt);
 
   const handleUpdateField = (field: string, value: unknown) => {
     if (!taskId) return;
@@ -174,17 +170,13 @@ export const TaskDetailDrawer = ({
   };
 
   const handleToggleSubtask = (subtaskId: string) => {
-    const columns = boardColumnsData?.data || [];
     const subtask = subtasks.find((s) => s.id === subtaskId);
-    if (!subtask || columns.length === 0) return;
+    if (!subtask) return;
 
-    const isDone = subtask.boardColumn?.isClosed === true;
-    const targetColumn = isDone
-      ? columns.find((c) => c.isDefault) || columns.find((c) => !c.isClosed)
-      : columns.find((c) => c.isClosed);
-
-    if (targetColumn) {
-      updateTask.mutate({ id: subtaskId, data: { boardColumnId: targetColumn.id } });
+    if (subtask.completedAt) {
+      uncompleteTask.mutate(subtaskId);
+    } else {
+      completeTask.mutate(subtaskId);
     }
   };
 
@@ -251,18 +243,7 @@ export const TaskDetailDrawer = ({
                   )}
                 </Group>
                 <Group gap="xs">
-                  {task.completedAt ? (
-                    <Button
-                      size="compact-xs"
-                      variant="light"
-                      color="gray"
-                      leftSection={<IconArrowBack size={14} />}
-                      onClick={() => uncompleteTask.mutate(taskId)}
-                      loading={uncompleteTask.isLoading}
-                    >
-                      Qayta ochish
-                    </Button>
-                  ) : (
+                  {!task.completedAt && (
                     <Button
                       size="compact-xs"
                       variant="light"
@@ -660,7 +641,7 @@ export const TaskDetailDrawer = ({
                     {subtasks.length > 0 ? (
                       <Stack gap="xs">
                         {subtasks.map((subtask) => {
-                          const isDone = subtask.boardColumn?.isClosed === true;
+                          const isDone = !!subtask.completedAt;
                           return (
                             <Paper key={subtask.id} p="xs" radius="sm" style={{ backgroundColor: isDone ? "#f0fdf4" : "#f8f9fa", cursor: "pointer" }}
                               onClick={() => setSelectedSubtaskId(subtask.id)}

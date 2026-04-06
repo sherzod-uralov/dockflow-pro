@@ -806,9 +806,13 @@ export const TaskCommentsInline = ({ taskId }: TaskCommentsInlineProps) => {
   };
 
   const handleReply = (comment: TaskCommentGetResponse) => {
+    if (isRecording) cancelVoiceRecording();
     setReplyingTo(comment);
     setEditingComment(null);
-    setTimeout(() => inputRef.current?.focus(), 0);
+    setTimeout(() => {
+      inputRef.current?.focus();
+      inputRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }, 50);
   };
 
   const handleEdit = (comment: TaskCommentGetResponse) => {

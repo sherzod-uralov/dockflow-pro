@@ -28,13 +28,14 @@ import {
     IconSubtask,
     IconPlus,
     IconSearch,
+    IconCheck,
 } from "@tabler/icons-react";
 import {
     TaskGetResponse,
     TASK_PRIORITY_OPTIONS,
     TaskPriority,
 } from "../type/task.type";
-import { useUpdateTask } from "../hook/task.hook";
+import { useUpdateTask, useCompleteTask, useUncompleteTask } from "../hook/task.hook";
 import { useGetUserQuery } from "@/features/admin/admin-users/hook/user.hook";
 
 interface TaskCardProps {
@@ -72,7 +73,10 @@ const TaskCard = ({ task, onEdit, onDelete, onClick, onAddSubtask, draggable = f
         pageSize: 1000,
     });
     const updateTask = useUpdateTask();
+    const completeTask = useCompleteTask();
+    const uncompleteTask = useUncompleteTask();
     const allUsers = usersData?.data || [];
+    const isCompleted = !!task.completedAt;
 
     // Get current assignee user IDs from the assignees array
     const currentAssigneeIds = task.assignees?.map(a => a.user.id) || [];
@@ -241,7 +245,27 @@ const TaskCard = ({ task, onEdit, onDelete, onClick, onAddSubtask, draggable = f
                 </Group>
             </Group>
 
-            {/* Title - Inline editable */}
+            {/* Title row with complete checkbox */}
+            <Group gap={8} mb={10} wrap="nowrap" align="flex-start">
+                <ActionIcon
+                    variant={isCompleted ? "filled" : "outline"}
+                    size={20}
+                    radius="xl"
+                    color={isCompleted ? "green" : "gray"}
+                    style={{ flexShrink: 0, marginTop: 2 }}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        if (isCompleted) {
+                            uncompleteTask.mutate(task.id);
+                        } else {
+                            completeTask.mutate(task.id);
+                        }
+                    }}
+                    loading={completeTask.isLoading || uncompleteTask.isLoading}
+                >
+                    {isCompleted && <IconCheck size={12} />}
+                </ActionIcon>
+
             {isEditingTitle ? (
                 <input
                     ref={inputRef}
@@ -271,20 +295,32 @@ const TaskCard = ({ task, onEdit, onDelete, onClick, onAddSubtask, draggable = f
                         border: "none",
                         outline: "none",
                         background: "transparent",
+                        flex: 1,
                         fontSize: 14,
                         fontWeight: 500,
-                        color: "#212529",
+                        color: isCompleted ? "#868e96" : "#212529",
+                        textDecoration: isCompleted ? "line-through" : "none",
                         padding: 0,
-                        marginBottom: 10,
                         lineHeight: 1.4,
                         fontFamily: "inherit",
                     }}
                 />
             ) : (
-                <Text fw={500} size="sm" c="#212529" lineClamp={2} mb={10} lh={1.4}>
+                <Text
+                    fw={500}
+                    size="sm"
+                    c={isCompleted ? "dimmed" : "#212529"}
+                    lineClamp={2}
+                    lh={1.4}
+                    style={{
+                        textDecoration: isCompleted ? "line-through" : "none",
+                        flex: 1,
+                    }}
+                >
                     {task.title}
                 </Text>
             )}
+            </Group>
 
             {/* Bottom row: Assignee + Due date + Counts */}
             <Group justify="space-between" gap={8}>

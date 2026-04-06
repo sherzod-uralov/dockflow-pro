@@ -35,12 +35,17 @@ const Page = () => {
 
   useEffect(() => {
     if (wopiData && iframeRef.current) {
-      const WOPI_SRC = `${wopiData.wopiSrc}?access_token=${wopiData.accessToken}`;
-      const COLLABORA_URL = `https://office.nordicuniversity.org/browser/e808afa229/cool.html?WOPISrc=${encodeURIComponent(WOPI_SRC)}`;
+      const COLLABORA_HOST = process.env.NEXT_PUBLIC_COLLABORA_URL || "https://office.docverse.uz";
+      const API_BASE = (process.env.NEXT_PUBLIC_SERVER_URL || "https://api.docverse.uz/api/v1").replace(/\/+$/, "");
+      const WOPI_SRC = `${API_BASE}/wopi/files/${fileId}`;
 
-      iframeRef.current.src = COLLABORA_URL;
+      const collaboraUrl = new URL(`${COLLABORA_HOST}/browser/dist/cool.html`);
+      collaboraUrl.searchParams.set("WOPISrc", WOPI_SRC);
+      collaboraUrl.searchParams.set("access_token", wopiData.accessToken);
+
+      iframeRef.current.src = collaboraUrl.toString();
     }
-  }, [wopiData]);
+  }, [wopiData, fileId]);
 
   const handleSaveAnnotations = () => {
     if (!documentId || !xfdfContent) {
