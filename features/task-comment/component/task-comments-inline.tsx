@@ -544,8 +544,8 @@ const CommentBubble = ({
           </Text>
         )}
 
-        {/* Time */}
-        <Group gap={4} justify="flex-end" mt={2}>
+        {/* Time + Menu */}
+        <Group gap={4} justify="flex-end" mt={2} wrap="nowrap">
           {comment.isEdited && (
             <Text style={{ fontSize: 10 }} c={isOwn ? "rgba(255,255,255,0.5)" : "#adb5bd"} fs="italic">
               tahrirlangan
@@ -554,32 +554,35 @@ const CommentBubble = ({
           <Text style={{ fontSize: 10 }} c={isOwn ? "rgba(255,255,255,0.5)" : "#adb5bd"}>
             {timeAgo}
           </Text>
+          <Menu shadow="md" width={150} position={isOwn ? "bottom-start" : "bottom-end"} withinPortal>
+            <Menu.Target>
+              <ActionIcon
+                variant="subtle"
+                size={16}
+                radius="sm"
+                style={{ color: isOwn ? "rgba(255,255,255,0.5)" : "#adb5bd" }}
+              >
+                <IconDots size={12} />
+              </ActionIcon>
+            </Menu.Target>
+            <Menu.Dropdown>
+              <Menu.Item leftSection={<IconCornerDownRight size={14} />} onClick={() => onReply(comment)}>
+                Javob berish
+              </Menu.Item>
+              {isOwn && (
+                <Menu.Item leftSection={<IconEdit size={14} />} onClick={() => onEdit(comment)}>
+                  Tahrirlash
+                </Menu.Item>
+              )}
+              {isOwn && (
+                <Menu.Item leftSection={<IconTrash size={14} />} color="red" onClick={() => onDelete(comment.id)}>
+                  O'chirish
+                </Menu.Item>
+              )}
+            </Menu.Dropdown>
+          </Menu>
         </Group>
       </Box>
-
-      {/* Menu */}
-      <Menu shadow="md" width={150} position={isOwn ? "bottom-start" : "bottom-end"} withinPortal>
-        <Menu.Target>
-          <ActionIcon variant="subtle" size="xs" color="gray" style={{ flexShrink: 0, alignSelf: "center" }}>
-            <IconDots size={14} />
-          </ActionIcon>
-        </Menu.Target>
-        <Menu.Dropdown>
-          <Menu.Item leftSection={<IconCornerDownRight size={14} />} onClick={() => onReply(comment)}>
-            Javob berish
-          </Menu.Item>
-          {isOwn && (
-            <Menu.Item leftSection={<IconEdit size={14} />} onClick={() => onEdit(comment)}>
-              Tahrirlash
-            </Menu.Item>
-          )}
-          {isOwn && (
-            <Menu.Item leftSection={<IconTrash size={14} />} color="red" onClick={() => onDelete(comment.id)}>
-              O'chirish
-            </Menu.Item>
-          )}
-        </Menu.Dropdown>
-      </Menu>
     </Group>
   );
 };
@@ -830,7 +833,7 @@ export const TaskCommentsInline = ({ taskId }: TaskCommentsInlineProps) => {
     <Stack gap={0} style={{ height: "100%" }}>
       {/* Messages */}
       <ScrollArea
-        style={{ flex: 1, backgroundColor: "#efeae2", borderRadius: 8 }}
+        style={{ flex: 1, backgroundColor: "#fff", borderRadius: 8 }}
         viewportRef={scrollAreaRef}
         offsetScrollbars
       >
