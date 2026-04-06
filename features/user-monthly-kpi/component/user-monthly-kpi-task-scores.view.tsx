@@ -9,13 +9,18 @@ import {
   Stack,
   Loader,
   Center,
-  Table,
+  Accordion,
+  Progress,
 } from "@mantine/core";
 import {
   IconClipboardCheck,
   IconAlertTriangle,
+  IconCheck,
+  IconClock,
+  IconTarget,
 } from "@tabler/icons-react";
 import { useGetUserMonthlyKpiTaskScores } from "../hook/user-monthly-kpi.hook";
+import { UserMonthlyKpiTaskScore } from "../type/user-monthly-kpi.type";
 
 interface UserMonthlyKpiTaskScoresViewProps {
   userId: string;
@@ -27,7 +32,110 @@ const formatDate = (dateString: string) => {
   const date = new Date(dateString);
   const day = date.getDate();
   const months = ["yan", "fev", "mar", "apr", "may", "iyun", "iyul", "avg", "sen", "okt", "noy", "dek"];
-  return `${day}-${months[date.getMonth()]} ${date.getFullYear()}`;
+  return `${day}-${months[date.getMonth()]}`;
+};
+
+const ScoreItem = ({ ts, index }: { ts: UserMonthlyKpiTaskScore; index: number }) => {
+  const percentage = ts.baseScore > 0 ? Math.round((ts.earnedScore / ts.baseScore) * 100) : 0;
+  const isLate = ts.daysLate > 0;
+  const isPerfect = ts.earnedScore === ts.baseScore;
+
+  return (
+    <Accordion.Item value={ts.id}>
+      <Accordion.Control>
+        <Group justify="space-between" wrap="nowrap" pr="xs">
+          <Group gap="sm" wrap="nowrap">
+            <Box
+              w={28} h={28}
+              style={{
+                borderRadius: 8,
+                backgroundColor: isPerfect ? "#e6f9ee" : isLate ? "#fff3f3" : "#f0f4ff",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+              }}
+            >
+              {isPerfect ? (
+                <IconCheck size={14} color="#2ecc71" />
+              ) : isLate ? (
+                <IconAlertTriangle size={14} color="#e74c3c" />
+              ) : (
+                <IconTarget size={14} color="#3498db" />
+              )}
+            </Box>
+            <Box>
+              <Text size="sm" fw={500} c="#212529">
+                Vazifa #{index + 1}
+              </Text>
+              <Text size="xs" c="dimmed">
+                {formatDate(ts.completedDate)} bajarildi
+              </Text>
+            </Box>
+          </Group>
+          <Group gap="sm" wrap="nowrap">
+            {isLate && (
+              <Badge variant="light" color="red" size="xs" radius="sm">
+                {ts.daysLate} kun kech
+              </Badge>
+            )}
+            <Badge
+              variant="light"
+              color={isPerfect ? "green" : isLate ? "orange" : "blue"}
+              size="lg"
+              radius="sm"
+              fw={700}
+            >
+              {ts.earnedScore}/{ts.baseScore}
+            </Badge>
+          </Group>
+        </Group>
+      </Accordion.Control>
+      <Accordion.Panel>
+        <Stack gap="sm" pl={40}>
+          {/* Progress bar */}
+          <Box>
+            <Group justify="space-between" mb={4}>
+              <Text size="xs" c="dimmed">Samaradorlik</Text>
+              <Text size="xs" fw={600} c={isPerfect ? "#2ecc71" : "#495057"}>{percentage}%</Text>
+            </Group>
+            <Progress
+              value={percentage}
+              size="sm"
+              radius="xl"
+              color={isPerfect ? "green" : isLate ? "orange" : "blue"}
+            />
+          </Box>
+
+          {/* Details grid */}
+          <Group gap="lg">
+            <Box>
+              <Text size="xs" c="dimmed">Asosiy ball</Text>
+              <Text size="sm" fw={600}>{ts.baseScore}</Text>
+            </Box>
+            <Box>
+              <Text size="xs" c="dimmed">Olingan</Text>
+              <Text size="sm" fw={600} c={isPerfect ? "#2ecc71" : "#495057"}>{ts.earnedScore}</Text>
+            </Box>
+            <Box>
+              <Text size="xs" c="dimmed">Jarima</Text>
+              <Text size="sm" fw={600} c={ts.penaltyApplied > 0 ? "#e74c3c" : "#495057"}>
+                {ts.penaltyApplied > 0 ? `-${ts.penaltyApplied}` : "0"}
+              </Text>
+            </Box>
+            <Box>
+              <Text size="xs" c="dimmed">Muddat</Text>
+              <Text size="sm" fw={500}>{formatDate(ts.dueDate)}</Text>
+            </Box>
+            <Box>
+              <Text size="xs" c="dimmed">Kunlik jarima</Text>
+              <Text size="sm" fw={500}>{ts.breakdown.penaltyPerDay}</Text>
+            </Box>
+          </Group>
+        </Stack>
+      </Accordion.Panel>
+    </Accordion.Item>
+  );
 };
 
 const UserMonthlyKpiTaskScoresView = ({ userId, year, month }: UserMonthlyKpiTaskScoresViewProps) => {
@@ -56,113 +164,59 @@ const UserMonthlyKpiTaskScoresView = ({ userId, year, month }: UserMonthlyKpiTas
     );
   }
 
-  const totalEarned = taskScores.reduce((sum, ts) => sum + ts.earnedScore, 0);
-  const totalBase = taskScores.reduce((sum, ts) => sum + ts.baseScore, 0);
-  const totalPenalty = taskScores.reduce((sum, ts) => sum + ts.penaltyApplied, 0);
+  const totalEarned = taskScores.reduce((sum: number, ts: UserMonthlyKpiTaskScore) => sum + ts.earnedScore, 0);
+  const totalBase = taskScores.reduce((sum: number, ts: UserMonthlyKpiTaskScore) => sum + ts.baseScore, 0);
+  const totalPenalty = taskScores.reduce((sum: number, ts: UserMonthlyKpiTaskScore) => sum + ts.penaltyApplied, 0);
+  const onTimeCount = taskScores.filter((ts: UserMonthlyKpiTaskScore) => ts.daysLate === 0).length;
+  const overallPercent = totalBase > 0 ? Math.round((totalEarned / totalBase) * 100) : 0;
 
   return (
     <Stack gap="md">
-      {/* Summary */}
-      <Group gap="md">
-        <Paper p="sm" radius="sm" withBorder style={{ borderColor: "#e9ecef", flex: 1 }}>
-          <Text size="xs" c="dimmed">Asosiy ball</Text>
-          <Text size="lg" fw={700} c="#495057">{totalBase}</Text>
+      {/* Summary cards */}
+      <Group gap="sm" grow>
+        <Paper p="sm" radius="sm" style={{ backgroundColor: "#f0f4ff", border: "1px solid #dbe4ff" }}>
+          <Group gap={8}>
+            <IconTarget size={16} color="#3498db" />
+            <Text size="xs" c="#3498db" fw={600}>Yakuniy</Text>
+          </Group>
+          <Text size="xl" fw={700} c="#1e3a5f" mt={4}>{totalEarned}</Text>
+          <Text size="xs" c="dimmed">{totalBase} dan</Text>
         </Paper>
-        <Paper p="sm" radius="sm" withBorder style={{ borderColor: "#e9ecef", flex: 1 }}>
-          <Text size="xs" c="dimmed">Jarima</Text>
-          <Text size="lg" fw={700} c={totalPenalty > 0 ? "#e74c3c" : "#495057"}>
+        <Paper p="sm" radius="sm" style={{ backgroundColor: totalPenalty > 0 ? "#fff3f3" : "#f8f9fa", border: `1px solid ${totalPenalty > 0 ? "#fde2e2" : "#e9ecef"}` }}>
+          <Group gap={8}>
+            <IconAlertTriangle size={16} color={totalPenalty > 0 ? "#e74c3c" : "#adb5bd"} />
+            <Text size="xs" c={totalPenalty > 0 ? "#e74c3c" : "dimmed"} fw={600}>Jarima</Text>
+          </Group>
+          <Text size="xl" fw={700} c={totalPenalty > 0 ? "#e74c3c" : "#495057"} mt={4}>
             {totalPenalty > 0 ? `-${totalPenalty}` : "0"}
           </Text>
         </Paper>
-        <Paper p="sm" radius="sm" withBorder style={{ borderColor: "#e9ecef", flex: 1 }}>
-          <Text size="xs" c="dimmed">Yakuniy ball</Text>
-          <Text size="lg" fw={700} c="#1e3a5f">{totalEarned}</Text>
+        <Paper p="sm" radius="sm" style={{ backgroundColor: "#e6f9ee", border: "1px solid #c3e6cb" }}>
+          <Group gap={8}>
+            <IconCheck size={16} color="#2ecc71" />
+            <Text size="xs" c="#2ecc71" fw={600}>O'z vaqtida</Text>
+          </Group>
+          <Text size="xl" fw={700} c="#212529" mt={4}>{onTimeCount}/{taskScores.length}</Text>
+          <Text size="xs" c="dimmed">{overallPercent}% samaradorlik</Text>
         </Paper>
       </Group>
 
-      {/* Table */}
-      <Paper radius="sm" withBorder style={{ borderColor: "#e9ecef", overflow: "auto" }}>
-        <Table striped highlightOnHover>
-          <Table.Thead>
-            <Table.Tr>
-              <Table.Th>#</Table.Th>
-              <Table.Th>Asosiy ball</Table.Th>
-              <Table.Th>Olingan ball</Table.Th>
-              <Table.Th>Jarima</Table.Th>
-              <Table.Th>Kechikish</Table.Th>
-              <Table.Th>Muddat</Table.Th>
-              <Table.Th>Bajarilgan</Table.Th>
-            </Table.Tr>
-          </Table.Thead>
-          <Table.Tbody>
-            {taskScores.map((ts, index) => (
-              <Table.Tr key={ts.id}>
-                <Table.Td>
-                  <Text size="sm" c="dimmed">{index + 1}</Text>
-                </Table.Td>
-                <Table.Td>
-                  <Text size="sm" c="#495057">{ts.baseScore}</Text>
-                </Table.Td>
-                <Table.Td>
-                  <Badge
-                    variant="light"
-                    color={ts.earnedScore >= ts.baseScore ? "green" : "blue"}
-                    radius="sm"
-                  >
-                    {ts.earnedScore}
-                  </Badge>
-                </Table.Td>
-                <Table.Td>
-                  {ts.penaltyApplied > 0 ? (
-                    <Group gap={4}>
-                      <IconAlertTriangle size={14} color="#e74c3c" />
-                      <Text size="sm" c="red" fw={500}>-{ts.penaltyApplied}</Text>
-                    </Group>
-                  ) : (
-                    <Text size="sm" c="dimmed">0</Text>
-                  )}
-                </Table.Td>
-                <Table.Td>
-                  <Text size="sm" c={ts.daysLate > 0 ? "#e74c3c" : "#495057"} fw={ts.daysLate > 0 ? 500 : 400}>
-                    {ts.daysLate > 0 ? `${ts.daysLate} kun` : "—"}
-                  </Text>
-                </Table.Td>
-                <Table.Td>
-                  <Text size="sm" c="#495057">
-                    {formatDate(ts.dueDate)}
-                  </Text>
-                </Table.Td>
-                <Table.Td>
-                  <Text size="sm" c="#495057">
-                    {formatDate(ts.completedDate)}
-                  </Text>
-                </Table.Td>
-              </Table.Tr>
-            ))}
-          </Table.Tbody>
-          <Table.Tfoot>
-            <Table.Tr>
-              <Table.Td>
-                <Text size="sm" fw={600} c="#212529">Jami</Text>
-              </Table.Td>
-              <Table.Td>
-                <Text size="sm" fw={600}>{totalBase}</Text>
-              </Table.Td>
-              <Table.Td>
-                <Badge variant="filled" color="blue" radius="sm" size="lg">
-                  {totalEarned}
-                </Badge>
-              </Table.Td>
-              <Table.Td>
-                {totalPenalty > 0 && (
-                  <Text size="sm" fw={600} c="red">-{totalPenalty}</Text>
-                )}
-              </Table.Td>
-              <Table.Td colSpan={3} />
-            </Table.Tr>
-          </Table.Tfoot>
-        </Table>
-      </Paper>
+      {/* Accordion list */}
+      <Accordion
+        variant="separated"
+        radius="sm"
+        defaultValue={taskScores.length <= 5 ? taskScores.map((ts: UserMonthlyKpiTaskScore) => ts.id) : undefined}
+        multiple
+        styles={{
+          item: { border: "1px solid #e9ecef", backgroundColor: "#fff" },
+          control: { padding: "10px 12px" },
+          panel: { padding: "0 12px 12px" },
+        }}
+      >
+        {taskScores.map((ts: UserMonthlyKpiTaskScore, index: number) => (
+          <ScoreItem key={ts.id} ts={ts} index={index} />
+        ))}
+      </Accordion>
     </Stack>
   );
 };

@@ -87,64 +87,51 @@ const TaskScoreConfigPage = () => {
 
   const columns: DataTableColumn<TaskScoreConfigGetResponse>[] = [
     {
-      accessorKey: "priorityLevel",
-      header: "Daraja",
+      accessorKey: "priorityCode",
+      header: "Prioritet",
       cell: ({ row }) => (
-        <Badge variant="light" color="blue" radius="sm" size="lg">
-          {row.original.priorityLevel}
-        </Badge>
+        <Group gap={8} wrap="nowrap">
+          <Badge variant="filled" color="blue" radius="sm" size="sm" w={28} style={{ fontWeight: 700 }}>
+            {row.original.priorityLevel}
+          </Badge>
+          <Text size="sm" fw={600} c="#212529">
+            {row.original.priorityCode}
+          </Text>
+        </Group>
       ),
-      meta: { width: 80, truncate: false },
+      meta: { width: 130, truncate: false },
     },
     {
-      accessorKey: "priorityCode",
-      header: "Kod",
+      accessorKey: "baseScore",
+      header: "Ball",
       cell: ({ row }) => (
-        <Text size="sm" fw={600} c="#212529">
-          {row.original.priorityCode}
-        </Text>
+        <Text size="sm" fw={600} c="#2ecc71">{row.original.baseScore}</Text>
+      ),
+      meta: { width: 70 },
+    },
+    {
+      accessorKey: "recommendedDays",
+      header: "Muddat",
+      cell: ({ row }) => (
+        <Text size="sm" c="#495057">{row.original.recommendedDays} kun</Text>
       ),
       meta: { width: 80 },
     },
     {
-      accessorKey: "baseScore",
-      header: "Asosiy ball",
-      cell: ({ row }) => (
-        <Badge variant="light" color="green" radius="sm">
-          {row.original.baseScore}
-        </Badge>
-      ),
-      meta: { width: 100, truncate: false },
-    },
-    {
-      accessorKey: "recommendedDays",
-      header: "Tavsiya kunlar",
-      cell: ({ row }) => (
-        <Text size="sm" c="#495057">
-          {row.original.recommendedDays} kun
-        </Text>
-      ),
-      meta: { width: 120 },
-    },
-    {
       accessorKey: "penaltyPerDay",
-      header: "Kunlik jarima",
+      header: "Jarima/kun",
       cell: ({ row }) => (
-        <Badge variant="light" color="red" radius="sm">
-          {row.original.penaltyPerDay}
-        </Badge>
+        <Text size="sm" fw={500} c="#e74c3c">-{row.original.penaltyPerDay}</Text>
       ),
-      meta: { width: 110, truncate: false },
+      meta: { width: 90 },
     },
     {
       accessorKey: "maxPenaltyDays",
-      header: "Maks. jarima kun",
+      header: "Maks. kun",
       cell: ({ row }) => (
-        <Text size="sm" c="#495057">
-          {row.original.maxPenaltyDays ?? "—"}
-        </Text>
+        <Text size="sm" c="#495057">{row.original.maxPenaltyDays ?? "—"}</Text>
       ),
-      meta: { width: 130 },
+      meta: { width: 80 },
     },
     {
       accessorKey: "description",
@@ -154,25 +141,22 @@ const TaskScoreConfigPage = () => {
           {row.original.description || "—"}
         </Text>
       ),
-      meta: { minWidth: 150 },
+      meta: { minWidth: 160 },
     },
     {
       accessorKey: "isActive",
       header: "Holat",
       cell: ({ row }) => (
-        <Badge
-          variant="light"
-          color={row.original.isActive ? "green" : "gray"}
-          radius="sm"
-        >
-          {row.original.isActive ? "Faol" : "Nofaol"}
-        </Badge>
+        <Box w={8} h={8} style={{
+          borderRadius: "50%",
+          backgroundColor: row.original.isActive ? "#2ecc71" : "#adb5bd",
+        }} />
       ),
-      meta: { width: 90, truncate: false },
+      meta: { width: 50, truncate: false },
     },
     {
       id: "actions",
-      header: "Amallar",
+      header: "",
       cell: ({ row }) => (
         <Menu shadow="md" width={200} position="bottom-end">
           <Menu.Target>
@@ -181,36 +165,20 @@ const TaskScoreConfigPage = () => {
             </ActionIcon>
           </Menu.Target>
           <Menu.Dropdown>
-            <Menu.Item
-              leftSection={<IconEye size={16} />}
-              onClick={() => handleView(row.original)}
-            >
+            <Menu.Item leftSection={<IconEye size={16} />} onClick={() => handleView(row.original)}>
               Ko'rish
             </Menu.Item>
-            <Menu.Item
-              leftSection={<IconEdit size={16} />}
-              onClick={() => handleEdit(row.original)}
-            >
+            <Menu.Item leftSection={<IconEdit size={16} />} onClick={() => handleEdit(row.original)}>
               Tahrirlash
             </Menu.Item>
-            <Menu.Item
-              leftSection={<IconCopy size={16} />}
-              onClick={() => handleCopyToClipboard(row.original.id, "ID")}
-            >
-              ID nusxalash
-            </Menu.Item>
             <Menu.Divider />
-            <Menu.Item
-              color="red"
-              leftSection={<IconTrash size={16} />}
-              onClick={() => handleDeleteClick(row.original)}
-            >
+            <Menu.Item color="red" leftSection={<IconTrash size={16} />} onClick={() => handleDeleteClick(row.original)}>
               O'chirish
             </Menu.Item>
           </Menu.Dropdown>
         </Menu>
       ),
-      meta: { width: 80, truncate: false },
+      meta: { width: 50, truncate: false },
     },
   ];
 

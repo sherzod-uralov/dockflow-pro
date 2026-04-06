@@ -6,10 +6,10 @@ import {
   useModal,
 } from "@/components/shared/ui/custom-modal";
 import { ModalState } from "@/types/modal";
-import { IconArrowLeft, IconSend, IconTrash } from "@tabler/icons-react";
+import { IconArrowLeft, IconSend, IconTrash, IconDots } from "@tabler/icons-react";
 import { useState, FC, ReactNode, useEffect, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { Group } from "@mantine/core";
+import { Group, Menu, ActionIcon, Tooltip } from "@mantine/core";
 import {
   CustomAction,
   createEditAction,
@@ -161,12 +161,19 @@ const DocumentPage: FC<{ children: ReactNode }> = ({ children }) => {
     setSelectedDocument(null);
   }, [router]);
 
+  const MAX_VISIBLE_TABS = 5;
+  const allDocTypes = documentTypes?.data || [];
+  const visibleTypes = allDocTypes.slice(0, MAX_VISIBLE_TABS);
+  const overflowTypes = allDocTypes.slice(MAX_VISIBLE_TABS);
+  const isOverflowSelected = overflowTypes.some((t) => t.id === selectedTab);
+
   const tabs = [
     { value: "all", label: "Barchasi" },
-    ...(documentTypes?.data.map((type) => ({
-      value: type.id,
-      label: type.name,
-    })) || []),
+    ...visibleTypes.map((type) => ({ value: type.id, label: type.name })),
+    // Agar overflow'dan tanlangan bo'lsa — uni ko'rinadigan tab qilamiz
+    ...(isOverflowSelected
+      ? [{ value: selectedTab, label: allDocTypes.find((t) => t.id === selectedTab)?.name || "" }]
+      : []),
   ];
 
   const actionButtons = [
@@ -239,12 +246,37 @@ const DocumentPage: FC<{ children: ReactNode }> = ({ children }) => {
         totalCount={data?.count || 0}
         onPageChange={handlePageChange}
         rightPanelContent={children}
+        activeTab={selectedTab || "all"}
         onTabChange={(tab) => setSelectedTab(tab === "all" ? "" : tab)}
         selectedItemActions={actionButtons}
         filters={filterConfig}
         showFilters={false}
         additionalActions={
           <Group gap="xs">
+            {overflowTypes.length > 0 && (
+              <Menu shadow="md" width={220} position="bottom-end">
+                <Menu.Target>
+                  <Tooltip label={`Yana ${overflowTypes.length} ta tur`}>
+                    <ActionIcon variant="subtle" color="gray" radius="sm" size="md">
+                      <IconDots size={18} />
+                    </ActionIcon>
+                  </Tooltip>
+                </Menu.Target>
+                <Menu.Dropdown>
+                  <Menu.Label>Boshqa hujjat turlari</Menu.Label>
+                  {overflowTypes.map((type) => (
+                    <Menu.Item
+                      key={type.id}
+                      onClick={() => setSelectedTab(type.id)}
+                      fw={selectedTab === type.id ? 600 : 400}
+                      c={selectedTab === type.id ? "#1e3a5f" : undefined}
+                    >
+                      {type.name}
+                    </Menu.Item>
+                  ))}
+                </Menu.Dropdown>
+              </Menu>
+            )}
             <TourButton tourKey="document" variant="icon" size="md" />
             {selectedDocument && (
               <CustomAction

@@ -27,7 +27,7 @@ export const TimeEntryItem = ({ entry, onDelete }: TimeEntryItemProps) => (
           </Text>
           {entry.isBillable && (
             <Badge size="xs" color="green" variant="light">
-              Billable
+              Hisoblangan
             </Badge>
           )}
         </Group>

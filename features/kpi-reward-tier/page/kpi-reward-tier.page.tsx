@@ -88,67 +88,60 @@ const KpiRewardTierPage = () => {
   const columns: DataTableColumn<KpiRewardTierGetResponse>[] = [
     {
       accessorKey: "name",
-      header: "Nomi",
+      header: "Daraja",
       cell: ({ row }) => (
         <Group gap="sm" wrap="nowrap">
-          <Box
-            style={{
-              width: 10,
-              height: 10,
-              borderRadius: "50%",
-              backgroundColor: row.original.color || "#868e96",
-              flexShrink: 0,
-            }}
-          />
-          <Text size="sm" fw={500} c="#212529">
-            {row.original.name}
-          </Text>
+          <Box w={12} h={12} style={{
+            borderRadius: "50%",
+            backgroundColor: row.original.color || "#868e96",
+            flexShrink: 0,
+          }} />
+          <Box>
+            <Text size="sm" fw={500} c="#212529">{row.original.name}</Text>
+            {row.original.description && (
+              <Text size="xs" c="dimmed" lineClamp={1}>{row.original.description}</Text>
+            )}
+          </Box>
         </Group>
       ),
-      meta: { minWidth: 150 },
+      meta: { minWidth: 180 },
     },
     {
       accessorKey: "scoreRange",
-      header: "Ball oralig'i",
+      header: "Ball",
       cell: ({ row }) => (
-        <Badge variant="light" color="blue" radius="sm">
-          {row.original.minScore} — {row.original.maxScore}
-        </Badge>
+        <Text size="sm" c="#495057" fw={500}>
+          {row.original.minScore}–{row.original.maxScore}
+        </Text>
       ),
-      meta: { width: 140, truncate: false },
+      meta: { width: 90 },
     },
     {
       accessorKey: "rewardAmount",
-      header: "Mukofot (so'm)",
+      header: "So'm",
       cell: ({ row }) => (
-        <Text size="sm" c="#495057">
+        <Text size="sm" fw={500} c="#212529">
           {row.original.rewardAmount != null
             ? row.original.rewardAmount.toLocaleString("uz-UZ")
             : "—"}
         </Text>
       ),
-      meta: { width: 130 },
-    },
-    {
-      accessorKey: "rewardBhm",
-      header: "Mukofot (BHM)",
-      cell: ({ row }) => (
-        <Text size="sm" c="#495057">
-          {row.original.rewardBhm ?? "—"}
-        </Text>
-      ),
       meta: { width: 120 },
     },
     {
-      accessorKey: "isPenalty",
-      header: "Jarima",
+      accessorKey: "rewardBhm",
+      header: "BHM",
       cell: ({ row }) => (
-        <Badge
-          variant="light"
-          color={row.original.isPenalty ? "red" : "gray"}
-          radius="sm"
-        >
-          {row.original.isPenalty ? "Ha" : "Yo'q"}
+        <Text size="sm" c="#495057">{row.original.rewardBhm ?? "—"}</Text>
+      ),
+      meta: { width: 60 },
+    },
+    {
+      accessorKey: "isPenalty",
+      header: "Turi",
+      cell: ({ row }) => (
+        <Badge variant="light" color={row.original.isPenalty ? "red" : "green"} radius="sm" size="sm">
+          {row.original.isPenalty ? "Jarima" : "Mukofot"}
         </Badge>
       ),
       meta: { width: 90, truncate: false },
@@ -157,19 +150,16 @@ const KpiRewardTierPage = () => {
       accessorKey: "isActive",
       header: "Holat",
       cell: ({ row }) => (
-        <Badge
-          variant="light"
-          color={row.original.isActive ? "green" : "gray"}
-          radius="sm"
-        >
-          {row.original.isActive ? "Faol" : "Nofaol"}
-        </Badge>
+        <Box w={8} h={8} style={{
+          borderRadius: "50%",
+          backgroundColor: row.original.isActive ? "#2ecc71" : "#adb5bd",
+        }} />
       ),
-      meta: { width: 90, truncate: false },
+      meta: { width: 50, truncate: false },
     },
     {
       id: "actions",
-      header: "Amallar",
+      header: "",
       cell: ({ row }) => (
         <Menu shadow="md" width={200} position="bottom-end">
           <Menu.Target>
@@ -178,36 +168,20 @@ const KpiRewardTierPage = () => {
             </ActionIcon>
           </Menu.Target>
           <Menu.Dropdown>
-            <Menu.Item
-              leftSection={<IconEye size={16} />}
-              onClick={() => handleView(row.original)}
-            >
+            <Menu.Item leftSection={<IconEye size={16} />} onClick={() => handleView(row.original)}>
               Ko'rish
             </Menu.Item>
-            <Menu.Item
-              leftSection={<IconEdit size={16} />}
-              onClick={() => handleEdit(row.original)}
-            >
+            <Menu.Item leftSection={<IconEdit size={16} />} onClick={() => handleEdit(row.original)}>
               Tahrirlash
             </Menu.Item>
-            <Menu.Item
-              leftSection={<IconCopy size={16} />}
-              onClick={() => handleCopyToClipboard(row.original.id, "ID")}
-            >
-              ID nusxalash
-            </Menu.Item>
             <Menu.Divider />
-            <Menu.Item
-              color="red"
-              leftSection={<IconTrash size={16} />}
-              onClick={() => handleDeleteClick(row.original)}
-            >
+            <Menu.Item color="red" leftSection={<IconTrash size={16} />} onClick={() => handleDeleteClick(row.original)}>
               O'chirish
             </Menu.Item>
           </Menu.Dropdown>
         </Menu>
       ),
-      meta: { width: 80, truncate: false },
+      meta: { width: 50, truncate: false },
     },
   ];
 

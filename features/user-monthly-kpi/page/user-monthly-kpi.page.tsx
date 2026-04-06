@@ -14,6 +14,7 @@ import {
   Center,
   Avatar,
   Tabs,
+  Tooltip,
 } from "@mantine/core";
 import {
   IconSearch,
@@ -125,131 +126,75 @@ const UserMonthlyKpiPage = () => {
   const columns: DataTableColumn<UserMonthlyKpiGetResponse>[] = [
     {
       accessorKey: "user",
-      header: "Foydalanuvchi",
+      header: "Xodim",
       cell: ({ row }) => {
         const { user, department } = row.original;
         return user ? (
           <Group gap="sm" wrap="nowrap">
-            <Avatar
-              size="sm"
-              radius="xl"
-              src={user.avatarUrl}
-              style={{ backgroundColor: "#e7f5ff", flexShrink: 0 }}
-            >
-              <Text size="xs" c="#1e3a5f" fw={500}>
-                {getInitials(user.fullname)}
-              </Text>
+            <Avatar size="sm" radius="xl" src={user.avatarUrl} style={{ backgroundColor: "#e7f5ff", flexShrink: 0 }}>
+              <Text size="xs" c="#1e3a5f" fw={500}>{getInitials(user.fullname)}</Text>
             </Avatar>
             <Box>
-              <Text size="sm" fw={500} c="#212529" lineClamp={1}>
-                {user.fullname}
-              </Text>
-              {department && (
-                <Text size="xs" c="dimmed" lineClamp={1}>
-                  {department.name}
-                </Text>
-              )}
+              <Text size="sm" fw={500} c="#212529" lineClamp={1}>{user.fullname}</Text>
+              {department && <Text size="xs" c="dimmed" lineClamp={1}>{department.name}</Text>}
             </Box>
           </Group>
-        ) : (
-          <Text size="sm" c="dimmed">—</Text>
-        );
+        ) : <Text size="sm" c="dimmed">—</Text>;
       },
-      meta: { minWidth: 220 },
+      meta: { minWidth: 200 },
     },
     {
       accessorKey: "period",
       header: "Davr",
       cell: ({ row }) => (
         <Text size="sm" c="#495057">
-          {MONTH_OPTIONS.find((m) => m.value === String(row.original.month))?.label}{" "}
-          {row.original.year}
+          {MONTH_OPTIONS.find((m) => m.value === String(row.original.month))?.label} {row.original.year}
         </Text>
       ),
-      meta: { width: 130 },
+      meta: { width: 120 },
     },
     {
       accessorKey: "finalScore",
-      header: "Yakuniy ball",
-      cell: ({ row }) => (
-        <Badge
-          variant="light"
-          color={row.original.finalScore > 0 ? "blue" : "gray"}
-          radius="sm"
-          size="lg"
-        >
-          {row.original.finalScore}
-        </Badge>
-      ),
-      meta: { width: 110, truncate: false },
+      header: "Ball",
+      cell: ({ row }) => {
+        const { finalScore, totalBaseScore, totalPenalty } = row.original;
+        return (
+          <Tooltip label={`Asosiy: ${totalBaseScore} | Jarima: -${totalPenalty}`}>
+            <Badge variant="light" color={finalScore > 0 ? "blue" : "gray"} radius="sm" size="lg" style={{ cursor: "help" }}>
+              {finalScore}
+            </Badge>
+          </Tooltip>
+        );
+      },
+      meta: { width: 80, truncate: false },
     },
     {
-      accessorKey: "totalBaseScore",
-      header: "Asosiy ball",
-      cell: ({ row }) => (
-        <Text size="sm" c="#495057">{row.original.totalBaseScore}</Text>
-      ),
-      meta: { width: 100 },
-    },
-    {
-      accessorKey: "totalPenalty",
-      header: "Jarima",
-      cell: ({ row }) => (
-        <Badge
-          variant="light"
-          color={row.original.totalPenalty > 0 ? "red" : "gray"}
-          radius="sm"
-        >
-          {row.original.totalPenalty > 0 ? `-${row.original.totalPenalty}` : "0"}
-        </Badge>
-      ),
-      meta: { width: 90, truncate: false },
-    },
-    {
-      accessorKey: "tasksCompleted",
-      header: "Bajarilgan",
-      cell: ({ row }) => (
-        <Text size="sm" c="#495057">{row.original.tasksCompleted}</Text>
-      ),
-      meta: { width: 90 },
-    },
-    {
-      accessorKey: "tasksOnTime",
-      header: "O'z vaqtida",
-      cell: ({ row }) => (
-        <Badge variant="light" color="green" radius="sm">
-          {row.original.tasksOnTime}
-        </Badge>
-      ),
-      meta: { width: 100, truncate: false },
-    },
-    {
-      accessorKey: "tasksLate",
-      header: "Kechikkan",
-      cell: ({ row }) => (
-        <Badge
-          variant="light"
-          color={row.original.tasksLate > 0 ? "red" : "gray"}
-          radius="sm"
-        >
-          {row.original.tasksLate}
-        </Badge>
-      ),
-      meta: { width: 90, truncate: false },
+      accessorKey: "tasks",
+      header: "Vazifalar",
+      cell: ({ row }) => {
+        const { tasksCompleted, tasksOnTime, tasksLate } = row.original;
+        return (
+          <Group gap={6} wrap="nowrap">
+            <Tooltip label="Bajarilgan"><Badge variant="light" color="blue" radius="sm" size="sm">{tasksCompleted}</Badge></Tooltip>
+            <Tooltip label="O'z vaqtida"><Badge variant="light" color="green" radius="sm" size="sm">{tasksOnTime}</Badge></Tooltip>
+            {tasksLate > 0 && (
+              <Tooltip label="Kechikkan"><Badge variant="light" color="red" radius="sm" size="sm">{tasksLate}</Badge></Tooltip>
+            )}
+          </Group>
+        );
+      },
+      meta: { width: 140, truncate: false },
     },
     {
       accessorKey: "isFinalized",
       header: "Holat",
       cell: ({ row }) => (
-        <Badge
-          variant="light"
-          color={row.original.isFinalized ? "green" : "orange"}
-          radius="sm"
-        >
-          {row.original.isFinalized ? "Yakunlangan" : "Jarayonda"}
-        </Badge>
+        <Box w={8} h={8} style={{
+          borderRadius: "50%",
+          backgroundColor: row.original.isFinalized ? "#2ecc71" : "#f39c12",
+        }} />
       ),
-      meta: { width: 120, truncate: false },
+      meta: { width: 50, truncate: false },
     },
     {
       id: "actions",
@@ -262,24 +207,18 @@ const UserMonthlyKpiPage = () => {
             </ActionIcon>
           </Menu.Target>
           <Menu.Dropdown>
-            <Menu.Item
-              leftSection={<IconEye size={16} />}
-              onClick={() => handleViewScores(row.original)}
-            >
+            <Menu.Item leftSection={<IconEye size={16} />} onClick={() => handleViewScores(row.original)}>
               Balllarni ko'rish
             </Menu.Item>
             {!row.original.isFinalized && (
-              <Menu.Item
-                leftSection={<IconCheck size={16} />}
-                onClick={() => handleFinalizeClick(row.original)}
-              >
+              <Menu.Item leftSection={<IconCheck size={16} />} onClick={() => handleFinalizeClick(row.original)}>
                 Yakunlash
               </Menu.Item>
             )}
           </Menu.Dropdown>
         </Menu>
       ),
-      meta: { width: 60, truncate: false },
+      meta: { width: 50, truncate: false },
     },
   ];
 
@@ -374,6 +313,7 @@ const UserMonthlyKpiPage = () => {
                 setPageSize(size);
                 setPage(1);
               }}
+              onRowClick={handleViewScores}
               emptyMessage="Oylik KPI topilmadi"
             />
           )}

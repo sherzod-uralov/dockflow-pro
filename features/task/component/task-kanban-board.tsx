@@ -966,10 +966,23 @@ const TaskKanbanBoard = ({
         if (finalColId !== origColId) {
             const shouldDetach = !!origTask.parentTaskId;
 
+            // Update parent task
             updateTaskMutation.mutate({
                 id: activeId,
                 data: { boardColumnId: finalColId, ...(shouldDetach ? { parentTaskId: null } : {}) },
             });
+
+            // Cascade: update all descendant subtasks to same column
+            const descendantIds = dragDescendantsRef.current;
+            for (const descId of descendantIds) {
+                const descTask = tasks.find((t) => t.id === descId);
+                if (descTask && descTask.boardColumnId !== finalColId) {
+                    updateTaskMutation.mutate({
+                        id: descId,
+                        data: { boardColumnId: finalColId },
+                    });
+                }
+            }
 
             if (shouldDetach) {
                 setOptimisticTasks((prev) =>

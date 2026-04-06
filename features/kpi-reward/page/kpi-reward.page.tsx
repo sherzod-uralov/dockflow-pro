@@ -186,49 +186,35 @@ const KpiRewardPage = () => {
   const allColumns: DataTableColumn<KpiRewardGetResponse>[] = [
     {
       accessorKey: "user",
-      header: "Foydalanuvchi",
+      header: "Xodim",
       cell: ({ row }) =>
         row.original.user ? (
           <Group gap="sm" wrap="nowrap">
-            <Avatar
-              size="sm"
-              radius="xl"
-              src={row.original.user.avatarUrl}
-              style={{ backgroundColor: "#e7f5ff", flexShrink: 0 }}
-            >
-              <Text size="xs" c="#1e3a5f" fw={500}>
-                {getInitials(row.original.user.fullname)}
-              </Text>
+            <Avatar size="sm" radius="xl" src={row.original.user.avatarUrl} style={{ backgroundColor: "#e7f5ff", flexShrink: 0 }}>
+              <Text size="xs" c="#1e3a5f" fw={500}>{getInitials(row.original.user.fullname)}</Text>
             </Avatar>
-            <Text size="sm" fw={500} c="#212529" lineClamp={1}>
-              {row.original.user.fullname}
-            </Text>
+            <Text size="sm" fw={500} c="#212529" lineClamp={1}>{row.original.user.fullname}</Text>
           </Group>
-        ) : (
-          <Text size="sm" c="dimmed">—</Text>
-        ),
-      meta: { minWidth: 180 },
+        ) : <Text size="sm" c="dimmed">—</Text>,
+      meta: { minWidth: 170 },
     },
     {
       accessorKey: "period",
       header: "Davr",
       cell: ({ row }) => (
         <Text size="sm" c="#495057">
-          {MONTH_OPTIONS.find((m) => m.value === String(row.original.month))?.label}{" "}
-          {row.original.year}
+          {MONTH_OPTIONS.find((m) => m.value === String(row.original.month))?.label} {row.original.year}
         </Text>
       ),
-      meta: { width: 130 },
+      meta: { width: 120 },
     },
     {
       accessorKey: "finalScore",
       header: "Ball",
       cell: ({ row }) => (
-        <Badge variant="light" color="blue" radius="sm">
-          {row.original.finalScore}
-        </Badge>
+        <Badge variant="light" color="blue" radius="sm" size="sm">{row.original.finalScore}</Badge>
       ),
-      meta: { width: 80, truncate: false },
+      meta: { width: 70, truncate: false },
     },
     {
       accessorKey: "rewardTier",
@@ -236,57 +222,34 @@ const KpiRewardPage = () => {
       cell: ({ row }) => {
         const tier = row.original.rewardTier;
         return tier ? (
-          <Badge
-            variant="light"
-            radius="sm"
-            style={{ backgroundColor: `${tier.color}20`, color: tier.color }}
-          >
+          <Badge variant="light" radius="sm" size="sm" style={{ backgroundColor: `${tier.color}20`, color: tier.color }}>
             {tier.name}
           </Badge>
-        ) : (
-          <Text size="sm" c="dimmed">—</Text>
-        );
+        ) : <Text size="sm" c="dimmed">—</Text>;
       },
-      meta: { width: 110, truncate: false },
+      meta: { width: 100, truncate: false },
     },
     {
       accessorKey: "rewardAmount",
-      header: "Mukofot (so'm)",
+      header: "So'm",
       cell: ({ row }) => (
-        <Text size="sm" fw={500} c="#212529">
-          {row.original.rewardAmount.toLocaleString("uz-UZ")}
-        </Text>
+        <Text size="sm" fw={500} c="#212529">{row.original.rewardAmount?.toLocaleString("uz-UZ") ?? "—"}</Text>
       ),
-      meta: { width: 140 },
+      meta: { width: 120 },
     },
     {
       accessorKey: "rewardBhm",
       header: "BHM",
       cell: ({ row }) => (
-        <Text size="sm" c="#495057">{row.original.rewardBhm}</Text>
+        <Text size="sm" c="#495057">{row.original.rewardBhm ?? "—"}</Text>
       ),
-      meta: { width: 70 },
-    },
-    {
-      accessorKey: "isPenalty",
-      header: "Turi",
-      cell: ({ row }) => (
-        <Badge
-          variant="light"
-          color={row.original.isPenalty ? "red" : "green"}
-          radius="sm"
-          size="sm"
-        >
-          {row.original.isPenalty ? "Jarima" : "Mukofot"}
-        </Badge>
-      ),
-      meta: { width: 90, truncate: false },
+      meta: { width: 60 },
     },
     {
       accessorKey: "status",
       header: "Holat",
       cell: ({ row }) => getStatusBadge(row.original.status),
-      meta: { width: 120, truncate: false },
+      meta: { width: 110, truncate: false },
     },
     {
       id: "actions",
@@ -296,49 +259,26 @@ const KpiRewardPage = () => {
         return (
           <Menu shadow="md" width={200} position="bottom-end">
             <Menu.Target>
-              <ActionIcon variant="subtle" color="gray" radius="sm">
+              <ActionIcon variant="subtle" color="gray" radius="sm" onClick={(e: React.MouseEvent) => e.stopPropagation()}>
                 <IconDotsVertical size={18} />
               </ActionIcon>
             </Menu.Target>
             <Menu.Dropdown>
-              <Menu.Item
-                leftSection={<IconEye size={16} />}
-                onClick={() => handleView(reward)}
-              >
-                Ko'rish
-              </Menu.Item>
+              <Menu.Item leftSection={<IconEye size={16} />} onClick={() => handleView(reward)}>Ko'rish</Menu.Item>
               {reward.status === KpiRewardStatus.PENDING && (
                 <>
-                  <Menu.Item
-                    leftSection={<IconCheck size={16} />}
-                    color="blue"
-                    onClick={() => handleApproveClick(reward)}
-                  >
-                    Tasdiqlash
-                  </Menu.Item>
-                  <Menu.Item
-                    leftSection={<IconX size={16} />}
-                    color="red"
-                    onClick={() => handleRejectClick(reward)}
-                  >
-                    Rad etish
-                  </Menu.Item>
+                  <Menu.Item leftSection={<IconCheck size={16} />} color="blue" onClick={() => handleApproveClick(reward)}>Tasdiqlash</Menu.Item>
+                  <Menu.Item leftSection={<IconX size={16} />} color="red" onClick={() => handleRejectClick(reward)}>Rad etish</Menu.Item>
                 </>
               )}
               {reward.status === KpiRewardStatus.APPROVED && (
-                <Menu.Item
-                  leftSection={<IconCash size={16} />}
-                  color="green"
-                  onClick={() => handlePayClick(reward)}
-                >
-                  To'lash
-                </Menu.Item>
+                <Menu.Item leftSection={<IconCash size={16} />} color="green" onClick={() => handlePayClick(reward)}>To'lash</Menu.Item>
               )}
             </Menu.Dropdown>
           </Menu>
         );
       },
-      meta: { width: 60, truncate: false },
+      meta: { width: 50, truncate: false },
     },
   ];
 
@@ -348,21 +288,18 @@ const KpiRewardPage = () => {
       header: "Davr",
       cell: ({ row }) => (
         <Text size="sm" c="#495057">
-          {MONTH_OPTIONS.find((m) => m.value === String(row.original.month))?.label}{" "}
-          {row.original.year}
+          {MONTH_OPTIONS.find((m) => m.value === String(row.original.month))?.label} {row.original.year}
         </Text>
       ),
-      meta: { width: 130 },
+      meta: { width: 120 },
     },
     {
       accessorKey: "finalScore",
       header: "Ball",
       cell: ({ row }) => (
-        <Badge variant="light" color="blue" radius="sm">
-          {row.original.finalScore}
-        </Badge>
+        <Badge variant="light" color="blue" radius="sm" size="sm">{row.original.finalScore}</Badge>
       ),
-      meta: { width: 80, truncate: false },
+      meta: { width: 70, truncate: false },
     },
     {
       accessorKey: "rewardTier",
@@ -370,72 +307,34 @@ const KpiRewardPage = () => {
       cell: ({ row }) => {
         const tier = row.original.rewardTier;
         return tier ? (
-          <Badge
-            variant="light"
-            radius="sm"
-            style={{ backgroundColor: `${tier.color}20`, color: tier.color }}
-          >
+          <Badge variant="light" radius="sm" size="sm" style={{ backgroundColor: `${tier.color}20`, color: tier.color }}>
             {tier.name}
           </Badge>
-        ) : (
-          <Text size="sm" c="dimmed">—</Text>
-        );
+        ) : <Text size="sm" c="dimmed">—</Text>;
       },
-      meta: { width: 110, truncate: false },
+      meta: { width: 100, truncate: false },
     },
     {
       accessorKey: "rewardAmount",
-      header: "Mukofot (so'm)",
+      header: "So'm",
       cell: ({ row }) => (
-        <Text size="sm" fw={500} c="#212529">
-          {row.original.rewardAmount.toLocaleString("uz-UZ")}
-        </Text>
+        <Text size="sm" fw={500} c="#212529">{row.original.rewardAmount?.toLocaleString("uz-UZ") ?? "—"}</Text>
       ),
-      meta: { width: 140 },
+      meta: { width: 120 },
     },
     {
       accessorKey: "rewardBhm",
       header: "BHM",
       cell: ({ row }) => (
-        <Text size="sm" c="#495057">{row.original.rewardBhm}</Text>
+        <Text size="sm" c="#495057">{row.original.rewardBhm ?? "—"}</Text>
       ),
-      meta: { width: 70 },
-    },
-    {
-      accessorKey: "isPenalty",
-      header: "Turi",
-      cell: ({ row }) => (
-        <Badge
-          variant="light"
-          color={row.original.isPenalty ? "red" : "green"}
-          radius="sm"
-          size="sm"
-        >
-          {row.original.isPenalty ? "Jarima" : "Mukofot"}
-        </Badge>
-      ),
-      meta: { width: 90, truncate: false },
+      meta: { width: 60 },
     },
     {
       accessorKey: "status",
       header: "Holat",
       cell: ({ row }) => getStatusBadge(row.original.status),
-      meta: { width: 120, truncate: false },
-    },
-    {
-      id: "actions",
-      header: "",
-      cell: ({ row }) => (
-        <ActionIcon
-          variant="subtle"
-          color="gray"
-          radius="sm"
-          onClick={() => handleView(row.original)}
-        >
-          <IconEye size={18} />
-        </ActionIcon>
-      ),
-      meta: { width: 60, truncate: false },
+      meta: { width: 110, truncate: false },
     },
   ];
 
@@ -469,7 +368,7 @@ const KpiRewardPage = () => {
             leftSection={<IconChecks size={18} />}
             onClick={bulkApproveModal.openModal}
             radius="sm"
-            color="blue"
+            style={{ backgroundColor: "#1e3a5f" }}
           >
             Barchasini tasdiqlash ({pendingCount})
           </Button>
@@ -540,6 +439,7 @@ const KpiRewardPage = () => {
                 setPageSize(size);
                 setPage(1);
               }}
+              onRowClick={handleView}
               emptyMessage="Mukofot topilmadi"
             />
           )}
@@ -560,6 +460,7 @@ const KpiRewardPage = () => {
               pageSize={50}
               onPageChange={() => {}}
               onPageSizeChange={() => {}}
+              onRowClick={handleView}
               emptyMessage="Mukofot topilmadi"
             />
           )}

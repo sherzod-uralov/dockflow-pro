@@ -70,6 +70,7 @@ interface DataTableProps<TData, TValue = unknown> {
   emptyMessage?: string;
   showSelectedCount?: boolean;
   onRowSelect?: (rows: TData[]) => void;
+  onRowClick?: (row: TData) => void;
   totalCount?: number;
   currentPage?: number;
   onPageChange?: (page: number) => void;
@@ -87,6 +88,7 @@ export function DataTable<TData, TValue = unknown>({
   pageSizeOptions = [10, 20, 50, 100],
   emptyMessage = "Ma'lumot topilmadi",
   onRowSelect,
+  onRowClick,
   totalCount,
   currentPage = 1,
   onPageChange,
@@ -251,9 +253,11 @@ export function DataTable<TData, TValue = unknown>({
                   <Table.Tr
                     key={row.id}
                     data-selected={row.getIsSelected() || undefined}
+                    onClick={() => onRowClick?.(row.original)}
                     style={{
                       backgroundColor: row.getIsSelected() ? "#f8f9fa" : undefined,
                       borderBottom: "1px solid #f1f3f5",
+                      cursor: onRowClick ? "pointer" : undefined,
                     }}
                   >
                     {row.getVisibleCells().map((cell) => {

@@ -138,7 +138,7 @@ const KpiRewardView = ({ reward }: KpiRewardViewProps) => {
           </Group>
           <Stack gap={4}>
             <Text size="lg" fw={600} c="#212529">
-              {reward.rewardAmount.toLocaleString("uz-UZ")} so'm
+              {reward.rewardAmount?.toLocaleString("uz-UZ") ?? "—"} so'm
             </Text>
             <Text size="sm" c="#495057">
               {reward.rewardBhm} BHM

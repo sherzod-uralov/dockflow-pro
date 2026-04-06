@@ -69,6 +69,7 @@ export interface UserMonthlyKpiTaskScore {
 }
 
 export interface UserMonthlyKpiLeaderboardEntry {
+  rank: number;
   userId: string;
   user: {
     id: string;
@@ -76,8 +77,13 @@ export interface UserMonthlyKpiLeaderboardEntry {
     username: string;
     avatarUrl?: string;
   };
-  totalScore: number;
-  rank: number;
+  department?: {
+    id: string;
+    name: string;
+  };
+  finalScore: number;
+  tasksCompleted?: number;
+  tasksOnTime?: number;
 }
 
 export interface UserMonthlyKpiHistoryParams {

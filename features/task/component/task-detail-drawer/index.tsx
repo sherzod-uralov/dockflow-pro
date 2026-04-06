@@ -23,6 +23,7 @@ import {
   Popover,
   Checkbox,
   Drawer,
+  Progress,
 } from "@mantine/core";
 import {
   IconX,
@@ -45,6 +46,7 @@ import {
   IconChevronRight,
   IconMaximize,
   IconMinimize,
+  IconSearch,
 } from "@tabler/icons-react";
 import { DatePickerInput } from "@mantine/dates";
 import { format } from "date-fns";
@@ -109,57 +111,33 @@ export const TaskDetailDrawer = ({
   const [showSubtaskForm, setShowSubtaskForm] = useState(false);
   const [selectedSubtaskId, setSelectedSubtaskId] = useState<string | null>(null);
   const [assigneePopoverOpen, setAssigneePopoverOpen] = useState(false);
+  const [assigneeSearch, setAssigneeSearch] = useState("");
   const [isFullscreen, setIsFullscreen] = useState(false);
 
-  // Users for assignee selection
-  const { data: usersData } = useGetUserQuery({
-    pageNumber: 1,
-    pageSize: 1000,
-  });
+  const { data: usersData } = useGetUserQuery({ pageNumber: 1, pageSize: 1000 });
   const allUsers = usersData?.data || [];
 
-  // Task data
   const { data: task, isLoading: taskLoading } = useGetTaskById(taskId || "", {
     enabled: !!taskId && isOpen,
   });
   const updateTask = useUpdateTask();
   const deleteTask = useDeleteTask();
 
-  // Related data
-  const { data: commentsData } = useGetAllTaskComments({
-    taskId: taskId || "",
-    pageSize: 1,
-  });
-  const { data: attachmentsData } = useGetAllTaskAttachments({
-    taskId: taskId || "",
-    pageSize: 1,
-  });
-  const { data: checklistsData } = useGetAllTaskChecklists({
-    taskId: taskId || "",
-    pageSize: 1,
-  });
-  const { data: timeEntriesData } = useGetAllTaskTimeEntries({
-    taskId: taskId || "",
-    pageSize: 100,
-  });
-  const { data: activitiesData } = useGetAllTaskActivities({
-    taskId: taskId || "",
-    pageSize: 50,
-  });
-  const { data: watchersData } = useGetAllTaskWatchers({
-    taskId: taskId || "",
-  });
-  const { data: dependenciesData } = useGetAllTaskDependencies({
-    taskId: taskId || "",
-  });
+  const shouldFetchRelated = !!taskId && isOpen;
 
-  // Subtasks
+  const { data: commentsData } = useGetAllTaskComments(shouldFetchRelated ? { taskId, pageSize: 1 } : undefined);
+  const { data: attachmentsData } = useGetAllTaskAttachments(shouldFetchRelated ? { taskId, pageSize: 1 } : undefined);
+  const { data: checklistsData } = useGetAllTaskChecklists(shouldFetchRelated ? { taskId, pageSize: 1 } : undefined);
+  const { data: timeEntriesData } = useGetAllTaskTimeEntries(shouldFetchRelated ? { taskId, pageSize: 100 } : undefined);
+  const { data: activitiesData } = useGetAllTaskActivities(shouldFetchRelated ? { taskId, pageSize: 50 } : undefined);
+  const { data: watchersData } = useGetAllTaskWatchers(shouldFetchRelated ? { taskId } : undefined);
+  const { data: dependenciesData } = useGetAllTaskDependencies(shouldFetchRelated ? { taskId } : undefined);
+
   const { data: subtasksData } = useGetAllTasks({
     parentTaskId: taskId || undefined,
     pageSize: 100,
   });
 
-  // Parent task (if this is a subtask)
   const { data: parentTask } = useGetTaskById(task?.parentTaskId || "", {
     enabled: !!task?.parentTaskId,
   });
@@ -177,18 +155,8 @@ export const TaskDetailDrawer = ({
   const watchers = watchersData?.data || [];
   const dependencies = dependenciesData?.data || [];
   const subtasks = subtasksData?.data || [];
-
   const isWatching = watchers.length > 0;
-
-  const handleSubtaskToggleComplete = (subtaskId: string, isClosed: boolean) => {
-    // When toggling, we update the boardColumnId - the server handles mapping to the correct column
-    // For now, we just trigger a generic update; the board column logic is server-side
-    updateTask.mutate({ id: subtaskId, data: {} });
-  };
-
-  const handleSubtaskClick = (subtaskId: string) => {
-    setSelectedSubtaskId(subtaskId);
-  };
+  const completedSubtasks = subtasks.filter((s) => s.boardColumn?.isClosed === true);
 
   const handleUpdateField = (field: string, value: unknown) => {
     if (!taskId) return;
@@ -212,25 +180,18 @@ export const TaskDetailDrawer = ({
   const handleDelete = () => {
     if (!taskId) return;
     deleteTask.mutate(taskId, {
-      onSuccess: () => {
-        onClose();
-        onDelete?.();
-      },
+      onSuccess: () => { onClose(); onDelete?.(); },
     });
   };
 
   const toggleWatch = () => {
     if (!taskId) return;
-    if (isWatching) {
-      unwatchTask.mutate(taskId);
-    } else {
-      watchTask.mutate(taskId);
-    }
+    isWatching ? unwatchTask.mutate(taskId) : watchTask.mutate(taskId);
   };
 
   if (!taskId) return null;
 
-  const completedSubtasks = subtasks.filter((s) => s.boardColumn?.isClosed === true);
+  const totalTimeLogged = timeEntries.reduce((sum, e) => sum + (e.hours || 0), 0);
 
   return (
     <>
@@ -241,9 +202,7 @@ export const TaskDetailDrawer = ({
         size={isFullscreen ? "100%" : "xl"}
         padding={0}
         withCloseButton={false}
-        styles={{
-          body: { height: "100%", display: "flex", flexDirection: "column" },
-        }}
+        styles={{ body: { height: "100%", display: "flex", flexDirection: "column" } }}
       >
         {taskLoading ? (
           <Box style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%" }}>
@@ -251,527 +210,315 @@ export const TaskDetailDrawer = ({
           </Box>
         ) : task ? (
           <Box style={{ display: "flex", flexDirection: "column", height: "100%", overflow: "hidden" }}>
-              {/* Header */}
-              <Box
-                p="md"
-                style={{
-                  borderBottom: "1px solid #e9ecef",
-                  flexShrink: 0,
-                }}
-              >
-                <Group justify="space-between" mb="sm">
-                  <Group gap="sm">
-                    {task.project && (
-                      <Badge
-                        size="sm"
-                        variant="light"
-                        style={{
-                          backgroundColor: `${task.project.color || "#1e3a5f"}20`,
-                          color: task.project.color || "#1e3a5f",
-                        }}
-                      >
-                        {task.project.name}
-                      </Badge>
-                    )}
-                    <StatusBadge boardColumn={task.boardColumn} />
-                    <PriorityBadge priority={task.priority} />
-                  </Group>
-                  <Group gap="xs">
-                    <Tooltip label={isWatching ? "Kuzatishni to'xtatish" : "Kuzatish"}>
-                      <ActionIcon
-                        variant="subtle"
-                        color={isWatching ? "blue" : "gray"}
-                        onClick={toggleWatch}
-                        loading={watchTask.isLoading || unwatchTask.isLoading}
-                      >
-                        {isWatching ? <IconEye size={18} /> : <IconEyeOff size={18} />}
-                      </ActionIcon>
-                    </Tooltip>
-                    <Tooltip label={isFullscreen ? "Kichraytirish" : "Kattalashtirish"}>
-                      <ActionIcon
-                        variant="subtle"
-                        color="gray"
-                        onClick={() => setIsFullscreen(!isFullscreen)}
-                      >
-                        {isFullscreen ? <IconMinimize size={18} /> : <IconMaximize size={18} />}
-                      </ActionIcon>
-                    </Tooltip>
-                    <Menu shadow="md" width={150}>
-                      <Menu.Target>
-                        <ActionIcon variant="subtle" color="gray">
-                          <IconDots size={18} />
-                        </ActionIcon>
-                      </Menu.Target>
-                      <Menu.Dropdown>
-                        <Menu.Item
-                          leftSection={<IconTrash size={14} />}
-                          color="red"
-                          onClick={handleDelete}
-                        >
-                          O'chirish
-                        </Menu.Item>
-                      </Menu.Dropdown>
-                    </Menu>
-                    <ActionIcon variant="subtle" color="gray" onClick={onClose}>
-                      <IconX size={18} />
-                    </ActionIcon>
-                  </Group>
+            {/* ─── Header ─── */}
+            <Box p="md" style={{ borderBottom: "1px solid #e9ecef", flexShrink: 0 }}>
+              <Group justify="space-between" mb="sm">
+                <Group gap="sm">
+                  {task.project && (
+                    <Badge size="sm" variant="light" style={{ backgroundColor: `${task.project.color || "#1e3a5f"}20`, color: task.project.color || "#1e3a5f" }}>
+                      {task.project.key}-{task.taskNumber}
+                    </Badge>
+                  )}
+                  <StatusBadge boardColumn={task.boardColumn} />
+                  <PriorityBadge priority={task.priority} />
+                  {task.score != null && task.score > 0 && (
+                    <Badge size="sm" variant="light" color="blue">{task.score} ball</Badge>
+                  )}
                 </Group>
+                <Group gap="xs">
+                  <Tooltip label={isWatching ? "Kuzatishni to'xtatish" : "Kuzatish"}>
+                    <ActionIcon variant="subtle" color={isWatching ? "blue" : "gray"} onClick={toggleWatch} loading={watchTask.isLoading || unwatchTask.isLoading}>
+                      {isWatching ? <IconEye size={18} /> : <IconEyeOff size={18} />}
+                    </ActionIcon>
+                  </Tooltip>
+                  <Tooltip label={isFullscreen ? "Kichraytirish" : "Kattalashtirish"}>
+                    <ActionIcon variant="subtle" color="gray" onClick={() => setIsFullscreen(!isFullscreen)}>
+                      {isFullscreen ? <IconMinimize size={18} /> : <IconMaximize size={18} />}
+                    </ActionIcon>
+                  </Tooltip>
+                  <Menu shadow="md" width={160}>
+                    <Menu.Target>
+                      <ActionIcon variant="subtle" color="gray"><IconDots size={18} /></ActionIcon>
+                    </Menu.Target>
+                    <Menu.Dropdown>
+                      <Menu.Item leftSection={<IconTrash size={14} />} color="red" onClick={handleDelete}>
+                        O'chirish
+                      </Menu.Item>
+                    </Menu.Dropdown>
+                  </Menu>
+                  <ActionIcon variant="subtle" color="gray" onClick={onClose}>
+                    <IconX size={18} />
+                  </ActionIcon>
+                </Group>
+              </Group>
 
-                {/* Title */}
-                {isEditingTitle ? (
-                  <TextInput
-                    value={editTitle}
-                    onChange={(e) => setEditTitle(e.target.value)}
-                    onBlur={handleSaveTitle}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") handleSaveTitle();
-                      if (e.key === "Escape") {
-                        setIsEditingTitle(false);
-                        setEditTitle(task.title);
-                      }
-                    }}
-                    autoFocus
-                    size="md"
-                    styles={{
-                      input: {
-                        fontSize: 18,
-                        fontWeight: 600,
-                        border: "none",
-                        backgroundColor: "transparent",
-                        padding: 0,
-                      },
-                    }}
-                  />
-                ) : (
-                  <Text
-                    size="lg"
-                    fw={600}
-                    c="#212529"
-                    style={{ cursor: "pointer" }}
-                    onClick={() => {
-                      setEditTitle(task.title);
-                      setIsEditingTitle(true);
-                    }}
-                  >
-                    {task.title}
-                  </Text>
-                )}
-              </Box>
+              {/* Sarlavha */}
+              {isEditingTitle ? (
+                <TextInput
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  onBlur={handleSaveTitle}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleSaveTitle();
+                    if (e.key === "Escape") { setIsEditingTitle(false); setEditTitle(task.title); }
+                  }}
+                  autoFocus
+                  size="md"
+                  styles={{ input: { fontSize: 18, fontWeight: 600, border: "none", backgroundColor: "transparent", padding: 0 } }}
+                />
+              ) : (
+                <Group gap={6} style={{ cursor: "pointer" }} onClick={() => { setEditTitle(task.title); setIsEditingTitle(true); }}>
+                  <Text size="lg" fw={600} c="#212529">{task.title}</Text>
+                  <IconEdit size={14} color="#adb5bd" />
+                </Group>
+              )}
+            </Box>
 
-              {/* Tabs */}
-              <Tabs
-                value={activeTab}
-                onChange={setActiveTab}
-                style={{
-                  flex: 1,
-                  display: "flex",
-                  flexDirection: "column",
-                  overflow: "hidden",
-                  minHeight: 0,
-                }}
-              >
-                <Tabs.List px="md" style={{ flexShrink: 0 }}>
-                  <Tabs.Tab value="details" leftSection={<IconEdit size={14} />}>
-                    Ma'lumot
-                  </Tabs.Tab>
-                  <Tabs.Tab
-                    value="comments"
-                    leftSection={<IconMessage size={14} />}
-                    rightSection={
-                      commentsCount > 0 ? (
-                        <Badge size="xs" variant="light" color="blue">
-                          {commentsCount}
-                        </Badge>
-                      ) : null
-                    }
-                  >
-                    Izohlar
-                  </Tabs.Tab>
-                  <Tabs.Tab
-                    value="attachments"
-                    leftSection={<IconPaperclip size={14} />}
-                    rightSection={
-                      attachmentsCount > 0 ? (
-                        <Badge size="xs" variant="light" color="blue">
-                          {attachmentsCount}
-                        </Badge>
-                      ) : null
-                    }
-                  >
-                    Fayllar
-                  </Tabs.Tab>
-                  <Tabs.Tab
-                    value="checklists"
-                    leftSection={<IconChecklist size={14} />}
-                    rightSection={
-                      checklistsCount > 0 ? (
-                        <Badge size="xs" variant="light" color="blue">
-                          {checklistsCount}
-                        </Badge>
-                      ) : null
-                    }
-                  >
-                    Checklist
-                  </Tabs.Tab>
-                  <Tabs.Tab
-                    value="subtasks"
-                    leftSection={<IconSubtask size={14} />}
-                    rightSection={
-                      subtasks.length > 0 ? (
-                        <Badge size="xs" variant="light" color="blue">
-                          {completedSubtasks.length}/{subtasks.length}
-                        </Badge>
-                      ) : null
-                    }
-                  >
-                    Subtasks
-                  </Tabs.Tab>
-                </Tabs.List>
+            {/* ─── Tab'lar ─── */}
+            <Tabs value={activeTab} onChange={setActiveTab} style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", minHeight: 0 }}>
+              <Tabs.List px="md" style={{ flexShrink: 0 }}>
+                <Tabs.Tab value="details">Tafsilot</Tabs.Tab>
+                <Tabs.Tab value="comments" rightSection={commentsCount > 0 ? <Badge size="xs" variant="light" color="blue" radius="xl">{commentsCount}</Badge> : null}>
+                  Izohlar
+                </Tabs.Tab>
+                <Tabs.Tab value="files" rightSection={attachmentsCount > 0 ? <Badge size="xs" variant="light" color="blue" radius="xl">{attachmentsCount}</Badge> : null}>
+                  Fayllar
+                </Tabs.Tab>
+                <Tabs.Tab value="subtasks" rightSection={
+                  subtasks.length > 0 ? (
+                    <Badge size="xs" variant="light" color={completedSubtasks.length === subtasks.length ? "green" : "blue"} radius="xl">
+                      {completedSubtasks.length}/{subtasks.length}
+                    </Badge>
+                  ) : null
+                }>
+                  Ichki vazifalar
+                </Tabs.Tab>
+              </Tabs.List>
 
-                <ScrollArea style={{ flex: 1, minHeight: 0 }} p="md">
-                  {/* Details Tab */}
-                  <Tabs.Panel value="details">
-                    <Stack gap="md">
-                      {/* Description */}
-                      <Box>
-                        <Text size="sm" fw={500} c="#495057" mb="xs">
-                          Tavsif
-                        </Text>
-                        {isEditingDesc ? (
-                          <Textarea
-                            value={editDesc}
-                            onChange={(e) => setEditDesc(e.target.value)}
-                            onBlur={handleSaveDesc}
-                            autosize
-                            minRows={3}
-                            autoFocus
-                          />
-                        ) : (
-                          <Paper
-                            p="sm"
-                            radius="sm"
-                            style={{
-                              backgroundColor: "#f8f9fa",
-                              cursor: "pointer",
-                              minHeight: 60,
-                            }}
-                            onClick={() => {
-                              setEditDesc(task.description || "");
-                              setIsEditingDesc(true);
-                            }}
-                          >
-                            <Text size="sm" c={task.description ? "#495057" : "dimmed"}>
-                              {task.description || "Tavsif qo'shish uchun bosing..."}
-                            </Text>
-                          </Paper>
-                        )}
-                      </Box>
+              {/* Izohlar — alohida full-height layout */}
+              {activeTab === "comments" && (
+                <Box p="md" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+                  <TaskCommentsInline taskId={taskId} />
+                </Box>
+              )}
 
-                      <Divider />
-
-                      {/* Status & Priority */}
-                      <Group grow>
-                        <Box>
-                          <Text size="sm" fw={500} c="#495057" mb="xs">
-                            Holat
-                          </Text>
-                          <StatusBadge boardColumn={task.boardColumn} />
-                        </Box>
-                        <Box>
-                          <Text size="sm" fw={500} c="#495057" mb="xs">
-                            Muhimlik
-                          </Text>
-                          <Select
-                            data={TASK_PRIORITY_OPTIONS.map((o) => ({
-                              value: o.value,
-                              label: o.label,
-                            }))}
-                            value={task.priority}
-                            onChange={(value) =>
-                              value && handleUpdateField("priority", value)
-                            }
-                            size="sm"
-                          />
-                        </Box>
-                      </Group>
-
-                      {/* Dates */}
-                      <Group grow>
-                        <Box>
-                          <Text size="sm" fw={500} c="#495057" mb="xs">
-                            <Group gap={4}>
-                              <IconCalendar size={14} />
-                              Boshlanish sanasi
+              {/* Qolgan tab'lar — scrollable */}
+              <ScrollArea style={{ flex: 1, minHeight: 0, display: activeTab === "comments" ? "none" : undefined }} p="md">
+                {/* ═══ TAFSILOT ═══ */}
+                <Tabs.Panel value="details">
+                  <Stack gap="lg">
+                    {/* Tavsif */}
+                    <Box>
+                      <Text size="sm" fw={600} c="#495057" mb={6}>Tavsif</Text>
+                      {isEditingDesc ? (
+                        <Textarea
+                          value={editDesc}
+                          onChange={(e) => setEditDesc(e.target.value)}
+                          onBlur={handleSaveDesc}
+                          autosize minRows={3} autoFocus
+                          placeholder="Vazifa haqida yozing..."
+                        />
+                      ) : (
+                        <Paper
+                          p="sm" radius="sm"
+                          style={{ backgroundColor: "#f8f9fa", cursor: "pointer", minHeight: 60 }}
+                          onClick={() => { setEditDesc(task.description || ""); setIsEditingDesc(true); }}
+                        >
+                          {task.description ? (
+                            <Text size="sm" c="#495057" style={{ whiteSpace: "pre-wrap" }}>{task.description}</Text>
+                          ) : (
+                            <Group gap={6}>
+                              <IconEdit size={14} color="#adb5bd" />
+                              <Text size="sm" c="dimmed">Tavsif yozish uchun bosing</Text>
                             </Group>
-                          </Text>
-                          <DatePickerInput
-                            value={task.startDate ? new Date(task.startDate) : null}
-                            onChange={(date) =>
-                              handleUpdateField(
-                                "startDate",
-                                date ? new Date(date).toISOString() : null
-                              )
-                            }
-                            placeholder="Sanani tanlang"
-                            size="sm"
-                            clearable
-                            locale="uz"
-                          />
-                        </Box>
-                        <Box>
-                          <Text size="sm" fw={500} c="#495057" mb="xs">
-                            <Group gap={4}>
-                              <IconCalendar size={14} />
-                              Tugash sanasi
-                            </Group>
-                          </Text>
-                          <DatePickerInput
-                            value={task.dueDate ? new Date(task.dueDate) : null}
-                            onChange={(date) =>
-                              handleUpdateField(
-                                "dueDate",
-                                date ? new Date(date).toISOString() : null
-                              )
-                            }
-                            placeholder="Sanani tanlang"
-                            size="sm"
-                            clearable
-                            locale="uz"
-                          />
-                        </Box>
-                      </Group>
-
-                      {/* Assignees */}
-                      <Box>
-                        <Text size="sm" fw={500} c="#495057" mb="xs">
-                          <Group gap={4}>
-                            <IconUser size={14} />
-                            Mas'ullar
-                          </Group>
-                        </Text>
-                        <Group gap="xs">
-                          {task.assignees && task.assignees.length > 0 && (
-                            <>
-                              {task.assignees.map((assignee) => (
-                                <Tooltip key={assignee.id} label={assignee.user.fullname}>
-                                  <Avatar
-                                    size="sm"
-                                    radius="xl"
-                                    color="blue"
-                                    src={assignee.user.avatarUrl}
-                                    style={{ cursor: "pointer" }}
-                                    onClick={() => {
-                                      const currentIds =
-                                        task.assignees?.map((a) => a.user.id) || [];
-                                      const newIds = currentIds.filter(
-                                        (id) => id !== assignee.user.id
-                                      );
-                                      handleUpdateField("assigneeIds", newIds);
-                                    }}
-                                  >
-                                    {assignee.user.fullname?.charAt(0)}
-                                  </Avatar>
-                                </Tooltip>
-                              ))}
-                            </>
                           )}
+                        </Paper>
+                      )}
+                    </Box>
 
-                          <Popover
-                            opened={assigneePopoverOpen}
-                            onChange={setAssigneePopoverOpen}
-                            position="bottom-start"
-                            width={250}
-                            shadow="md"
-                          >
-                            <Popover.Target>
-                              <Tooltip label="Mas'ul qo'shish">
-                                <ActionIcon
-                                  variant="light"
-                                  size="sm"
-                                  radius="xl"
-                                  onClick={() => setAssigneePopoverOpen((o) => !o)}
-                                  style={{
-                                    backgroundColor: "#f8f9fa",
-                                    border: "1px dashed #dee2e6",
-                                  }}
-                                >
-                                  <IconPlus size={14} />
-                                </ActionIcon>
-                              </Tooltip>
-                            </Popover.Target>
-                            <Popover.Dropdown p="xs">
-                              <Text size="xs" fw={500} c="dimmed" mb="xs">
-                                Foydalanuvchi tanlang
-                              </Text>
-                              <ScrollArea.Autosize mah={200}>
-                                <Stack gap={4}>
-                                  {allUsers.map((user) => {
-                                    const currentIds =
-                                      task.assignees?.map((a) => a.user.id) || [];
+                    <Divider />
+
+                    {/* Muhimlik */}
+                    <Box>
+                      <Text size="sm" fw={600} c="#495057" mb={6}>Muhimlik</Text>
+                      <Select
+                        data={TASK_PRIORITY_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
+                        value={task.priority}
+                        onChange={(value) => value && handleUpdateField("priority", value)}
+                        size="sm"
+                        radius="sm"
+                        styles={{ input: { backgroundColor: "#f8f9fa", border: "1px solid #e9ecef" } }}
+                      />
+                    </Box>
+
+                    {/* Sanalar */}
+                    <Group grow>
+                      <Box>
+                        <Text size="sm" fw={600} c="#495057" mb={6}>Boshlanish</Text>
+                        <DatePickerInput
+                          value={task.startDate ? new Date(task.startDate) : null}
+                          onChange={(date) => handleUpdateField("startDate", date ? new Date(date).toISOString() : null)}
+                          placeholder="Tanlang"
+                          size="sm" radius="sm" clearable locale="uz"
+                          styles={{ input: { backgroundColor: "#f8f9fa", border: "1px solid #e9ecef" } }}
+                        />
+                      </Box>
+                      <Box>
+                        <Text size="sm" fw={600} c="#495057" mb={6}>Muddat</Text>
+                        <DatePickerInput
+                          value={task.dueDate ? new Date(task.dueDate) : null}
+                          onChange={(date) => handleUpdateField("dueDate", date ? new Date(date).toISOString() : null)}
+                          placeholder="Tanlang"
+                          size="sm" radius="sm" clearable locale="uz"
+                          styles={{ input: { backgroundColor: "#f8f9fa", border: "1px solid #e9ecef" } }}
+                        />
+                      </Box>
+                    </Group>
+
+                    <Divider />
+
+                    {/* Mas'ullar */}
+                    <Box>
+                      <Text size="sm" fw={600} c="#495057" mb={6}>Mas'ullar</Text>
+                      <Group gap="xs">
+                        {task.assignees?.map((assignee) => (
+                          <Tooltip key={assignee.id} label={`${assignee.user.fullname} — olib tashlash uchun bosing`}>
+                            <Avatar
+                              size="sm" radius="xl" color="blue" src={assignee.user.avatarUrl}
+                              style={{ cursor: "pointer", border: "2px solid #e7f5ff" }}
+                              onClick={() => {
+                                const newIds = task.assignees?.map((a) => a.user.id).filter((id) => id !== assignee.user.id) || [];
+                                handleUpdateField("assigneeIds", newIds);
+                              }}
+                            >
+                              {assignee.user.fullname?.charAt(0)}
+                            </Avatar>
+                          </Tooltip>
+                        ))}
+
+                        <Popover opened={assigneePopoverOpen} onChange={setAssigneePopoverOpen} position="bottom-start" width={260} shadow="md"
+                          onClose={() => setAssigneeSearch("")}
+                        >
+                          <Popover.Target>
+                            <Tooltip label="Mas'ul qo'shish">
+                              <ActionIcon
+                                variant="light" size="sm" radius="xl"
+                                onClick={() => setAssigneePopoverOpen((o) => !o)}
+                                style={{ backgroundColor: "#f8f9fa", border: "1px dashed #dee2e6" }}
+                              >
+                                <IconPlus size={14} />
+                              </ActionIcon>
+                            </Tooltip>
+                          </Popover.Target>
+                          <Popover.Dropdown p={0}>
+                            <Box p="xs" style={{ borderBottom: "1px solid #e9ecef" }}>
+                              <TextInput
+                                placeholder="Qidirish..."
+                                size="xs"
+                                leftSection={<IconSearch size={14} />}
+                                value={assigneeSearch}
+                                onChange={(e) => setAssigneeSearch(e.target.value)}
+                                styles={{ input: { backgroundColor: "#f8f9fa", border: "1px solid #e9ecef" } }}
+                              />
+                            </Box>
+                            <ScrollArea.Autosize mah={200} p="xs">
+                              <Stack gap={4}>
+                                {allUsers
+                                  .filter((u) => u.fullname?.toLowerCase().includes(assigneeSearch.toLowerCase()))
+                                  .map((user) => {
+                                    const currentIds = task.assignees?.map((a) => a.user.id) || [];
                                     const isAssigned = currentIds.includes(user.id);
                                     return (
                                       <Paper
-                                        key={user.id}
-                                        p="xs"
-                                        radius="sm"
-                                        style={{
-                                          backgroundColor: isAssigned
-                                            ? "#e7f5ff"
-                                            : "#f8f9fa",
-                                          cursor: "pointer",
-                                        }}
+                                        key={user.id} p="xs" radius="sm"
+                                        style={{ backgroundColor: isAssigned ? "#e7f5ff" : "transparent", cursor: "pointer" }}
                                         onClick={() => {
-                                          const newIds = isAssigned
-                                            ? currentIds.filter((id) => id !== user.id)
-                                            : [...currentIds, user.id];
+                                          const newIds = isAssigned ? currentIds.filter((id) => id !== user.id) : [...currentIds, user.id];
                                           handleUpdateField("assigneeIds", newIds);
                                         }}
                                       >
                                         <Group gap="sm" wrap="nowrap">
-                                          <Checkbox
-                                            checked={isAssigned}
-                                            onChange={() => {}}
-                                            size="xs"
-                                            styles={{
-                                              input: { cursor: "pointer" },
-                                            }}
-                                          />
-                                          <Avatar size="xs" radius="xl" color="blue">
-                                            {user.fullname?.charAt(0)}
-                                          </Avatar>
-                                          <Text size="sm" lineClamp={1}>
-                                            {user.fullname}
-                                          </Text>
+                                          <Checkbox checked={isAssigned} onChange={() => {}} size="xs" styles={{ input: { cursor: "pointer" } }} />
+                                          <Avatar size="xs" radius="xl" color="blue" src={user.avatarUrl}>{user.fullname?.charAt(0)}</Avatar>
+                                          <Text size="sm" lineClamp={1}>{user.fullname}</Text>
                                         </Group>
                                       </Paper>
                                     );
                                   })}
-                                </Stack>
-                              </ScrollArea.Autosize>
-                            </Popover.Dropdown>
-                          </Popover>
+                              </Stack>
+                            </ScrollArea.Autosize>
+                          </Popover.Dropdown>
+                        </Popover>
 
-                          {(!task.assignees || task.assignees.length === 0) && (
-                            <Text size="sm" c="dimmed">
-                              Tayinlanmagan
-                            </Text>
-                          )}
-                        </Group>
-                      </Box>
-
-                      <Divider />
-
-                      {/* Parent Task */}
-                      {task.parentTaskId && parentTask && (
-                        <>
-                          <Box>
-                            <Text size="sm" fw={500} c="#495057" mb="xs">
-                              <Group gap={4}>
-                                <IconSubtask size={14} />
-                                Asosiy vazifa
-                              </Group>
-                            </Text>
-                            <Paper
-                              p="xs"
-                              radius="sm"
-                              style={{
-                                backgroundColor: "#e7f5ff",
-                                cursor: "pointer",
-                              }}
-                              onClick={() => setSelectedSubtaskId(null)}
-                            >
-                              <Group gap="sm">
-                                <IconChevronRight
-                                  size={14}
-                                  style={{ transform: "rotate(180deg)" }}
-                                />
-                                <Text size="sm" c="#1e3a5f" fw={500}>
-                                  {parentTask.title}
-                                </Text>
-                              </Group>
-                            </Paper>
-                          </Box>
-                          <Divider />
-                        </>
-                      )}
-
-                      {/* Time Entries */}
-                      <Box>
-                        <Group justify="space-between" mb="xs">
-                          <Text size="sm" fw={500} c="#495057">
-                            <Group gap={4}>
-                              <IconClock size={14} />
-                              Vaqt yozuvlari
-                            </Group>
-                          </Text>
-                          <ActionIcon
-                            variant="light"
-                            size="sm"
-                            onClick={() => setShowTimeForm(!showTimeForm)}
-                          >
-                            {showTimeForm ? <IconX size={14} /> : <IconClock size={14} />}
-                          </ActionIcon>
-                        </Group>
-                        {showTimeForm && (
-                          <Box mb="sm">
-                            <TimeEntryForm
-                              taskId={taskId}
-                              onClose={() => setShowTimeForm(false)}
-                            />
-                          </Box>
+                        {(!task.assignees || task.assignees.length === 0) && (
+                          <Text size="sm" c="dimmed">Hali tayinlanmagan</Text>
                         )}
-                        {timeEntries.length > 0 ? (
-                          <Stack gap="xs">
-                            {timeEntries.slice(0, 5).map((entry) => (
-                              <TimeEntryItem
-                                key={entry.id}
-                                entry={entry}
-                                onDelete={(id) => deleteTimeEntry.mutate(id)}
-                              />
-                            ))}
-                            {timeEntries.length > 5 && (
-                              <Text size="xs" c="dimmed" ta="center">
-                                +{timeEntries.length - 5} ta boshqa
-                              </Text>
-                            )}
-                          </Stack>
-                        ) : (
-                          <Text size="sm" c="dimmed">
-                            Vaqt yozuvlari yo'q
-                          </Text>
-                        )}
-                      </Box>
+                      </Group>
+                    </Box>
 
-                      <Divider />
-
-                      {/* Dependencies */}
-                      {dependencies.length > 0 && (
+                    {/* Asosiy vazifa */}
+                    {task.parentTaskId && parentTask && (
+                      <>
+                        <Divider />
                         <Box>
-                          <Text size="sm" fw={500} c="#495057" mb="xs">
-                            <Group gap={4}>
-                              <IconLink size={14} />
-                              Bog'liqliklar
+                          <Text size="sm" fw={600} c="#495057" mb={6}>Asosiy vazifa</Text>
+                          <Paper p="xs" radius="sm" style={{ backgroundColor: "#e7f5ff", cursor: "pointer" }}>
+                            <Group gap="sm">
+                              <IconChevronRight size={14} style={{ transform: "rotate(180deg)" }} />
+                              <Text size="sm" c="#1e3a5f" fw={500}>{parentTask.title}</Text>
                             </Group>
-                          </Text>
+                          </Paper>
+                        </Box>
+                      </>
+                    )}
+
+                    <Divider />
+
+                    {/* Vaqt */}
+                    <Box>
+                      <Group justify="space-between" mb={6}>
+                        <Text size="sm" fw={600} c="#495057">
+                          Sarflangan vaqt {totalTimeLogged > 0 && <Text span c="dimmed" fw={400}>({totalTimeLogged} soat)</Text>}
+                        </Text>
+                        <Button
+                          variant="subtle" size="xs" color="gray"
+                          leftSection={showTimeForm ? <IconX size={14} /> : <IconPlus size={14} />}
+                          onClick={() => setShowTimeForm(!showTimeForm)}
+                        >
+                          {showTimeForm ? "Yopish" : "Qo'shish"}
+                        </Button>
+                      </Group>
+                      {showTimeForm && (
+                        <Box mb="sm">
+                          <TimeEntryForm taskId={taskId} onClose={() => setShowTimeForm(false)} />
+                        </Box>
+                      )}
+                      {timeEntries.length > 0 ? (
+                        <Stack gap="xs">
+                          {timeEntries.slice(0, 5).map((entry) => (
+                            <TimeEntryItem key={entry.id} entry={entry} onDelete={(id) => deleteTimeEntry.mutate(id)} />
+                          ))}
+                          {timeEntries.length > 5 && (
+                            <Text size="xs" c="dimmed" ta="center">Yana {timeEntries.length - 5} ta yozuv</Text>
+                          )}
+                        </Stack>
+                      ) : !showTimeForm ? (
+                        <Text size="sm" c="dimmed">Hali vaqt yozilmagan</Text>
+                      ) : null}
+                    </Box>
+
+                    {/* Bog'liqliklar */}
+                    {dependencies.length > 0 && (
+                      <>
+                        <Divider />
+                        <Box>
+                          <Text size="sm" fw={600} c="#495057" mb={6}>Bog'liq vazifalar</Text>
                           <Stack gap="xs">
                             {dependencies.map((dep) => (
-                              <Paper
-                                key={dep.id}
-                                p="xs"
-                                radius="sm"
-                                style={{ backgroundColor: "#f8f9fa" }}
-                              >
+                              <Paper key={dep.id} p="xs" radius="sm" style={{ backgroundColor: "#f8f9fa" }}>
                                 <Group justify="space-between">
-                                  <Text size="sm">
-                                    {dep.dependsOnTask?.title || "Noma'lum vazifa"}
-                                  </Text>
-                                  <ActionIcon
-                                    variant="subtle"
-                                    size="xs"
-                                    color="red"
-                                    onClick={() => deleteDependency.mutate(dep.id)}
-                                  >
+                                  <Text size="sm">{dep.dependsOnTask?.title || "Noma'lum"}</Text>
+                                  <ActionIcon variant="subtle" size="xs" color="red" onClick={() => deleteDependency.mutate(dep.id)}>
                                     <IconTrash size={14} />
                                   </ActionIcon>
                                 </Group>
@@ -779,240 +526,154 @@ export const TaskDetailDrawer = ({
                             ))}
                           </Stack>
                         </Box>
-                      )}
+                      </>
+                    )}
 
-                      {/* Watchers */}
-                      {watchers.length > 0 && (
+                    {/* Kuzatuvchilar */}
+                    {watchers.length > 0 && (
+                      <>
+                        <Divider />
                         <Box>
-                          <Text size="sm" fw={500} c="#495057" mb="xs">
-                            <Group gap={4}>
-                              <IconEye size={14} />
-                              Kuzatuvchilar ({watchers.length})
-                            </Group>
-                          </Text>
+                          <Text size="sm" fw={600} c="#495057" mb={6}>Kuzatuvchilar ({watchers.length})</Text>
                           <Group gap="xs">
-                            {watchers.map((watcher) => (
-                              <Tooltip key={watcher.id} label={watcher.user?.fullname}>
-                                <Avatar size="sm" radius="xl" color="blue">
-                                  {watcher.user?.fullname?.charAt(0)}
-                                </Avatar>
+                            {watchers.map((w) => (
+                              <Tooltip key={w.id} label={w.user?.fullname}>
+                                <Avatar size="sm" radius="xl" color="blue" src={(w.user as any)?.avatarUrl}>{w.user?.fullname?.charAt(0)}</Avatar>
                               </Tooltip>
                             ))}
                           </Group>
                         </Box>
-                      )}
+                      </>
+                    )}
 
-                      <Divider />
+                    <Divider />
 
-                      {/* Activity */}
-                      <Box>
-                        <Text size="sm" fw={500} c="#495057" mb="xs">
-                          <Group gap={4}>
-                            <IconActivity size={14} />
-                            Faoliyat
-                          </Group>
-                        </Text>
-                        {activities.length > 0 ? (
-                          <Stack gap="sm">
-                            {activities.slice(0, 10).map((activity) => (
-                              <ActivityItem key={activity.id} activity={activity} />
-                            ))}
-                          </Stack>
-                        ) : (
-                          <Text size="sm" c="dimmed">
-                            Faoliyat tarixi bo'sh
-                          </Text>
-                        )}
-                      </Box>
+                    {/* Ro'yxat / Tekshiruv */}
+                    <Box>
+                      <Text size="sm" fw={600} c="#495057" mb={6}>Tekshiruv ro'yxati</Text>
+                      <TaskChecklist taskId={taskId} />
+                    </Box>
 
-                      {/* Meta info */}
-                      <Box pt="md">
-                        <Group gap="xs">
-                          <Text size="xs" c="dimmed">
-                            Yaratildi:{" "}
-                            {format(new Date(task.createdAt), "dd MMM yyyy HH:mm", {
-                              locale: uz,
-                            })}
-                          </Text>
-                          {task.createdBy && (
-                            <Text size="xs" c="dimmed">
-                              • {task.createdBy.fullname}
-                            </Text>
+                    <Divider />
+
+                    {/* Faoliyat */}
+                    <Box>
+                      <Text size="sm" fw={600} c="#495057" mb={6}>Faoliyat tarixi</Text>
+                      {activities.length > 0 ? (
+                        <Stack gap="sm">
+                          {activities.slice(0, 10).map((activity) => (
+                            <ActivityItem key={activity.id} activity={activity} />
+                          ))}
+                          {activities.length > 10 && (
+                            <Text size="xs" c="dimmed" ta="center">Yana {activities.length - 10} ta faoliyat</Text>
                           )}
+                        </Stack>
+                      ) : (
+                        <Text size="sm" c="dimmed">Hali faoliyat yo'q</Text>
+                      )}
+                    </Box>
+
+                    {/* Meta */}
+                    <Paper p="xs" radius="sm" style={{ backgroundColor: "#f8f9fa" }}>
+                      <Text size="xs" c="dimmed">
+                        Yaratildi: {format(new Date(task.createdAt), "d-MMM yyyy, HH:mm", { locale: uz })}
+                        {task.createdBy && ` — ${task.createdBy.fullname}`}
+                      </Text>
+                    </Paper>
+                  </Stack>
+                </Tabs.Panel>
+
+                {/* ═══ FAYLLAR ═══ */}
+                <Tabs.Panel value="files">
+                  <TaskAttachments taskId={taskId} />
+                </Tabs.Panel>
+
+                {/* ═══ ICHKI VAZIFALAR ═══ */}
+                <Tabs.Panel value="subtasks">
+                  <Stack gap="md">
+                    {/* Progress */}
+                    {subtasks.length > 0 && (
+                      <Box>
+                        <Group justify="space-between" mb={6}>
+                          <Text size="sm" c="dimmed">{completedSubtasks.length}/{subtasks.length} bajarildi</Text>
+                          <Text size="sm" fw={600} c={completedSubtasks.length === subtasks.length ? "#2ecc71" : "#1e3a5f"}>
+                            {Math.round((completedSubtasks.length / subtasks.length) * 100)}%
+                          </Text>
                         </Group>
+                        <Progress
+                          value={(completedSubtasks.length / subtasks.length) * 100}
+                          size={6} radius="xl"
+                          color={completedSubtasks.length === subtasks.length ? "green" : "#1e3a5f"}
+                        />
                       </Box>
-                    </Stack>
-                  </Tabs.Panel>
+                    )}
 
-                  {/* Comments Tab */}
-                  <Tabs.Panel value="comments" style={{ height: "calc(100vh - 250px)" }}>
-                    <TaskCommentsInline taskId={taskId} />
-                  </Tabs.Panel>
-
-                  {/* Attachments Tab */}
-                  <Tabs.Panel value="attachments">
-                    <TaskAttachments taskId={taskId} />
-                  </Tabs.Panel>
-
-                  {/* Checklists Tab */}
-                  <Tabs.Panel value="checklists">
-                    <TaskChecklist taskId={taskId} />
-                  </Tabs.Panel>
-
-                  {/* Subtasks Tab */}
-                  <Tabs.Panel value="subtasks">
-                    <Stack gap="md">
-                      {/* Header with progress */}
-                      <Paper p="sm" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
-                        <Group justify="space-between" mb="xs">
-                          <Group gap="xs">
-                            <Text size="sm" fw={600} c="#212529">
-                              Subtasks
-                            </Text>
-                            <Text size="xs" c="dimmed">
-                              ({completedSubtasks.length}/{subtasks.length})
-                            </Text>
-                          </Group>
-                        </Group>
-                        {subtasks.length > 0 && (
-                          <Box
-                            style={{
-                              height: 6,
-                              backgroundColor: "#e9ecef",
-                              borderRadius: 3,
-                              overflow: "hidden",
-                            }}
-                          >
-                            <Box
-                              style={{
-                                height: "100%",
-                                width: `${(completedSubtasks.length / subtasks.length) * 100}%`,
-                                backgroundColor:
-                                  completedSubtasks.length === subtasks.length
-                                    ? "#2ecc71"
-                                    : "#1e3a5f",
-                                borderRadius: 3,
-                                transition: "width 0.3s ease",
-                              }}
-                            />
-                          </Box>
-                        )}
-                      </Paper>
-
-                      {/* Subtask List */}
-                      {subtasks.length > 0 ? (
-                        <Stack gap="xs">
-                          {subtasks.map((subtask) => (
-                            <Paper
-                              key={subtask.id}
-                              p="xs"
-                              radius="sm"
-                              style={{ backgroundColor: "#f8f9fa" }}
+                    {/* Ro'yxat */}
+                    {subtasks.length > 0 ? (
+                      <Stack gap="xs">
+                        {subtasks.map((subtask) => {
+                          const isDone = subtask.boardColumn?.isClosed === true;
+                          return (
+                            <Paper key={subtask.id} p="xs" radius="sm" style={{ backgroundColor: isDone ? "#f0fdf4" : "#f8f9fa", cursor: "pointer" }}
+                              onClick={() => setSelectedSubtaskId(subtask.id)}
                             >
                               <Group justify="space-between" wrap="nowrap">
-                                <Group
-                                  gap="sm"
-                                  wrap="nowrap"
-                                  style={{ flex: 1, minWidth: 0 }}
-                                >
-                                  <ActionIcon
-                                    variant={
-                                      subtask.boardColumn?.isClosed
-                                        ? "filled"
-                                        : "outline"
-                                    }
-                                    size="xs"
-                                    color={
-                                      subtask.boardColumn?.isClosed
-                                        ? "green"
-                                        : "gray"
-                                    }
-                                    radius="xl"
-                                    onClick={() =>
-                                      handleSubtaskToggleComplete(
-                                        subtask.id,
-                                        !subtask.boardColumn?.isClosed
-                                      )
-                                    }
-                                  >
-                                    {subtask.boardColumn?.isClosed && (
-                                      <IconCheck size={10} />
-                                    )}
-                                  </ActionIcon>
-                                  <Text
-                                    size="sm"
-                                    c={
-                                      subtask.boardColumn?.isClosed
-                                        ? "dimmed"
-                                        : "#212529"
-                                    }
-                                    lineClamp={1}
-                                    style={{
-                                      textDecoration:
-                                        subtask.boardColumn?.isClosed
-                                          ? "line-through"
-                                          : "none",
-                                      flex: 1,
-                                      cursor: "pointer",
-                                    }}
-                                    onClick={() => handleSubtaskClick(subtask.id)}
+                                <Group gap="sm" wrap="nowrap" style={{ flex: 1, minWidth: 0 }}>
+                                  <Box w={18} h={18} style={{
+                                    borderRadius: "50%",
+                                    border: isDone ? "none" : "2px solid #dee2e6",
+                                    backgroundColor: isDone ? "#2ecc71" : "transparent",
+                                    display: "flex", alignItems: "center", justifyContent: "center",
+                                    flexShrink: 0,
+                                  }}>
+                                    {isDone && <IconCheck size={10} color="white" />}
+                                  </Box>
+                                  <Text size="sm" c={isDone ? "dimmed" : "#212529"} lineClamp={1}
+                                    style={{ textDecoration: isDone ? "line-through" : "none", flex: 1 }}
                                   >
                                     {subtask.title}
                                   </Text>
                                 </Group>
-                                <ActionIcon
-                                  variant="subtle"
-                                  size="xs"
-                                  color="red"
-                                  onClick={() => {
-                                    if (confirm("Ichki vazifani o'chirishni xohlaysizmi?")) {
-                                      deleteTask.mutate(subtask.id);
-                                    }
-                                  }}
-                                >
-                                  <IconTrash size={14} />
-                                </ActionIcon>
+                                <Group gap={4} wrap="nowrap">
+                                  {subtask.boardColumn && (
+                                    <Badge size="xs" variant="light" style={{ backgroundColor: `${subtask.boardColumn.color}20`, color: subtask.boardColumn.color }}>
+                                      {subtask.boardColumn.name}
+                                    </Badge>
+                                  )}
+                                  <IconChevronRight size={14} color="#868e96" />
+                                </Group>
                               </Group>
                             </Paper>
-                          ))}
-                        </Stack>
-                      ) : (
-                        <Text size="sm" c="dimmed" ta="center" py="md">
-                          Ichki vazifalar yo'q
-                        </Text>
-                      )}
+                          );
+                        })}
+                      </Stack>
+                    ) : (
+                      <Paper p="xl" radius="sm" style={{ backgroundColor: "#f8f9fa", textAlign: "center" }}>
+                        <IconSubtask size={32} color="#adb5bd" style={{ margin: "0 auto 8px" }} />
+                        <Text size="sm" c="dimmed">Ichki vazifalar yo'q</Text>
+                      </Paper>
+                    )}
 
-                      {/* Add Subtask */}
-                      {showSubtaskForm && task.projectId ? (
-                        <Paper p="sm" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
-                          <SubtaskForm
-                            parentTaskId={taskId}
-                            projectId={task.projectId}
-                            onClose={() => setShowSubtaskForm(false)}
-                          />
-                        </Paper>
-                      ) : (
-                        <Button
-                          variant="light"
-                          leftSection={<IconPlus size={16} />}
-                          onClick={() => setShowSubtaskForm(true)}
-                          styles={{
-                            root: {
-                              backgroundColor: "#f8f9fa",
-                              color: "#495057",
-                              border: "1px dashed #e9ecef",
-                              "&:hover": {
-                                backgroundColor: "#e9ecef",
-                              },
-                            },
-                          }}
-                        >
-                          Ichki vazifa qo'shish
-                        </Button>
-                      )}
-                    </Stack>
-                  </Tabs.Panel>
-                </ScrollArea>
+                    {/* Qo'shish */}
+                    {showSubtaskForm && task.projectId ? (
+                      <SubtaskForm
+                        parentTaskId={taskId}
+                        projectId={task.projectId}
+                        onClose={() => setShowSubtaskForm(false)}
+                      />
+                    ) : (
+                      <Button
+                        variant="light" fullWidth
+                        leftSection={<IconPlus size={16} />}
+                        onClick={() => setShowSubtaskForm(true)}
+                        style={{ backgroundColor: "#f8f9fa", color: "#495057", border: "1px dashed #dee2e6" }}
+                      >
+                        Ichki vazifa qo'shish
+                      </Button>
+                    )}
+                  </Stack>
+                </Tabs.Panel>
+              </ScrollArea>
             </Tabs>
           </Box>
         ) : (
@@ -1022,7 +683,6 @@ export const TaskDetailDrawer = ({
         )}
       </Drawer>
 
-      {/* Nested Drawer for Subtask */}
       {selectedSubtaskId && (
         <TaskDetailDrawer
           taskId={selectedSubtaskId}

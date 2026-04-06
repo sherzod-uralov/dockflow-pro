@@ -83,6 +83,7 @@ interface FilterConfig {
 interface SplitLayoutWithTabsProps {
   tabs: Tab[];
   defaultTab?: string;
+  activeTab?: string;
   onTabChange?: (value: string) => void;
   onCreateNew?: () => void;
   createButtonLabel?: string;
@@ -252,6 +253,7 @@ ListItemCard.displayName = "ListItemCard";
 export const SplitLayoutWithTabs = ({
   tabs,
   defaultTab,
+  activeTab,
   onTabChange,
   onCreateNew,
   createButtonLabel = "+ Yangi",
@@ -305,6 +307,7 @@ export const SplitLayoutWithTabs = ({
   return (
     <Box style={{ height: "calc(100vh - 120px)", display: "flex", flexDirection: "column" }}>
       <Tabs
+        value={activeTab || undefined}
         defaultValue={effectiveDefaultTab}
         onChange={(value) => onTabChange?.(value || "")}
         style={{ display: "flex", flexDirection: "column", flex: 1, overflow: "hidden" }}
