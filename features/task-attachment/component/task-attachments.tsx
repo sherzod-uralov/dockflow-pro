@@ -172,11 +172,7 @@ export const TaskAttachments = ({ taskId }: TaskAttachmentsProps) => {
       for (const file of acceptedFiles) {
         try {
           // First upload the file to get attachment ID
-          const formData = new FormData();
-          formData.append("file", file);
-
-          // @ts-ignore
-            const result = await createAttachment.mutateAsync(formData);
+          const result = await createAttachment.mutateAsync(file);
 
           // Then link it to the task
           if (result?.id) {
