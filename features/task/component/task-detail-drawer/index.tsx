@@ -62,6 +62,7 @@ import {
 } from "../../type/task.type";
 import { TaskCommentsInline } from "@/features/task-comment/component/task-comments-inline";
 import { TaskAttachments } from "@/features/task-attachment/component/task-attachments";
+import { useGetAllBoardColumns } from "@/features/board-column/hook/board-column.hook";
 import { TaskChecklist } from "@/features/task-checklist/component/task-checklist";
 import {
   useGetAllTaskTimeEntries,
@@ -138,6 +139,10 @@ export const TaskDetailDrawer = ({
     pageSize: 100,
   });
 
+  const { data: boardColumnsData } = useGetAllBoardColumns(
+    task?.projectId ? { projectId: task.projectId } : undefined,
+  );
+
   const { data: parentTask } = useGetTaskById(task?.parentTaskId || "", {
     enabled: !!task?.parentTaskId,
   });
@@ -161,6 +166,21 @@ export const TaskDetailDrawer = ({
   const handleUpdateField = (field: string, value: unknown) => {
     if (!taskId) return;
     updateTask.mutate({ id: taskId, data: { [field]: value } });
+  };
+
+  const handleToggleSubtask = (subtaskId: string) => {
+    const columns = boardColumnsData?.data || [];
+    const subtask = subtasks.find((s) => s.id === subtaskId);
+    if (!subtask || columns.length === 0) return;
+
+    const isDone = subtask.boardColumn?.isClosed === true;
+    const targetColumn = isDone
+      ? columns.find((c) => c.isDefault) || columns.find((c) => !c.isClosed)
+      : columns.find((c) => c.isClosed);
+
+    if (targetColumn) {
+      updateTask.mutate({ id: subtaskId, data: { boardColumnId: targetColumn.id } });
+    }
   };
 
   const handleSaveTitle = () => {
@@ -619,13 +639,21 @@ export const TaskDetailDrawer = ({
                             >
                               <Group justify="space-between" wrap="nowrap">
                                 <Group gap="sm" wrap="nowrap" style={{ flex: 1, minWidth: 0 }}>
-                                  <Box w={18} h={18} style={{
-                                    borderRadius: "50%",
-                                    border: isDone ? "none" : "2px solid #dee2e6",
-                                    backgroundColor: isDone ? "#2ecc71" : "transparent",
-                                    display: "flex", alignItems: "center", justifyContent: "center",
-                                    flexShrink: 0,
-                                  }}>
+                                  <Box
+                                    w={18} h={18}
+                                    style={{
+                                      borderRadius: "50%",
+                                      border: isDone ? "none" : "2px solid #dee2e6",
+                                      backgroundColor: isDone ? "#2ecc71" : "transparent",
+                                      display: "flex", alignItems: "center", justifyContent: "center",
+                                      flexShrink: 0,
+                                      cursor: "pointer",
+                                    }}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleToggleSubtask(subtask.id);
+                                    }}
+                                  >
                                     {isDone && <IconCheck size={10} color="white" />}
                                   </Box>
                                   <Text size="sm" c={isDone ? "dimmed" : "#212529"} lineClamp={1}
