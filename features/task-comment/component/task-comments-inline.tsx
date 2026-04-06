@@ -783,7 +783,7 @@ export const TaskCommentsInline = ({ taskId }: TaskCommentsInlineProps) => {
   const handleReply = (comment: TaskCommentGetResponse) => {
     setReplyingTo(comment);
     setEditingComment(null);
-    inputRef.current?.focus();
+    setTimeout(() => inputRef.current?.focus(), 0);
   };
 
   const handleEdit = (comment: TaskCommentGetResponse) => {
