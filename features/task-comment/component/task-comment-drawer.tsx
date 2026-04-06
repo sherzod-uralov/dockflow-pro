@@ -1,3 +1,9 @@
+// ==========================================================================
+// VAQTINCHALIK O'CHIRILGAN — Telegram modal oynasi
+// Kerak bo'lganda commentdan chiqaring
+// ==========================================================================
+
+/*
 "use client";
 
 import { useState, useRef, useEffect } from "react";
@@ -267,7 +273,6 @@ export const TaskCommentDrawer = ({
         },
       }}
     >
-      {/* Comments list */}
       <ScrollArea
         style={{ flex: 1 }}
         px="md"
@@ -308,7 +313,6 @@ export const TaskCommentDrawer = ({
                   onEdit={handleEdit}
                   onDelete={handleDelete}
                 />
-                {/* Replies */}
                 {repliesMap[comment.id]?.map((reply) => (
                   <Box key={reply.id} mt="sm">
                     <CommentItem
@@ -326,7 +330,6 @@ export const TaskCommentDrawer = ({
         )}
       </ScrollArea>
 
-      {/* Input area */}
       <Box
         p="md"
         style={{
@@ -334,7 +337,6 @@ export const TaskCommentDrawer = ({
           backgroundColor: "#f8f9fa",
         }}
       >
-        {/* Reply/Edit indicator */}
         {(replyingTo || editingComment) && (
           <Paper
             p="xs"
@@ -413,3 +415,4 @@ export const TaskCommentDrawer = ({
 };
 
 export default TaskCommentDrawer;
+*/

@@ -4,5 +4,5 @@ export * from "./hook/task-comment.hook";
 export * from "./schema/task-comment.schema";
 
 // Components
-export { TaskCommentDrawer } from "./component/task-comment-drawer";
+// export { TaskCommentDrawer } from "./component/task-comment-drawer"; // VAQTINCHALIK O'CHIRILGAN
 export { TaskCommentsInline } from "./component/task-comments-inline";
