@@ -806,9 +806,7 @@ export const TaskCommentsInline = ({ taskId }: TaskCommentsInlineProps) => {
     return acc;
   }, {} as Record<string, TaskCommentGetResponse>);
 
-  const topLevelComments = comments
-    .filter((c) => !c.parentCommentId)
-    .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+  const topLevelComments = comments.filter((c) => !c.parentCommentId);
 
   const repliesMap = comments.reduce((acc, c) => {
     if (c.parentCommentId) {
