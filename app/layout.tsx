@@ -9,16 +9,7 @@ import { MantineProviderWrapper } from "@/providers/mantine-provider";
 import { ColorSchemeScript } from "@mantine/core";
 import "./globals.css";
 import "@/styles/onboarding.css";
-import { Geist } from "next/font/google";
 import ReactQueryProvider from "@/context/react-query.provider";
-import Script from "next/script";
-
-const satoshi = Geist({
-  subsets: ["latin"],
-  variable: "--font-satoshi",
-  display: "swap",
-  weight: ["400", "500", "700"],
-});
 
 export const metadata: Metadata = {
   title: "DockFlow Pro",
@@ -33,13 +24,9 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <ColorSchemeScript />
-        <Script
-          src="https://cdn.cloud.pspdfkit.com/pspdfkit-web@1.7.0/nutrient-viewer.js"
-          strategy="lazyOnload"
-        />
       </head>
       <body
-        className={`font-sans ${GeistSans.variable} ${GeistMono.variable} ${satoshi.variable}`}
+        className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}
       >
         <ReactQueryProvider>
           <ThemeProvider
