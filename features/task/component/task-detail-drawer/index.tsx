@@ -47,6 +47,7 @@ import {
   IconMaximize,
   IconMinimize,
   IconSearch,
+  IconArrowBack,
 } from "@tabler/icons-react";
 import { DatePickerInput } from "@mantine/dates";
 import { format } from "date-fns";
@@ -56,6 +57,8 @@ import {
   useGetAllTasks,
   useUpdateTask,
   useDeleteTask,
+  useCompleteTask,
+  useUncompleteTask,
 } from "../../hook/task.hook";
 import {
   TASK_PRIORITY_OPTIONS,
@@ -123,6 +126,8 @@ export const TaskDetailDrawer = ({
   });
   const updateTask = useUpdateTask();
   const deleteTask = useDeleteTask();
+  const completeTask = useCompleteTask();
+  const uncompleteTask = useUncompleteTask();
 
   const shouldFetchRelated = !!taskId && isOpen;
 
@@ -246,6 +251,29 @@ export const TaskDetailDrawer = ({
                   )}
                 </Group>
                 <Group gap="xs">
+                  {task.completedAt ? (
+                    <Button
+                      size="compact-xs"
+                      variant="light"
+                      color="gray"
+                      leftSection={<IconArrowBack size={14} />}
+                      onClick={() => uncompleteTask.mutate(taskId)}
+                      loading={uncompleteTask.isLoading}
+                    >
+                      Qayta ochish
+                    </Button>
+                  ) : (
+                    <Button
+                      size="compact-xs"
+                      variant="light"
+                      color="green"
+                      leftSection={<IconCheck size={14} />}
+                      onClick={() => completeTask.mutate(taskId)}
+                      loading={completeTask.isLoading}
+                    >
+                      Yakunlash
+                    </Button>
+                  )}
                   <Tooltip label={isWatching ? "Kuzatishni to'xtatish" : "Kuzatish"}>
                     <ActionIcon variant="subtle" color={isWatching ? "blue" : "gray"} onClick={toggleWatch} loading={watchTask.isLoading || unwatchTask.isLoading}>
                       {isWatching ? <IconEye size={18} /> : <IconEyeOff size={18} />}

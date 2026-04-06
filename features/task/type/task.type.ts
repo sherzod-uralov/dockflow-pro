@@ -53,6 +53,7 @@ export interface TaskGetResponse {
     };
     priority: TaskPriority;
     score: number | null;
+    scoreConfigId?: string;
     assignees?: TaskAssignee[];
     parentTaskId?: string;
     parentTask?: {
@@ -114,6 +115,7 @@ export interface TaskFormData {
     categoryId?: string;
     priority: TaskPriority;
     score?: number;
+    scoreConfigId?: string;
     assigneeIds?: string[];
     parentTaskId?: string;
     startDate?: string;
@@ -132,6 +134,7 @@ export interface TaskUpdatePayload {
     categoryId?: string;
     priority?: TaskPriority;
     score?: number;
+    scoreConfigId?: string;
     assigneeIds?: string[];
     parentTaskId?: string | null;
     boardColumnId?: string;

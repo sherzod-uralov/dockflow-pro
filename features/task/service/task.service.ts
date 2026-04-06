@@ -1,3 +1,4 @@
+import axiosInstance from "@/api/axios.instance";
 import { endpoints } from "@/api/axios.endpoints";
 import { createCRUDService } from "@/lib/crud-service";
 import {
@@ -8,7 +9,7 @@ import {
   TaskUpdatePayload,
 } from "../type/task.type";
 
-export const taskService = createCRUDService<
+const baseCRUDService = createCRUDService<
   TaskGetResponse,
   TaskCreatePayload,
   TaskUpdatePayload,
@@ -29,6 +30,20 @@ export const taskService = createCRUDService<
   }),
 });
 
+export const taskService = {
+  ...baseCRUDService,
+
+  completeTask: async (id: string) => {
+    const { data } = await axiosInstance.post(endpoints.task.complete(id));
+    return data;
+  },
+
+  uncompleteTask: async (id: string) => {
+    const { data } = await axiosInstance.post(endpoints.task.uncomplete(id));
+    return data;
+  },
+};
+
 // Backwards compatible aliases
 export const {
   getAll: getAllTasks,
@@ -36,4 +51,4 @@ export const {
   create: createTask,
   update: updateTask,
   delete: deleteTask,
-} = taskService;
+} = baseCRUDService;

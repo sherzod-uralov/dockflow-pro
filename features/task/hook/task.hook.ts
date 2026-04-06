@@ -1,5 +1,7 @@
+import { useMutation, useQueryClient } from "react-query";
 import { createCRUDHooks } from "@/lib/crud-hooks";
 import { taskService } from "../service/task.service";
+import { showError, showSuccess } from "@/utils/show-error";
 import {
   TaskQueryParams,
   GetAllTasks,
@@ -32,3 +34,31 @@ export const useCreateTask = taskHooks.useCreate;
 export const useUpdateTask = taskHooks.useUpdate;
 
 export const useDeleteTask = taskHooks.useDelete;
+
+export const useCompleteTask = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => taskService.completeTask(id),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries(["tasks"]);
+      queryClient.invalidateQueries(["task"]);
+      queryClient.invalidateQueries(["userMonthlyKpis"]);
+      showSuccess(data);
+    },
+    onError: showError,
+  });
+};
+
+export const useUncompleteTask = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => taskService.uncompleteTask(id),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries(["tasks"]);
+      queryClient.invalidateQueries(["task"]);
+      queryClient.invalidateQueries(["userMonthlyKpis"]);
+      showSuccess(data);
+    },
+    onError: showError,
+  });
+};

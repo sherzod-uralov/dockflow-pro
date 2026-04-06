@@ -66,6 +66,7 @@ export default function ProjectTasksPage() {
     const [searchQuery, debouncedSearch, setSearchQuery] = useDebounce("", 500);
     const [viewMode, setViewMode] = useState<"kanban" | "list" | "calendar">("kanban");
     const [defaultDueDate, setDefaultDueDate] = useState<Date | undefined>(undefined);
+    const [defaultColumnId, setDefaultColumnId] = useState<string | undefined>(undefined);
 
     // Filters
     const [priorityFilter, setPriorityFilter] = useState<string | null>(null);
@@ -92,8 +93,9 @@ export default function ProjectTasksPage() {
     const deleteTaskMutation = useDeleteTask();
 
     const handleCreateTask = useCallback(
-        (_status?: string, date?: Date) => {
+        (columnIdOrStatus?: string, date?: Date) => {
             setDefaultDueDate(date);
+            setDefaultColumnId(columnIdOrStatus);
             createModal.openModal();
         },
         [createModal]
@@ -333,6 +335,7 @@ export default function ProjectTasksPage() {
                 onClose={() => {
                     createModal.closeModal();
                     setDefaultDueDate(undefined);
+                    setDefaultColumnId(undefined);
                 }}
             >
                 <TaskForm
@@ -340,6 +343,7 @@ export default function ProjectTasksPage() {
                     mode="create"
                     defaultProjectId={projectId}
                     defaultDueDate={defaultDueDate}
+                    defaultBoardColumnId={defaultColumnId}
                 />
             </CustomModal>
 

@@ -34,6 +34,7 @@ import { useGetAllProjects } from "@/features/project/hook/project.hook";
 import { useGetUserQuery } from "@/features/admin/admin-users/hook/user.hook";
 import { useGetAllBoardColumns } from "@/features/board-column/hook/board-column.hook";
 import { useGetAllTaskCategories } from "@/features/task-category/hook/task-category.hook";
+import { useGetAllTaskScoreConfigs } from "@/features/task-score-config/hook/task-score-config.hook";
 import { useCreateAttachment } from "@/features/attachment/hook/attachment.hook";
 import { FileUpload } from "@/components/shared/ui/custom-file-upload";
 
@@ -44,6 +45,7 @@ interface TaskFormProps {
     onSuccess?: () => void;
     defaultProjectId?: string;
     defaultDueDate?: Date;
+    defaultBoardColumnId?: string;
 }
 //test
 const TaskForm = ({
@@ -53,6 +55,7 @@ const TaskForm = ({
     onSuccess,
     defaultProjectId,
     defaultDueDate,
+    defaultBoardColumnId,
 }: TaskFormProps) => {
     const createMutation = useCreateTask();
     const updateMutation = useUpdateTask();
@@ -74,6 +77,11 @@ const TaskForm = ({
         pageNumber: 1,
         pageSize: 1000,
         isActive: true,
+    });
+
+    const { data: scoreConfigs } = useGetAllTaskScoreConfigs({
+        pageNumber: 1,
+        pageSize: 100,
     });
 
     const isUpdate = mode === "update";
@@ -113,6 +121,7 @@ const TaskForm = ({
                 position: task.position || 0,
                 boardColumnId: task.boardColumnId || undefined,
                 score: task.score || undefined,
+                scoreConfigId: task.scoreConfigId || undefined,
                 coverImageUrl: task.coverImageUrl || undefined,
             }
             : {
@@ -127,8 +136,9 @@ const TaskForm = ({
                 dueDate: formatDateForForm(defaultDueDate),
                 estimatedHours: undefined,
                 position: 0,
-                boardColumnId: undefined,
+                boardColumnId: defaultBoardColumnId || undefined,
                 score: undefined,
+                scoreConfigId: undefined,
                 coverImageUrl: undefined,
             },
         mode: "onChange",
@@ -161,6 +171,7 @@ const TaskForm = ({
                 parentTaskId: values.parentTaskId || undefined,
                 boardColumnId: values.boardColumnId || undefined,
                 score: values.score ?? undefined,
+                scoreConfigId: values.scoreConfigId || undefined,
                 coverImageUrl,
             };
             updateMutation.mutate(
@@ -183,6 +194,7 @@ const TaskForm = ({
                 estimatedHours: values.estimatedHours || undefined,
                 boardColumnId: values.boardColumnId || undefined,
                 score: values.score ?? undefined,
+                scoreConfigId: values.scoreConfigId || undefined,
                 coverImageUrl,
             };
             createMutation.mutate(createData as any, {
@@ -414,19 +426,24 @@ const TaskForm = ({
                     />
                 </SimpleGrid>
 
-                {/* Score */}
-                <NumberInput
-                    label="Ball"
-                    placeholder="0"
+                {/* Ball konfiguratsiyasi */}
+                <Select
+                    label="Ball konfiguratsiyasi"
+                    placeholder="Tanlang (ixtiyoriy)"
                     size="sm"
                     radius="sm"
-                    min={0}
-                    step={1}
-                    value={form.watch("score")}
-                    onChange={(value) =>
-                        form.setValue("score", value as number, { shouldValidate: true })
+                    clearable
+                    searchable
+                    data={
+                        scoreConfigs?.data?.map((cfg: any) => ({
+                            value: cfg.id,
+                            label: `${cfg.priorityCode} — ${cfg.baseScore} ball (${cfg.description})`,
+                        })) || []
                     }
-                    error={form.formState.errors.score?.message}
+                    value={form.watch("scoreConfigId") || null}
+                    onChange={(value) =>
+                        form.setValue("scoreConfigId", value || undefined, { shouldValidate: true })
+                    }
                     styles={{
                         input: {
                             backgroundColor: "#f8f9fa",

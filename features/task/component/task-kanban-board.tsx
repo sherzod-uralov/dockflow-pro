@@ -45,7 +45,7 @@ interface TaskKanbanBoardProps {
     projectId?: string;
     onEditTask?: (task: TaskGetResponse) => void;
     onDeleteTask?: (id: string) => void;
-    onCreateTask?: () => void;
+    onCreateTask?: (columnId?: string) => void;
     onClickTask?: (task: TaskGetResponse) => void;
 }
 
@@ -530,7 +530,7 @@ const ColumnHeaderActions = ({
     taskCount: number;
     onUpdate: (id: string, data: { name?: string; color?: string }) => void;
     onDelete: (id: string) => void;
-    onCreateTask?: () => void;
+    onCreateTask?: (columnId?: string) => void;
 }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [editName, setEditName] = useState(column.name);
@@ -586,7 +586,7 @@ const ColumnHeaderActions = ({
             <Group gap={4}>
                 <Button
                     size="xs" variant="subtle" color="gray" p={4}
-                    onClick={() => onCreateTask?.()}
+                    onClick={() => onCreateTask?.(column.id)}
                 >
                     <IconPlus size={16} />
                 </Button>
@@ -631,7 +631,7 @@ const KanbanColumnView = ({
     addingSubtaskForId: string | null;
     onEditTask?: (task: TaskGetResponse) => void;
     onDeleteTask?: (id: string) => void;
-    onCreateTask?: () => void;
+    onCreateTask?: (columnId?: string) => void;
     onClickTask?: (task: TaskGetResponse) => void;
     onAddSubtask?: (task: TaskGetResponse) => void;
     onCloseSubtaskInput: () => void;

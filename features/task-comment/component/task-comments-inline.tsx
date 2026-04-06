@@ -46,6 +46,7 @@ import { useGetProfileQuery } from "@/features/login/hook/login.hook";
 import {
   TaskCommentGetResponse,
   CommentAttachment,
+  CommentReplyTo,
 } from "../type/task-comment.type";
 import { formatDistanceToNow } from "date-fns";
 import { uz } from "date-fns/locale";
@@ -448,16 +449,36 @@ const PendingFilePreview = ({
 // Comment Bubble
 // ============================================================================
 
+const getReplyPreviewText = (replyTo: CommentReplyTo) => {
+  if (replyTo.content) return replyTo.content;
+  if (replyTo.attachmentType?.startsWith("audio/")) return "🎤 Ovozli xabar";
+  if (replyTo.attachmentType?.startsWith("image/")) return "📷 Rasm";
+  if (replyTo.attachmentType?.startsWith("video/")) return "🎬 Video";
+  if (replyTo.attachmentName) return "📎 " + replyTo.attachmentName;
+  return "...";
+};
+
+const scrollToComment = (commentId: string) => {
+  const el = document.getElementById(`comment-${commentId}`);
+  if (el) {
+    el.scrollIntoView({ behavior: "smooth", block: "center" });
+    el.style.transition = "background-color 0.3s";
+    el.style.backgroundColor = "rgba(30,58,95,0.08)";
+    el.style.borderRadius = "12px";
+    setTimeout(() => {
+      el.style.backgroundColor = "transparent";
+    }, 1500);
+  }
+};
+
 const CommentBubble = ({
   comment,
-  parentComment,
   onReply,
   onEdit,
   onDelete,
   isOwn,
 }: {
   comment: TaskCommentGetResponse;
-  parentComment?: TaskCommentGetResponse;
   onReply: (c: TaskCommentGetResponse) => void;
   onEdit: (c: TaskCommentGetResponse) => void;
   onDelete: (id: string) => void;
@@ -471,9 +492,11 @@ const CommentBubble = ({
   const attachments = comment.attachments || [];
   const hasAttachments = attachments.length > 0;
   const hasContent = !!comment.content.trim();
+  const replyTo = comment.replyTo;
 
   return (
     <Group
+      id={`comment-${comment.id}`}
       align="flex-end"
       gap={6}
       wrap="nowrap"
@@ -502,8 +525,8 @@ const CommentBubble = ({
           </Text>
         )}
 
-        {/* Reply quote */}
-        {parentComment && (
+        {/* Reply preview — bosganda original commentga scroll */}
+        {replyTo && (
           <Box
             mb={6}
             pl="xs"
@@ -512,13 +535,15 @@ const CommentBubble = ({
               borderLeft: isOwn ? "2px solid rgba(255,255,255,0.5)" : "2px solid #1e3a5f",
               backgroundColor: isOwn ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.04)",
               borderRadius: "0 4px 4px 0",
+              cursor: "pointer",
             }}
+            onClick={() => scrollToComment(replyTo.id)}
           >
             <Text size="xs" fw={600} c={isOwn ? "rgba(255,255,255,0.8)" : "#1971c2"} lineClamp={1}>
-              {parentComment.user?.fullname}
+              {replyTo.user?.fullname}
             </Text>
             <Text size="xs" c={isOwn ? "rgba(255,255,255,0.6)" : "#868e96"} lineClamp={1}>
-              {parentComment.content || "📎 Fayl"}
+              {getReplyPreviewText(replyTo)}
             </Text>
           </Box>
         )}
@@ -800,30 +825,7 @@ export const TaskCommentsInline = ({ taskId }: TaskCommentsInlineProps) => {
     setPendingFiles([]);
   };
 
-  // Build comment tree
-  const commentsById = comments.reduce((acc, c) => {
-    acc[c.id] = c;
-    return acc;
-  }, {} as Record<string, TaskCommentGetResponse>);
-
-  const topLevelComments = comments.filter((c) => !c.parentCommentId);
-
-  const repliesMap = comments.reduce((acc, c) => {
-    if (c.parentCommentId) {
-      const rootId = commentsById[c.parentCommentId]?.parentCommentId
-        ? commentsById[c.parentCommentId]?.id
-        : c.parentCommentId;
-      if (rootId) {
-        if (!acc[rootId]) acc[rootId] = [];
-        acc[rootId].push(c);
-      }
-    }
-    return acc;
-  }, {} as Record<string, TaskCommentGetResponse[]>);
-
-  Object.keys(repliesMap).forEach((key) => {
-    repliesMap[key].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-  });
+  // Flat list — backend tartibida (createdAt asc), hech qanday guruhlash yo'q
 
   const isSending = createMutation.isLoading || updateMutation.isLoading || uploadMutation.isLoading;
 
@@ -845,28 +847,15 @@ export const TaskCommentsInline = ({ taskId }: TaskCommentsInlineProps) => {
           </Box>
         ) : (
           <Stack gap={6} pb="md" px={4} pt="sm">
-            {topLevelComments.map((comment) => (
-              <Box key={comment.id}>
-                <CommentBubble
-                  comment={comment}
-                  onReply={handleReply}
-                  onEdit={handleEdit}
-                  onDelete={(id) => deleteMutation.mutate(id)}
-                  isOwn={comment.user?.id === currentUserId}
-                />
-                {repliesMap[comment.id]?.map((reply) => (
-                  <Box key={reply.id} mt={4}>
-                    <CommentBubble
-                      comment={reply}
-                      parentComment={reply.parentCommentId ? commentsById[reply.parentCommentId] : undefined}
-                      onReply={handleReply}
-                      onEdit={handleEdit}
-                      onDelete={(id) => deleteMutation.mutate(id)}
-                      isOwn={reply.user?.id === currentUserId}
-                    />
-                  </Box>
-                ))}
-              </Box>
+            {comments.map((comment) => (
+              <CommentBubble
+                key={comment.id}
+                comment={comment}
+                onReply={handleReply}
+                onEdit={handleEdit}
+                onDelete={(id) => deleteMutation.mutate(id)}
+                isOwn={comment.user?.id === currentUserId}
+              />
             ))}
           </Stack>
         )}
@@ -889,7 +878,7 @@ export const TaskCommentsInline = ({ taskId }: TaskCommentsInlineProps) => {
                 </Text>
                 {!editingComment && replyingTo && (
                   <Text size="xs" c="dimmed" lineClamp={1}>
-                    {replyingTo.content || "📎 Fayl"}
+                    {replyingTo.content || (replyingTo.attachments?.length ? "📎 Fayl" : "...")}
                   </Text>
                 )}
               </Box>

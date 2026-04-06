@@ -140,6 +140,8 @@ export const endpoints = {
     detail: (id: string | number) => `/task/${id}`,
     update: (id: string | number) => `/task/${id}`,
     delete: (id: string | number) => `/task/${id}`,
+    complete: (id: string) => `/task/${id}/complete`,
+    uncomplete: (id: string) => `/task/${id}/uncomplete`,
   },
   // Project Member
   projectMember: {
