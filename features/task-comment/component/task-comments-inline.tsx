@@ -32,6 +32,8 @@ import {
   IconFile,
   IconDownload,
   IconPhoto,
+  IconPlayerPlayFilled,
+  IconPlayerPauseFilled,
 } from "@tabler/icons-react";
 import {
   useGetAllTaskComments,
@@ -189,6 +191,132 @@ const EmojiPicker = ({
 };
 
 // ============================================================================
+// Audio Mini-Player (Telegram style)
+// ============================================================================
+
+const formatTime = (sec: number) => {
+  if (!sec || !isFinite(sec)) return "0:00";
+  const m = Math.floor(sec / 60);
+  const s = Math.floor(sec % 60);
+  return `${m}:${s.toString().padStart(2, "0")}`;
+};
+
+const AudioPlayer = ({ src, isOwn }: { src: string; isOwn: boolean }) => {
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const onLoaded = () => setDuration(audio.duration);
+    const onTimeUpdate = () => setCurrentTime(audio.currentTime);
+    const onEnded = () => { setIsPlaying(false); setCurrentTime(0); };
+
+    audio.addEventListener("loadedmetadata", onLoaded);
+    audio.addEventListener("timeupdate", onTimeUpdate);
+    audio.addEventListener("ended", onEnded);
+
+    return () => {
+      audio.removeEventListener("loadedmetadata", onLoaded);
+      audio.removeEventListener("timeupdate", onTimeUpdate);
+      audio.removeEventListener("ended", onEnded);
+    };
+  }, []);
+
+  const togglePlay = () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (isPlaying) {
+      audio.pause();
+    } else {
+      audio.play();
+    }
+    setIsPlaying(!isPlaying);
+  };
+
+  const handleSeek = (e: React.MouseEvent<HTMLDivElement>) => {
+    const audio = audioRef.current;
+    if (!audio || !duration) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    audio.currentTime = pct * duration;
+    setCurrentTime(pct * duration);
+  };
+
+  const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
+  const accent = isOwn ? "rgba(255,255,255,0.85)" : "#1e3a5f";
+  const trackBg = isOwn ? "rgba(255,255,255,0.2)" : "#dee2e6";
+  const timColor = isOwn ? "rgba(255,255,255,0.6)" : "#868e96";
+
+  return (
+    <Box mb={4}>
+      <audio ref={audioRef} src={src} preload="metadata" />
+      <Group gap={8} wrap="nowrap" align="center">
+        {/* Play/Pause */}
+        <ActionIcon
+          size={36}
+          radius="xl"
+          variant="transparent"
+          onClick={togglePlay}
+          style={{ color: accent, flexShrink: 0 }}
+        >
+          {isPlaying ? <IconPlayerPauseFilled size={22} /> : <IconPlayerPlayFilled size={22} />}
+        </ActionIcon>
+
+        {/* Waveform / progress bar */}
+        <Box style={{ flex: 1, minWidth: 100 }}>
+          <Box
+            onClick={handleSeek}
+            style={{
+              height: 28,
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: 1.5,
+            }}
+          >
+            {/* Simplified waveform bars */}
+            {Array.from({ length: 32 }).map((_, i) => {
+              const barPct = ((i + 1) / 32) * 100;
+              const isActive = barPct <= progress;
+              // Pseudo-random bar heights for waveform look
+              const h = [14, 20, 10, 24, 16, 28, 12, 22, 18, 26, 8, 20, 14, 24, 10, 28,
+                         16, 22, 12, 26, 18, 20, 14, 24, 10, 28, 16, 22, 12, 26, 18, 8][i];
+              return (
+                <Box
+                  key={i}
+                  style={{
+                    width: 2.5,
+                    height: h,
+                    borderRadius: 2,
+                    backgroundColor: isActive ? accent : trackBg,
+                    transition: "background-color 0.1s",
+                    flexShrink: 0,
+                  }}
+                />
+              );
+            })}
+          </Box>
+
+          {/* Time */}
+          <Group justify="space-between" mt={-2}>
+            <Text style={{ fontSize: 10, color: timColor }}>
+              {formatTime(isPlaying || currentTime > 0 ? currentTime : 0)}
+            </Text>
+            <Text style={{ fontSize: 10, color: timColor }}>
+              {formatTime(duration)}
+            </Text>
+          </Group>
+        </Box>
+      </Group>
+    </Box>
+  );
+};
+
+// ============================================================================
 // Attachment Preview (inside bubble)
 // ============================================================================
 
@@ -223,11 +351,7 @@ const AttachmentPreview = ({ att, isOwn }: { att: CommentAttachment; isOwn: bool
   }
 
   if (isAudioMime(file.mimeType)) {
-    return (
-      <Box mb={4}>
-        <audio src={file.fileUrl} controls style={{ width: "100%", maxWidth: 250, height: 36 }} />
-      </Box>
-    );
+    return <AudioPlayer src={file.fileUrl} isOwn={isOwn} />;
   }
 
   // Generic file
