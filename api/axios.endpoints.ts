@@ -40,6 +40,7 @@ export const endpoints = {
   document: {
     list: "/document",
     create: "/document",
+    createWithOffice: "/document/create-with-office",
     detail: (id: string | number) => `/document/${id}`,
     update: (id: string | number) => `/document/${id}`,
     delete: (id: string | number) => `/document/${id}`,

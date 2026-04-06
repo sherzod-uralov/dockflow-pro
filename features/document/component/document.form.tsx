@@ -16,8 +16,9 @@ import {
   Stack,
   SimpleGrid,
   Loader,
+  SegmentedControl,
 } from "@mantine/core";
-import { IconTag, IconLoader2 } from "@tabler/icons-react";
+import { IconTag, IconLoader2, IconUpload, IconFileText } from "@tabler/icons-react";
 import { FileUpload } from "@/components/shared/ui/custom-file-upload";
 import {
   DocumentFormType,
@@ -27,7 +28,9 @@ import {
   DocumentGetResponse,
   useCreateDocument,
   useUpdateDocument,
+  useCreateDocumentWithOffice,
 } from "@/features/document";
+import type { OfficeFileType } from "@/features/document/type/document.type";
 import { useGetAllDocumentTypes } from "@/features/document-type";
 import { useGetAllJournals } from "@/features/journal/hook/journal.hook";
 import {
@@ -53,6 +56,10 @@ const DocumentFormModal = ({
 }: DocumentFormModalProps) => {
   const createMutation = useCreateDocument();
   const updateMutation = useUpdateDocument();
+  const createWithOfficeMutation = useCreateDocumentWithOffice();
+
+  const [createMode, setCreateMode] = useState<"upload" | "office">("upload");
+  const [officeFileType, setOfficeFileType] = useState<OfficeFileType>("docx");
   const { data: documentTypes } = useGetAllDocumentTypes();
   const { data: journals } = useGetAllJournals({
     pageNumber: 1,
@@ -154,7 +161,50 @@ const DocumentFormModal = ({
   }, [form]);
 
   const handleSubmit = (values: DocumentFormType) => {
-    // Custom validation: If no template is selected, attachments are required
+    if (isUpdate && document) {
+      const data = {
+        ...values,
+        templateId: selectedTemplateId || undefined,
+        tags: Object.keys(tagValues).length > 0 ? tagValues : undefined,
+        attachments: values.attachments || [],
+      };
+      updateMutation.mutate(
+        { id: document.id || "", data },
+        {
+          onSuccess: () => {
+            modal.closeModal();
+            onSuccess?.();
+          },
+        }
+      );
+      return;
+    }
+
+    // Create mode — Office
+    if (createMode === "office") {
+      if (!values.title || !values.documentTypeId || !values.journalId) return;
+      createWithOfficeMutation.mutate(
+        {
+          title: values.title,
+          documentTypeId: values.documentTypeId,
+          journalId: values.journalId,
+          fileType: officeFileType,
+        },
+        {
+          onSuccess: (response) => {
+            modal.closeModal();
+            onSuccess?.();
+            // Open Collabora editor in new tab
+            const token = response.wopiSrc ? "" : ""; // token olinadi
+            const editUrl = `/document-edit?id=${response.attachment.id}&documentId=${response.document.id}`;
+            window.open(editUrl, "_blank");
+          },
+        }
+      );
+      return;
+    }
+
+    // Create mode — Upload
     if (!selectedTemplateId && (!values.attachments || values.attachments.length === 0)) {
       form.setError("attachments", {
         type: "manual",
@@ -170,25 +220,13 @@ const DocumentFormModal = ({
       attachments: values.attachments || [],
     };
 
-    if (isUpdate && document) {
-      updateMutation.mutate(
-        { id: document.id || "", data },
-        {
-          onSuccess: () => {
-            modal.closeModal();
-            onSuccess?.();
-          },
-        }
-      );
-    } else {
-      // @ts-ignore
-      createMutation.mutate(data, {
-        onSuccess: () => {
-          modal.closeModal();
-          onSuccess?.();
-        },
-      });
-    }
+    // @ts-ignore
+    createMutation.mutate(data, {
+      onSuccess: () => {
+        modal.closeModal();
+        onSuccess?.();
+      },
+    });
   };
 
   const requiredTags = selectedTemplate?.requiredTags as RequiredTags | undefined;
@@ -293,6 +331,53 @@ const DocumentFormModal = ({
         />
 
 
+        {/* Create mode selector — faqat create rejimda */}
+        {!isUpdate && (
+          <Box>
+            <Text size="sm" fw={500} c="#495057" mb={4}>
+              Hujjat yaratish usuli
+            </Text>
+            <SegmentedControl
+              fullWidth
+              size="sm"
+              radius="sm"
+              value={createMode}
+              onChange={(val) => setCreateMode(val as "upload" | "office")}
+              data={[
+                { value: "upload", label: "Fayl yuklash" },
+                { value: "office", label: "Office da yaratish" },
+              ]}
+              styles={{
+                root: { backgroundColor: "#f8f9fa" },
+              }}
+            />
+          </Box>
+        )}
+
+        {/* Office file type — faqat office rejimda */}
+        {!isUpdate && createMode === "office" && (
+          <Select
+            label="Fayl turi"
+            size="sm"
+            radius="sm"
+            value={officeFileType}
+            onChange={(val) => setOfficeFileType((val as OfficeFileType) || "docx")}
+            data={[
+              { value: "docx", label: "Word hujjat (.docx)" },
+              { value: "xlsx", label: "Excel jadval (.xlsx)" },
+              { value: "pptx", label: "PowerPoint taqdimot (.pptx)" },
+            ]}
+            styles={{
+              input: {
+                backgroundColor: "#f8f9fa",
+                border: "1px solid #e9ecef",
+                "&:focus": { borderColor: "#1e3a5f" },
+              },
+              label: { color: "#495057", fontWeight: 500, marginBottom: 4 },
+            }}
+          />
+        )}
+
         <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
           {/* Journal */}
           <Select
@@ -394,8 +479,8 @@ const DocumentFormModal = ({
           </Paper>
         )}
 
-        {/* File Upload - only show when no template selected */}
-        {!selectedTemplateId && (
+        {/* File Upload - only show in upload mode when no template selected */}
+        {createMode === "upload" && !selectedTemplateId && (
           <Box>
             <Text size="sm" fw={500} c="#495057" mb={4}>
               Fayllar <span style={{ color: "var(--mantine-color-error)" }}>*</span>
@@ -491,12 +576,17 @@ const DocumentFormModal = ({
             type="submit"
             size="sm"
             radius="sm"
-            disabled={!form.formState.isValid || !areTagsValid}
+            disabled={
+              createMode === "office"
+                ? !form.watch("title") || !form.watch("documentTypeId") || !form.watch("journalId")
+                : !form.formState.isValid || !areTagsValid
+            }
             loading={
               form.formState.isSubmitting ||
               isUploading ||
               createMutation.isLoading ||
-              updateMutation.isLoading
+              updateMutation.isLoading ||
+              createWithOfficeMutation.isLoading
             }
             style={{ backgroundColor: "#1e3a5f" }}
           >

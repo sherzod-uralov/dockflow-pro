@@ -57,3 +57,20 @@ export interface DocumentQueryParams {
   priority?: string;
   templateId?: string;
 }
+
+export type OfficeFileType = "docx" | "xlsx" | "pptx";
+
+export interface CreateWithOfficePayload {
+  title: string;
+  documentTypeId: string;
+  journalId: string;
+  fileType: OfficeFileType;
+}
+
+export interface CreateWithOfficeResponse {
+  document: { id: string; title: string; documentNumber: string };
+  attachment: { id: string; fileName: string; fileUrl: string };
+  collaboraUrl: string;
+  wopiSrc: string;
+  fileType: OfficeFileType;
+}
