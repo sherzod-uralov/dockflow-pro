@@ -11,7 +11,7 @@ import {
   getPermissionDescription,
   getSaveButtonText,
 } from "@/features/document-editor/utils/permission.utils";
-import { Button } from "@/components/ui/button";
+import { Button } from "@mantine/core";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Save, Lock, Edit3 } from "lucide-react";
