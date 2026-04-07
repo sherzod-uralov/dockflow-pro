@@ -76,6 +76,7 @@ class ChatSocket {
       "chat:updated",
       "chat:deleted",
       "chat:typing",
+      "presence:update",
       "call:incoming",
       "call:status",
       "call:signal",
@@ -99,7 +100,12 @@ class ChatSocket {
 
   setTyping(chatId: string, isTyping: boolean) {
     if (!this.socket) return;
-    this.socket.emit("chat:typing", { chatId, isTyping });
+    this.socket.emit("chat:typing", { chatId, isTyping, action: "typing" });
+  }
+
+  sendTyping(chatId: string, isTyping: boolean, action: string = "typing") {
+    if (!this.socket) return;
+    this.socket.emit("chat:typing", { chatId, isTyping, action });
   }
 
   sendCallSignal(payload: {

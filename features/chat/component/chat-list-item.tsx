@@ -15,6 +15,7 @@ import {
 import { ChatListItem as ChatListItemType } from "../type/chat.type";
 import { useMuteChat, usePinChat, useArchiveChat } from "../hook/chat.hook";
 import { useChatCall } from "../hook/use-chat-call";
+import { useUserPresence } from "../hook/use-presence";
 
 interface Props {
   chat: ChatListItemType;
@@ -54,6 +55,8 @@ export const ChatListItemView = ({ chat, isActive, onClick }: Props) => {
   const pinMutation = usePinChat();
   const archiveMutation = useArchiveChat();
   const { startCall, activeCall } = useChatCall();
+  const peerPresence = useUserPresence(chat.peer?.id);
+  const isPeerOnline = peerPresence?.isOnline ?? chat.peer?.isOnline ?? false;
 
   const preview = lastMsg
     ? lastMsg.type === "TEXT"
@@ -106,7 +109,7 @@ export const ChatListItemView = ({ chat, isActive, onClick }: Props) => {
               {isGroup ? <IconUsers size={20} color="#f39c12" /> : getInitials(chat.title)}
             </Avatar>
           </Indicator>
-          {!isGroup && chat.peer?.isOnline && (
+          {!isGroup && isPeerOnline && (
             <Box
               style={{
                 position: "absolute",

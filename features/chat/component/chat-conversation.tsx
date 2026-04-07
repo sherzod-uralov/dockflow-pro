@@ -29,6 +29,7 @@ import {
   IconPhone,
 } from "@tabler/icons-react";
 import { useChatCall } from "../hook/use-chat-call";
+import { useUserPresence } from "../hook/use-presence";
 import { formatPresence } from "../lib/presence";
 import {
   useGetChatMessages,
@@ -76,6 +77,9 @@ export const ChatConversation = ({ chatId, currentUserId, onChatDeleted }: Props
 
   const { data: chat } = useGetChatDetail(chatId);
   const { data: messagesData, isLoading } = useGetChatMessages(chatId);
+  const peerPresence = useUserPresence(chat?.peer?.id);
+  const isPeerOnline = peerPresence?.isOnline ?? chat?.peer?.isOnline;
+  const peerLastSeen = peerPresence?.lastSeen ?? chat?.peer?.lastSeen;
   const sendText = useSendTextMessage();
   const sendMedia = useSendMediaMessage();
   const editMessage = useEditMessage();
@@ -83,7 +87,7 @@ export const ChatConversation = ({ chatId, currentUserId, onChatDeleted }: Props
   const markRead = useMarkChatRead();
   const addReaction = useAddReaction();
   const removeReaction = useRemoveReaction();
-  const { typingUsers, handleTyping } = useChatTyping(chatId);
+  const { typingLabel, handleTyping, sendAction, stopAction } = useChatTyping(chatId);
 
   const isGroup = chat?.type === "GROUP";
 
@@ -124,7 +128,7 @@ export const ChatConversation = ({ chatId, currentUserId, onChatDeleted }: Props
         });
       });
     }
-  }, [allMessages.length, typingUsers.length]);
+  }, [allMessages.length, typingLabel]);
 
   // Reset on chat change
   useEffect(() => {
@@ -198,6 +202,17 @@ export const ChatConversation = ({ chatId, currentUserId, onChatDeleted }: Props
       ? "VOICE"
       : "FILE";
 
+    // Emit "uploading" action
+    const uploadAction =
+      fileType === "IMAGE"
+        ? "uploading_photo"
+        : fileType === "VIDEO"
+        ? "uploading_video"
+        : fileType === "VOICE"
+        ? "uploading_voice"
+        : "uploading_file";
+    sendAction(uploadAction);
+
     const optimisticMsg: ChatMessage = {
       id: tempId,
       tempId,
@@ -220,6 +235,8 @@ export const ChatConversation = ({ chatId, currentUserId, onChatDeleted }: Props
       setOptimistic((prev) => prev.filter((m) => m.id !== tempId));
     } catch {
       setOptimistic((prev) => prev.map((m) => (m.id === tempId ? { ...m, pending: false, failed: true } : m)));
+    } finally {
+      stopAction(uploadAction);
     }
   };
 
@@ -250,6 +267,7 @@ export const ChatConversation = ({ chatId, currentUserId, onChatDeleted }: Props
       recorder.start();
       mediaRecorderRef.current = recorder;
       setIsRecording(true);
+      sendAction("recording");
     } catch (err) {
       alert("Mikrofonga ruxsat berilmadi");
     }
@@ -260,6 +278,7 @@ export const ChatConversation = ({ chatId, currentUserId, onChatDeleted }: Props
       mediaRecorderRef.current.stop();
     }
     setIsRecording(false);
+    stopAction("recording");
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -335,7 +354,7 @@ export const ChatConversation = ({ chatId, currentUserId, onChatDeleted }: Props
             <Text size="xs" c="dimmed">
               {isGroup
                 ? `${chat.membersCount} a'zo`
-                : formatPresence(chat.peer?.isOnline, chat.peer?.lastSeen)}
+                : formatPresence(isPeerOnline, peerLastSeen)}
             </Text>
           </Box>
         </Group>
@@ -412,9 +431,9 @@ export const ChatConversation = ({ chatId, currentUserId, onChatDeleted }: Props
                   />
                 );
               })}
-              {typingUsers.length > 0 && (
+              {typingLabel && (
                 <Text size="xs" c="dimmed" pl={40} mt={4}>
-                  {typingUsers.map((u) => u.username).join(", ")} yozmoqda...
+                  {typingLabel}
                 </Text>
               )}
             </Stack>

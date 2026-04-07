@@ -3,10 +3,28 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { chatSocket } from "../lib/chat-socket";
 
+export type TypingAction =
+  | "typing"
+  | "recording"
+  | "uploading_file"
+  | "uploading_photo"
+  | "uploading_video"
+  | "uploading_voice";
+
 interface TypingUser {
   userId: string;
   username: string;
+  action: TypingAction;
 }
+
+const ACTION_LABELS: Record<TypingAction, string> = {
+  typing: "yozmoqda",
+  recording: "ovozli xabar yozmoqda",
+  uploading_file: "fayl yubormoqda",
+  uploading_photo: "rasm yubormoqda",
+  uploading_video: "video yubormoqda",
+  uploading_voice: "ovozli xabar yubormoqda",
+};
 
 export const useChatTyping = (chatId: string | null) => {
   const [typingUsers, setTypingUsers] = useState<TypingUser[]>([]);
@@ -14,25 +32,33 @@ export const useChatTyping = (chatId: string | null) => {
   const stopTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const userTimersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
-  // Listen incoming typing events
+  // Listen to incoming typing events
   useEffect(() => {
     if (!chatId) return;
     const off = chatSocket.on(
       "chat:typing",
-      (data: { chatId: string; userId: string; username: string; isTyping: boolean }) => {
+      (data: {
+        chatId: string;
+        userId: string;
+        username: string;
+        isTyping: boolean;
+        action?: TypingAction;
+      }) => {
         if (data.chatId !== chatId) return;
+        const action: TypingAction = data.action || "typing";
+
         if (data.isTyping) {
           setTypingUsers((prev) => {
-            if (prev.some((u) => u.userId === data.userId)) return prev;
-            return [...prev, { userId: data.userId, username: data.username }];
+            const filtered = prev.filter((u) => u.userId !== data.userId);
+            return [...filtered, { userId: data.userId, username: data.username, action }];
           });
-          // Auto-remove after 3s
+
           const existing = userTimersRef.current.get(data.userId);
           if (existing) clearTimeout(existing);
           const t = setTimeout(() => {
             setTypingUsers((prev) => prev.filter((u) => u.userId !== data.userId));
             userTimersRef.current.delete(data.userId);
-          }, 3000);
+          }, 4000);
           userTimersRef.current.set(data.userId, t);
         } else {
           setTypingUsers((prev) => prev.filter((u) => u.userId !== data.userId));
@@ -52,20 +78,44 @@ export const useChatTyping = (chatId: string | null) => {
     };
   }, [chatId]);
 
-  // Emit typing (debounced) — call from input onChange
+  // Emit typing (debounced) — for text input
   const handleTyping = useCallback(() => {
     if (!chatId) return;
     const now = Date.now();
     if (now - lastEmitRef.current > 1500) {
-      chatSocket.setTyping(chatId, true);
+      chatSocket.sendTyping(chatId, true, "typing");
       lastEmitRef.current = now;
     }
     if (stopTimerRef.current) clearTimeout(stopTimerRef.current);
     stopTimerRef.current = setTimeout(() => {
-      chatSocket.setTyping(chatId, false);
+      chatSocket.sendTyping(chatId, false, "typing");
       lastEmitRef.current = 0;
     }, 2000);
   }, [chatId]);
 
-  return { typingUsers, handleTyping };
+  // Emit specific action (recording, uploading)
+  const sendAction = useCallback(
+    (action: TypingAction) => {
+      if (!chatId) return;
+      chatSocket.sendTyping(chatId, true, action);
+    },
+    [chatId]
+  );
+
+  const stopAction = useCallback(
+    (action: TypingAction = "typing") => {
+      if (!chatId) return;
+      chatSocket.sendTyping(chatId, false, action);
+    },
+    [chatId]
+  );
+
+  // Format display: "Asror yozmoqda", "Bobur va 2 boshqa yozmoqda"
+  const typingLabel = typingUsers.length
+    ? typingUsers.length === 1
+      ? `${typingUsers[0].username} ${ACTION_LABELS[typingUsers[0].action]}...`
+      : `${typingUsers[0].username} va yana ${typingUsers.length - 1} kishi ${ACTION_LABELS[typingUsers[0].action]}...`
+    : "";
+
+  return { typingUsers, typingLabel, handleTyping, sendAction, stopAction };
 };

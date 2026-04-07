@@ -5,6 +5,7 @@ import { useQueryClient } from "react-query";
 import { authService } from "@/features/login/service/login.service";
 import { chatSocket } from "../lib/chat-socket";
 import { ChatMessage } from "../type/chat.type";
+import { usePresenceSync } from "./use-presence";
 
 /**
  * Mounts global chat socket connection (lifecycle managed by app).
@@ -12,6 +13,9 @@ import { ChatMessage } from "../type/chat.type";
  */
 export const useChatSocket = () => {
   const qc = useQueryClient();
+
+  // Real-time online/offline sync from notification socket store
+  usePresenceSync();
 
   useEffect(() => {
     const token = authService.getAccessToken();
