@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useMemo, KeyboardEvent } from "react";
+import { useQueryClient } from "react-query";
 import {
   Box,
   Group,
@@ -32,6 +33,7 @@ import {
 import { useChatCall } from "../hook/use-chat-call";
 import { useUserPresence } from "../hook/use-presence";
 import { formatPresence } from "../lib/presence";
+import { ChatMessagesResponse } from "../type/chat.type";
 import {
   useGetChatMessages,
   useGetChatDetail,
@@ -75,6 +77,7 @@ export const ChatConversation = ({ chatId, currentUserId, onChatDeleted, onBack 
   const recordedChunksRef = useRef<Blob[]>([]);
   const recordStartRef = useRef<number>(0);
   const forwardModal = useModal();
+  const qc = useQueryClient();
   const { startCall, activeCall } = useChatCall();
 
   const { data: chat } = useGetChatDetail(chatId);
@@ -120,17 +123,30 @@ export const ChatConversation = ({ chatId, currentUserId, onChatDeleted, onBack 
     setOptimistic((prev) => prev.filter((m) => m.pending || m.failed));
   }, [messagesData?.messages]);
 
-  // Auto-scroll
+  // Auto-scroll — birinchi yuklanganda darhol, keyinchalik smooth
+  const isFirstScrollRef = useRef(true);
   useEffect(() => {
-    if (scrollRef.current) {
-      requestAnimationFrame(() => {
-        scrollRef.current?.scrollTo({
-          top: scrollRef.current.scrollHeight,
-          behavior: "smooth",
-        });
+    const el = scrollRef.current;
+    if (!el) return;
+
+    const isNearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 200;
+    const shouldScroll = isFirstScrollRef.current || isNearBottom;
+    if (!shouldScroll) return;
+
+    requestAnimationFrame(() => {
+      if (!scrollRef.current) return;
+      scrollRef.current.scrollTo({
+        top: scrollRef.current.scrollHeight,
+        behavior: isFirstScrollRef.current ? "auto" : "smooth",
       });
-    }
+      isFirstScrollRef.current = false;
+    });
   }, [allMessages.length, typingLabel]);
+
+  // Reset scroll flag on chat change
+  useEffect(() => {
+    isFirstScrollRef.current = true;
+  }, [chatId]);
 
   // Reset on chat change
   useEffect(() => {
@@ -182,10 +198,31 @@ export const ChatConversation = ({ chatId, currentUserId, onChatDeleted, onBack 
     setReplyTo(null);
 
     try {
-      await sendText.mutateAsync({ id: chatId, payload: { content: text, replyToId: replyId } });
+      const realMessage = await sendText.mutateAsync({
+        id: chatId,
+        payload: { content: text, replyToId: replyId },
+      });
+
+      // Server xabarini cache'ga darhol qo'shamiz (agar socket eventidan oldin kelsa)
+      qc.setQueryData<ChatMessagesResponse | undefined>(
+        ["chat-messages", chatId],
+        (old) => {
+          if (!old) return old;
+          if (old.messages.some((m) => m.id === realMessage.id)) return old;
+          return {
+            ...old,
+            count: old.count + 1,
+            messages: [...old.messages, realMessage],
+          };
+        }
+      );
+
+      // Optimistic'ni darhol olib tashlaymiz
       setOptimistic((prev) => prev.filter((m) => m.id !== tempId));
     } catch {
-      setOptimistic((prev) => prev.map((m) => (m.id === tempId ? { ...m, pending: false, failed: true } : m)));
+      setOptimistic((prev) =>
+        prev.map((m) => (m.id === tempId ? { ...m, pending: false, failed: true } : m))
+      );
     }
   };
 
@@ -233,7 +270,19 @@ export const ChatConversation = ({ chatId, currentUserId, onChatDeleted, onBack 
     setOptimistic((prev) => [...prev, optimisticMsg]);
 
     try {
-      await sendMedia.mutateAsync({ id: chatId, file });
+      const realMessage = await sendMedia.mutateAsync({ id: chatId, file });
+      qc.setQueryData<ChatMessagesResponse | undefined>(
+        ["chat-messages", chatId],
+        (old) => {
+          if (!old) return old;
+          if (old.messages.some((m) => m.id === realMessage.id)) return old;
+          return {
+            ...old,
+            count: old.count + 1,
+            messages: [...old.messages, realMessage],
+          };
+        }
+      );
       setOptimistic((prev) => prev.filter((m) => m.id !== tempId));
     } catch {
       setOptimistic((prev) => prev.map((m) => (m.id === tempId ? { ...m, pending: false, failed: true } : m)));
@@ -592,12 +641,12 @@ export const ChatConversation = ({ chatId, currentUserId, onChatDeleted, onBack 
       {/* Animatsiyalar */}
       <style jsx global>{`
         @keyframes msgSlideInRight {
-          from { opacity: 0; transform: translateX(20px); }
-          to { opacity: 1; transform: translateX(0); }
+          from { opacity: 0; transform: translate3d(12px, 4px, 0); }
+          to { opacity: 1; transform: translate3d(0, 0, 0); }
         }
         @keyframes msgSlideInLeft {
-          from { opacity: 0; transform: translateX(-20px); }
-          to { opacity: 1; transform: translateX(0); }
+          from { opacity: 0; transform: translate3d(-12px, 4px, 0); }
+          to { opacity: 1; transform: translate3d(0, 0, 0); }
         }
         @keyframes typingDot {
           0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }

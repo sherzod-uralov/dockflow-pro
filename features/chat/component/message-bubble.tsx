@@ -274,7 +274,7 @@ export const MessageBubble = ({
       justify={isOwn ? "flex-end" : "flex-start"}
       style={{
         marginBottom: 4,
-        animation: isOwn ? "msgSlideInRight 0.25s ease" : "msgSlideInLeft 0.25s ease",
+        animation: isOwn ? "msgSlideInRight 0.18s ease-out" : "msgSlideInLeft 0.18s ease-out",
       }}
     >
       {!isOwn && showAvatar && (

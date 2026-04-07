@@ -79,20 +79,15 @@ export const useDeleteChat = () => {
 };
 
 export const useSendTextMessage = () => {
-  const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ id, payload }: { id: string; payload: SendTextMessagePayload }) =>
       chatService.sendText(id, payload),
-    onSuccess: (_, { id }) => {
-      qc.invalidateQueries(chatMessagesKey(id));
-      qc.invalidateQueries(CHAT_LIST_KEY);
-    },
+    // Cache socket eventi orqali yangilanadi (use-chat-socket.ts)
     onError: showError,
   });
 };
 
 export const useSendMediaMessage = () => {
-  const qc = useQueryClient();
   return useMutation({
     mutationFn: ({
       id,
@@ -103,10 +98,7 @@ export const useSendMediaMessage = () => {
       file: File;
       extras?: { content?: string; replyToId?: string; duration?: number };
     }) => chatService.sendMedia(id, file, extras),
-    onSuccess: (_, { id }) => {
-      qc.invalidateQueries(chatMessagesKey(id));
-      qc.invalidateQueries(CHAT_LIST_KEY);
-    },
+    // Cache socket eventi orqali yangilanadi
     onError: showError,
   });
 };
