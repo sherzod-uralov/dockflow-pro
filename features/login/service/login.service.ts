@@ -139,7 +139,16 @@ export const authService = {
         } finally {
             tokenUtils.clearTokens();
             if (typeof window !== "undefined") {
-                window.location.href = "/login";
+                const currentPath = window.location.pathname + window.location.search;
+                const isProtected =
+                    currentPath.startsWith("/dashboard") ||
+                    currentPath.startsWith("/document-edit") ||
+                    currentPath.startsWith("/pdf");
+                if (isProtected && currentPath !== "/login") {
+                    window.location.href = `/login?callbackUrl=${encodeURIComponent(currentPath)}`;
+                } else {
+                    window.location.href = "/login";
+                }
             }
         }
     },

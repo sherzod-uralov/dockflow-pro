@@ -9,7 +9,7 @@ import {
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { IconUser, IconLock, IconAlertCircle } from "@tabler/icons-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useLoginMutation } from "../hook/login.hook";
 import Cookie from "js-cookie";
 import React, { useState } from "react";
@@ -22,6 +22,8 @@ interface LoginFormValues {
 export const LoginForm = () => {
     const authMutation = useLoginMutation();
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const callbackUrl = searchParams?.get("callbackUrl");
     const [loginError, setLoginError] = useState<string | null>(null);
 
     const form = useForm<LoginFormValues>({
@@ -51,7 +53,8 @@ export const LoginForm = () => {
             onSuccess: (data) => {
                 Cookie.set("accessToken", data.accessToken);
                 Cookie.set("refreshToken", data.refreshToken);
-                router.push("/dashboard");
+                const target = callbackUrl && callbackUrl.startsWith("/") ? callbackUrl : "/dashboard";
+                router.push(target);
             },
         });
     };

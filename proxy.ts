@@ -13,9 +13,13 @@ export default function proxy(req: NextRequest) {
   }
 
   const isAuth = !!token;
-  const isLoginPage = req.nextUrl.pathname.startsWith("/login");
-  const isRootPage = req.nextUrl.pathname === "/";
-  const isDashboard = req.nextUrl.pathname.startsWith("/dashboard");
+  const { pathname, search } = req.nextUrl;
+  const isLoginPage = pathname.startsWith("/login");
+  const isRootPage = pathname === "/";
+  const isProtected =
+    pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/document-edit") ||
+    pathname.startsWith("/pdf");
 
   if (isRootPage) {
     if (isAuth) {
@@ -24,15 +28,19 @@ export default function proxy(req: NextRequest) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
-  if (!isAuth && isDashboard) {
-    const response = NextResponse.redirect(new URL("/login", req.url));
+  if (!isAuth && isProtected) {
+    const loginUrl = new URL("/login", req.url);
+    loginUrl.searchParams.set("callbackUrl", pathname + search);
+    const response = NextResponse.redirect(loginUrl);
     response.cookies.delete("accessToken");
     response.cookies.delete("refreshToken");
     return response;
   }
 
   if (isAuth && isLoginPage) {
-    return NextResponse.redirect(new URL("/dashboard", req.url));
+    const callbackUrl = req.nextUrl.searchParams.get("callbackUrl");
+    const target = callbackUrl && callbackUrl.startsWith("/") ? callbackUrl : "/dashboard";
+    return NextResponse.redirect(new URL(target, req.url));
   }
 
   return NextResponse.next();
@@ -40,9 +48,10 @@ export default function proxy(req: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
     "/",
-    "/dashboard/:path*",
     "/login",
+    "/dashboard/:path*",
+    "/document-edit/:path*",
+    "/pdf/:path*",
   ],
 };
