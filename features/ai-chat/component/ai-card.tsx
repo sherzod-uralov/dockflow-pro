@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { Paper, Group, Text, Badge, Box, Stack, Progress, ThemeIcon, Button } from "@mantine/core";
 import {
   IconClipboardList,
@@ -42,6 +43,25 @@ const formatBytes = (bytes?: number) => {
   const kb = bytes / 1024;
   if (kb < 1024) return `${kb.toFixed(0)} KB`;
   return `${(kb / 1024).toFixed(1)} MB`;
+};
+
+// Xavfsiz string converter — object/array kelsa name ni oladi yoki JSON qiladi
+const safeText = (value: unknown): string => {
+  if (value == null) return "";
+  if (typeof value === "string") return value;
+  if (typeof value === "number" || typeof value === "boolean") return String(value);
+  if (typeof value === "object") {
+    const obj = value as Record<string, unknown>;
+    if (typeof obj.name === "string") return obj.name;
+    if (typeof obj.title === "string") return obj.title;
+    if (typeof obj.label === "string") return obj.label;
+    try {
+      return JSON.stringify(value);
+    } catch {
+      return "";
+    }
+  }
+  return "";
 };
 
 const PRIORITY_COLORS: Record<string, string> = {
@@ -239,9 +259,9 @@ const renderMeta = (card: AiCardType) => {
     }
 
     case "user": {
-      const fullname = meta.fullname as string | undefined;
-      const role = meta.role as string | undefined;
-      const department = meta.department as string | undefined;
+      const fullname = safeText(meta.fullname);
+      const role = safeText(meta.role);
+      const department = safeText(meta.department);
       return (
         <Stack gap={2}>
           {fullname && (
@@ -406,7 +426,36 @@ interface AiCardProps {
   card: AiCardType;
 }
 
-export const AiCard = ({ card }: AiCardProps) => {
+// Error boundary — agar card render xato bersa crash o'rniga fallback ko'rsatadi
+class CardErrorBoundary extends React.Component<
+  { children: React.ReactNode; cardType: string },
+  { hasError: boolean }
+> {
+  state = { hasError: false };
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: Error) {
+    console.error("AiCard render error:", error);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <Paper p="xs" radius="sm" withBorder style={{ borderColor: "#fde2e2", backgroundColor: "#fff3f3" }}>
+          <Text size="xs" c="#a02525">
+            Karta ko'rsatishda xato ({this.props.cardType})
+          </Text>
+        </Paper>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+const AiCardInner = ({ card }: AiCardProps) => {
   const config = TYPE_CONFIG[card.type] || TYPE_CONFIG.task;
   const Icon = config.icon;
 
@@ -432,7 +481,7 @@ export const AiCard = ({ card }: AiCardProps) => {
         <Box style={{ flex: 1, minWidth: 0 }}>
           <Group justify="space-between" gap="xs" mb={2} wrap="nowrap">
             <Text size="sm" fw={600} c="#212529" lineClamp={1}>
-              {card.title}
+              {safeText(card.title)}
             </Text>
             <Badge
               size="xs"
@@ -445,7 +494,7 @@ export const AiCard = ({ card }: AiCardProps) => {
           </Group>
           {card.subtitle && (
             <Text size="xs" c="dimmed" mb={6} lineClamp={2}>
-              {card.subtitle}
+              {safeText(card.subtitle)}
             </Text>
           )}
           {renderMeta(card)}
@@ -488,5 +537,11 @@ export const AiCard = ({ card }: AiCardProps) => {
     </Paper>
   );
 };
+
+export const AiCard = ({ card }: AiCardProps) => (
+  <CardErrorBoundary cardType={card.type}>
+    <AiCardInner card={card} />
+  </CardErrorBoundary>
+);
 
 export default AiCard;
