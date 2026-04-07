@@ -7,6 +7,7 @@ import Cookies from "js-cookie";
 interface LoginResponse {
     accessToken: string;
     refreshToken: string;
+    sessionId?: string;
     user: {
         id: string;
         email: string;
@@ -68,6 +69,7 @@ const tokenUtils = {
         Cookies.remove(this.REFRESH_TOKEN_KEY);
         if (typeof window !== "undefined") {
             localStorage.removeItem(this.USER_KEY);
+            localStorage.removeItem("sessionId");
         }
     },
 
@@ -93,6 +95,10 @@ export const authService = {
                     response.data.refreshToken,
                     response.data.user
                 );
+            }
+
+            if (response.data.sessionId && typeof window !== "undefined") {
+                localStorage.setItem("sessionId", response.data.sessionId);
             }
 
             return response.data;

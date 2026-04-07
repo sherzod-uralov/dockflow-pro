@@ -167,27 +167,46 @@ class SocketManager {
       store.setActiveWorkflowsCount(data.count);
     });
 
-    // Session Events — auto logout
+    // Session Events — faqat o'z sessionId ga teng bo'lsa logout
     this.socket.on('session:revoked', (data: { sessionId: string; message?: string }) => {
-      mantineNotifications.show({
-        title: 'Sessiya bekor qilindi',
-        message: data.message || 'Sizning sessiyangiz boshqa qurilmadan chiqarib yuborildi',
-        color: 'red',
-        autoClose: 5000,
-      });
-      this.handleForceLogout();
+      const mySessionId = this.getCurrentSessionId();
+
+      if (data.sessionId && mySessionId && data.sessionId === mySessionId) {
+        // Bu mening sessiyam — logout
+        mantineNotifications.show({
+          title: 'Sessiya bekor qilindi',
+          message: data.message || 'Sizning sessiyangiz boshqa qurilmadan chiqarib yuborildi',
+          color: 'red',
+          autoClose: 5000,
+        });
+        this.handleForceLogout();
+      } else {
+        // Boshqa sessiya bekor qilindi — faqat ro'yxatni yangilash
+        window.dispatchEvent(new CustomEvent('sessions-changed'));
+      }
     });
 
     this.socket.on('session:revoked-all', (data: { exceptSessionId?: string; message?: string }) => {
-      mantineNotifications.show({
-        title: 'Sessiyalar bekor qilindi',
-        message: data.message || 'Barcha boshqa sessiyalar chiqarib yuborildi',
-        color: 'orange',
-        autoClose: 5000,
-      });
-      // Bu qurilma bekor qilinmagan bo'lishi mumkin (exceptSessionId)
-      // Lekin xavfsizlik uchun profile invalidate qilamiz
-      window.dispatchEvent(new CustomEvent('sessions-changed'));
+      const mySessionId = this.getCurrentSessionId();
+
+      // Agar mening sessiyam istisnoda bo'lmasa — logout
+      if (mySessionId && data.exceptSessionId && data.exceptSessionId !== mySessionId) {
+        mantineNotifications.show({
+          title: 'Sessiya bekor qilindi',
+          message: data.message || 'Barcha sessiyalar chiqarib yuborildi',
+          color: 'red',
+          autoClose: 5000,
+        });
+        this.handleForceLogout();
+      } else {
+        mantineNotifications.show({
+          title: 'Sessiyalar bekor qilindi',
+          message: data.message || 'Boshqa qurilmalardagi sessiyalar bekor qilindi',
+          color: 'orange',
+          autoClose: 5000,
+        });
+        window.dispatchEvent(new CustomEvent('sessions-changed'));
+      }
     });
 
     // Error Events
@@ -335,6 +354,11 @@ class SocketManager {
 
   private handleAuthError(): void {
     window.dispatchEvent(new CustomEvent('socket-auth-error'));
+  }
+
+  private getCurrentSessionId(): string | null {
+    if (typeof window === 'undefined') return null;
+    return localStorage.getItem('sessionId');
   }
 
   private handleForceLogout(): void {
