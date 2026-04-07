@@ -460,32 +460,6 @@ const SidebarBody = ({
                 borderLeft: "1px solid var(--sidebar-border-accent)",
               }}
             >
-              {/* Barcha vazifalar link */}
-              <NavLink
-                label={
-                  <Text
-                    size="sm"
-                    c={isActive("/dashboard/task") ? "white" : "var(--sidebar-text-secondary)"}
-                  >
-                    Barcha vazifalar
-                  </Text>
-                }
-                onClick={() => handleItemClick("/dashboard/task")}
-                active={isActive("/dashboard/task")}
-                variant="subtle"
-                styles={{
-                  root: {
-                    borderRadius: 4,
-                    backgroundColor: isActive("/dashboard/task")
-                      ? "var(--sidebar-active)"
-                      : "transparent",
-                    "&:hover": {
-                      backgroundColor: "var(--sidebar-hover)",
-                    },
-                  },
-                }}
-              />
-
               {/* Barcha loyihalar link */}
               <NavLink
                 label={
