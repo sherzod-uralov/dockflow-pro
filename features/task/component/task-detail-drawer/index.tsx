@@ -65,6 +65,12 @@ import {
 } from "../../type/task.type";
 import { TaskCommentsInline } from "@/features/task-comment/component/task-comments-inline";
 import { TaskAttachments } from "@/features/task-attachment/component/task-attachments";
+import {
+  GuardedButton,
+  GuardedActionIcon,
+  GuardedMenuItem,
+  usePermissionCheck,
+} from "@/components/shared/permission";
 
 import { TaskChecklist } from "@/features/task-checklist/component/task-checklist";
 import {
@@ -128,6 +134,8 @@ export const TaskDetailDrawer = ({
   const deleteTask = useDeleteTask();
   const completeTask = useCompleteTask();
   const uncompleteTask = useUncompleteTask();
+  const { allowed: canUpdateTask } = usePermissionCheck("task:update");
+  const { allowed: canCompleteTask } = usePermissionCheck("task:complete");
 
   const shouldFetchRelated = !!taskId && isOpen;
 
@@ -244,7 +252,8 @@ export const TaskDetailDrawer = ({
                 </Group>
                 <Group gap="xs">
                   {!task.completedAt && (
-                    <Button
+                    <GuardedButton
+                      permission="task:complete"
                       size="compact-xs"
                       variant="light"
                       color="green"
@@ -253,13 +262,18 @@ export const TaskDetailDrawer = ({
                       loading={completeTask.isLoading}
                     >
                       Yakunlash
-                    </Button>
+                    </GuardedButton>
                   )}
-                  <Tooltip label={isWatching ? "Kuzatishni to'xtatish" : "Kuzatish"}>
-                    <ActionIcon variant="subtle" color={isWatching ? "blue" : "gray"} onClick={toggleWatch} loading={watchTask.isLoading || unwatchTask.isLoading}>
-                      {isWatching ? <IconEye size={18} /> : <IconEyeOff size={18} />}
-                    </ActionIcon>
-                  </Tooltip>
+                  <GuardedActionIcon
+                    permission="task:watch"
+                    label={isWatching ? "Kuzatishni to'xtatish" : "Kuzatish"}
+                    variant="subtle"
+                    color={isWatching ? "blue" : "gray"}
+                    onClick={toggleWatch}
+                    loading={watchTask.isLoading || unwatchTask.isLoading}
+                  >
+                    {isWatching ? <IconEye size={18} /> : <IconEyeOff size={18} />}
+                  </GuardedActionIcon>
                   <Tooltip label={isFullscreen ? "Kichraytirish" : "Kattalashtirish"}>
                     <ActionIcon variant="subtle" color="gray" onClick={() => setIsFullscreen(!isFullscreen)}>
                       {isFullscreen ? <IconMinimize size={18} /> : <IconMaximize size={18} />}
@@ -270,9 +284,9 @@ export const TaskDetailDrawer = ({
                       <ActionIcon variant="subtle" color="gray"><IconDots size={18} /></ActionIcon>
                     </Menu.Target>
                     <Menu.Dropdown>
-                      <Menu.Item leftSection={<IconTrash size={14} />} color="red" onClick={handleDelete}>
+                      <GuardedMenuItem permission="task:delete" leftSection={<IconTrash size={14} />} color="red" onClick={handleDelete}>
                         O'chirish
-                      </Menu.Item>
+                      </GuardedMenuItem>
                     </Menu.Dropdown>
                   </Menu>
                   <ActionIcon variant="subtle" color="gray" onClick={onClose}>
@@ -296,10 +310,25 @@ export const TaskDetailDrawer = ({
                   styles={{ input: { fontSize: 18, fontWeight: 600, border: "none", backgroundColor: "transparent", padding: 0 } }}
                 />
               ) : (
-                <Group gap={6} style={{ cursor: "pointer" }} onClick={() => { setEditTitle(task.title); setIsEditingTitle(true); }}>
-                  <Text size="lg" fw={600} c="#212529">{task.title}</Text>
-                  <IconEdit size={14} color="#adb5bd" />
-                </Group>
+                <Tooltip
+                  label="Bu amalni bajarish uchun ruxsat yo'q"
+                  disabled={canUpdateTask}
+                  withArrow
+                  position="top"
+                >
+                  <Group
+                    gap={6}
+                    style={{ cursor: canUpdateTask ? "pointer" : "default" }}
+                    onClick={() => {
+                      if (!canUpdateTask) return;
+                      setEditTitle(task.title);
+                      setIsEditingTitle(true);
+                    }}
+                  >
+                    <Text size="lg" fw={600} c="#212529">{task.title}</Text>
+                    {canUpdateTask && <IconEdit size={14} color="#adb5bd" />}
+                  </Group>
+                </Tooltip>
               )}
             </Box>
 
@@ -350,8 +379,13 @@ export const TaskDetailDrawer = ({
                       ) : (
                         <Paper
                           p="sm" radius="sm"
-                          style={{ backgroundColor: "#f8f9fa", cursor: "pointer", minHeight: 60 }}
-                          onClick={() => { setEditDesc(task.description || ""); setIsEditingDesc(true); }}
+                          style={{ backgroundColor: "#f8f9fa", cursor: canUpdateTask ? "pointer" : "default", minHeight: 60 }}
+                          onClick={() => {
+                            if (!canUpdateTask) return;
+                            setEditDesc(task.description || "");
+                            setIsEditingDesc(true);
+                          }}
+                          title={canUpdateTask ? "" : "Bu amalni bajarish uchun ruxsat yo'q"}
                         >
                           {task.description ? (
                             <Text size="sm" c="#495057" style={{ whiteSpace: "pre-wrap" }}>{task.description}</Text>
@@ -429,15 +463,17 @@ export const TaskDetailDrawer = ({
                           onClose={() => setAssigneeSearch("")}
                         >
                           <Popover.Target>
-                            <Tooltip label="Mas'ul qo'shish">
-                              <ActionIcon
-                                variant="light" size="sm" radius="xl"
-                                onClick={() => setAssigneePopoverOpen((o) => !o)}
-                                style={{ backgroundColor: "#f8f9fa", border: "1px dashed #dee2e6" }}
-                              >
-                                <IconPlus size={14} />
-                              </ActionIcon>
-                            </Tooltip>
+                            <GuardedActionIcon
+                              permission="task:assign"
+                              label="Mas'ul qo'shish"
+                              variant="light"
+                              size="sm"
+                              radius="xl"
+                              onClick={() => setAssigneePopoverOpen((o) => !o)}
+                              style={{ backgroundColor: "#f8f9fa", border: "1px dashed #dee2e6" }}
+                            >
+                              <IconPlus size={14} />
+                            </GuardedActionIcon>
                           </Popover.Target>
                           <Popover.Dropdown p={0}>
                             <Box p="xs" style={{ borderBottom: "1px solid #e9ecef" }}>
@@ -509,13 +545,14 @@ export const TaskDetailDrawer = ({
                         <Text size="sm" fw={600} c="#495057">
                           Sarflangan vaqt {totalTimeLogged > 0 && <Text span c="dimmed" fw={400}>({totalTimeLogged} soat)</Text>}
                         </Text>
-                        <Button
+                        <GuardedButton
+                          permission="task-time-entry:create"
                           variant="subtle" size="xs" color="gray"
                           leftSection={showTimeForm ? <IconX size={14} /> : <IconPlus size={14} />}
                           onClick={() => setShowTimeForm(!showTimeForm)}
                         >
                           {showTimeForm ? "Yopish" : "Qo'shish"}
-                        </Button>
+                        </GuardedButton>
                       </Group>
                       {showTimeForm && (
                         <Box mb="sm">
@@ -547,9 +584,16 @@ export const TaskDetailDrawer = ({
                               <Paper key={dep.id} p="xs" radius="sm" style={{ backgroundColor: "#f8f9fa" }}>
                                 <Group justify="space-between">
                                   <Text size="sm">{dep.dependsOnTask?.title || "Noma'lum"}</Text>
-                                  <ActionIcon variant="subtle" size="xs" color="red" onClick={() => deleteDependency.mutate(dep.id)}>
+                                  <GuardedActionIcon
+                                    permission="task-dependency:delete"
+                                    label="O'chirish"
+                                    variant="subtle"
+                                    size="xs"
+                                    color="red"
+                                    onClick={() => deleteDependency.mutate(dep.id)}
+                                  >
                                     <IconTrash size={14} />
-                                  </ActionIcon>
+                                  </GuardedActionIcon>
                                 </Group>
                               </Paper>
                             ))}
@@ -648,23 +692,32 @@ export const TaskDetailDrawer = ({
                             >
                               <Group justify="space-between" wrap="nowrap">
                                 <Group gap="sm" wrap="nowrap" style={{ flex: 1, minWidth: 0 }}>
-                                  <Box
-                                    w={18} h={18}
-                                    style={{
-                                      borderRadius: "50%",
-                                      border: isDone ? "none" : "2px solid #dee2e6",
-                                      backgroundColor: isDone ? "#2ecc71" : "transparent",
-                                      display: "flex", alignItems: "center", justifyContent: "center",
-                                      flexShrink: 0,
-                                      cursor: "pointer",
-                                    }}
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleToggleSubtask(subtask.id);
-                                    }}
+                                  <Tooltip
+                                    label={canCompleteTask ? "" : "Bu amalni bajarish uchun ruxsat yo'q"}
+                                    disabled={canCompleteTask}
+                                    withArrow
+                                    position="top"
                                   >
-                                    {isDone && <IconCheck size={10} color="white" />}
-                                  </Box>
+                                    <Box
+                                      w={18} h={18}
+                                      style={{
+                                        borderRadius: "50%",
+                                        border: isDone ? "none" : "2px solid #dee2e6",
+                                        backgroundColor: isDone ? "#2ecc71" : "transparent",
+                                        display: "flex", alignItems: "center", justifyContent: "center",
+                                        flexShrink: 0,
+                                        cursor: canCompleteTask ? "pointer" : "not-allowed",
+                                        opacity: canCompleteTask ? 1 : 0.6,
+                                      }}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        if (!canCompleteTask) return;
+                                        handleToggleSubtask(subtask.id);
+                                      }}
+                                    >
+                                      {isDone && <IconCheck size={10} color="white" />}
+                                    </Box>
+                                  </Tooltip>
                                   <Text size="sm" c={isDone ? "dimmed" : "#212529"} lineClamp={1}
                                     style={{ textDecoration: isDone ? "line-through" : "none", flex: 1 }}
                                   >
@@ -699,14 +752,15 @@ export const TaskDetailDrawer = ({
                         onClose={() => setShowSubtaskForm(false)}
                       />
                     ) : (
-                      <Button
+                      <GuardedButton
+                        permission="task:create"
                         variant="light" fullWidth
                         leftSection={<IconPlus size={16} />}
                         onClick={() => setShowSubtaskForm(true)}
                         style={{ backgroundColor: "#f8f9fa", color: "#495057", border: "1px dashed #dee2e6" }}
                       >
                         Ichki vazifa qo'shish
-                      </Button>
+                      </GuardedButton>
                     )}
                   </Stack>
                 </Tabs.Panel>

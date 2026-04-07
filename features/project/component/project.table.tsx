@@ -4,6 +4,7 @@ import { Table, Badge, ActionIcon, Group, Text } from "@mantine/core";
 import { IconEdit, IconTrash, IconEye } from "@tabler/icons-react";
 import { ProjectGetResponse, PROJECT_STATUS_OPTIONS } from "../type/project.type";
 import { useRouter } from "next/navigation";
+import { GuardedActionIcon } from "@/components/shared/permission";
 
 interface ProjectTableProps {
     projects: ProjectGetResponse[];
@@ -87,20 +88,24 @@ const ProjectTable = ({ projects, onEdit, onDelete }: ProjectTableProps) => {
                         >
                             <IconEye size={18} />
                         </ActionIcon>
-                        <ActionIcon
+                        <GuardedActionIcon
+                            permission="project:update"
+                            label="Tahrirlash"
                             variant="subtle"
                             color="gray"
                             onClick={() => onEdit?.(project)}
                         >
                             <IconEdit size={18} />
-                        </ActionIcon>
-                        <ActionIcon
+                        </GuardedActionIcon>
+                        <GuardedActionIcon
+                            permission="project:delete"
+                            label="O'chirish"
                             variant="subtle"
                             color="red"
                             onClick={() => onDelete?.(project.id)}
                         >
                             <IconTrash size={18} />
-                        </ActionIcon>
+                        </GuardedActionIcon>
                     </Group>
                 </Table.Td>
             </Table.Tr>

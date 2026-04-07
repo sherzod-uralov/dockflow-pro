@@ -6,7 +6,6 @@ import {
   Box,
   Text,
   Group,
-  Button,
   TextInput,
   Paper,
   Badge,
@@ -17,6 +16,10 @@ import {
   Avatar,
   Tabs,
 } from "@mantine/core";
+import {
+  GuardedButton,
+  GuardedMenuItem,
+} from "@/components/shared/permission";
 import {
   IconPlus,
   IconSearch,
@@ -236,24 +239,27 @@ const DepartmentPage = () => {
             </ActionIcon>
           </Menu.Target>
           <Menu.Dropdown>
-            <Menu.Item
+            <GuardedMenuItem
+              permission="user:list"
               leftSection={<IconUsers size={16} />}
               onClick={() => handleViewUsers(row.original)}
             >
               Foydalanuvchilarni ko'rish
-            </Menu.Item>
-            <Menu.Item
+            </GuardedMenuItem>
+            <GuardedMenuItem
+              permission="department:read"
               leftSection={<IconEye size={16} />}
               onClick={() => handleView(row.original)}
             >
               Ko'rish
-            </Menu.Item>
-            <Menu.Item
+            </GuardedMenuItem>
+            <GuardedMenuItem
+              permission="department:update"
               leftSection={<IconEdit size={16} />}
               onClick={() => handleEdit(row.original)}
             >
               Tahrirlash
-            </Menu.Item>
+            </GuardedMenuItem>
             <Menu.Item
               leftSection={<IconCopy size={16} />}
               onClick={() => handleCopyToClipboard(row.original.id, "ID")}
@@ -261,13 +267,14 @@ const DepartmentPage = () => {
               ID nusxalash
             </Menu.Item>
             <Menu.Divider />
-            <Menu.Item
+            <GuardedMenuItem
+              permission="department:delete"
               color="red"
               leftSection={<IconTrash size={16} />}
               onClick={() => handleDeleteClick(row.original)}
             >
               O'chirish
-            </Menu.Item>
+            </GuardedMenuItem>
           </Menu.Dropdown>
         </Menu>
       ),
@@ -310,7 +317,8 @@ const DepartmentPage = () => {
             Tashkilot bo'limlari ro'yxati
           </Text>
         </Box>
-        <Button
+        <GuardedButton
+          permission="department:create"
           leftSection={<IconPlus size={18} />}
           onClick={createModal.openModal}
           radius="sm"
@@ -322,7 +330,7 @@ const DepartmentPage = () => {
           }}
         >
           Bo'lim qo'shish
-        </Button>
+        </GuardedButton>
       </Group>
 
       {/* Search */}

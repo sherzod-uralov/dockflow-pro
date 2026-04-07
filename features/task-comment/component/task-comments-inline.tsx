@@ -44,6 +44,10 @@ import {
 import { useCreateAttachment } from "@/features/attachment/hook/attachment.hook";
 import { useGetProfileQuery } from "@/features/login/hook/login.hook";
 import {
+  GuardedMenuItem,
+  usePermissionCheck,
+} from "@/components/shared/permission";
+import {
   TaskCommentGetResponse,
   CommentAttachment,
   CommentReplyTo,
@@ -591,18 +595,18 @@ const CommentBubble = ({
               </ActionIcon>
             </Menu.Target>
             <Menu.Dropdown>
-              <Menu.Item leftSection={<IconCornerDownRight size={14} />} onClick={() => onReply(comment)}>
+              <GuardedMenuItem permission="task-comment:create" leftSection={<IconCornerDownRight size={14} />} onClick={() => onReply(comment)}>
                 Javob berish
-              </Menu.Item>
+              </GuardedMenuItem>
               {isOwn && (
-                <Menu.Item leftSection={<IconEdit size={14} />} onClick={() => onEdit(comment)}>
+                <GuardedMenuItem permission="task-comment:update" leftSection={<IconEdit size={14} />} onClick={() => onEdit(comment)}>
                   Tahrirlash
-                </Menu.Item>
+                </GuardedMenuItem>
               )}
               {isOwn && (
-                <Menu.Item leftSection={<IconTrash size={14} />} color="red" onClick={() => onDelete(comment.id)}>
+                <GuardedMenuItem permission="task-comment:delete" leftSection={<IconTrash size={14} />} color="red" onClick={() => onDelete(comment.id)}>
                   O'chirish
-                </Menu.Item>
+                </GuardedMenuItem>
               )}
             </Menu.Dropdown>
           </Menu>
@@ -641,6 +645,7 @@ export const TaskCommentsInline = ({ taskId }: TaskCommentsInlineProps) => {
   const updateMutation = useUpdateTaskComment();
   const deleteMutation = useDeleteTaskComment();
   const uploadMutation = useCreateAttachment();
+  const { allowed: canCreateComment, reason: createReason } = usePermissionCheck("task-comment:create");
 
   const comments = commentsData?.data || [];
 
@@ -867,6 +872,14 @@ export const TaskCommentsInline = ({ taskId }: TaskCommentsInlineProps) => {
 
       {/* Input area */}
       <Box pt="md" style={{ borderTop: "1px solid #e9ecef" }}>
+        {!canCreateComment ? (
+          <Paper p="md" radius="sm" style={{ backgroundColor: "#fff5f5", border: "1px solid #fde2e2", textAlign: "center" }}>
+            <Text size="sm" c="#e74c3c">
+              {createReason || "Izoh yozish uchun ruxsat yo'q"}
+            </Text>
+          </Paper>
+        ) : (
+          <>
         {/* Reply / Edit bar */}
         {(replyingTo || editingComment) && (
           <Paper
@@ -1001,6 +1014,8 @@ export const TaskCommentsInline = ({ taskId }: TaskCommentsInlineProps) => {
               </Tooltip>
             )}
           </Group>
+        )}
+        </>
         )}
       </Box>
     </Stack>

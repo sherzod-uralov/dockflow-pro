@@ -5,7 +5,6 @@ import {
   Box,
   Text,
   Group,
-  Button,
   TextInput,
   Paper,
   Badge,
@@ -14,6 +13,10 @@ import {
   Stack,
   Center,
 } from "@mantine/core";
+import {
+  GuardedButton,
+  GuardedMenuItem,
+} from "@/components/shared/permission";
 import {
   IconPlus,
   IconSearch,
@@ -161,26 +164,29 @@ const DocumentTemplatePage = () => {
             </ActionIcon>
           </Menu.Target>
           <Menu.Dropdown>
-            <Menu.Item
+            <GuardedMenuItem
+              permission="document-template:read"
               leftSection={<IconEye size={16} />}
               onClick={() => handleView(row.original)}
             >
               Ko'rish
-            </Menu.Item>
-            <Menu.Item
+            </GuardedMenuItem>
+            <GuardedMenuItem
+              permission="document-template:update"
               leftSection={<IconEdit size={16} />}
               onClick={() => handleEdit(row.original)}
             >
               Tahrirlash
-            </Menu.Item>
+            </GuardedMenuItem>
             <Menu.Divider />
-            <Menu.Item
+            <GuardedMenuItem
+              permission="document-template:delete"
               color="red"
               leftSection={<IconTrash size={16} />}
               onClick={() => handleDeleteClick(row.original)}
             >
               O'chirish
-            </Menu.Item>
+            </GuardedMenuItem>
           </Menu.Dropdown>
         </Menu>
       ),
@@ -223,7 +229,8 @@ const DocumentTemplatePage = () => {
             Hujjatlar uchun tayyor shablonlar
           </Text>
         </Box>
-        <Button
+        <GuardedButton
+          permission="document-template:create"
           leftSection={<IconPlus size={18} />}
           onClick={createModal.openModal}
           radius="sm"
@@ -235,7 +242,7 @@ const DocumentTemplatePage = () => {
           }}
         >
           Shablon qo'shish
-        </Button>
+        </GuardedButton>
       </Group>
 
       {/* Search */}

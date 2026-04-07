@@ -272,6 +272,10 @@ export const endpoints = {
     update: (id: string | number) => `/kpi-reward-tier/${id}`,
     delete: (id: string | number) => `/kpi-reward-tier/${id}`,
   },
+  // KPI Analytics
+  kpiAnalytics: {
+    get: "/analytics/kpi",
+  },
   // User Monthly KPI
   userMonthlyKpi: {
     list: "/user-monthly-kpi",

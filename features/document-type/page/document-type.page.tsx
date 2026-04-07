@@ -6,7 +6,6 @@ import {
   Box,
   Text,
   Group,
-  Button,
   TextInput,
   Paper,
   ActionIcon,
@@ -14,6 +13,10 @@ import {
   Stack,
   Center,
 } from "@mantine/core";
+import {
+  GuardedButton,
+  GuardedMenuItem,
+} from "@/components/shared/permission";
 import {
   IconPlus,
   IconSearch,
@@ -156,18 +159,20 @@ const DocumentTypePage = () => {
             </ActionIcon>
           </Menu.Target>
           <Menu.Dropdown>
-            <Menu.Item
+            <GuardedMenuItem
+              permission="document-type:read"
               leftSection={<IconEye size={16} />}
               onClick={() => handleView(row.original)}
             >
               Ko'rish
-            </Menu.Item>
-            <Menu.Item
+            </GuardedMenuItem>
+            <GuardedMenuItem
+              permission="document-type:update"
               leftSection={<IconEdit size={16} />}
               onClick={() => handleEdit(row.original)}
             >
               Tahrirlash
-            </Menu.Item>
+            </GuardedMenuItem>
             <Menu.Item
               leftSection={<IconCopy size={16} />}
               onClick={() => handleCopyToClipboard(row.original.id || "", "ID")}
@@ -175,13 +180,14 @@ const DocumentTypePage = () => {
               ID nusxalash
             </Menu.Item>
             <Menu.Divider />
-            <Menu.Item
+            <GuardedMenuItem
+              permission="document-type:delete"
               color="red"
               leftSection={<IconTrash size={16} />}
               onClick={() => handleDeleteClick(row.original)}
             >
               O'chirish
-            </Menu.Item>
+            </GuardedMenuItem>
           </Menu.Dropdown>
         </Menu>
       ),
@@ -226,7 +232,8 @@ const DocumentTypePage = () => {
         </Box>
         <Group gap="xs">
           <TourButton tourKey="document-type" variant="icon" size="md" />
-          <Button
+          <GuardedButton
+            permission="document-type:create"
             leftSection={<IconPlus size={18} />}
             onClick={createModal.openModal}
             radius="sm"
@@ -239,7 +246,7 @@ const DocumentTypePage = () => {
             }}
           >
             Hujjat turini qo'shish
-          </Button>
+          </GuardedButton>
         </Group>
       </Group>
 

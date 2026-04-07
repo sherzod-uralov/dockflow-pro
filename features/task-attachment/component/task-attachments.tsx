@@ -31,6 +31,10 @@ import {
 } from "../hook/task-attachment.hook";
 import { useCreateAttachment } from "@/features/attachment/hook/attachment.hook";
 import { TaskAttachmentGetResponse } from "../type/task-attachment.type";
+import {
+  GuardedActionIcon,
+  usePermissionCheck,
+} from "@/components/shared/permission";
 
 interface TaskAttachmentsProps {
   taskId: string;
@@ -137,14 +141,16 @@ const AttachmentItem = ({
               <IconDownload size={16} />
             </ActionIcon>
           )}
-          <ActionIcon
+          <GuardedActionIcon
+            permission="task-attachment:delete"
+            label="O'chirish"
             variant="subtle"
             size="sm"
             color="red"
             onClick={() => onDelete(attachment.id)}
           >
             <IconTrash size={16} />
-          </ActionIcon>
+          </GuardedActionIcon>
         </Group>
       </Group>
     </Paper>
@@ -162,6 +168,7 @@ export const TaskAttachments = ({ taskId }: TaskAttachmentsProps) => {
   const createAttachment = useCreateAttachment();
   const createTaskAttachment = useCreateTaskAttachment();
   const deleteTaskAttachment = useDeleteTaskAttachment();
+  const { allowed: canUpload } = usePermissionCheck("task-attachment:create");
 
   const attachments = attachmentsData?.data || [];
 
@@ -214,37 +221,53 @@ export const TaskAttachments = ({ taskId }: TaskAttachmentsProps) => {
   return (
     <Stack gap="md">
       {/* Upload zone */}
-      <Box
-        {...getRootProps()}
-        p="md"
-        style={{
-          border: `2px dashed ${isDragActive ? "#1e3a5f" : "#e9ecef"}`,
-          borderRadius: 8,
-          backgroundColor: isDragActive ? "#f8f9fa" : "#fff",
-          cursor: "pointer",
-          transition: "all 0.2s",
-        }}
-      >
-        <input {...getInputProps()} />
-        <Stack align="center" gap="xs">
-          <ThemeIcon
-            size="lg"
-            radius="xl"
-            variant="light"
-            style={{ backgroundColor: "#f1f3f5", color: "#868e96" }}
-          >
-            <IconUpload size={20} />
-          </ThemeIcon>
-          <Text size="sm" c="#495057">
-            {isDragActive
-              ? "Faylni bu yerga tashlang"
-              : "Fayl yuklash uchun bosing yoki sudrab keling"}
+      {canUpload ? (
+        <Box
+          {...getRootProps()}
+          p="md"
+          style={{
+            border: `2px dashed ${isDragActive ? "#1e3a5f" : "#e9ecef"}`,
+            borderRadius: 8,
+            backgroundColor: isDragActive ? "#f8f9fa" : "#fff",
+            cursor: "pointer",
+            transition: "all 0.2s",
+          }}
+        >
+          <input {...getInputProps()} />
+          <Stack align="center" gap="xs">
+            <ThemeIcon
+              size="lg"
+              radius="xl"
+              variant="light"
+              style={{ backgroundColor: "#f1f3f5", color: "#868e96" }}
+            >
+              <IconUpload size={20} />
+            </ThemeIcon>
+            <Text size="sm" c="#495057">
+              {isDragActive
+                ? "Faylni bu yerga tashlang"
+                : "Fayl yuklash uchun bosing yoki sudrab keling"}
+            </Text>
+            <Text size="xs" c="dimmed">
+              PDF, JPG, PNG, GIF, DOC, DOCX (max 100MB)
+            </Text>
+          </Stack>
+        </Box>
+      ) : (
+        <Box
+          p="md"
+          style={{
+            border: "2px dashed #fde2e2",
+            borderRadius: 8,
+            backgroundColor: "#fff5f5",
+            textAlign: "center",
+          }}
+        >
+          <Text size="sm" c="#e74c3c">
+            Fayl yuklash uchun ruxsat yo'q
           </Text>
-          <Text size="xs" c="dimmed">
-            PDF, JPG, PNG, GIF, DOC, DOCX (max 100MB)
-          </Text>
-        </Stack>
-      </Box>
+        </Box>
+      )}
 
       {/* Uploading indicator */}
       {isUploading && (

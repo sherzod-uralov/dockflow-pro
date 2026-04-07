@@ -2,8 +2,9 @@
 
 import { Card, Group, Text, Badge, ActionIcon, Menu, Progress } from "@mantine/core";
 import { IconDots, IconEdit, IconTrash, IconFolder } from "@tabler/icons-react";
-import { ProjectGetResponse, PROJECT_STATUS_OPTIONS } from "../type/project.type";
+import { ProjectGetResponse, PROJECT_STATUS_OPTIONS, PROJECT_VISIBILITY_OPTIONS } from "../type/project.type";
 import { useRouter } from "next/navigation";
+import { GuardedMenuItem } from "@/components/shared/permission";
 
 interface ProjectCardProps {
     project: ProjectGetResponse;
@@ -80,7 +81,8 @@ const ProjectCard = ({ project, onEdit, onDelete }: ProjectCardProps) => {
                     </Menu.Target>
 
                     <Menu.Dropdown>
-                        <Menu.Item
+                        <GuardedMenuItem
+                            permission="project:update"
                             leftSection={<IconEdit size={16} />}
                             onClick={(e) => {
                                 e.stopPropagation();
@@ -88,8 +90,9 @@ const ProjectCard = ({ project, onEdit, onDelete }: ProjectCardProps) => {
                             }}
                         >
                             Tahrirlash
-                        </Menu.Item>
-                        <Menu.Item
+                        </GuardedMenuItem>
+                        <GuardedMenuItem
+                            permission="project:delete"
                             leftSection={<IconTrash size={16} />}
                             color="red"
                             onClick={(e) => {
@@ -98,7 +101,7 @@ const ProjectCard = ({ project, onEdit, onDelete }: ProjectCardProps) => {
                             }}
                         >
                             O'chirish
-                        </Menu.Item>
+                        </GuardedMenuItem>
                     </Menu.Dropdown>
                 </Menu>
             </Group>
@@ -122,6 +125,15 @@ const ProjectCard = ({ project, onEdit, onDelete }: ProjectCardProps) => {
                 >
                     {statusOption?.label || project.status}
                 </Badge>
+
+                {project.visibility && (() => {
+                    const v = PROJECT_VISIBILITY_OPTIONS.find((o) => o.value === project.visibility);
+                    return v ? (
+                        <Badge size="xs" variant="light" color={v.color}>
+                            {v.icon} {v.label}
+                        </Badge>
+                    ) : null;
+                })()}
 
                 {project.department && (
                     <Text size="xs" c="dimmed">

@@ -1,6 +1,6 @@
 "use client";
 
-import { Menu, ActionIcon, Divider } from "@mantine/core";
+import { Menu, ActionIcon, Divider, Tooltip } from "@mantine/core";
 import {
   IconDotsVertical,
   IconEye,
@@ -10,6 +10,8 @@ import {
   IconDownload,
 } from "@tabler/icons-react";
 import { ComponentType } from "react";
+import { usePermission } from "@/providers/permission-provider";
+import { DEFAULT_DENIAL_REASON } from "@/components/shared/permission";
 
 export interface ActionItem {
   id: string;
@@ -19,6 +21,10 @@ export interface ActionItem {
   className?: string;
   variant?: "default" | "destructive";
   disabled?: boolean;
+  /** Permission key required to use this action */
+  permission?: string;
+  /** Hide instead of disabling when no permission */
+  hideWhenDenied?: boolean;
 }
 
 export interface ActionGroup {
@@ -39,16 +45,21 @@ export const CustomAction = ({
   contentAlign = "end",
   disabled = false,
 }: CustomActionProps) => {
+  const { hasPermission } = usePermission();
+
   const renderActionItem = (action: ActionItem) => {
     const Icon = action.icon;
     const isDestructive = action.variant === "destructive";
+    const allowed = action.permission ? hasPermission(action.permission) : true;
 
-    return (
+    if (!allowed && action.hideWhenDenied) return null;
+
+    const item = (
       <Menu.Item
         key={action.id}
         leftSection={<Icon size={16} />}
         onClick={action.onClick}
-        disabled={action.disabled}
+        disabled={action.disabled || !allowed}
         color={isDestructive ? "red" : undefined}
         styles={{
           item: {
@@ -59,6 +70,22 @@ export const CustomAction = ({
         {action.label}
       </Menu.Item>
     );
+
+    if (!allowed) {
+      return (
+        <Tooltip
+          key={action.id}
+          label={DEFAULT_DENIAL_REASON}
+          withArrow
+          position="left"
+          withinPortal
+        >
+          <span style={{ display: "block", cursor: "not-allowed" }}>{item}</span>
+        </Tooltip>
+      );
+    }
+
+    return item;
   };
 
   const renderActions = () => {
@@ -114,38 +141,43 @@ export const CustomAction = ({
   );
 };
 
-export const createViewAction = (onClick: () => void): ActionItem => ({
+export const createViewAction = (onClick: () => void, permission?: string): ActionItem => ({
   id: "view",
   label: "To'liq ma'lumotlarni ko'rish",
   icon: IconEye,
   onClick,
+  permission,
 });
 
-export const createEditAction = (onClick: () => void): ActionItem => ({
+export const createEditAction = (onClick: () => void, permission?: string): ActionItem => ({
   id: "edit",
   label: "Tahrirlash",
   icon: IconPencil,
   onClick,
+  permission,
 });
 
-export const createDeleteAction = (onClick: () => void): ActionItem => ({
+export const createDeleteAction = (onClick: () => void, permission?: string): ActionItem => ({
   id: "delete",
   label: "O'chirish",
   icon: IconTrash,
   onClick,
   variant: "destructive",
+  permission,
 });
 
-export const createCopyAction = (onClick: () => void): ActionItem => ({
+export const createCopyAction = (onClick: () => void, permission?: string): ActionItem => ({
   id: "copy",
   label: "Nusxalash",
   icon: IconCopy,
   onClick,
+  permission,
 });
 
-export const createDownloadAction = (onClick: () => void): ActionItem => ({
+export const createDownloadAction = (onClick: () => void, permission?: string): ActionItem => ({
   id: "download",
   label: "Yuklab olish",
   icon: IconDownload,
   onClick,
+  permission,
 });

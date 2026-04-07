@@ -5,7 +5,6 @@ import {
   Box,
   Text,
   Group,
-  Button,
   Paper,
   Badge,
   ActionIcon,
@@ -13,6 +12,10 @@ import {
   Stack,
   Center,
 } from "@mantine/core";
+import {
+  GuardedButton,
+  GuardedMenuItem,
+} from "@/components/shared/permission";
 import {
   IconPlus,
   IconDotsVertical,
@@ -168,16 +171,16 @@ const KpiRewardTierPage = () => {
             </ActionIcon>
           </Menu.Target>
           <Menu.Dropdown>
-            <Menu.Item leftSection={<IconEye size={16} />} onClick={() => handleView(row.original)}>
+            <GuardedMenuItem permission="kpi-reward-tier:read" leftSection={<IconEye size={16} />} onClick={() => handleView(row.original)}>
               Ko'rish
-            </Menu.Item>
-            <Menu.Item leftSection={<IconEdit size={16} />} onClick={() => handleEdit(row.original)}>
+            </GuardedMenuItem>
+            <GuardedMenuItem permission="kpi-reward-tier:update" leftSection={<IconEdit size={16} />} onClick={() => handleEdit(row.original)}>
               Tahrirlash
-            </Menu.Item>
+            </GuardedMenuItem>
             <Menu.Divider />
-            <Menu.Item color="red" leftSection={<IconTrash size={16} />} onClick={() => handleDeleteClick(row.original)}>
+            <GuardedMenuItem permission="kpi-reward-tier:delete" color="red" leftSection={<IconTrash size={16} />} onClick={() => handleDeleteClick(row.original)}>
               O'chirish
-            </Menu.Item>
+            </GuardedMenuItem>
           </Menu.Dropdown>
         </Menu>
       ),
@@ -216,7 +219,8 @@ const KpiRewardTierPage = () => {
             KPI mukofot darajalari ro'yxati
           </Text>
         </Box>
-        <Button
+        <GuardedButton
+          permission="kpi-reward-tier:create"
           leftSection={<IconPlus size={18} />}
           onClick={createModal.openModal}
           radius="sm"
@@ -228,7 +232,7 @@ const KpiRewardTierPage = () => {
           }}
         >
           Daraja qo'shish
-        </Button>
+        </GuardedButton>
       </Group>
 
       {/* Table */}

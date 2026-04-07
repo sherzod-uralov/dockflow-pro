@@ -6,7 +6,6 @@ import {
   Box,
   Text,
   Group,
-  Button,
   TextInput,
   Paper,
   ActionIcon,
@@ -14,6 +13,10 @@ import {
   Stack,
   Center,
 } from "@mantine/core";
+import {
+  GuardedButton,
+  GuardedMenuItem,
+} from "@/components/shared/permission";
 import {
   IconPlus,
   IconSearch,
@@ -140,7 +143,7 @@ const RolesPage = () => {
       accessorKey: "permissions",
       header: "Ruxsatlar",
       cell: ({ row }) => {
-        const permissions = row.original.permissions;
+        const permissions = row.original.permissions || [];
         return (
           <Group gap={4}>
             {permissions.length > 0 ? (
@@ -217,26 +220,29 @@ const RolesPage = () => {
             </ActionIcon>
           </Menu.Target>
           <Menu.Dropdown>
-            <Menu.Item
+            <GuardedMenuItem
+              permission="role:read"
               leftSection={<IconEye size={16} />}
               onClick={() => handleViewRole(row.original)}
             >
               Ko'rish
-            </Menu.Item>
-            <Menu.Item
+            </GuardedMenuItem>
+            <GuardedMenuItem
+              permission="role:update"
               leftSection={<IconEdit size={16} />}
               onClick={() => handleUpdate(row.original)}
             >
               Tahrirlash
-            </Menu.Item>
+            </GuardedMenuItem>
             <Menu.Divider />
-            <Menu.Item
+            <GuardedMenuItem
+              permission="role:delete"
               color="red"
               leftSection={<IconTrash size={16} />}
               onClick={() => handleDeleteClick(row.original)}
             >
               O'chirish
-            </Menu.Item>
+            </GuardedMenuItem>
           </Menu.Dropdown>
         </Menu>
       ),
@@ -279,7 +285,8 @@ const RolesPage = () => {
             Rollarni boshqarish
           </Text>
         </Box>
-        <Button
+        <GuardedButton
+          permission="role:create"
           leftSection={<IconPlus size={18} />}
           onClick={createModal.openModal}
           radius="sm"
@@ -291,7 +298,7 @@ const RolesPage = () => {
           }}
         >
           Rol qo'shish
-        </Button>
+        </GuardedButton>
       </Group>
 
       {/* Search */}

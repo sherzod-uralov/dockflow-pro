@@ -31,6 +31,11 @@ import { useGetAllDocumentTypes } from "@/features/document-type";
 import { useGetAllJournals } from "@/features/journal/hook/journal.hook";
 import { useGetAllDocumentTemplates } from "@/features/document-template/hook/document-template.hook";
 import { useOnboarding, TourButton } from "@/hooks/use-onboarding";
+import {
+  PermissionGate,
+  GuardedActionIcon,
+  GuardedMenuItem,
+} from "@/components/shared/permission";
 
 // Status options
 const STATUS_OPTIONS = [
@@ -189,11 +194,13 @@ const DocumentPage: FC<{ children: ReactNode }> = ({ children }) => {
         workflowModal.openModal();
         router.push(`?documentId=${selectedDocument?.id}`);
       },
+      permission: "workflow:create",
     },
     {
       label: "O'chirish",
       icon: <IconTrash size={16} />,
       onClick: () => deleteModal.openModal(),
+      permission: "document:delete",
     },
   ];
 
@@ -231,6 +238,7 @@ const DocumentPage: FC<{ children: ReactNode }> = ({ children }) => {
         defaultTab="all"
         createButtonLabel="+ Yangi hujjat"
         onCreateNew={createModal.openModal}
+        createPermission="document:create"
         searchPlaceholder="Hujjatlarni qidirish..."
         searchValue={searchQuery}
         onSearchChange={setSearchQuery}
@@ -281,9 +289,12 @@ const DocumentPage: FC<{ children: ReactNode }> = ({ children }) => {
             {selectedDocument && (
               <CustomAction
                 actions={[
-                  createEditAction(() => handleEdit(selectedDocument)),
+                  createEditAction(
+                    () => handleEdit(selectedDocument),
+                    "document:update",
+                  ),
                   createCopyAction(() =>
-                    handleCopyToClipboard(selectedDocument.id || "", "ID")
+                    handleCopyToClipboard(selectedDocument.id || "", "ID"),
                   ),
                 ]}
               />

@@ -23,7 +23,7 @@ export interface CRUDHooks<
   TQueryParams,
   TListResponse,
 > {
-  useGetAll: (params?: TQueryParams) => ReturnType<typeof useQuery<TListResponse>>;
+  useGetAll: (params?: TQueryParams, options?: { enabled?: boolean }) => ReturnType<typeof useQuery<TListResponse>>;
   useGetById: (id: string, options?: { enabled?: boolean }) => ReturnType<typeof useQuery<TEntity>>;
   useCreate: () => ReturnType<typeof useMutation<TEntity, unknown, TCreatePayload>>;
   useUpdate: () => ReturnType<typeof useMutation<TEntity, unknown, { id: string; data: TUpdatePayload }>>;
@@ -47,11 +47,17 @@ export function createCRUDHooks<
   const showToast = messages !== false;
 
   return {
-    useGetAll: (params?: TQueryParams) => {
+    useGetAll: (params?: TQueryParams, options?: { enabled?: boolean }) => {
       return useQuery<TListResponse>({
         queryKey: [queryKey, params],
         queryFn: () => service.getAll(params),
         keepPreviousData: true,
+        enabled: options?.enabled !== false,
+        retry: (failureCount, error: any) => {
+          const status = error?.response?.status;
+          if (status === 401 || status === 403 || status === 404) return false;
+          return failureCount < 2;
+        },
       });
     },
 
@@ -60,6 +66,11 @@ export function createCRUDHooks<
         queryKey: [itemQueryKey, id],
         queryFn: () => service.getById(id),
         enabled: !!id && (options?.enabled !== false),
+        retry: (failureCount, error: any) => {
+          const status = error?.response?.status;
+          if (status === 401 || status === 403 || status === 404) return false;
+          return failureCount < 2;
+        },
       });
     },
 

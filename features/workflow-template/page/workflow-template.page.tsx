@@ -58,6 +58,10 @@ import {
 } from "../type/workflow-template.type";
 import WorkflowTemplateForm from "../component/workflow-template.form";
 import { useGetAllDocumentTypes } from "@/features/document-type";
+import {
+  GuardedButton,
+  GuardedMenuItem,
+} from "@/components/shared/permission";
 
 // Action type icons
 const ACTION_ICONS: Record<string, any> = {
@@ -167,7 +171,8 @@ const TemplateItem = memo(({
               </ActionIcon>
             </Menu.Target>
             <Menu.Dropdown>
-              <Menu.Item
+              <GuardedMenuItem
+                permission="workflow-template:update"
                 leftSection={<IconPencil size={16} />}
                 onClick={(e) => {
                   e.stopPropagation();
@@ -175,7 +180,7 @@ const TemplateItem = memo(({
                 }}
               >
                 Tahrirlash
-              </Menu.Item>
+              </GuardedMenuItem>
               <Menu.Item
                 leftSection={<IconCopy size={16} />}
                 onClick={(e) => {
@@ -186,7 +191,8 @@ const TemplateItem = memo(({
                 ID nusxalash
               </Menu.Item>
               <Menu.Divider />
-              <Menu.Item
+              <GuardedMenuItem
+                permission="workflow-template:delete"
                 leftSection={<IconTrash size={16} />}
                 color="red"
                 onClick={(e) => {
@@ -195,7 +201,7 @@ const TemplateItem = memo(({
                 }}
               >
                 O'chirish
-              </Menu.Item>
+              </GuardedMenuItem>
             </Menu.Dropdown>
           </Menu>
 
@@ -252,7 +258,8 @@ const EmptyState = ({ onCreateNew }: { onCreateNew: () => void }) => (
       <Text size="sm" c="dimmed" ta="center" maw={400}>
         Hozircha hech qanday shablon mavjud emas
       </Text>
-      <Button
+      <GuardedButton
+        permission="workflow-template:create"
         size="md"
         radius="sm"
         leftSection={<IconPlus size={18} />}
@@ -260,7 +267,7 @@ const EmptyState = ({ onCreateNew }: { onCreateNew: () => void }) => (
         style={{ backgroundColor: "#1e3a5f" }}
       >
         Shablon yaratish
-      </Button>
+      </GuardedButton>
     </Stack>
   </Paper>
 );
@@ -335,7 +342,8 @@ const WorkflowTemplatePage = () => {
           </Text>
         </Box>
 
-        <Button
+        <GuardedButton
+          permission="workflow-template:create"
           size="sm"
           radius="sm"
           leftSection={<IconPlus size={16} />}
@@ -343,7 +351,7 @@ const WorkflowTemplatePage = () => {
           style={{ backgroundColor: "#1e3a5f" }}
         >
           Shablon qo'shish
-        </Button>
+        </GuardedButton>
       </Group>
 
       {/* Filters */}
@@ -585,7 +593,8 @@ const WorkflowTemplatePage = () => {
               >
                 Yopish
               </Button>
-              <Button
+              <GuardedButton
+                permission="workflow-template:update"
                 size="sm"
                 radius="sm"
                 leftSection={<IconPencil size={16} />}
@@ -596,7 +605,7 @@ const WorkflowTemplatePage = () => {
                 style={{ backgroundColor: "#1e3a5f" }}
               >
                 Tahrirlash
-              </Button>
+              </GuardedButton>
             </Group>
           </Stack>
         )}

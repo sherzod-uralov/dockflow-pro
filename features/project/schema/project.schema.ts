@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ProjectStatus } from "../type/project.type";
+import { ProjectStatus, ProjectVisibility } from "../type/project.type";
 
 export const projectCreateSchema = z.object({
     name: z
@@ -14,7 +14,9 @@ export const projectCreateSchema = z.object({
         .regex(/^[A-Z0-9_-]+$/, "Kalit faqat katta harflar, raqamlar, _ va - dan iborat bo'lishi kerak")
         .transform((val) => val.toUpperCase()),
     status: z.nativeEnum(ProjectStatus).default(ProjectStatus.PLANNING),
+    visibility: z.nativeEnum(ProjectVisibility).optional(),
     departmentId: z.string().uuid("Noto'g'ri bo'lim ID").optional(),
+    initialMemberIds: z.array(z.string().uuid()).optional(),
     startDate: z.string().optional(),
     endDate: z.string().optional(),
     budget: z.number().min(0, "Byudjet manfiy bo'lishi mumkin emas").optional(),
@@ -30,6 +32,7 @@ export const projectUpdateSchema = z.object({
         .optional(),
     description: z.string().optional(),
     status: z.nativeEnum(ProjectStatus).optional(),
+    visibility: z.nativeEnum(ProjectVisibility).optional(),
     departmentId: z.string().uuid("Noto'g'ri bo'lim ID").optional().nullable(),
 });
 

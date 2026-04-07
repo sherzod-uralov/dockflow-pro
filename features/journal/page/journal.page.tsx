@@ -6,7 +6,6 @@ import {
   Box,
   Text,
   Group,
-  Button,
   TextInput,
   Paper,
   Badge,
@@ -15,6 +14,10 @@ import {
   Stack,
   Center,
 } from "@mantine/core";
+import {
+  GuardedButton,
+  GuardedMenuItem,
+} from "@/components/shared/permission";
 import {
   IconPlus,
   IconSearch,
@@ -192,24 +195,27 @@ const JournalPage = () => {
             </ActionIcon>
           </Menu.Target>
           <Menu.Dropdown>
-            <Menu.Item
+            <GuardedMenuItem
+              permission="document:list"
               leftSection={<IconFileText size={16} />}
               onClick={() => handleViewDocuments(row.original)}
             >
               Hujjatlarni ko'rish
-            </Menu.Item>
-            <Menu.Item
+            </GuardedMenuItem>
+            <GuardedMenuItem
+              permission="journal:read"
               leftSection={<IconEye size={16} />}
               onClick={() => handleView(row.original)}
             >
               Ko'rish
-            </Menu.Item>
-            <Menu.Item
+            </GuardedMenuItem>
+            <GuardedMenuItem
+              permission="journal:update"
               leftSection={<IconEdit size={16} />}
               onClick={() => handleEdit(row.original)}
             >
               Tahrirlash
-            </Menu.Item>
+            </GuardedMenuItem>
             <Menu.Item
               leftSection={<IconCopy size={16} />}
               onClick={() => handleCopyToClipboard(row.original.id, "ID")}
@@ -217,13 +223,14 @@ const JournalPage = () => {
               ID nusxalash
             </Menu.Item>
             <Menu.Divider />
-            <Menu.Item
+            <GuardedMenuItem
+              permission="journal:delete"
               color="red"
               leftSection={<IconTrash size={16} />}
               onClick={() => handleDeleteClick(row.original)}
             >
               O'chirish
-            </Menu.Item>
+            </GuardedMenuItem>
           </Menu.Dropdown>
         </Menu>
       ),
@@ -268,7 +275,8 @@ const JournalPage = () => {
         </Box>
         <Group gap="xs">
           <TourButton tourKey="journal" variant="icon" size="md" />
-          <Button
+          <GuardedButton
+            permission="journal:create"
             leftSection={<IconPlus size={18} />}
             onClick={createModal.openModal}
             radius="sm"
@@ -281,7 +289,7 @@ const JournalPage = () => {
             }}
           >
             Jurnal qo'shish
-          </Button>
+          </GuardedButton>
         </Group>
       </Group>
 

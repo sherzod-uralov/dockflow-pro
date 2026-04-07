@@ -71,6 +71,7 @@ const TaskForm = ({
     const { data: users } = useGetUserQuery({
         pageNumber: 1,
         pageSize: 1000,
+        projectId: defaultProjectId || (mode === "update" && task ? task.projectId : undefined),
     });
 
     const { data: categories } = useGetAllTaskCategories({
@@ -280,39 +281,8 @@ const TaskForm = ({
                     }}
                 />
 
-                {/* Project and Priority */}
-                <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
-                    <Select
-                        label="Loyiha"
-                        placeholder="Tanlang"
-                        size="sm"
-                        radius="sm"
-                        withAsterisk
-                        searchable
-                        data={projectOptions}
-                        value={form.watch("projectId")}
-                        onChange={(value) => {
-                            form.setValue("projectId", value || "", { shouldValidate: true });
-                            setActiveProjectId(value || "");
-                            form.setValue("boardColumnId", undefined);
-                        }}
-                        error={form.formState.errors.projectId?.message}
-                        styles={{
-                            input: {
-                                backgroundColor: "#f8f9fa",
-                                border: "1px solid #e9ecef",
-                                "&:focus": {
-                                    borderColor: "#1e3a5f",
-                                },
-                            },
-                            label: {
-                                color: "#495057",
-                                fontWeight: 500,
-                                marginBottom: 4,
-                            },
-                        }}
-                    />
-
+                {/* Priority */}
+                <SimpleGrid cols={{ base: 1, sm: 1 }} spacing="md">
                     <Select
                         label="Muhimlik"
                         placeholder="Tanlang"
@@ -526,31 +496,6 @@ const TaskForm = ({
                         }}
                     />
                 </SimpleGrid>
-
-                {/* Estimated Hours */}
-                <NumberInput
-                    label="Taxminiy soatlar"
-                    placeholder="0"
-                    size="sm"
-                    radius="sm"
-                    min={0}
-                    step={0.5}
-                    value={form.watch("estimatedHours")}
-                    onChange={(value) =>
-                        form.setValue("estimatedHours", value as number, {
-                            shouldValidate: true,
-                        })
-                    }
-                    error={form.formState.errors.estimatedHours?.message}
-                    styles={{
-                        input: {
-                            backgroundColor: "#f8f9fa",
-                            border: "1px solid #e9ecef",
-                            "&:focus": { borderColor: "#1e3a5f" },
-                        },
-                        label: { color: "#495057", fontWeight: 500, marginBottom: 4 },
-                    }}
-                />
 
                 {/* Cover Image Upload */}
                 <FileUpload

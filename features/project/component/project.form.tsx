@@ -9,19 +9,24 @@ import {
     TextInput,
     Textarea,
     Select,
+    MultiSelect,
     Group,
     Stack,
     SimpleGrid,
     NumberInput,
     ColorInput,
+    Radio,
+    Box,
+    Text,
 } from "@mantine/core";
 import { DateInput } from "@mantine/dates";
 import {
-    ProjectFormData,
     ProjectGetResponse,
     PROJECT_STATUS_OPTIONS,
     PROJECT_COLOR_PALETTE,
+    PROJECT_VISIBILITY_OPTIONS,
     ProjectStatus,
+    ProjectVisibility,
 }
     from "../type/project.type";
 import {
@@ -33,6 +38,8 @@ import {
     useUpdateProject,
 } from "../hook/project.hook";
 import { useGetAllDepartments } from "@/features/department/hook/department.hook";
+import { useGetUserQuery } from "@/features/admin/admin-users/hook/user.hook";
+import { useGetProfileQuery } from "@/features/login/hook/login.hook";
 
 interface ProjectFormProps {
     modal: ModalState;
@@ -53,6 +60,11 @@ const ProjectForm = ({
         pageNumber: 1,
         pageSize: 1000,
     });
+    const { data: usersData } = useGetUserQuery({ pageNumber: 1, pageSize: 1000 });
+    const { data: profile } = useGetProfileQuery();
+    const isAdmin =
+        profile?.role?.name === "Super Administrator" ||
+        profile?.role?.name === "Admin";
 
     const isUpdate = mode === "update";
 
@@ -64,7 +76,9 @@ const ProjectForm = ({
                 description: project.description || "",
                 key: project.key,
                 status: project.status,
+                visibility: project.visibility || ProjectVisibility.PRIVATE,
                 departmentId: project.departmentId,
+                initialMemberIds: [],
                 startDate: project.startDate,
                 endDate: project.endDate,
                 budget: project.budget,
@@ -76,7 +90,9 @@ const ProjectForm = ({
                 description: "",
                 key: "",
                 status: ProjectStatus.PLANNING,
+                visibility: ProjectVisibility.PRIVATE,
                 departmentId: undefined,
+                initialMemberIds: [],
                 startDate: undefined,
                 endDate: undefined,
                 budget: undefined,
@@ -92,6 +108,7 @@ const ProjectForm = ({
                 name: values.name,
                 description: values.description || undefined,
                 status: values.status,
+                visibility: values.visibility,
                 departmentId: values.departmentId || undefined,
             };
             updateMutation.mutate(
@@ -104,9 +121,15 @@ const ProjectForm = ({
                 }
             );
         } else {
+            // Auto-default visibility: department tanlanmasa PRIVATE, tanlansa DEPARTMENT
+            const finalVisibility = values.visibility
+                || (values.departmentId ? ProjectVisibility.DEPARTMENT : ProjectVisibility.PRIVATE);
+
             const createData = {
                 ...values,
+                visibility: finalVisibility,
                 departmentId: values.departmentId || undefined,
+                initialMemberIds: values.initialMemberIds?.length ? values.initialMemberIds : undefined,
                 startDate: values.startDate || undefined,
                 endDate: values.endDate || undefined,
                 budget: values.budget || undefined,
@@ -267,6 +290,67 @@ const ProjectForm = ({
                         }}
                     />
                 </SimpleGrid>
+
+                {/* Visibility */}
+                <Box>
+                    <Text size="sm" fw={500} c="#495057" mb={6}>
+                        Ko'rinish darajasi
+                    </Text>
+                    <Radio.Group
+                        value={form.watch("visibility") || ProjectVisibility.PRIVATE}
+                        onChange={(value) => form.setValue("visibility", value as ProjectVisibility, { shouldValidate: true })}
+                    >
+                        <Stack gap="xs">
+                            {PROJECT_VISIBILITY_OPTIONS.map((opt) => (
+                                <Radio
+                                    key={opt.value}
+                                    value={opt.value}
+                                    disabled={opt.value === ProjectVisibility.PUBLIC && !isAdmin}
+                                    label={
+                                        <Box>
+                                            <Text size="sm" fw={500} c="#212529">
+                                                {opt.icon} {opt.label}
+                                            </Text>
+                                            <Text size="xs" c="dimmed">
+                                                {opt.description}
+                                            </Text>
+                                        </Box>
+                                    }
+                                />
+                            ))}
+                        </Stack>
+                    </Radio.Group>
+                </Box>
+
+                {/* Initial members — faqat create rejimda */}
+                {!isUpdate && (
+                    <MultiSelect
+                        label="Boshlang'ich a'zolar"
+                        placeholder="Foydalanuvchilarni tanlang (ixtiyoriy)"
+                        size="sm"
+                        radius="sm"
+                        searchable
+                        clearable
+                        data={
+                            usersData?.data?.map((u: any) => ({
+                                value: u.id,
+                                label: `${u.fullname} (@${u.username})`,
+                            })) || []
+                        }
+                        value={form.watch("initialMemberIds") || []}
+                        onChange={(value) =>
+                            form.setValue("initialMemberIds", value, { shouldValidate: true })
+                        }
+                        styles={{
+                            input: {
+                                backgroundColor: "#f8f9fa",
+                                border: "1px solid #e9ecef",
+                                "&:focus": { borderColor: "#1e3a5f" },
+                            },
+                            label: { color: "#495057", fontWeight: 500, marginBottom: 4 },
+                        }}
+                    />
+                )}
 
                 {/* Dates */}
                 <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">

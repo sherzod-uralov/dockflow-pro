@@ -19,8 +19,10 @@ const permissionHooks = createCRUDHooks<
 });
 
 // Export individual hooks for backwards compatibility
-export const useGetAllPermissions = (params?: PermissionQueryParams) =>
-  permissionHooks.useGetAll(params);
+export const useGetAllPermissions = (
+  params?: PermissionQueryParams,
+  options?: { enabled?: boolean },
+) => permissionHooks.useGetAll(params, options);
 
 export const useGetPermissionById = (id: string) =>
   permissionHooks.useGetById(id);

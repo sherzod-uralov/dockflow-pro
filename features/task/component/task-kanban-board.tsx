@@ -60,10 +60,12 @@ interface KanbanColumnData {
 const InlineSubtaskInput = ({
     parentTaskId,
     projectId,
+    boardColumnId,
     onClose,
 }: {
     parentTaskId: string;
     projectId: string;
+    boardColumnId?: string;
     onClose: () => void;
 }) => {
     const [title, setTitle] = useState("");
@@ -84,6 +86,7 @@ const InlineSubtaskInput = ({
                 title: title.trim(),
                 projectId,
                 parentTaskId,
+                boardColumnId,
                 priority: TaskPriority.MEDIUM,
             },
             {
@@ -346,7 +349,7 @@ const RecursiveSubtaskItem = ({
                                     <InlineSubtaskInput
                                         parentTaskId={task.id}
                                         projectId={task.project?.id || task.projectId}
-
+                                        boardColumnId={task.boardColumnId}
                                         onClose={onCloseSubtaskInput}
                                     />
                                 </Box>
@@ -424,6 +427,7 @@ const ParentTaskWithSubtasks = ({
                                 <InlineSubtaskInput
                                     parentTaskId={task.id}
                                     projectId={task.project?.id || task.projectId}
+                                    boardColumnId={task.boardColumnId}
                                     onClose={onCloseSubtaskInput}
                                 />
                             </Box>

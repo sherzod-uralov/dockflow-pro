@@ -81,4 +81,5 @@ export interface UserHookProps {
   pageSize: number;
   search?: string;
   departmentId?: string;
+  projectId?: string;
 }

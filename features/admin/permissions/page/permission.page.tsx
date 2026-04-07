@@ -6,7 +6,6 @@ import {
   Box,
   Text,
   Group,
-  Button,
   TextInput,
   Paper,
   ActionIcon,
@@ -14,6 +13,10 @@ import {
   Stack,
   Center,
 } from "@mantine/core";
+import {
+  GuardedButton,
+  GuardedMenuItem,
+} from "@/components/shared/permission";
 import {
   IconPlus,
   IconSearch,
@@ -162,7 +165,8 @@ const PermissionPage = () => {
             Ruxsatlarni boshqarish
           </Text>
         </Box>
-        <Button
+        <GuardedButton
+          permission="permission:create"
           leftSection={<IconPlus size={18} />}
           onClick={createModal.openModal}
           radius="sm"
@@ -174,7 +178,7 @@ const PermissionPage = () => {
           }}
         >
           Ruxsat qo'shish
-        </Button>
+        </GuardedButton>
       </Group>
 
       {/* Search */}
@@ -291,18 +295,20 @@ const PermissionPage = () => {
                       </ActionIcon>
                     </Menu.Target>
                     <Menu.Dropdown>
-                      <Menu.Item
+                      <GuardedMenuItem
+                        permission="permission:read"
                         leftSection={<IconEye size={16} />}
                         onClick={() => handleView(row.original)}
                       >
                         Ko'rish
-                      </Menu.Item>
-                      <Menu.Item
+                      </GuardedMenuItem>
+                      <GuardedMenuItem
+                        permission="permission:update"
                         leftSection={<IconEdit size={16} />}
                         onClick={() => handleEdit(row.original)}
                       >
                         Tahrirlash
-                      </Menu.Item>
+                      </GuardedMenuItem>
                       <Menu.Item
                         leftSection={<IconCopy size={16} />}
                         onClick={() =>
@@ -312,13 +318,14 @@ const PermissionPage = () => {
                         Kalitdan nusxa olish
                       </Menu.Item>
                       <Menu.Divider />
-                      <Menu.Item
+                      <GuardedMenuItem
+                        permission="permission:delete"
                         color="red"
                         leftSection={<IconTrash size={16} />}
                         onClick={() => handleDeleteClick(row.original)}
                       >
                         O'chirish
-                      </Menu.Item>
+                      </GuardedMenuItem>
                     </Menu.Dropdown>
                   </Menu>
                 ),

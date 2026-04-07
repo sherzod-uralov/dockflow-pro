@@ -15,6 +15,7 @@ export const userService = createCRUDService<
     pageSize: params ? Number(params.pageSize) : undefined,
     search: params?.search || undefined,
     departmentId: params?.departmentId || undefined,
+    projectId: params?.projectId || undefined,
   }),
 });
 

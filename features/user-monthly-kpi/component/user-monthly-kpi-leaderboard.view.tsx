@@ -30,8 +30,8 @@ const RANK_STYLES: Record<number, { bg: string; border: string; medal: string; l
   3: { bg: "linear-gradient(135deg, #fff5f0 0%, #ffe8d6 100%)", border: "#CD7F32", medal: "#CD7F32", label: "3-o'rin" },
 };
 
-const getInitials = (name: string) =>
-  name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
+const getInitials = (name?: string) =>
+  (name || "?").split(" ").map((n) => n[0]).filter(Boolean).join("").toUpperCase().slice(0, 2);
 
 const UserMonthlyKpiLeaderboardView = ({ year, month }: UserMonthlyKpiLeaderboardViewProps) => {
   const { data, isLoading } = useGetUserMonthlyKpiLeaderboard({ year, month });
@@ -77,8 +77,8 @@ const UserMonthlyKpiLeaderboardView = ({ year, month }: UserMonthlyKpiLeaderboar
                 style={{
                   background: style?.bg || "#f8f9fa",
                   border: `2px solid ${style?.border || "#e9ecef"}`,
-                  minWidth: 190,
-                  maxWidth: 220,
+                  minWidth: 220,
+                  maxWidth: 260,
                   textAlign: "center",
                   flex: 1,
                 }}
@@ -93,19 +93,20 @@ const UserMonthlyKpiLeaderboardView = ({ year, month }: UserMonthlyKpiLeaderboar
                     >
                       <Text size="sm" fw={600}>{getInitials(entry.user.fullname)}</Text>
                     </Avatar>
-                    <Badge
-                      size="xs"
-                      variant="filled"
-                      color={entry.rank === 1 ? "yellow" : entry.rank === 2 ? "gray" : "orange"}
-                      style={{ position: "absolute", bottom: -6, left: "50%", transform: "translateX(-50%)" }}
-                    >
-                      <Group gap={2}><IconMedal size={10} />{style?.label}</Group>
-                    </Badge>
                   </Box>
-                  <Box>
+                  <Text size="sm" fw={700} c={style?.medal || "#495057"}>
+                    {entry.rank}
+                  </Text>
+                  <Box style={{ width: "100%" }}>
                     <Text size="sm" fw={600} c="#212529" lineClamp={1}>{entry.user.fullname}</Text>
                   </Box>
-                  <Text size="xl" fw={700} c="#1e3a5f">{entry.finalScore}</Text>
+                  <Text
+                    fw={700}
+                    c="#1e3a5f"
+                    style={{ fontSize: 28, lineHeight: 1.1, whiteSpace: "nowrap" }}
+                  >
+                    {entry.finalScore}
+                  </Text>
                   <Text size="xs" c="dimmed">ball</Text>
                 </Stack>
               </Paper>

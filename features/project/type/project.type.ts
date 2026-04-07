@@ -9,6 +9,18 @@ export enum ProjectStatus {
     ARCHIVED = "ARCHIVED",
 }
 
+export enum ProjectVisibility {
+    PRIVATE = "PRIVATE",
+    DEPARTMENT = "DEPARTMENT",
+    PUBLIC = "PUBLIC",
+}
+
+export const PROJECT_VISIBILITY_OPTIONS = [
+    { value: ProjectVisibility.PRIVATE, label: "Maxfiy", icon: "🔒", color: "gray", description: "Faqat tanlangan a'zolar ko'radi" },
+    { value: ProjectVisibility.DEPARTMENT, label: "Bo'lim", icon: "🏢", color: "blue", description: "Tanlangan bo'lim hammasi ko'radi" },
+    { value: ProjectVisibility.PUBLIC, label: "Umumiy", icon: "🌐", color: "green", description: "Hamma kompaniya xodimlari ko'radi" },
+] as const;
+
 export const PROJECT_STATUS_OPTIONS = [
     { value: ProjectStatus.PLANNING, label: "Rejalashtirish" },
     { value: ProjectStatus.ACTIVE, label: "Faol" },
@@ -37,6 +49,8 @@ export interface ProjectGetResponse {
     description?: string;
     key: string;
     status: ProjectStatus;
+    visibility?: ProjectVisibility;
+    createdById?: string;
     departmentId?: string;
     department?: {
         id: string;
@@ -79,7 +93,9 @@ export interface ProjectFormData {
     description?: string;
     key: string;
     status: ProjectStatus;
+    visibility?: ProjectVisibility;
     departmentId?: string;
+    initialMemberIds?: string[];
     startDate?: string;
     endDate?: string;
     budget?: number;
@@ -93,5 +109,6 @@ export interface ProjectUpdatePayload {
     name?: string;
     description?: string;
     status?: ProjectStatus;
+    visibility?: ProjectVisibility;
     departmentId?: string;
 }

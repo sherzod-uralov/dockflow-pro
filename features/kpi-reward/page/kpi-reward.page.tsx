@@ -6,7 +6,6 @@ import {
   Text,
   Group,
   Select,
-  Button,
   Paper,
   Badge,
   ActionIcon,
@@ -16,6 +15,10 @@ import {
   Avatar,
   Tabs,
 } from "@mantine/core";
+import {
+  GuardedButton,
+  GuardedMenuItem,
+} from "@/components/shared/permission";
 import {
   IconDotsVertical,
   IconEye,
@@ -264,15 +267,15 @@ const KpiRewardPage = () => {
               </ActionIcon>
             </Menu.Target>
             <Menu.Dropdown>
-              <Menu.Item leftSection={<IconEye size={16} />} onClick={() => handleView(reward)}>Ko'rish</Menu.Item>
+              <GuardedMenuItem permission="kpi-reward:read" leftSection={<IconEye size={16} />} onClick={() => handleView(reward)}>Ko'rish</GuardedMenuItem>
               {reward.status === KpiRewardStatus.PENDING && (
                 <>
-                  <Menu.Item leftSection={<IconCheck size={16} />} color="blue" onClick={() => handleApproveClick(reward)}>Tasdiqlash</Menu.Item>
-                  <Menu.Item leftSection={<IconX size={16} />} color="red" onClick={() => handleRejectClick(reward)}>Rad etish</Menu.Item>
+                  <GuardedMenuItem permission="kpi-reward:approve" leftSection={<IconCheck size={16} />} color="blue" onClick={() => handleApproveClick(reward)}>Tasdiqlash</GuardedMenuItem>
+                  <GuardedMenuItem permission="kpi-reward:reject" leftSection={<IconX size={16} />} color="red" onClick={() => handleRejectClick(reward)}>Rad etish</GuardedMenuItem>
                 </>
               )}
               {reward.status === KpiRewardStatus.APPROVED && (
-                <Menu.Item leftSection={<IconCash size={16} />} color="green" onClick={() => handlePayClick(reward)}>To'lash</Menu.Item>
+                <GuardedMenuItem permission="kpi-reward:pay" leftSection={<IconCash size={16} />} color="green" onClick={() => handlePayClick(reward)}>To'lash</GuardedMenuItem>
               )}
             </Menu.Dropdown>
           </Menu>
@@ -364,14 +367,15 @@ const KpiRewardPage = () => {
           </Text>
         </Box>
         {pendingCount > 0 && activeTab === "all" && (
-          <Button
+          <GuardedButton
+            permission="kpi-reward:approve"
             leftSection={<IconChecks size={18} />}
             onClick={bulkApproveModal.openModal}
             radius="sm"
             style={{ backgroundColor: "#1e3a5f" }}
           >
             Barchasini tasdiqlash ({pendingCount})
-          </Button>
+          </GuardedButton>
         )}
       </Group>
 

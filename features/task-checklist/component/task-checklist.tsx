@@ -35,6 +35,11 @@ import {
   useDeleteChecklistItem,
 } from "../hook/task-checklist.hook";
 import { TaskChecklistGetResponse, TaskChecklistItemGetResponse } from "../type/task-checklist.type";
+import {
+  GuardedButton,
+  GuardedActionIcon,
+  GuardedMenuItem,
+} from "@/components/shared/permission";
 
 interface TaskChecklistProps {
   taskId: string;
@@ -112,14 +117,16 @@ const ChecklistItemRow = ({
           {item.title}
         </Text>
       )}
-      <ActionIcon
+      <GuardedActionIcon
+        permission="task-checklist:delete"
+        label="O'chirish"
         variant="subtle"
         size="xs"
         color="red"
         onClick={() => onDelete(checklistId, item.id)}
       >
         <IconTrash size={14} />
-      </ActionIcon>
+      </GuardedActionIcon>
     </Group>
   );
 };
@@ -222,19 +229,21 @@ const ChecklistSection = ({
             </ActionIcon>
           </Menu.Target>
           <Menu.Dropdown>
-            <Menu.Item
+            <GuardedMenuItem
+              permission="task-checklist:update"
               leftSection={<IconEdit size={14} />}
               onClick={() => setIsEditing(true)}
             >
               Nomini o'zgartirish
-            </Menu.Item>
-            <Menu.Item
+            </GuardedMenuItem>
+            <GuardedMenuItem
+              permission="task-checklist:delete"
               leftSection={<IconTrash size={14} />}
               color="red"
               onClick={() => onDelete(checklist.id)}
             >
               O'chirish
-            </Menu.Item>
+            </GuardedMenuItem>
           </Menu.Dropdown>
         </Menu>
       </Group>
@@ -288,7 +297,8 @@ const ChecklistSection = ({
               </ActionIcon>
             </Group>
           ) : (
-            <Button
+            <GuardedButton
+              permission="task-checklist:update"
               variant="subtle"
               size="xs"
               leftSection={<IconPlus size={14} />}
@@ -304,7 +314,7 @@ const ChecklistSection = ({
               }}
             >
               Element qo'shish
-            </Button>
+            </GuardedButton>
           )}
         </Stack>
       </Collapse>
@@ -403,7 +413,8 @@ export const TaskChecklist = ({ taskId }: TaskChecklistProps) => {
           </Group>
         </Paper>
       ) : (
-        <Button
+        <GuardedButton
+          permission="task-checklist:create"
           variant="light"
           leftSection={<IconPlus size={16} />}
           onClick={() => setShowAddChecklist(true)}
@@ -419,7 +430,7 @@ export const TaskChecklist = ({ taskId }: TaskChecklistProps) => {
           }}
         >
           Checklist qo'shish
-        </Button>
+        </GuardedButton>
       )}
     </Stack>
   );

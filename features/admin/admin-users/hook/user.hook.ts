@@ -26,8 +26,9 @@ export const useGetUserQuery = ({
   pageSize = 10,
   search = "",
   departmentId,
+  projectId,
 }: Partial<UserHookProps> = {}) =>
-  userHooks.useGetAll({ pageNumber, pageSize, search, departmentId });
+  userHooks.useGetAll({ pageNumber, pageSize, search, departmentId, projectId });
 
 export const useCreateUserMutation = userHooks.useCreate;
 

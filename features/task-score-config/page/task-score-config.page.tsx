@@ -5,7 +5,6 @@ import {
   Box,
   Text,
   Group,
-  Button,
   Paper,
   Badge,
   ActionIcon,
@@ -13,6 +12,10 @@ import {
   Stack,
   Center,
 } from "@mantine/core";
+import {
+  GuardedButton,
+  GuardedMenuItem,
+} from "@/components/shared/permission";
 import {
   IconPlus,
   IconDotsVertical,
@@ -165,16 +168,16 @@ const TaskScoreConfigPage = () => {
             </ActionIcon>
           </Menu.Target>
           <Menu.Dropdown>
-            <Menu.Item leftSection={<IconEye size={16} />} onClick={() => handleView(row.original)}>
+            <GuardedMenuItem permission="task-score-config:read" leftSection={<IconEye size={16} />} onClick={() => handleView(row.original)}>
               Ko'rish
-            </Menu.Item>
-            <Menu.Item leftSection={<IconEdit size={16} />} onClick={() => handleEdit(row.original)}>
+            </GuardedMenuItem>
+            <GuardedMenuItem permission="task-score-config:update" leftSection={<IconEdit size={16} />} onClick={() => handleEdit(row.original)}>
               Tahrirlash
-            </Menu.Item>
+            </GuardedMenuItem>
             <Menu.Divider />
-            <Menu.Item color="red" leftSection={<IconTrash size={16} />} onClick={() => handleDeleteClick(row.original)}>
+            <GuardedMenuItem permission="task-score-config:delete" color="red" leftSection={<IconTrash size={16} />} onClick={() => handleDeleteClick(row.original)}>
               O'chirish
-            </Menu.Item>
+            </GuardedMenuItem>
           </Menu.Dropdown>
         </Menu>
       ),
@@ -213,7 +216,8 @@ const TaskScoreConfigPage = () => {
             Vazifa ball hisoblash sozlamalari
           </Text>
         </Box>
-        <Button
+        <GuardedButton
+          permission="task-score-config:create"
           leftSection={<IconPlus size={18} />}
           onClick={createModal.openModal}
           radius="sm"
@@ -225,7 +229,7 @@ const TaskScoreConfigPage = () => {
           }}
         >
           Konfiguratsiya qo'shish
-        </Button>
+        </GuardedButton>
       </Group>
 
       {/* Table */}

@@ -4,7 +4,6 @@ import { useState, useCallback } from "react";
 import {
     Container,
     Group,
-    Button,
     TextInput,
     Select,
     SegmentedControl,
@@ -13,6 +12,7 @@ import {
     Text,
     Stack,
 } from "@mantine/core";
+import { GuardedButton } from "@/components/shared/permission";
 import {
     IconPlus,
     IconSearch,
@@ -170,13 +170,14 @@ const TaskPage = () => {
                             Barcha vazifalarni boshqarish
                         </Text>
                     </div>
-                    <Button
+                    <GuardedButton
+                        permission="task:create"
                         leftSection={<IconPlus size={16} />}
                         onClick={() => handleCreateTask()}
                         style={{ backgroundColor: "#1e3a5f" }}
                     >
                         Yangi vazifa
-                    </Button>
+                    </GuardedButton>
                 </Group>
                 <Group justify="space-between" wrap="wrap">
                     <Group gap="md" style={{ flex: 1 }}>

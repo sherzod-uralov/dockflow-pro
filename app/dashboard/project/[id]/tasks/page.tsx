@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
     Group,
@@ -33,6 +33,7 @@ import {
 } from "@/components/shared/ui/custom-modal";
 import { useDebounce } from "@/hooks/use-debaunce";
 import { useTaskSocket } from "@/hooks/socket";
+import { showError } from "@/utils/show-error";
 import {
     useGetAllTasks,
     useDeleteTask,
@@ -73,7 +74,16 @@ export default function ProjectTasksPage() {
     const [assigneeFilter, setAssigneeFilter] = useState<string | null>(null);
 
     // Fetch project details
-    const { data: project, isLoading: isProjectLoading } = useGetProjectById(projectId);
+    const { data: project, isLoading: isProjectLoading, error: projectError } = useGetProjectById(projectId);
+
+    // 403 handling — redirect if no access
+    useEffect(() => {
+        const status = (projectError as any)?.response?.status;
+        if (status === 403) {
+            showError("Bu loyihaga kirish huquqingiz yo'q");
+            router.push("/dashboard/project");
+        }
+    }, [projectError, router]);
 
     // Fetch tasks for this project
     const { data: tasksData, isLoading: isTasksLoading } = useGetAllTasks({
@@ -88,6 +98,7 @@ export default function ProjectTasksPage() {
     const { data: users } = useGetUserQuery({
         pageNumber: 1,
         pageSize: 1000,
+        projectId: projectId,
     });
 
     const deleteTaskMutation = useDeleteTask();

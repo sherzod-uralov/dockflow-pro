@@ -34,6 +34,7 @@ import { useWorkflowCalendar } from "../hook/workflow.hook";
 import { WorkflowStepApiResponse, CalendarDayData, WorkflowStepWithWorkflow } from "../type/workflow.type";
 import { formatDateTime } from "@/lib/date-utils";
 import { useRouter } from "next/navigation";
+import { GuardedButton } from "@/components/shared/permission";
 
 import "dayjs/locale/uz-latn";
 import uzLocale from "@fullcalendar/core/locales/uz";
@@ -342,13 +343,14 @@ export default function WorkflowCalendarPage() {
                                 Yopish
                             </Button>
                             {selectedStep.workflowId && (
-                                <Button
+                                <GuardedButton
+                                    permission="workflow:read"
                                     onClick={handleWorkflowNavigate}
                                     rightSection={<IconArrowRight size={16} />}
                                     style={{ backgroundColor: "#1e3a5f" }}
                                 >
                                     Jarayonga o'tish
-                                </Button>
+                                </GuardedButton>
                             )}
                         </Group>
                     </Stack>

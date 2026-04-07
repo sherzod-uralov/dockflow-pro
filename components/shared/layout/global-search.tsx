@@ -32,6 +32,7 @@ import { useRouter } from "next/navigation";
 import { useGetUserQuery } from "@/features/admin/admin-users/hook/user.hook";
 import { useGetRoles } from "@/features/admin/roles/hook/role.hook";
 import { useGetAllPermissions } from "@/features/admin/permissions/hook/permission.hook";
+import { usePermission } from "@/providers/permission-provider";
 import { useGetAllDocumentTemplates } from "@/features/document-template/hook/document-template.hook";
 import { useGetAllDocuments } from "@/features/document/hook/document.hook";
 import { useGetAllJournals } from "@/features/journal/hook/journal.hook";
@@ -77,11 +78,17 @@ export function GlobalSearch() {
     search: debouncedQuery,
   });
 
-  const { data: permissionsData, isLoading: permissionsLoading } = useGetAllPermissions({
-    pageSize: 5,
-    pageNumber: 1,
-    search: debouncedQuery,
-  });
+  const { hasPermission } = usePermission();
+  const canSearchPermissions = hasPermission("permission:list");
+
+  const { data: permissionsData, isLoading: permissionsLoading } = useGetAllPermissions(
+    {
+      pageSize: 5,
+      pageNumber: 1,
+      search: debouncedQuery,
+    },
+    { enabled: canSearchPermissions },
+  );
 
   const { data: documentTemplatesData, isLoading: documentTemplatesLoading } = useGetAllDocumentTemplates({
     pageSize: 5,

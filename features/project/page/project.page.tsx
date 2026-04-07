@@ -4,7 +4,6 @@ import { useState, useCallback } from "react";
 import {
     Container,
     Group,
-    Button,
     TextInput,
     Select,
     SegmentedControl,
@@ -15,6 +14,7 @@ import {
     Stack,
     Pagination,
 } from "@mantine/core";
+import { GuardedButton } from "@/components/shared/permission";
 import {
     IconPlus,
     IconSearch,
@@ -124,13 +124,14 @@ const ProjectPage = () => {
                             Barcha loyihalarni boshqarish
                         </Text>
                     </div>
-                    <Button
+                    <GuardedButton
+                        permission="project:create"
                         leftSection={<IconPlus size={16} />}
                         onClick={createModal.openModal}
                         style={{ backgroundColor: "#1e3a5f" }}
                     >
                         Yangi loyiha
-                    </Button>
+                    </GuardedButton>
                 </Group>
 
                 {/* Filters and Search */}
@@ -255,13 +256,14 @@ const ProjectPage = () => {
                             <Text size="lg" c="dimmed">
                                 Hech qanday loyiha topilmadi
                             </Text>
-                            <Button
+                            <GuardedButton
+                                permission="project:create"
                                 leftSection={<IconPlus size={16} />}
                                 onClick={createModal.openModal}
                                 style={{ backgroundColor: "#1e3a5f" }}
                             >
                                 Birinchi loyihani yaratish
-                            </Button>
+                            </GuardedButton>
                         </Stack>
                     </Center>
                 )}

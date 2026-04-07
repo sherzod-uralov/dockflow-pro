@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   Box,
   Text,
@@ -11,6 +12,8 @@ import {
   Center,
   Accordion,
   Progress,
+  Tooltip,
+  ActionIcon,
 } from "@mantine/core";
 import {
   IconClipboardCheck,
@@ -18,9 +21,11 @@ import {
   IconCheck,
   IconClock,
   IconTarget,
+  IconExternalLink,
 } from "@tabler/icons-react";
 import { useGetUserMonthlyKpiTaskScores } from "../hook/user-monthly-kpi.hook";
 import { UserMonthlyKpiTaskScore } from "../type/user-monthly-kpi.type";
+import { TaskDetailDrawer } from "@/features/task/component/task-detail-drawer";
 
 interface UserMonthlyKpiTaskScoresViewProps {
   userId: string;
@@ -35,7 +40,15 @@ const formatDate = (dateString: string) => {
   return `${day}-${months[date.getMonth()]}`;
 };
 
-const ScoreItem = ({ ts, index }: { ts: UserMonthlyKpiTaskScore; index: number }) => {
+const ScoreItem = ({
+  ts,
+  index,
+  onOpenTask,
+}: {
+  ts: UserMonthlyKpiTaskScore;
+  index: number;
+  onOpenTask: (taskId: string) => void;
+}) => {
   const percentage = ts.baseScore > 0 ? Math.round((ts.earnedScore / ts.baseScore) * 100) : 0;
   const isLate = ts.daysLate > 0;
   const isPerfect = ts.earnedScore === ts.baseScore;
@@ -79,6 +92,20 @@ const ScoreItem = ({ ts, index }: { ts: UserMonthlyKpiTaskScore; index: number }
                 {ts.daysLate} kun kech
               </Badge>
             )}
+            <Tooltip label="Vazifani ko'rish">
+              <ActionIcon
+                variant="subtle"
+                color="blue"
+                size="md"
+                radius="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onOpenTask(ts.taskId);
+                }}
+              >
+                <IconExternalLink size={16} />
+              </ActionIcon>
+            </Tooltip>
             <Badge
               variant="light"
               color={isPerfect ? "green" : isLate ? "orange" : "blue"}
@@ -140,6 +167,7 @@ const ScoreItem = ({ ts, index }: { ts: UserMonthlyKpiTaskScore; index: number }
 
 const UserMonthlyKpiTaskScoresView = ({ userId, year, month }: UserMonthlyKpiTaskScoresViewProps) => {
   const { data: taskScores, isLoading } = useGetUserMonthlyKpiTaskScores({ userId, year, month });
+  const [openTaskId, setOpenTaskId] = useState<string | null>(null);
 
   if (isLoading) {
     return (
@@ -190,6 +218,7 @@ const UserMonthlyKpiTaskScoresView = ({ userId, year, month }: UserMonthlyKpiTas
           <Text size="xl" fw={700} c={totalPenalty > 0 ? "#e74c3c" : "#495057"} mt={4}>
             {totalPenalty > 0 ? `-${totalPenalty}` : "0"}
           </Text>
+          <Text size="xs" c="dimmed">jami ball</Text>
         </Paper>
         <Paper p="sm" radius="sm" style={{ backgroundColor: "#e6f9ee", border: "1px solid #c3e6cb" }}>
           <Group gap={8}>
@@ -214,9 +243,15 @@ const UserMonthlyKpiTaskScoresView = ({ userId, year, month }: UserMonthlyKpiTas
         }}
       >
         {taskScores.map((ts: UserMonthlyKpiTaskScore, index: number) => (
-          <ScoreItem key={ts.id} ts={ts} index={index} />
+          <ScoreItem key={ts.id} ts={ts} index={index} onOpenTask={setOpenTaskId} />
         ))}
       </Accordion>
+
+      <TaskDetailDrawer
+        taskId={openTaskId}
+        isOpen={!!openTaskId}
+        onClose={() => setOpenTaskId(null)}
+      />
     </Stack>
   );
 };

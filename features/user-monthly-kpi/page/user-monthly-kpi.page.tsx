@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useUrlFilter } from "@/hooks/use-url-filters";
 import {
   Box,
   Text,
@@ -39,6 +40,8 @@ import { UserMonthlyKpiGetResponse } from "../type/user-monthly-kpi.type";
 import { DataTable, DataTableColumn } from "@/components/shared/ui/custom-table";
 import UserMonthlyKpiTaskScoresView from "../component/user-monthly-kpi-task-scores.view";
 import UserMonthlyKpiLeaderboardView from "../component/user-monthly-kpi-leaderboard.view";
+import KpiAnalyticsView from "../component/kpi-analytics.view";
+import { GuardedMenuItem } from "@/components/shared/permission";
 
 const MONTH_OPTIONS = [
   { value: "1", label: "Yanvar" },
@@ -67,10 +70,11 @@ const FINALIZED_OPTIONS = [
   { value: "false", label: "Yakunlanmagan" },
 ];
 
-const getInitials = (name: string) =>
-  name
+const getInitials = (name?: string) =>
+  (name || "?")
     .split(" ")
     .map((n) => n[0])
+    .filter(Boolean)
     .join("")
     .toUpperCase()
     .slice(0, 2);
@@ -80,7 +84,7 @@ const UserMonthlyKpiPage = () => {
   const finalizeModal = useModal();
 
   const [selectedKpi, setSelectedKpi] = useState<UserMonthlyKpiGetResponse | null>(null);
-  const [activeTab, setActiveTab] = useState<string | null>("table");
+  const [activeTab, setActiveTab] = useUrlFilter("tab", "table");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
@@ -207,13 +211,13 @@ const UserMonthlyKpiPage = () => {
             </ActionIcon>
           </Menu.Target>
           <Menu.Dropdown>
-            <Menu.Item leftSection={<IconEye size={16} />} onClick={() => handleViewScores(row.original)}>
+            <GuardedMenuItem permission="user-monthly-kpi:read" leftSection={<IconEye size={16} />} onClick={() => handleViewScores(row.original)}>
               Balllarni ko'rish
-            </Menu.Item>
+            </GuardedMenuItem>
             {!row.original.isFinalized && (
-              <Menu.Item leftSection={<IconCheck size={16} />} onClick={() => handleFinalizeClick(row.original)}>
+              <GuardedMenuItem permission="user-monthly-kpi:finalize" leftSection={<IconCheck size={16} />} onClick={() => handleFinalizeClick(row.original)}>
                 Yakunlash
-              </Menu.Item>
+              </GuardedMenuItem>
             )}
           </Menu.Dropdown>
         </Menu>
@@ -285,13 +289,16 @@ const UserMonthlyKpiPage = () => {
       </Paper>
 
       {/* Tabs */}
-      <Tabs value={activeTab} onChange={setActiveTab} radius="sm">
+      <Tabs value={activeTab || "table"} onChange={(val) => setActiveTab(val || "table")} radius="sm">
         <Tabs.List mb="md">
           <Tabs.Tab value="table" leftSection={<IconTable size={18} />}>
             Jadval
           </Tabs.Tab>
           <Tabs.Tab value="leaderboard" leftSection={<IconChartBar size={18} />}>
             Reyting
+          </Tabs.Tab>
+          <Tabs.Tab value="analytics" leftSection={<IconChartBar size={18} />}>
+            Statistika
           </Tabs.Tab>
         </Tabs.List>
 
@@ -321,6 +328,13 @@ const UserMonthlyKpiPage = () => {
 
         <Tabs.Panel value="leaderboard">
           <UserMonthlyKpiLeaderboardView
+            year={yearFilter ? Number(yearFilter) : currentYear}
+            month={monthFilter ? Number(monthFilter) : new Date().getMonth() + 1}
+          />
+        </Tabs.Panel>
+
+        <Tabs.Panel value="analytics">
+          <KpiAnalyticsView
             year={yearFilter ? Number(yearFilter) : currentYear}
             month={monthFilter ? Number(monthFilter) : new Date().getMonth() + 1}
           />

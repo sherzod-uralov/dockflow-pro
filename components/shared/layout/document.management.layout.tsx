@@ -27,6 +27,7 @@ import {
   IconX,
 } from "@tabler/icons-react";
 import { ReactNode, memo, useCallback, useState } from "react";
+import { GuardedButton } from "@/components/shared/permission";
 
 interface Tab {
   value: string;
@@ -48,6 +49,8 @@ interface ActionButton {
   icon: ReactNode;
   onClick: () => void;
   variant?: "default" | "outline" | "ghost";
+  /** Permission key required to enable this action (e.g. "document:delete") */
+  permission?: string;
 }
 
 interface FilterOption {
@@ -87,6 +90,8 @@ interface SplitLayoutWithTabsProps {
   onTabChange?: (value: string) => void;
   onCreateNew?: () => void;
   createButtonLabel?: string;
+  /** Permission key required to use the create button (e.g. "document:create") */
+  createPermission?: string;
   searchPlaceholder?: string;
   searchValue: string;
   onSearchChange: (value: string) => void;
@@ -257,6 +262,7 @@ export const SplitLayoutWithTabs = ({
   onTabChange,
   onCreateNew,
   createButtonLabel = "+ Yangi",
+  createPermission,
   searchPlaceholder = "Qidirish...",
   searchValue,
   onSearchChange,
@@ -344,7 +350,8 @@ export const SplitLayoutWithTabs = ({
             </Tabs.List>
 
             {onCreateNew && (
-              <Button
+              <GuardedButton
+                permission={createPermission}
                 size="sm"
                 radius="sm"
                 onClick={onCreateNew}
@@ -352,7 +359,7 @@ export const SplitLayoutWithTabs = ({
                 data-tour="document-create"
               >
                 {createButtonLabel}
-              </Button>
+              </GuardedButton>
             )}
           </Group>
         </Box>
@@ -600,8 +607,9 @@ export const SplitLayoutWithTabs = ({
                   <Group justify="space-between">
                     <Group gap="xs">
                       {selectedItemActions.map((action, index) => (
-                        <Button
+                        <GuardedButton
                           key={index}
+                          permission={action.permission}
                           variant="outline"
                           size="xs"
                           radius="sm"
@@ -618,7 +626,7 @@ export const SplitLayoutWithTabs = ({
                           }}
                         >
                           {action.label}
-                        </Button>
+                        </GuardedButton>
                       ))}
                     </Group>
                     {additionalActions}

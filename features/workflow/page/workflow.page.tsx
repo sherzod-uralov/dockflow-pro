@@ -4,6 +4,10 @@ import React, { useCallback, memo, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useUrlFilter } from "@/hooks/use-url-filters";
 import {
+  GuardedButton,
+  GuardedMenuItem,
+} from "@/components/shared/permission";
+import {
   Box,
   Text,
   Button,
@@ -221,7 +225,8 @@ const WorkflowItem = memo(({
               </ActionIcon>
             </Menu.Target>
             <Menu.Dropdown>
-              <Menu.Item
+              <GuardedMenuItem
+                permission="workflow:update"
                 leftSection={<IconPencil size={16} />}
                 onClick={(e) => {
                   e.stopPropagation();
@@ -229,8 +234,9 @@ const WorkflowItem = memo(({
                 }}
               >
                 Tahrirlash
-              </Menu.Item>
-              <Menu.Item
+              </GuardedMenuItem>
+              <GuardedMenuItem
+                permission="workflow:delete"
                 leftSection={<IconTrash size={16} />}
                 color="red"
                 onClick={(e) => {
@@ -239,7 +245,7 @@ const WorkflowItem = memo(({
                 }}
               >
                 O'chirish
-              </Menu.Item>
+              </GuardedMenuItem>
             </Menu.Dropdown>
           </Menu>
 
@@ -456,7 +462,8 @@ const WorkflowPage = () => {
 
         <Group gap="sm">
           <TourButton tourKey="workflow" variant="icon" size="md" />
-          <Button
+          <GuardedButton
+            permission="workflow:create"
             variant="outline"
             size="sm"
             radius="sm"
@@ -474,8 +481,9 @@ const WorkflowPage = () => {
             }}
           >
             Shablondan
-          </Button>
-          <Button
+          </GuardedButton>
+          <GuardedButton
+            permission="workflow:create"
             size="sm"
             radius="sm"
             leftSection={<IconPlus size={16} />}
@@ -484,7 +492,7 @@ const WorkflowPage = () => {
             data-tour="workflow-create"
           >
             Yangi aylanma
-          </Button>
+          </GuardedButton>
         </Group>
       </Group>
 
