@@ -174,6 +174,10 @@ const menuItems: MenuItem[] = [
         label: "Profil",
         href: "/dashboard/setting/profile",
       },
+      {
+        label: "Sessiyalar",
+        href: "/dashboard/setting/sessions",
+      },
     ],
   },
 ];

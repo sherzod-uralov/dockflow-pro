@@ -167,6 +167,29 @@ class SocketManager {
       store.setActiveWorkflowsCount(data.count);
     });
 
+    // Session Events — auto logout
+    this.socket.on('session:revoked', (data: { sessionId: string; message?: string }) => {
+      mantineNotifications.show({
+        title: 'Sessiya bekor qilindi',
+        message: data.message || 'Sizning sessiyangiz boshqa qurilmadan chiqarib yuborildi',
+        color: 'red',
+        autoClose: 5000,
+      });
+      this.handleForceLogout();
+    });
+
+    this.socket.on('session:revoked-all', (data: { exceptSessionId?: string; message?: string }) => {
+      mantineNotifications.show({
+        title: 'Sessiyalar bekor qilindi',
+        message: data.message || 'Barcha boshqa sessiyalar chiqarib yuborildi',
+        color: 'orange',
+        autoClose: 5000,
+      });
+      // Bu qurilma bekor qilinmagan bo'lishi mumkin (exceptSessionId)
+      // Lekin xavfsizlik uchun profile invalidate qilamiz
+      window.dispatchEvent(new CustomEvent('sessions-changed'));
+    });
+
     // Error Events
     this.socket.on('error', (error: { message: string }) => {
       store.setConnectionError(error.message);
@@ -312,6 +335,30 @@ class SocketManager {
 
   private handleAuthError(): void {
     window.dispatchEvent(new CustomEvent('socket-auth-error'));
+  }
+
+  private handleForceLogout(): void {
+    // Tokenlarni tozalash va login sahifasiga yo'naltirish
+    if (typeof window !== 'undefined') {
+      const currentPath = window.location.pathname + window.location.search;
+      const isProtected =
+        currentPath.startsWith('/dashboard') ||
+        currentPath.startsWith('/document-edit') ||
+        currentPath.startsWith('/pdf');
+
+      // Cookies tozalash document.cookie orqali
+      document.cookie = 'accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+      document.cookie = 'refreshToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+
+      this.disconnect();
+
+      const loginUrl = isProtected
+        ? `/login?callbackUrl=${encodeURIComponent(currentPath)}`
+        : '/login';
+      setTimeout(() => {
+        window.location.href = loginUrl;
+      }, 1500);
+    }
   }
 
   get isConnected(): boolean {
