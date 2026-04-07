@@ -8,6 +8,8 @@ import {
   UpdateChatPayload,
   ChatMemberRole,
   ChatSettings,
+  ChatVisibilityPayload,
+  ChatPermissionsPayload,
 } from "../type/chat.type";
 
 const CHAT_LIST_KEY = ["chat-list"];
@@ -248,6 +250,123 @@ export const useSearchMessages = (q: string, chatId?: string) =>
     enabled: q.length >= 2,
     keepPreviousData: true,
   });
+
+// ─── Visibility / Permissions / Invite ────────────────────
+export const useSetChatVisibility = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, payload }: { id: string; payload: ChatVisibilityPayload }) =>
+      chatService.setVisibility(id, payload),
+    onSuccess: (_, { id }) => {
+      qc.invalidateQueries(chatDetailKey(id));
+      qc.invalidateQueries(CHAT_LIST_KEY);
+      showSuccess("Saqlandi");
+    },
+    onError: showError,
+  });
+};
+
+export const useSetChatPermissions = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, payload }: { id: string; payload: ChatPermissionsPayload }) =>
+      chatService.setPermissions(id, payload),
+    onSuccess: (_, { id }) => qc.invalidateQueries(chatDetailKey(id)),
+    onError: showError,
+  });
+};
+
+export const useRegenerateInvite = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (chatId: string) => chatService.regenerateInvite(chatId),
+    onSuccess: (_, chatId) => {
+      qc.invalidateQueries(chatDetailKey(chatId));
+      showSuccess("Yangi taklif kodi yaratildi");
+    },
+    onError: showError,
+  });
+};
+
+// ─── Public discovery ─────────────────────────────────────
+export const useSearchPublicChats = (q: string) =>
+  useQuery({
+    queryKey: ["chat-public-search", q],
+    queryFn: () => chatService.searchPublicChats(q),
+    enabled: q.length >= 2,
+    keepPreviousData: true,
+  });
+
+export const useJoinByInvite = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (code: string) => chatService.joinByInvite(code),
+    onSuccess: () => {
+      qc.invalidateQueries(CHAT_LIST_KEY);
+      showSuccess("Suhbatga qo'shildingiz");
+    },
+    onError: showError,
+  });
+};
+
+export const useJoinByUsername = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (username: string) => chatService.joinByUsername(username),
+    onSuccess: () => {
+      qc.invalidateQueries(CHAT_LIST_KEY);
+      showSuccess("Suhbatga qo'shildingiz");
+    },
+    onError: showError,
+  });
+};
+
+// ─── Block / Unblock ──────────────────────────────────────
+export const useBlockUser = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (userId: string) => chatService.blockUser(userId),
+    onSuccess: () => {
+      qc.invalidateQueries(["chat-blocked"]);
+      qc.invalidateQueries(CHAT_LIST_KEY);
+      showSuccess("Foydalanuvchi bloklandi");
+    },
+    onError: showError,
+  });
+};
+
+export const useUnblockUser = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (userId: string) => chatService.unblockUser(userId),
+    onSuccess: () => {
+      qc.invalidateQueries(["chat-blocked"]);
+      qc.invalidateQueries(CHAT_LIST_KEY);
+      showSuccess("Blokdan chiqarildi");
+    },
+    onError: showError,
+  });
+};
+
+export const useBlockedUsers = () =>
+  useQuery({
+    queryKey: ["chat-blocked"],
+    queryFn: () => chatService.getBlockedUsers(),
+  });
+
+// ─── Clear history ────────────────────────────────────────
+export const useClearChatHistory = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (chatId: string) => chatService.clearHistory(chatId),
+    onSuccess: (_, chatId) => {
+      qc.setQueryData(chatMessagesKey(chatId), { count: 0, messages: [] });
+      qc.invalidateQueries(CHAT_LIST_KEY);
+      showSuccess("Tarix tozalandi");
+    },
+    onError: showError,
+  });
+};
 
 export const useLeaveChat = () => {
   const qc = useQueryClient();

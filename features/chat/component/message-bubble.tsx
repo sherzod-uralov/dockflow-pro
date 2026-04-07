@@ -305,6 +305,23 @@ export const MessageBubble = ({
             opacity: isPending ? 0.7 : 1,
           }}
         >
+          {/* Forward attribution */}
+          {message.forwardedFrom && (
+            <Box mb={6} pl={6} style={{ borderLeft: `2px solid ${isOwn ? "#fff" : "#1e3a5f"}` }}>
+              <Text size="xs" c={subTextColor} fw={500}>
+                Yo'naltirildi
+              </Text>
+              <Text size="xs" c={isOwn ? "#fff" : "#1e3a5f"} fw={600}>
+                {message.forwardedFrom.user.fullname}
+                {message.forwardedFrom.chat && (
+                  <Text span size="xs" c={subTextColor} fw={400}>
+                    {" "}— {message.forwardedFrom.chat.title}
+                  </Text>
+                )}
+              </Text>
+            </Box>
+          )}
+
           {/* Reply preview */}
           {message.replyTo && (
             <Box

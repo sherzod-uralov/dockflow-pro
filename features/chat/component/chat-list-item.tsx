@@ -11,9 +11,17 @@ import {
   IconDots,
   IconVolume,
   IconPhone,
+  IconBan,
+  IconEraser,
 } from "@tabler/icons-react";
 import { ChatListItem as ChatListItemType } from "../type/chat.type";
-import { useMuteChat, usePinChat, useArchiveChat } from "../hook/chat.hook";
+import {
+  useMuteChat,
+  usePinChat,
+  useArchiveChat,
+  useBlockUser,
+  useClearChatHistory,
+} from "../hook/chat.hook";
 import { useChatCall } from "../hook/use-chat-call";
 import { useUserPresence } from "../hook/use-presence";
 
@@ -54,6 +62,8 @@ export const ChatListItemView = ({ chat, isActive, onClick }: Props) => {
   const muteMutation = useMuteChat();
   const pinMutation = usePinChat();
   const archiveMutation = useArchiveChat();
+  const blockMutation = useBlockUser();
+  const clearHistoryMutation = useClearChatHistory();
   const { startCall, activeCall } = useChatCall();
   const peerPresence = useUserPresence(chat.peer?.id);
   const isPeerOnline = peerPresence?.isOnline ?? chat.peer?.isOnline ?? false;
@@ -221,6 +231,29 @@ export const ChatListItemView = ({ chat, isActive, onClick }: Props) => {
                 >
                   {chat.isArchived ? "Arxivdan chiqarish" : "Arxivlash"}
                 </Menu.Item>
+                <Menu.Item
+                  leftSection={<IconEraser size={14} />}
+                  onClick={() => {
+                    if (confirm("Tarixni tozalashni xohlaysizmi?")) {
+                      clearHistoryMutation.mutate(chat.id);
+                    }
+                  }}
+                >
+                  Tarixni tozalash
+                </Menu.Item>
+                {!isGroup && chat.peer && (
+                  <Menu.Item
+                    leftSection={<IconBan size={14} />}
+                    color="red"
+                    onClick={() => {
+                      if (confirm(`${chat.peer!.fullname} ni bloklashni xohlaysizmi?`)) {
+                        blockMutation.mutate(chat.peer!.id);
+                      }
+                    }}
+                  >
+                    Bloklash
+                  </Menu.Item>
+                )}
               </Menu.Dropdown>
             </Menu>
           </Group>

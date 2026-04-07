@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Drawer,
   Stack,
@@ -31,6 +31,11 @@ import {
   IconUserPlus,
   IconSearch,
   IconArrowLeft,
+  IconWorld,
+  IconLock,
+  IconCopy,
+  IconRefresh,
+  IconCheck,
 } from "@tabler/icons-react";
 import {
   useGetChatDetail,
@@ -39,9 +44,13 @@ import {
   useLeaveChat,
   useChangeMemberRole,
   useDeleteChat,
+  useSetChatVisibility,
+  useSetChatPermissions,
+  useRegenerateInvite,
 } from "../hook/chat.hook";
-import { ChatMemberRole } from "../type/chat.type";
+import { ChatMemberRole, ChatVisibility } from "../type/chat.type";
 import { useGetUserQuery } from "@/features/admin/admin-users/hook/user.hook";
+import { Switch, SegmentedControl, CopyButton } from "@mantine/core";
 
 interface Props {
   opened: boolean;
@@ -72,10 +81,42 @@ export const ChatInfoDrawer = ({ opened, onClose, chatId, currentUserId, onChatD
   const leaveChat = useLeaveChat();
   const changeRole = useChangeMemberRole();
   const deleteChat = useDeleteChat();
+  const setVisibility = useSetChatVisibility();
+  const setPermissions = useSetChatPermissions();
+  const regenInvite = useRegenerateInvite();
+  const [usernameInput, setUsernameInput] = useState("");
 
   const isGroup = chat?.type === "GROUP";
   const myRole = chat?.myRole;
   const canManage = myRole === "OWNER" || myRole === "ADMIN";
+  const isOwner = myRole === "OWNER";
+
+  // Sync username input when chat loads
+  useEffect(() => {
+    if (chat?.username !== undefined && chat?.username !== null) {
+      setUsernameInput(chat.username || "");
+    }
+  }, [chat?.username]);
+
+  const handleVisibilityChange = (visibility: ChatVisibility) => {
+    if (!chat) return;
+    if (visibility === "PUBLIC" && !usernameInput.trim()) {
+      alert("Public uchun username kerak");
+      return;
+    }
+    setVisibility.mutate({
+      id: chat.id,
+      payload:
+        visibility === "PUBLIC"
+          ? { visibility, username: usernameInput.trim() }
+          : { visibility },
+    });
+  };
+
+  const handlePermissionToggle = (key: "allowMemberInvite" | "allowMemberSendMedia" | "allowMemberPin", value: boolean) => {
+    if (!chat) return;
+    setPermissions.mutate({ id: chat.id, payload: { [key]: value } });
+  };
 
   const memberIds = new Set(chat?.members?.map((m) => m.userId) || []);
   const availableUsers = (usersData?.data || []).filter(
@@ -328,6 +369,108 @@ export const ChatInfoDrawer = ({ opened, onClose, chatId, currentUserId, onChatD
                     })}
                   </Stack>
                 </ScrollArea>
+              </Box>
+            </>
+          )}
+
+          {/* Group visibility — faqat owner */}
+          {isGroup && isOwner && (
+            <>
+              <Divider />
+              <Box>
+                <Text size="xs" fw={600} c="#868e96" tt="uppercase" mb="xs">
+                  Guruh turi
+                </Text>
+                <SegmentedControl
+                  fullWidth
+                  data={[
+                    { label: (<Group gap={4} justify="center"><IconLock size={14} /><Text size="xs">Maxfiy</Text></Group>) as any, value: "PRIVATE" },
+                    { label: (<Group gap={4} justify="center"><IconWorld size={14} /><Text size="xs">Public</Text></Group>) as any, value: "PUBLIC" },
+                  ]}
+                  value={chat.visibility || "PRIVATE"}
+                  onChange={(v) => handleVisibilityChange(v as ChatVisibility)}
+                />
+
+                {chat.visibility === "PUBLIC" && (
+                  <Box mt="sm">
+                    <TextInput
+                      label="Username"
+                      placeholder="masalan: it_dept"
+                      value={usernameInput}
+                      onChange={(e) => setUsernameInput(e.target.value.replace(/[^a-z0-9_]/gi, "").toLowerCase())}
+                      size="sm"
+                      leftSection={<Text size="sm" c="dimmed">@</Text>}
+                    />
+                    <Button
+                      size="xs"
+                      mt={6}
+                      variant="light"
+                      onClick={() => handleVisibilityChange("PUBLIC")}
+                      disabled={!usernameInput.trim() || usernameInput === chat.username}
+                      loading={setVisibility.isLoading}
+                    >
+                      Saqlash
+                    </Button>
+                  </Box>
+                )}
+
+                {chat.visibility === "PRIVATE" && chat.inviteCode && (
+                  <Box mt="sm">
+                    <Text size="xs" c="dimmed" mb={4}>
+                      Taklif kodi
+                    </Text>
+                    <Group gap="xs">
+                      <TextInput
+                        value={chat.inviteCode}
+                        readOnly
+                        size="xs"
+                        style={{ flex: 1 }}
+                        styles={{ input: { fontFamily: "monospace" } }}
+                      />
+                      <CopyButton value={chat.inviteCode}>
+                        {({ copied, copy }) => (
+                          <ActionIcon variant="light" onClick={copy}>
+                            {copied ? <IconCheck size={14} /> : <IconCopy size={14} />}
+                          </ActionIcon>
+                        )}
+                      </CopyButton>
+                      <ActionIcon
+                        variant="light"
+                        onClick={() => regenInvite.mutate(chat.id)}
+                        loading={regenInvite.isLoading}
+                      >
+                        <IconRefresh size={14} />
+                      </ActionIcon>
+                    </Group>
+                  </Box>
+                )}
+              </Box>
+
+              {/* Permissions */}
+              <Box>
+                <Text size="xs" fw={600} c="#868e96" tt="uppercase" mb="xs">
+                  A'zolar ruxsatlari
+                </Text>
+                <Stack gap="xs">
+                  <Switch
+                    label="A'zo qo'shishi mumkin"
+                    checked={!!chat.allowMemberInvite}
+                    onChange={(e) => handlePermissionToggle("allowMemberInvite", e.currentTarget.checked)}
+                    color="#1e3a5f"
+                  />
+                  <Switch
+                    label="Media yuborish"
+                    checked={!!chat.allowMemberSendMedia}
+                    onChange={(e) => handlePermissionToggle("allowMemberSendMedia", e.currentTarget.checked)}
+                    color="#1e3a5f"
+                  />
+                  <Switch
+                    label="Pin qilish"
+                    checked={!!chat.allowMemberPin}
+                    onChange={(e) => handlePermissionToggle("allowMemberPin", e.currentTarget.checked)}
+                    color="#1e3a5f"
+                  />
+                </Stack>
               </Box>
             </>
           )}

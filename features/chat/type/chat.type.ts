@@ -1,5 +1,6 @@
 export type ChatType = "DIRECT" | "GROUP";
 export type ChatMemberRole = "OWNER" | "ADMIN" | "MEMBER";
+export type ChatVisibility = "PRIVATE" | "PUBLIC";
 export type ChatMessageType =
   | "TEXT"
   | "IMAGE"
@@ -30,6 +31,11 @@ export interface ChatLastMessage {
   createdAt: string;
 }
 
+export interface ChatBlockStatus {
+  iBlocked: boolean;
+  blockedMe: boolean;
+}
+
 export interface ChatListItem {
   id: string;
   type: ChatType;
@@ -44,6 +50,13 @@ export interface ChatListItem {
   myRole: ChatMemberRole;
   lastMessage?: ChatLastMessage | null;
   unreadCount?: number;
+  visibility?: ChatVisibility;
+  username?: string | null;
+  inviteCode?: string | null;
+  allowMemberInvite?: boolean;
+  allowMemberSendMedia?: boolean;
+  allowMemberPin?: boolean;
+  blockStatus?: ChatBlockStatus;
 }
 
 export interface ChatListResponse {
@@ -111,6 +124,22 @@ export interface ChatMessage {
     sender: { id: string; fullname: string };
   } | null;
   forwardedFromId?: string | null;
+  forwardedFrom?: {
+    user: {
+      id: string;
+      fullname: string;
+      username: string;
+      avatarUrl?: string | null;
+      deleted?: boolean;
+    };
+    chat?: {
+      id: string;
+      type: ChatType;
+      title: string;
+      username?: string | null;
+      visibility?: ChatVisibility;
+    } | null;
+  } | null;
   fileUrl?: string;
   fileName?: string;
   fileSize?: number;
@@ -180,6 +209,32 @@ export interface ChatSearchMessage extends ChatMessage {
 export interface ChatSearchResponse {
   count: number;
   messages: ChatSearchMessage[];
+}
+
+export interface ChatVisibilityPayload {
+  visibility: ChatVisibility;
+  username?: string;
+}
+
+export interface ChatPermissionsPayload {
+  allowMemberInvite?: boolean;
+  allowMemberSendMedia?: boolean;
+  allowMemberPin?: boolean;
+}
+
+export interface PublicChatSearchResult {
+  id: string;
+  title: string;
+  username: string;
+  avatarUrl?: string | null;
+  description?: string;
+  membersCount: number;
+}
+
+export interface BlockedUser {
+  userId: string;
+  user: ChatUser;
+  blockedAt: string;
 }
 
 export interface ChatSettings {

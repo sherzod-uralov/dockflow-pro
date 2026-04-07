@@ -23,10 +23,19 @@ import {
   IconSearch,
   IconMessage,
   IconPhone,
+  IconWorld,
+  IconLink,
 } from "@tabler/icons-react";
 import { useGetUserQuery } from "@/features/admin/admin-users/hook/user.hook";
-import { useCreateDirectChat, useCreateGroupChat } from "../hook/chat.hook";
+import {
+  useCreateDirectChat,
+  useCreateGroupChat,
+  useSearchPublicChats,
+  useJoinByInvite,
+  useJoinByUsername,
+} from "../hook/chat.hook";
 import { useChatCall } from "../hook/use-chat-call";
+import { useDebounce } from "@/hooks/use-debaunce";
 
 interface Props {
   onClose: () => void;
@@ -42,10 +51,15 @@ export const NewChatModal = ({ onClose, onSuccess }: Props) => {
   const [groupTitle, setGroupTitle] = useState("");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [callingUserId, setCallingUserId] = useState<string | null>(null);
+  const [publicSearch, debouncedPublicSearch, setPublicSearch] = useDebounce("", 300);
+  const [inviteCode, setInviteCode] = useState("");
 
   const { data: usersData, isLoading } = useGetUserQuery({ pageNumber: 1, pageSize: 100 });
   const createDirect = useCreateDirectChat();
   const createGroup = useCreateGroupChat();
+  const joinByInvite = useJoinByInvite();
+  const joinByUsername = useJoinByUsername();
+  const publicSearchQuery = useSearchPublicChats(debouncedPublicSearch);
   const { startCall } = useChatCall();
 
   const users = (usersData?.data || []).filter((u) =>
@@ -113,6 +127,12 @@ export const NewChatModal = ({ onClose, onSuccess }: Props) => {
         </Tabs.Tab>
         <Tabs.Tab value="group" leftSection={<IconUsers size={16} />}>
           Guruh
+        </Tabs.Tab>
+        <Tabs.Tab value="public" leftSection={<IconWorld size={16} />}>
+          Topish
+        </Tabs.Tab>
+        <Tabs.Tab value="invite" leftSection={<IconLink size={16} />}>
+          Taklif
         </Tabs.Tab>
       </Tabs.List>
 
@@ -253,6 +273,121 @@ export const NewChatModal = ({ onClose, onSuccess }: Props) => {
               style={{ backgroundColor: "#1e3a5f" }}
             >
               Yaratish
+            </Button>
+          </Group>
+        </Stack>
+      </Tabs.Panel>
+
+      {/* ─── Public discovery ─── */}
+      <Tabs.Panel value="public">
+        <Stack gap="sm">
+          <TextInput
+            placeholder="Public guruhlarni qidirish..."
+            leftSection={<IconSearch size={14} />}
+            value={publicSearch}
+            onChange={(e) => setPublicSearch(e.target.value)}
+            size="sm"
+          />
+          {debouncedPublicSearch.length < 2 && (
+            <Center py="xl">
+              <Text size="sm" c="dimmed">
+                Kamida 2 ta belgi kiriting
+              </Text>
+            </Center>
+          )}
+          {publicSearchQuery.isLoading && (
+            <Center py="xl">
+              <Loader size="sm" />
+            </Center>
+          )}
+          {!publicSearchQuery.isLoading &&
+            debouncedPublicSearch.length >= 2 &&
+            publicSearchQuery.data?.chats.length === 0 && (
+              <Center py="xl">
+                <Text size="sm" c="dimmed">
+                  Hech narsa topilmadi
+                </Text>
+              </Center>
+            )}
+          <ScrollArea h={350}>
+            <Stack gap={4}>
+              {publicSearchQuery.data?.chats?.map((chat) => (
+                <Group
+                  key={chat.id}
+                  p="xs"
+                  gap="sm"
+                  justify="space-between"
+                  style={{
+                    borderRadius: 6,
+                    border: "1px solid #e9ecef",
+                    backgroundColor: "#fff",
+                  }}
+                >
+                  <Group gap="sm" style={{ flex: 1, minWidth: 0 }}>
+                    <Avatar size="sm" radius="xl" src={chat.avatarUrl} style={{ backgroundColor: "#fff3e0" }}>
+                      <IconUsers size={14} color="#f39c12" />
+                    </Avatar>
+                    <Box style={{ minWidth: 0 }}>
+                      <Text size="sm" fw={500} lineClamp={1}>{chat.title}</Text>
+                      <Text size="xs" c="dimmed" lineClamp={1}>
+                        @{chat.username} · {chat.membersCount} a'zo
+                      </Text>
+                    </Box>
+                  </Group>
+                  <Button
+                    size="xs"
+                    onClick={() =>
+                      joinByUsername.mutate(chat.username, {
+                        onSuccess: (data: any) => {
+                          if (data?.id) onSuccess(data.id);
+                          onClose();
+                        },
+                      })
+                    }
+                    loading={joinByUsername.isLoading}
+                    style={{ backgroundColor: "#1e3a5f" }}
+                  >
+                    Qo'shilish
+                  </Button>
+                </Group>
+              ))}
+            </Stack>
+          </ScrollArea>
+        </Stack>
+      </Tabs.Panel>
+
+      {/* ─── Join by invite code ─── */}
+      <Tabs.Panel value="invite">
+        <Stack gap="md">
+          <Text size="sm" c="dimmed">
+            Sizga ulashilgan taklif kodini kiriting
+          </Text>
+          <TextInput
+            placeholder="Masalan: k9fyc083b9x14q"
+            value={inviteCode}
+            onChange={(e) => setInviteCode(e.target.value.trim())}
+            size="sm"
+            leftSection={<IconLink size={14} />}
+          />
+          <Group justify="flex-end" gap="xs">
+            <Button variant="default" size="sm" onClick={onClose}>
+              Bekor
+            </Button>
+            <Button
+              size="sm"
+              disabled={!inviteCode}
+              loading={joinByInvite.isLoading}
+              onClick={() =>
+                joinByInvite.mutate(inviteCode, {
+                  onSuccess: (data: any) => {
+                    if (data?.id) onSuccess(data.id);
+                    onClose();
+                  },
+                })
+              }
+              style={{ backgroundColor: "#1e3a5f" }}
+            >
+              Qo'shilish
             </Button>
           </Group>
         </Stack>

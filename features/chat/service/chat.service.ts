@@ -14,6 +14,10 @@ import {
   UpdateChatPayload,
   ChatSettings,
   ChatMemberRole,
+  ChatVisibilityPayload,
+  ChatPermissionsPayload,
+  PublicChatSearchResult,
+  BlockedUser,
 } from "../type/chat.type";
 
 export const chatService = {
@@ -211,6 +215,59 @@ export const chatService = {
     const { data } = await axiosInstance.get<ChatSearchResponse>(endpoints.chat.searchMessages, {
       params: { q, chatId },
     });
+    return data;
+  },
+
+  // ─── Visibility / Permissions / Invite ─────────────────
+  setVisibility: async (id: string, payload: ChatVisibilityPayload) => {
+    const { data } = await axiosInstance.post(endpoints.chat.visibility(id), payload);
+    return data;
+  },
+
+  setPermissions: async (id: string, payload: ChatPermissionsPayload) => {
+    const { data } = await axiosInstance.post(endpoints.chat.permissions(id), payload);
+    return data;
+  },
+
+  regenerateInvite: async (id: string) => {
+    const { data } = await axiosInstance.post(endpoints.chat.inviteRegenerate(id));
+    return data;
+  },
+
+  // ─── Public discovery ──────────────────────────────────
+  searchPublicChats: async (q: string): Promise<{ chats: PublicChatSearchResult[] }> => {
+    const { data } = await axiosInstance.get(endpoints.chat.publicSearch, { params: { q } });
+    return data;
+  },
+
+  joinByInvite: async (code: string) => {
+    const { data } = await axiosInstance.post(endpoints.chat.joinInvite, { code });
+    return data;
+  },
+
+  joinByUsername: async (username: string) => {
+    const { data } = await axiosInstance.post(endpoints.chat.joinUsername, { username });
+    return data;
+  },
+
+  // ─── Block / Unblock ────────────────────────────────────
+  blockUser: async (userId: string) => {
+    const { data } = await axiosInstance.post(endpoints.chat.block(userId));
+    return data;
+  },
+
+  unblockUser: async (userId: string) => {
+    await axiosInstance.delete(endpoints.chat.block(userId));
+  },
+
+  getBlockedUsers: async (): Promise<{ users: BlockedUser[] }> => {
+    const { data } = await axiosInstance.get(endpoints.chat.blockList);
+    return data;
+  },
+
+  // ─── Clear history ──────────────────────────────────────
+  clearHistory: async (id: string) => {
+    const { data } = await axiosInstance.post(endpoints.chat.clearHistory(id));
     return data;
   },
 
