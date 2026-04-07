@@ -28,6 +28,7 @@ import {
   IconPlus,
   IconLayoutKanban,
   IconChartBar,
+  IconMessageCircle,
 } from "@tabler/icons-react";
 import { useRouter, usePathname } from "next/navigation";
 import { useState, useEffect, useMemo } from "react";
@@ -65,6 +66,12 @@ const menuItems: MenuItem[] = [
     icon: IconHome,
     label: "Bosh sahifa",
     href: "/dashboard",
+  },
+  {
+    icon: IconMessageCircle,
+    label: "Suhbatlar",
+    href: "/dashboard/chat",
+    permission: "chat:list",
   },
   {
     icon: IconFileText,

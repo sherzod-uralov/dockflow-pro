@@ -11,6 +11,12 @@ import { SocketProvider } from "@/providers/socket.provider";
 import { TelegramConnectModal } from "@/features/telegram/component/telegram-connect-modal";
 import { useGetProfileQuery } from "@/features/login/hook/login.hook";
 import { AiChatWidget } from "@/features/ai-chat";
+import { useChatSocket } from "@/features/chat";
+
+const ChatSocketMount = () => {
+  useChatSocket();
+  return null;
+};
 
 export function DashboardShell({ children }: { children: ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -52,6 +58,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
             </Box>
           </Box>
           {/* {user?.id && <TelegramConnectModal userId={user.id} />} */}
+          <ChatSocketMount />
           <AiChatWidget />
         </SocketProvider>
       </OnboardingProvider>
