@@ -14,7 +14,6 @@ import {
   Button,
   Paper,
   Avatar,
-  Transition,
 } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
 import {
@@ -52,7 +51,9 @@ const WELCOME_MESSAGE = `Salom! Men **DocFlow AI yordamchisiman**. Quyidagilarni
 export const AiChatWidget = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
-  const [optimisticMessages, setOptimisticMessages] = useState<AiHistoryMessage[]>([]);
+  const [messages, setMessages] = useState<AiHistoryMessage[]>([]);
+  const [historyLoaded, setHistoryLoaded] = useState(false);
+  const [lastUserText, setLastUserText] = useState<string>("");
   const scrollViewportRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -62,25 +63,15 @@ export const AiChatWidget = () => {
   const sendMutation = useSendChatMessage();
   const clearMutation = useClearChatHistory();
 
-  // Combine server history with optimistic messages
-  const allMessages: AiHistoryMessage[] = [
-    ...(history || []),
-    ...optimisticMessages,
-  ];
-
-  // Reset optimistic messages when server history updates
+  // Initial history load → seed local state once
   useEffect(() => {
-    if (history && optimisticMessages.length > 0) {
-      // Check if optimistic messages are now in server history
-      const serverIds = new Set(history.map((m) => m.id));
-      const stillPending = optimisticMessages.filter((m) => !serverIds.has(m.id));
-      if (stillPending.length !== optimisticMessages.length) {
-        setOptimisticMessages(stillPending);
-      }
+    if (history && !historyLoaded) {
+      setMessages(history);
+      setHistoryLoaded(true);
     }
-  }, [history]);
+  }, [history, historyLoaded]);
 
-  // Auto-scroll to bottom on new messages
+  // Auto-scroll to bottom on new messages or typing indicator
   useEffect(() => {
     if (scrollViewportRef.current) {
       requestAnimationFrame(() => {
@@ -90,7 +81,7 @@ export const AiChatWidget = () => {
         });
       });
     }
-  }, [allMessages.length, sendMutation.isLoading, isOpen]);
+  }, [messages.length, sendMutation.isLoading, isOpen]);
 
   // Focus input on open
   useEffect(() => {
@@ -99,9 +90,8 @@ export const AiChatWidget = () => {
     }
   }, [isOpen]);
 
-  const handleSend = (overrideText?: string) => {
-    const text = (overrideText ?? inputValue).trim();
-    if (!text || sendMutation.isLoading) return;
+  const sendMessage = async (text: string) => {
+    if (!text.trim() || sendMutation.isLoading) return;
 
     const tempId = `tmp-${Date.now()}`;
     const optimistic: AiHistoryMessage = {
@@ -109,33 +99,67 @@ export const AiChatWidget = () => {
       role: "user",
       content: text,
       timestamp: new Date().toISOString(),
+      pending: true,
     };
-    setOptimisticMessages((prev) => [...prev, optimistic]);
+
+    // 1) Darhol user xabarini ko'rsatamiz
+    setMessages((prev) => [...prev, optimistic]);
+    setLastUserText(text);
     setInputValue("");
 
-    sendMutation.mutate(text, {
-      onError: () => {
-        // Remove optimistic message on error
-        setOptimisticMessages((prev) => prev.filter((m) => m.id !== tempId));
-      },
-    });
+    try {
+      const res = await sendMutation.mutateAsync(text);
+
+      // 2) Pending'ni real user xabariga + assistant javobiga almashtiramiz
+      setMessages((prev) => [
+        ...prev.filter((m) => m.id !== tempId),
+        {
+          id: `${res.id}-user`,
+          role: "user",
+          content: text,
+          timestamp: res.timestamp,
+        },
+        {
+          id: res.id,
+          role: "assistant",
+          content: res.message,
+          cards: res.cards || [],
+          timestamp: res.timestamp,
+          error: res.error,
+        },
+      ]);
+    } catch {
+      // Xato bo'lsa pending xabarni olib tashlaymiz
+      setMessages((prev) => prev.filter((m) => m.id !== tempId));
+    }
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      handleSend();
+      sendMessage(inputValue);
+    }
+  };
+
+  const handleRetry = () => {
+    if (lastUserText && !sendMutation.isLoading) {
+      sendMessage(lastUserText);
     }
   };
 
   const handleClearHistory = () => {
-    if (allMessages.length === 0) return;
+    if (messages.length === 0) return;
     if (typeof window !== "undefined" && !window.confirm("Suhbat tarixini tozalashni xohlaysizmi?")) return;
-    clearMutation.mutate();
-    setOptimisticMessages([]);
+    clearMutation.mutate(undefined, {
+      onSuccess: () => {
+        setMessages([]);
+        setLastUserText("");
+      },
+    });
   };
 
-  const isEmpty = !isHistoryLoading && allMessages.length === 0;
+  const isEmpty = !isHistoryLoading && messages.length === 0;
+  const isSending = sendMutation.isLoading;
 
   // Floating button (closed state)
   if (!isOpen) {
@@ -217,7 +241,7 @@ export const AiChatWidget = () => {
           </Box>
         </Group>
         <Group gap={4}>
-          {allMessages.length > 0 && (
+          {messages.length > 0 && (
             <Tooltip label="Tarixni tozalash" withArrow>
               <ActionIcon
                 variant="subtle"
@@ -248,13 +272,12 @@ export const AiChatWidget = () => {
         offsetScrollbars
       >
         <Box p="sm">
-          {isHistoryLoading && allMessages.length === 0 ? (
+          {isHistoryLoading && messages.length === 0 ? (
             <Box style={{ display: "flex", justifyContent: "center", padding: 32 }}>
               <Loader size="sm" color="#1e3a5f" />
             </Box>
           ) : isEmpty ? (
             <Stack gap="md">
-              {/* Welcome message */}
               <AiMessage
                 message={{
                   id: "welcome",
@@ -263,7 +286,6 @@ export const AiChatWidget = () => {
                   timestamp: new Date().toISOString(),
                 }}
               />
-              {/* Suggested questions */}
               <Stack gap={6}>
                 {SUGGESTED_QUESTIONS.map((q) => {
                   const Icon = q.icon;
@@ -274,8 +296,8 @@ export const AiChatWidget = () => {
                       size="sm"
                       radius="md"
                       leftSection={<Icon size={14} />}
-                      onClick={() => handleSend(q.text)}
-                      disabled={sendMutation.isLoading}
+                      onClick={() => sendMessage(q.text)}
+                      disabled={isSending}
                       styles={{
                         root: {
                           backgroundColor: "#f8f9fa",
@@ -295,10 +317,14 @@ export const AiChatWidget = () => {
             </Stack>
           ) : (
             <Stack gap="md">
-              {allMessages.map((msg) => (
-                <AiMessage key={msg.id} message={msg} />
+              {messages.map((msg) => (
+                <AiMessage
+                  key={msg.id}
+                  message={msg}
+                  onRetry={msg.error ? handleRetry : undefined}
+                />
               ))}
-              {sendMutation.isLoading && (
+              {isSending && (
                 <Group gap="sm" wrap="nowrap" align="flex-start">
                   <Avatar
                     size="sm"
@@ -338,14 +364,14 @@ export const AiChatWidget = () => {
         <Group gap="xs" align="flex-end">
           <Textarea
             ref={inputRef}
-            placeholder="Savol yozing..."
+            placeholder={isSending ? "AI javob yozmoqda..." : "Savol yozing..."}
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={handleKeyDown}
             autosize
             minRows={1}
             maxRows={4}
-            disabled={sendMutation.isLoading}
+            disabled={isSending}
             style={{ flex: 1 }}
             styles={{
               input: {
@@ -358,9 +384,9 @@ export const AiChatWidget = () => {
           <ActionIcon
             size="lg"
             radius="md"
-            onClick={() => handleSend()}
-            disabled={!inputValue.trim() || sendMutation.isLoading}
-            loading={sendMutation.isLoading}
+            onClick={() => sendMessage(inputValue)}
+            disabled={!inputValue.trim() || isSending}
+            loading={isSending}
             style={{
               backgroundColor: "#1e3a5f",
               color: "#fff",

@@ -12,6 +12,10 @@ import {
   IconTrendingUp,
   IconExternalLink,
   IconCalendar,
+  IconUser,
+  IconCircleCheck,
+  IconSparkles,
+  IconDownload,
 } from "@tabler/icons-react";
 import Link from "next/link";
 import { AiCard as AiCardType } from "../type/ai-chat.type";
@@ -21,6 +25,8 @@ const TYPE_CONFIG: Record<
   { icon: typeof IconClipboardList; color: string; label: string }
 > = {
   task: { icon: IconClipboardList, color: "#3498db", label: "Vazifa" },
+  task_created: { icon: IconSparkles, color: "#2ecc71", label: "Yaratildi" },
+  action_result: { icon: IconCircleCheck, color: "#2ecc71", label: "Bajarildi" },
   workflow: { icon: IconRefresh, color: "#9b59b6", label: "Jarayon" },
   document: { icon: IconFile, color: "#1e3a5f", label: "Hujjat" },
   pdf: { icon: IconFileText, color: "#e74c3c", label: "PDF" },
@@ -28,6 +34,14 @@ const TYPE_CONFIG: Record<
   notification: { icon: IconBell, color: "#f39c12", label: "Bildirishnoma" },
   project: { icon: IconRocket, color: "#16a085", label: "Loyiha" },
   stats: { icon: IconTrendingUp, color: "#34495e", label: "Statistika" },
+  user: { icon: IconUser, color: "#3498db", label: "Foydalanuvchi" },
+};
+
+const formatBytes = (bytes?: number) => {
+  if (!bytes) return "";
+  const kb = bytes / 1024;
+  if (kb < 1024) return `${kb.toFixed(0)} KB`;
+  return `${(kb / 1024).toFixed(1)} MB`;
 };
 
 const PRIORITY_COLORS: Record<string, string> = {
@@ -166,9 +180,87 @@ const renderMeta = (card: AiCardType) => {
 
     case "pdf": {
       const fileName = meta.fileName as string | undefined;
-      return fileName ? (
-        <Text size="xs" c="dimmed" lineClamp={1}>{fileName}</Text>
-      ) : null;
+      const fileSize = meta.fileSize as number | undefined;
+      return (
+        <Group gap={6}>
+          {fileName && (
+            <Text size="xs" c="dimmed" lineClamp={1} style={{ flex: 1 }}>
+              {fileName}
+            </Text>
+          )}
+          {fileSize != null && (
+            <Badge size="xs" variant="light" color="gray" radius="sm">
+              {formatBytes(fileSize)}
+            </Badge>
+          )}
+        </Group>
+      );
+    }
+
+    case "task_created": {
+      const ref = meta.ref as string | undefined;
+      const priority = meta.priority as string | undefined;
+      return (
+        <Group gap="xs" wrap="wrap">
+          {ref && (
+            <Badge size="xs" variant="light" color="green" radius="sm">
+              {ref}
+            </Badge>
+          )}
+          {priority && (
+            <Badge
+              size="xs"
+              variant="light"
+              radius="sm"
+              style={{
+                backgroundColor: `${PRIORITY_COLORS[priority] || "#95a5a6"}20`,
+                color: PRIORITY_COLORS[priority] || "#95a5a6",
+              }}
+            >
+              {PRIORITY_LABELS[priority] || priority}
+            </Badge>
+          )}
+        </Group>
+      );
+    }
+
+    case "action_result": {
+      const success = meta.success as boolean | undefined;
+      return (
+        <Badge
+          size="xs"
+          variant="light"
+          color={success === false ? "red" : "green"}
+          radius="sm"
+        >
+          {success === false ? "Xato" : "Muvaffaqiyatli"}
+        </Badge>
+      );
+    }
+
+    case "user": {
+      const fullname = meta.fullname as string | undefined;
+      const role = meta.role as string | undefined;
+      const department = meta.department as string | undefined;
+      return (
+        <Stack gap={2}>
+          {fullname && (
+            <Text size="xs" c="#495057" fw={500}>
+              {fullname}
+            </Text>
+          )}
+          <Group gap="xs">
+            {role && (
+              <Badge size="xs" variant="light" color="blue" radius="sm">
+                {role}
+              </Badge>
+            )}
+            {department && (
+              <Text size="xs" c="dimmed">{department}</Text>
+            )}
+          </Group>
+        </Stack>
+      );
     }
 
     case "kpi": {

@@ -2,13 +2,18 @@ export type AiMessageRole = "user" | "assistant";
 
 export type AiCardType =
   | "task"
+  | "task_created"
+  | "action_result"
   | "workflow"
   | "document"
   | "pdf"
   | "kpi"
   | "notification"
   | "project"
-  | "stats";
+  | "stats"
+  | "user";
+
+export type AiErrorType = "RATE_LIMIT" | "AI_ERROR";
 
 export interface AiCardAction {
   label: string;
@@ -32,6 +37,8 @@ export interface AiHistoryMessage {
   cards?: AiCard[];
   attachments?: unknown[] | null;
   timestamp: string;
+  pending?: boolean;
+  error?: AiErrorType;
 }
 
 export interface AiChatResponse {
@@ -39,6 +46,7 @@ export interface AiChatResponse {
   message: string;
   cards?: AiCard[];
   timestamp: string;
+  error?: AiErrorType;
 }
 
 export interface AiClearHistoryResponse {
