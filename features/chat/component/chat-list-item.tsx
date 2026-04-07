@@ -89,22 +89,39 @@ export const ChatListItemView = ({ chat, isActive, onClick }: Props) => {
       }}
     >
       <Group gap="sm" wrap="nowrap" align="flex-start">
-        <Indicator
-          disabled={!chat.unreadCount}
-          label={chat.unreadCount}
-          size={16}
-          color="#1e3a5f"
-          offset={4}
-        >
-          <Avatar
-            size="md"
-            radius="xl"
-            src={chat.avatarUrl || chat.peer?.avatarUrl}
-            style={{ backgroundColor: isGroup ? "#fff3e0" : "#e7f5ff" }}
+        <Box style={{ position: "relative" }}>
+          <Indicator
+            disabled={!chat.unreadCount}
+            label={chat.unreadCount}
+            size={16}
+            color="#1e3a5f"
+            offset={4}
           >
-            {isGroup ? <IconUsers size={20} color="#f39c12" /> : getInitials(chat.title)}
-          </Avatar>
-        </Indicator>
+            <Avatar
+              size="md"
+              radius="xl"
+              src={chat.avatarUrl || chat.peer?.avatarUrl}
+              style={{ backgroundColor: isGroup ? "#fff3e0" : "#e7f5ff" }}
+            >
+              {isGroup ? <IconUsers size={20} color="#f39c12" /> : getInitials(chat.title)}
+            </Avatar>
+          </Indicator>
+          {!isGroup && chat.peer?.isOnline && (
+            <Box
+              style={{
+                position: "absolute",
+                bottom: 0,
+                right: 0,
+                width: 12,
+                height: 12,
+                borderRadius: "50%",
+                backgroundColor: "#2ecc71",
+                border: "2px solid #fff",
+                zIndex: 2,
+              }}
+            />
+          )}
+        </Box>
         <Box style={{ flex: 1, minWidth: 0 }}>
           <Group justify="space-between" gap={4} wrap="nowrap">
             <Group gap={4} style={{ minWidth: 0 }}>

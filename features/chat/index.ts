@@ -17,3 +17,4 @@ export { ChatSearchModal } from "./component/chat-search-modal";
 export { CallOverlay } from "./component/call-overlay";
 export { useChatCall } from "./hook/use-chat-call";
 export { callManager } from "./lib/call-manager";
+export { formatPresence } from "./lib/presence";

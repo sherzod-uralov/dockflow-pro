@@ -29,6 +29,7 @@ import {
   IconPhone,
 } from "@tabler/icons-react";
 import { useChatCall } from "../hook/use-chat-call";
+import { formatPresence } from "../lib/presence";
 import {
   useGetChatMessages,
   useGetChatDetail,
@@ -332,7 +333,9 @@ export const ChatConversation = ({ chatId, currentUserId, onChatDeleted }: Props
               {chat.title}
             </Text>
             <Text size="xs" c="dimmed">
-              {isGroup ? `${chat.membersCount} a'zo` : "Onlayn"}
+              {isGroup
+                ? `${chat.membersCount} a'zo`
+                : formatPresence(chat.peer?.isOnline, chat.peer?.lastSeen)}
             </Text>
           </Box>
         </Group>

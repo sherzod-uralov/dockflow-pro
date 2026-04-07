@@ -22,16 +22,25 @@ export const useChatCall = () => {
         call: {
           id: string;
           type: "AUDIO" | "VIDEO";
-          callerId: string;
-          caller?: { id: string; fullname: string; avatarUrl?: string };
+          callerId?: string;
+          initiator?: { id: string; fullname: string; username: string; avatarUrl?: string | null };
+          caller?: { id: string; fullname: string; avatarUrl?: string | null };
+          chat?: { id: string; type: "DIRECT" | "GROUP"; title: string; avatarUrl?: string | null };
         };
       }) => {
+        const initiator = data.call.initiator || data.call.caller;
+        const fromUserId = initiator?.id || data.call.callerId || "";
+        const isGroup = data.call.chat?.type === "GROUP";
+        const peerName = isGroup
+          ? `${data.call.chat?.title || "Guruh"} · ${initiator?.fullname || "Noma'lum"}`
+          : initiator?.fullname || "Noma'lum";
+
         callManager.setIncoming({
           callId: data.call.id,
           chatId: data.chatId,
-          fromUserId: data.call.callerId,
-          peerName: data.call.caller?.fullname,
-          peerAvatar: data.call.caller?.avatarUrl,
+          fromUserId,
+          peerName,
+          peerAvatar: initiator?.avatarUrl || data.call.chat?.avatarUrl || undefined,
           type: data.call.type,
         });
       }
@@ -43,15 +52,25 @@ export const useChatCall = () => {
 
     const offStatus = chatSocket.on(
       "call:status",
-      (data: { callId: string; action: "accepted" | "rejected" | "ended" | "missed"; userId?: string }) => {
+      (data: {
+        callId: string;
+        chatId?: string;
+        action: "accepted" | "rejected" | "ended" | "missed";
+        userId?: string;
+        user?: { fullname: string };
+        duration?: number;
+      }) => {
         const current = callManager.getCurrent();
         if (!current || current.callId !== data.callId) return;
 
         if (data.action === "accepted") {
           callManager.setStatus("connecting");
-          // After remote accepts, if we have pending offer (callee just accepted), process it
           callManager.processPendingOffer().catch(console.error);
-        } else if (data.action === "rejected" || data.action === "ended" || data.action === "missed") {
+        } else if (
+          data.action === "rejected" ||
+          data.action === "ended" ||
+          data.action === "missed"
+        ) {
           callManager.cleanup();
         }
       }
