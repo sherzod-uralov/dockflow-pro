@@ -10,7 +10,7 @@ export interface DocumentGetResponse {
   description: string;
   documentNumber: string;
   versions: number;
-  status: "PUBLISHED" | "DRAFT" | "ARCHIVED";
+  status: "DRAFT" | "PENDING" | "IN_REVIEW" | "APPROVED" | "REJECTED" | "PUBLISHED" | "ARCHIVED";
   priority: "LOW" | "MEDIUM" | "HIGH";
   documentType: {
     id: string;

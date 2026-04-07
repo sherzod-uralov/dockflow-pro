@@ -181,27 +181,41 @@ const DocumentPage: FC<{ children: ReactNode }> = ({ children }) => {
       : []),
   ];
 
+  // Workflow yaratish faqat DRAFT yoki REJECTED statusdagi hujjatlar uchun
+  const canCreateWorkflow =
+    selectedDocument?.status === "DRAFT" || selectedDocument?.status === "REJECTED";
+  // O'chirish faqat APPROVED bo'lmaganlar uchun
+  const canDelete = selectedDocument?.status !== "APPROVED";
+
   const actionButtons = [
     {
       label: "Ortga",
       icon: <IconArrowLeft size={16} />,
       onClick: handleBack,
     },
-    {
-      label: "Yuborish",
-      icon: <IconSend size={16} />,
-      onClick: () => {
-        workflowModal.openModal();
-        router.push(`?documentId=${selectedDocument?.id}`);
-      },
-      permission: "workflow:create",
-    },
-    {
-      label: "O'chirish",
-      icon: <IconTrash size={16} />,
-      onClick: () => deleteModal.openModal(),
-      permission: "document:delete",
-    },
+    ...(canCreateWorkflow
+      ? [
+          {
+            label: "Yuborish",
+            icon: <IconSend size={16} />,
+            onClick: () => {
+              workflowModal.openModal();
+              router.push(`?documentId=${selectedDocument?.id}`);
+            },
+            permission: "workflow:create",
+          },
+        ]
+      : []),
+    ...(canDelete
+      ? [
+          {
+            label: "O'chirish",
+            icon: <IconTrash size={16} />,
+            onClick: () => deleteModal.openModal(),
+            permission: "document:delete",
+          },
+        ]
+      : []),
   ];
 
   // Filter configuration

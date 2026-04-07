@@ -22,8 +22,11 @@ import {
   IconCheck,
   IconClock,
   IconAlertCircle,
+  IconHistory,
 } from "@tabler/icons-react";
 import { useGetDocumentById } from "@/features/document";
+import { CustomModal, useModal } from "@/components/shared/ui/custom-modal";
+import DocumentHistoryView from "./document-history.view";
 import { useGetAllWorkflows, useDownloadDocument } from "@/features/workflow";
 import DocumentStepper from "@/features/document/component/document.stepper";
 
@@ -205,6 +208,7 @@ const DocumentView = ({ id }: { id: string }) => {
   });
   const { data, isLoading, isFetching } = useGetDocumentById(id);
   const downloadMutation = useDownloadDocument();
+  const historyModal = useModal();
 
   const handleDownloadPdf = () => {
     if (data?.id) {
@@ -292,19 +296,29 @@ const DocumentView = ({ id }: { id: string }) => {
           {/* Biriktirilgan fayllar */}
           {data.attachments && data.attachments.length > 0 && (
             <Box pt="md" style={{ borderTop: "1px solid #e9ecef" }}>
-              <Group gap="xs" mb="sm">
-                <IconFileText size={16} color="#868e96" />
-                <Text size="sm" fw={600} c="#212529">
-                  Biriktirilgan fayllar
-                </Text>
-                <Badge
-                  size="sm"
+              <Group justify="space-between" mb="sm">
+                <Group gap="xs">
+                  <IconFileText size={16} color="#868e96" />
+                  <Text size="sm" fw={600} c="#212529">
+                    Biriktirilgan fayllar
+                  </Text>
+                </Group>
+                <Button
+                  size="xs"
                   radius="sm"
                   variant="light"
-                  style={{ backgroundColor: "#e9ecef", color: "#495057" }}
+                  leftSection={<IconHistory size={14} />}
+                  onClick={historyModal.openModal}
+                  styles={{
+                    root: {
+                      backgroundColor: "#f0f4ff",
+                      color: "#1e3a5f",
+                      "&:hover": { backgroundColor: "#dbe4ff" },
+                    },
+                  }}
                 >
-                  {data.attachments.length}
-                </Badge>
+                  Tarix va versiyalar
+                </Button>
               </Group>
 
               <Stack gap="xs">
@@ -332,19 +346,42 @@ const DocumentView = ({ id }: { id: string }) => {
                       </Group>
 
                       <Group gap="xs" wrap="nowrap">
-                        <Button
-                          size="xs"
-                          radius="sm"
-                          variant="filled"
-                          style={{ backgroundColor: "#1e3a5f" }}
-                          onClick={() =>
-                            router.push(
-                              `/document-edit?id=${file.id}&documentId=${data.id}`
-                            )
-                          }
-                        >
-                          Tahrirlash
-                        </Button>
+                        {(data.status === "DRAFT" || data.status === "REJECTED") && (
+                          <Button
+                            size="xs"
+                            radius="sm"
+                            variant="filled"
+                            style={{ backgroundColor: "#1e3a5f" }}
+                            onClick={() =>
+                              router.push(
+                                `/document-edit?id=${file.id}&documentId=${data.id}`
+                              )
+                            }
+                          >
+                            Tahrirlash
+                          </Button>
+                        )}
+                        {data.status !== "DRAFT" && data.status !== "REJECTED" && (
+                          <Button
+                            size="xs"
+                            radius="sm"
+                            variant="outline"
+                            onClick={() =>
+                              router.push(
+                                `/document-edit?id=${file.id}&documentId=${data.id}&readonly=true`
+                              )
+                            }
+                            styles={{
+                              root: {
+                                borderColor: "#e9ecef",
+                                color: "#495057",
+                                "&:hover": { backgroundColor: "#f8f9fa" },
+                              },
+                            }}
+                          >
+                            Ko'rish
+                          </Button>
+                        )}
                         <Button
                           size="xs"
                           radius="sm"
@@ -373,6 +410,16 @@ const DocumentView = ({ id }: { id: string }) => {
           )}
         </>
       )}
+
+      <CustomModal
+        size="3xl"
+        title="Hujjat tarixi"
+        description="Versiyalar va vaqt chizig'i"
+        isOpen={historyModal.isOpen}
+        onClose={historyModal.closeModal}
+      >
+        <DocumentHistoryView documentId={id} />
+      </CustomModal>
     </Stack>
   );
 };
