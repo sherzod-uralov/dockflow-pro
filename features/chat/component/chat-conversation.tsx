@@ -27,6 +27,7 @@ import {
   IconMicrophone,
   IconMicrophoneOff,
   IconPhone,
+  IconArrowLeft,
 } from "@tabler/icons-react";
 import { useChatCall } from "../hook/use-chat-call";
 import { useUserPresence } from "../hook/use-presence";
@@ -55,9 +56,10 @@ interface Props {
   chatId: string;
   currentUserId: string;
   onChatDeleted?: () => void;
+  onBack?: () => void;
 }
 
-export const ChatConversation = ({ chatId, currentUserId, onChatDeleted }: Props) => {
+export const ChatConversation = ({ chatId, currentUserId, onChatDeleted, onBack }: Props) => {
   const [inputValue, setInputValue] = useState("");
   const [replyTo, setReplyTo] = useState<ChatMessage | null>(null);
   const [editingMsg, setEditingMsg] = useState<ChatMessage | null>(null);
@@ -336,9 +338,16 @@ export const ChatConversation = ({ chatId, currentUserId, onChatDeleted }: Props
       <Group
         justify="space-between"
         p="sm"
+        gap="xs"
+        wrap="nowrap"
         style={{ borderBottom: "1px solid #e9ecef", flexShrink: 0, backgroundColor: "#fff" }}
       >
-        <Group gap="sm" style={{ cursor: "pointer", flex: 1 }} onClick={() => setInfoOpen(true)}>
+        {onBack && (
+          <ActionIcon variant="subtle" color="gray" onClick={onBack}>
+            <IconArrowLeft size={20} />
+          </ActionIcon>
+        )}
+        <Group gap="sm" style={{ cursor: "pointer", flex: 1, minWidth: 0 }} onClick={() => setInfoOpen(true)}>
           <Avatar
             size="md"
             radius="xl"

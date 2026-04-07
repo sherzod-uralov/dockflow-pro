@@ -161,27 +161,37 @@ export const AiChatWidget = () => {
   const isEmpty = !isHistoryLoading && messages.length === 0;
   const isSending = sendMutation.isLoading;
 
-  // Floating button (closed state)
+  // Floating button (closed state) — yarim ko'rinib turadi, hover'da to'liq chiqadi
   if (!isOpen) {
     return (
-      <Tooltip label="DocFlow AI yordamchi" position="left" withArrow>
-        <ActionIcon
-          size={60}
-          radius="xl"
-          onClick={() => setIsOpen(true)}
-          style={{
-            position: "fixed",
-            bottom: 24,
-            right: 24,
-            zIndex: 9999,
-            backgroundColor: "#1e3a5f",
-            color: "#fff",
-            boxShadow: "0 8px 24px rgba(30, 58, 95, 0.35)",
-          }}
-        >
-          <IconRobot size={28} />
-        </ActionIcon>
-      </Tooltip>
+      <>
+        <Tooltip label="DocFlow AI yordamchi" position="left" withArrow>
+          <ActionIcon
+            size={56}
+            radius="xl"
+            onClick={() => setIsOpen(true)}
+            className="ai-bot-toggle"
+            style={{
+              position: "fixed",
+              bottom: 24,
+              right: -20,
+              zIndex: 9999,
+              backgroundColor: "#1e3a5f",
+              color: "#fff",
+              boxShadow: "0 8px 24px rgba(30, 58, 95, 0.35)",
+              transition: "right 0.25s ease, transform 0.25s ease",
+            }}
+          >
+            <IconRobot size={26} />
+          </ActionIcon>
+        </Tooltip>
+        <style jsx global>{`
+          .ai-bot-toggle:hover {
+            right: 16px !important;
+            transform: scale(1.05);
+          }
+        `}</style>
+      </>
     );
   }
 
