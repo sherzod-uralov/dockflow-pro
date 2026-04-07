@@ -441,9 +441,14 @@ export const ChatConversation = ({ chatId, currentUserId, onChatDeleted, onBack 
                 );
               })}
               {typingLabel && (
-                <Text size="xs" c="dimmed" pl={40} mt={4}>
-                  {typingLabel}
-                </Text>
+                <Group gap={6} pl={40} mt={4}>
+                  <Box className="typing-indicator">
+                    <span>•</span><span>•</span><span>•</span>
+                  </Box>
+                  <Text size="xs" c="dimmed">
+                    {typingLabel}
+                  </Text>
+                </Group>
               )}
             </Stack>
           )}
@@ -583,6 +588,31 @@ export const ChatConversation = ({ chatId, currentUserId, onChatDeleted, onBack 
           />
         )}
       </CustomModal>
+
+      {/* Animatsiyalar */}
+      <style jsx global>{`
+        @keyframes msgSlideInRight {
+          from { opacity: 0; transform: translateX(20px); }
+          to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes msgSlideInLeft {
+          from { opacity: 0; transform: translateX(-20px); }
+          to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes typingDot {
+          0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
+          30% { opacity: 1; transform: translateY(-3px); }
+        }
+        .typing-indicator span {
+          display: inline-block;
+          font-size: 18px;
+          line-height: 1;
+          animation: typingDot 1.4s infinite;
+          color: #1e3a5f;
+        }
+        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+      `}</style>
     </Box>
   );
 };

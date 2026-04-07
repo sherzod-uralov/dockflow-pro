@@ -252,6 +252,15 @@ const ChatPage = () => {
       >
         <ChatSearchModal onSelect={handleSearchSelect} />
       </CustomModal>
+
+      <style jsx global>{`
+        .chat-list-item:hover {
+          background-color: #f8f9fa !important;
+        }
+        .chat-list-item:active {
+          transform: scale(0.99);
+        }
+      `}</style>
     </Box>
   );
 };

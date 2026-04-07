@@ -272,7 +272,10 @@ export const MessageBubble = ({
       align="flex-end"
       wrap="nowrap"
       justify={isOwn ? "flex-end" : "flex-start"}
-      style={{ marginBottom: 4 }}
+      style={{
+        marginBottom: 4,
+        animation: isOwn ? "msgSlideInRight 0.25s ease" : "msgSlideInLeft 0.25s ease",
+      }}
     >
       {!isOwn && showAvatar && (
         <Avatar

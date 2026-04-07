@@ -83,11 +83,12 @@ export const ChatListItemView = ({ chat, isActive, onClick }: Props) => {
     <Box
       p="sm"
       onClick={onClick}
+      className="chat-list-item"
       style={{
         cursor: "pointer",
         backgroundColor: isActive ? "#e7f5ff" : "transparent",
         borderLeft: isActive ? "3px solid #1e3a5f" : "3px solid transparent",
-        transition: "background-color 0.15s",
+        transition: "background-color 0.2s ease, border-color 0.2s ease",
         position: "relative",
       }}
     >
