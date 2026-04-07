@@ -18,6 +18,7 @@ import {
 } from "@tabler/icons-react";
 import { ChatMessage, ChatReaction } from "../type/chat.type";
 import Link from "next/link";
+import { VoicePlayer } from "./voice-player";
 
 interface Props {
   message: ChatMessage;
@@ -187,16 +188,11 @@ const MediaContent = ({ msg, isOwn }: { msg: ChatMessage; isOwn: boolean }) => {
       );
 
     case "VOICE":
-      return (
+      return msg.fileUrl ? (
         <Box mb={msg.content ? 6 : 0}>
-          <audio src={msg.fileUrl} controls style={{ maxWidth: 250 }} />
-          {msg.duration && (
-            <Text size="xs" c={subColor} mt={2}>
-              {formatDuration(msg.duration)}
-            </Text>
-          )}
+          <VoicePlayer src={msg.fileUrl} duration={msg.duration} isOwn={isOwn} />
         </Box>
-      );
+      ) : null;
 
     case "FILE":
       return (
