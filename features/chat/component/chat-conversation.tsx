@@ -26,7 +26,9 @@ import {
   IconSettings,
   IconMicrophone,
   IconMicrophoneOff,
+  IconPhone,
 } from "@tabler/icons-react";
+import { useChatCall } from "../hook/use-chat-call";
 import {
   useGetChatMessages,
   useGetChatDetail,
@@ -69,6 +71,7 @@ export const ChatConversation = ({ chatId, currentUserId, onChatDeleted }: Props
   const recordedChunksRef = useRef<Blob[]>([]);
   const recordStartRef = useRef<number>(0);
   const forwardModal = useModal();
+  const { startCall, activeCall } = useChatCall();
 
   const { data: chat } = useGetChatDetail(chatId);
   const { data: messagesData, isLoading } = useGetChatMessages(chatId);
@@ -334,6 +337,24 @@ export const ChatConversation = ({ chatId, currentUserId, onChatDeleted }: Props
           </Box>
         </Group>
         <Group gap={4}>
+          {!isGroup && chat.peer && !activeCall && (
+            <Tooltip label="Audio qo'ng'iroq">
+              <ActionIcon
+                variant="subtle"
+                color="green"
+                onClick={() =>
+                  startCall({
+                    chatId,
+                    targetUserId: chat.peer!.id,
+                    peerName: chat.peer!.fullname,
+                    peerAvatar: chat.peer!.avatarUrl || undefined,
+                  })
+                }
+              >
+                <IconPhone size={18} />
+              </ActionIcon>
+            </Tooltip>
+          )}
           <Tooltip label="Ma'lumot">
             <ActionIcon variant="subtle" color="gray" onClick={() => setInfoOpen(true)}>
               <IconInfoCircle size={18} />

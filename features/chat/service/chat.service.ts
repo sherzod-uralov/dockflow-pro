@@ -161,6 +161,27 @@ export const chatService = {
     await axiosInstance.post(endpoints.chat.read(id), { upToMessageId });
   },
 
+  // ─── Calls ──────────────────────────────────────────────
+  startCall: async (chatId: string, type: "AUDIO" | "VIDEO" = "AUDIO") => {
+    const { data } = await axiosInstance.post(endpoints.chat.call(chatId), { type });
+    return data;
+  },
+
+  acceptCall: async (callId: string) => {
+    const { data } = await axiosInstance.post(endpoints.chat.callAccept(callId));
+    return data;
+  },
+
+  rejectCall: async (callId: string) => {
+    const { data } = await axiosInstance.post(endpoints.chat.callReject(callId));
+    return data;
+  },
+
+  endCall: async (callId: string) => {
+    const { data } = await axiosInstance.post(endpoints.chat.callEnd(callId));
+    return data;
+  },
+
   // ─── Mute / Pin / Archive ───────────────────────────────
   muteChat: async (id: string, mutedUntil: string | null) => {
     const { data } = await axiosInstance.post(endpoints.chat.mute(id), { mutedUntil });

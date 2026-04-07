@@ -14,3 +14,6 @@ export { ChatInfoDrawer } from "./component/chat-info-drawer";
 export { ChatSettingsDrawer } from "./component/chat-settings-drawer";
 export { ReadByModal } from "./component/read-by-modal";
 export { ChatSearchModal } from "./component/chat-search-modal";
+export { CallOverlay } from "./component/call-overlay";
+export { useChatCall } from "./hook/use-chat-call";
+export { callManager } from "./lib/call-manager";

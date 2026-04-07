@@ -12,6 +12,7 @@ import { TelegramConnectModal } from "@/features/telegram/component/telegram-con
 import { useGetProfileQuery } from "@/features/login/hook/login.hook";
 import { AiChatWidget } from "@/features/ai-chat";
 import { useChatSocket } from "@/features/chat";
+import { CallOverlay } from "@/features/chat/component/call-overlay";
 
 const ChatSocketMount = () => {
   useChatSocket();
@@ -59,6 +60,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
           </Box>
           {/* {user?.id && <TelegramConnectModal userId={user.id} />} */}
           <ChatSocketMount />
+          <CallOverlay />
           <AiChatWidget />
         </SocketProvider>
       </OnboardingProvider>
