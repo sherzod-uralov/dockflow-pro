@@ -36,9 +36,9 @@ export const useSocketConnection = () => {
       }
     };
 
-    // 30 soniya kutib disconnect qilish uchun timer
+    // 10 soniya kutib disconnect qilish uchun timer
     let awayTimer: ReturnType<typeof setTimeout> | null = null;
-    const AWAY_DELAY = 30_000;
+    const AWAY_DELAY = 10_000;
 
     const reconnect = () => {
       const currentToken = authService.getAccessToken();
