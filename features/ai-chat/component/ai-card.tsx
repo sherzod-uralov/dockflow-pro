@@ -330,30 +330,70 @@ const renderMeta = (card: AiCardType) => {
     }
 
     case "stats": {
-      const totalUsers = meta.totalUsers as number | undefined;
-      const activeTasks = meta.activeTasks as number | undefined;
-      const completedTasks = meta.completedTasks as number | undefined;
+      // Statistika maydonlari uchun universal label'lar
+      const STAT_LABELS: Record<string, string> = {
+        kpiScore: "KPI ball",
+        avgKpiScore: "O'rtacha KPI",
+        completionRate: "Bajarilish %",
+        tasksTotal: "Vazifalar",
+        tasksActive: "Faol",
+        tasksCompleted: "Bajarilgan",
+        tasksOverdue: "Muddati o'tgan",
+        projectsCount: "Loyihalar",
+        documentsTotal: "Hujjatlar",
+        documentsPending: "Kutilmoqda",
+        documentsApproved: "Tasdiqlangan",
+        activeWorkflows: "Faol jarayonlar",
+        pendingMySteps: "Mening bosqichlarim",
+        unreadNotifications: "O'qilmagan",
+        totalUsers: "Foydalanuvchilar",
+        activeTasks: "Faol vazifalar",
+      };
+
+      const STAT_COLORS: Record<string, string> = {
+        kpiScore: "#2ecc71",
+        avgKpiScore: "#2ecc71",
+        completionRate: "#2ecc71",
+        tasksOverdue: "#e74c3c",
+        documentsPending: "#f39c12",
+        unreadNotifications: "#f39c12",
+      };
+
+      const entries = Object.entries(meta)
+        .filter(([_, value]) => typeof value === "number")
+        .filter(([key]) => STAT_LABELS[key]);
+
+      if (entries.length === 0) return null;
+
       return (
-        <Group gap="md">
-          {totalUsers != null && (
-            <Box>
-              <Text size="xs" c="dimmed">Foydalanuvchi</Text>
-              <Text size="sm" fw={600}>{totalUsers}</Text>
+        <Box
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(80px, 1fr))",
+            gap: 8,
+          }}
+        >
+          {entries.map(([key, value]) => (
+            <Box
+              key={key}
+              p={6}
+              style={{
+                backgroundColor: "#f8f9fa",
+                borderRadius: 6,
+                border: "1px solid #e9ecef",
+              }}
+            >
+              <Text size="xs" c="dimmed" lineClamp={1}>
+                {STAT_LABELS[key]}
+              </Text>
+              <Text size="md" fw={700} c={STAT_COLORS[key] || "#212529"}>
+                {key === "completionRate" || key === "avgKpiScore" || key === "kpiScore"
+                  ? `${value as number}${key === "completionRate" ? "%" : ""}`
+                  : (value as number)}
+              </Text>
             </Box>
-          )}
-          {activeTasks != null && (
-            <Box>
-              <Text size="xs" c="dimmed">Faol</Text>
-              <Text size="sm" fw={600}>{activeTasks}</Text>
-            </Box>
-          )}
-          {completedTasks != null && (
-            <Box>
-              <Text size="xs" c="dimmed">Bajarilgan</Text>
-              <Text size="sm" fw={600}>{completedTasks}</Text>
-            </Box>
-          )}
-        </Group>
+          ))}
+        </Box>
       );
     }
 
@@ -409,36 +449,38 @@ export const AiCard = ({ card }: AiCardProps) => {
             </Text>
           )}
           {renderMeta(card)}
-          {card.actions && card.actions.length > 0 && (
+          {card.actions && card.actions.filter((a) => a.url).length > 0 && (
             <Group gap={6} mt={8}>
-              {card.actions.map((action, idx) =>
-                action.external ? (
-                  <Button
-                    key={idx}
-                    size="compact-xs"
-                    variant="light"
-                    component="a"
-                    href={action.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    rightSection={<IconExternalLink size={10} />}
-                    style={{ backgroundColor: "#f8f9fa", color: "#1e3a5f" }}
-                  >
-                    {action.label}
-                  </Button>
-                ) : (
-                  <Button
-                    key={idx}
-                    size="compact-xs"
-                    variant="light"
-                    component={Link}
-                    href={action.url}
-                    style={{ backgroundColor: "#f8f9fa", color: "#1e3a5f" }}
-                  >
-                    {action.label}
-                  </Button>
-                )
-              )}
+              {card.actions
+                .filter((action) => action.url)
+                .map((action, idx) =>
+                  action.external ? (
+                    <Button
+                      key={idx}
+                      size="compact-xs"
+                      variant="light"
+                      component="a"
+                      href={action.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      rightSection={<IconExternalLink size={10} />}
+                      style={{ backgroundColor: "#f8f9fa", color: "#1e3a5f" }}
+                    >
+                      {action.label}
+                    </Button>
+                  ) : (
+                    <Button
+                      key={idx}
+                      size="compact-xs"
+                      variant="light"
+                      component={Link}
+                      href={action.url}
+                      style={{ backgroundColor: "#f8f9fa", color: "#1e3a5f" }}
+                    >
+                      {action.label}
+                    </Button>
+                  )
+                )}
             </Group>
           )}
         </Box>

@@ -138,14 +138,15 @@ export const TaskDetailDrawer = ({
   const { allowed: canCompleteTask } = usePermissionCheck("task:complete");
 
   const shouldFetchRelated = !!taskId && isOpen;
+  const safeTaskId = taskId || "";
 
-  const { data: commentsData } = useGetAllTaskComments(shouldFetchRelated ? { taskId, pageSize: 1 } : undefined);
-  const { data: attachmentsData } = useGetAllTaskAttachments(shouldFetchRelated ? { taskId, pageSize: 1 } : undefined);
-  const { data: checklistsData } = useGetAllTaskChecklists(shouldFetchRelated ? { taskId, pageSize: 1 } : undefined);
-  const { data: timeEntriesData } = useGetAllTaskTimeEntries(shouldFetchRelated ? { taskId, pageSize: 100 } : undefined);
-  const { data: activitiesData } = useGetAllTaskActivities(shouldFetchRelated ? { taskId, pageSize: 50 } : undefined);
-  const { data: watchersData } = useGetAllTaskWatchers(shouldFetchRelated ? { taskId } : undefined);
-  const { data: dependenciesData } = useGetAllTaskDependencies(shouldFetchRelated ? { taskId } : undefined);
+  const { data: commentsData } = useGetAllTaskComments({ taskId: safeTaskId, pageSize: 1 }, { enabled: shouldFetchRelated });
+  const { data: attachmentsData } = useGetAllTaskAttachments({ taskId: safeTaskId, pageSize: 1 }, { enabled: shouldFetchRelated });
+  const { data: checklistsData } = useGetAllTaskChecklists({ taskId: safeTaskId, pageSize: 1 }, { enabled: shouldFetchRelated });
+  const { data: timeEntriesData } = useGetAllTaskTimeEntries({ taskId: safeTaskId, pageSize: 100 }, { enabled: shouldFetchRelated });
+  const { data: activitiesData } = useGetAllTaskActivities({ taskId: safeTaskId, pageSize: 50 }, { enabled: shouldFetchRelated });
+  const { data: watchersData } = useGetAllTaskWatchers({ taskId: safeTaskId }, { enabled: shouldFetchRelated });
+  const { data: dependenciesData } = useGetAllTaskDependencies({ taskId: safeTaskId }, { enabled: shouldFetchRelated });
 
   const { data: subtasksData } = useGetAllTasks({
     parentTaskId: taskId || undefined,
