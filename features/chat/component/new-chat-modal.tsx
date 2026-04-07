@@ -14,10 +14,19 @@ import {
   Checkbox,
   Loader,
   Center,
+  ActionIcon,
+  Tooltip,
 } from "@mantine/core";
-import { IconUser, IconUsers, IconSearch } from "@tabler/icons-react";
+import {
+  IconUser,
+  IconUsers,
+  IconSearch,
+  IconMessage,
+  IconPhone,
+} from "@tabler/icons-react";
 import { useGetUserQuery } from "@/features/admin/admin-users/hook/user.hook";
 import { useCreateDirectChat, useCreateGroupChat } from "../hook/chat.hook";
+import { useChatCall } from "../hook/use-chat-call";
 
 interface Props {
   onClose: () => void;
@@ -32,22 +41,55 @@ export const NewChatModal = ({ onClose, onSuccess }: Props) => {
   const [search, setSearch] = useState("");
   const [groupTitle, setGroupTitle] = useState("");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [callingUserId, setCallingUserId] = useState<string | null>(null);
 
   const { data: usersData, isLoading } = useGetUserQuery({ pageNumber: 1, pageSize: 100 });
   const createDirect = useCreateDirectChat();
   const createGroup = useCreateGroupChat();
+  const { startCall } = useChatCall();
 
   const users = (usersData?.data || []).filter((u) =>
     u.fullname?.toLowerCase().includes(search.toLowerCase())
   );
 
   const handleStartDirect = (userId: string) => {
-    createDirect.mutate({ userId }, {
-      onSuccess: (data: any) => {
-        onSuccess(data.id);
-        onClose();
-      },
-    });
+    createDirect.mutate(
+      { userId },
+      {
+        onSuccess: (data: any) => {
+          onSuccess(data.id);
+          onClose();
+        },
+      }
+    );
+  };
+
+  const handleStartCall = async (user: any) => {
+    setCallingUserId(user.id);
+    try {
+      // Create or get direct chat first
+      const chat = await new Promise<any>((resolve, reject) => {
+        createDirect.mutate(
+          { userId: user.id },
+          { onSuccess: resolve, onError: reject }
+        );
+      });
+
+      // Start audio call
+      await startCall({
+        chatId: chat.id,
+        targetUserId: user.id,
+        peerName: user.fullname,
+        peerAvatar: user.avatarUrl,
+      });
+
+      onSuccess(chat.id);
+      onClose();
+    } catch (err) {
+      console.error("Call start error:", err);
+    } finally {
+      setCallingUserId(null);
+    }
   };
 
   const handleCreateGroup = () => {
@@ -83,7 +125,7 @@ export const NewChatModal = ({ onClose, onSuccess }: Props) => {
             onChange={(e) => setSearch(e.target.value)}
             size="sm"
           />
-          <ScrollArea h={300}>
+          <ScrollArea h={350}>
             {isLoading ? (
               <Center py="xl">
                 <Loader size="sm" />
@@ -95,24 +137,52 @@ export const NewChatModal = ({ onClose, onSuccess }: Props) => {
                     key={user.id}
                     p="xs"
                     gap="sm"
+                    justify="space-between"
                     style={{
-                      cursor: "pointer",
                       borderRadius: 6,
-                      backgroundColor: "transparent",
+                      border: "1px solid #e9ecef",
+                      backgroundColor: "#fff",
                     }}
-                    onClick={() => handleStartDirect(user.id)}
                   >
-                    <Avatar size="sm" radius="xl" src={user.avatarUrl}>
-                      {getInitials(user.fullname)}
-                    </Avatar>
-                    <Box>
-                      <Text size="sm" fw={500}>
-                        {user.fullname}
-                      </Text>
-                      <Text size="xs" c="dimmed">
-                        @{user.username}
-                      </Text>
-                    </Box>
+                    <Group gap="sm" style={{ flex: 1, minWidth: 0 }}>
+                      <Avatar size="sm" radius="xl" src={user.avatarUrl}>
+                        {getInitials(user.fullname)}
+                      </Avatar>
+                      <Box style={{ minWidth: 0 }}>
+                        <Text size="sm" fw={500} lineClamp={1}>
+                          {user.fullname}
+                        </Text>
+                        <Text size="xs" c="dimmed" lineClamp={1}>
+                          @{user.username}
+                        </Text>
+                      </Box>
+                    </Group>
+                    <Group gap={4}>
+                      <Tooltip label="Yozish">
+                        <ActionIcon
+                          variant="light"
+                          color="blue"
+                          size="md"
+                          radius="sm"
+                          onClick={() => handleStartDirect(user.id)}
+                          loading={createDirect.isLoading && callingUserId !== user.id}
+                        >
+                          <IconMessage size={16} />
+                        </ActionIcon>
+                      </Tooltip>
+                      <Tooltip label="Audio qo'ng'iroq">
+                        <ActionIcon
+                          variant="light"
+                          color="green"
+                          size="md"
+                          radius="sm"
+                          onClick={() => handleStartCall(user)}
+                          loading={callingUserId === user.id}
+                        >
+                          <IconPhone size={16} />
+                        </ActionIcon>
+                      </Tooltip>
+                    </Group>
                   </Group>
                 ))}
               </Stack>

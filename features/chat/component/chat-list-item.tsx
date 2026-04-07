@@ -10,9 +10,11 @@ import {
   IconArchiveOff,
   IconDots,
   IconVolume,
+  IconPhone,
 } from "@tabler/icons-react";
 import { ChatListItem as ChatListItemType } from "../type/chat.type";
 import { useMuteChat, usePinChat, useArchiveChat } from "../hook/chat.hook";
+import { useChatCall } from "../hook/use-chat-call";
 
 interface Props {
   chat: ChatListItemType;
@@ -51,6 +53,7 @@ export const ChatListItemView = ({ chat, isActive, onClick }: Props) => {
   const muteMutation = useMuteChat();
   const pinMutation = usePinChat();
   const archiveMutation = useArchiveChat();
+  const { startCall, activeCall } = useChatCall();
 
   const preview = lastMsg
     ? lastMsg.type === "TEXT"
@@ -137,6 +140,24 @@ export const ChatListItemView = ({ chat, isActive, onClick }: Props) => {
                 </ActionIcon>
               </Menu.Target>
               <Menu.Dropdown onClick={(e) => e.stopPropagation()}>
+                {!isGroup && chat.peer && !activeCall && (
+                  <>
+                    <Menu.Item
+                      leftSection={<IconPhone size={14} color="#2ecc71" />}
+                      onClick={() =>
+                        startCall({
+                          chatId: chat.id,
+                          targetUserId: chat.peer!.id,
+                          peerName: chat.peer!.fullname,
+                          peerAvatar: chat.peer!.avatarUrl || undefined,
+                        })
+                      }
+                    >
+                      Audio qo'ng'iroq
+                    </Menu.Item>
+                    <Menu.Divider />
+                  </>
+                )}
                 <Menu.Item
                   leftSection={chat.isPinned ? <IconPin size={14} /> : <IconPinFilled size={14} />}
                   onClick={() => pinMutation.mutate({ id: chat.id, pinned: !chat.isPinned })}
