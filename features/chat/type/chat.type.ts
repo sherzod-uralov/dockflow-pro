@@ -160,6 +160,26 @@ export interface UpdateChatPayload {
   avatarUrl?: string;
 }
 
+export interface ChatMessageReadEntry {
+  userId: string;
+  readAt: string;
+  user: ChatUser;
+}
+
+export interface ChatMessageReadsResponse {
+  count: number;
+  reads: ChatMessageReadEntry[];
+}
+
+export interface ChatSearchMessage extends ChatMessage {
+  chat?: { id: string; type: ChatType; title: string };
+}
+
+export interface ChatSearchResponse {
+  count: number;
+  messages: ChatSearchMessage[];
+}
+
 export interface ChatSettings {
   id: string;
   userId: string;

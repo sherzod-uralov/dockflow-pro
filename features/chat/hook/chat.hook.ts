@@ -213,6 +213,50 @@ export const useRemoveChatMember = () => {
   });
 };
 
+export const useMuteChat = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, mutedUntil }: { id: string; mutedUntil: string | null }) =>
+      chatService.muteChat(id, mutedUntil),
+    onSuccess: () => qc.invalidateQueries(CHAT_LIST_KEY),
+    onError: showError,
+  });
+};
+
+export const usePinChat = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, pinned }: { id: string; pinned: boolean }) => chatService.pinChat(id, pinned),
+    onSuccess: () => qc.invalidateQueries(CHAT_LIST_KEY),
+    onError: showError,
+  });
+};
+
+export const useArchiveChat = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, archived }: { id: string; archived: boolean }) =>
+      chatService.archiveChat(id, archived),
+    onSuccess: () => qc.invalidateQueries(CHAT_LIST_KEY),
+    onError: showError,
+  });
+};
+
+export const useGetMessageReads = (messageId: string | null, enabled = true) =>
+  useQuery({
+    queryKey: ["chat-message-reads", messageId],
+    queryFn: () => chatService.getMessageReads(messageId!),
+    enabled: !!messageId && enabled,
+  });
+
+export const useSearchMessages = (q: string, chatId?: string) =>
+  useQuery({
+    queryKey: ["chat-search", q, chatId],
+    queryFn: () => chatService.searchMessages(q, chatId),
+    enabled: q.length >= 2,
+    keepPreviousData: true,
+  });
+
 export const useLeaveChat = () => {
   const qc = useQueryClient();
   return useMutation({

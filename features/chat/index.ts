@@ -9,3 +9,8 @@ export { ChatConversation } from "./component/chat-conversation";
 export { ChatListItemView } from "./component/chat-list-item";
 export { MessageBubble } from "./component/message-bubble";
 export { NewChatModal } from "./component/new-chat-modal";
+export { ForwardModal } from "./component/forward-modal";
+export { ChatInfoDrawer } from "./component/chat-info-drawer";
+export { ChatSettingsDrawer } from "./component/chat-settings-drawer";
+export { ReadByModal } from "./component/read-by-modal";
+export { ChatSearchModal } from "./component/chat-search-modal";

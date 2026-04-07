@@ -12,8 +12,9 @@ import {
   Center,
   Textarea,
   ActionIcon,
-  Paper,
   Tooltip,
+  FileButton,
+  Paper,
 } from "@mantine/core";
 import {
   IconSend,
@@ -21,32 +22,63 @@ import {
   IconX,
   IconCornerDownRight,
   IconPaperclip,
+  IconInfoCircle,
+  IconSettings,
+  IconMicrophone,
+  IconMicrophoneOff,
 } from "@tabler/icons-react";
-import { useGetChatMessages, useGetChatDetail, useSendTextMessage, useDeleteMessage, useEditMessage, useMarkChatRead } from "../hook/chat.hook";
+import {
+  useGetChatMessages,
+  useGetChatDetail,
+  useSendTextMessage,
+  useSendMediaMessage,
+  useDeleteMessage,
+  useEditMessage,
+  useMarkChatRead,
+  useAddReaction,
+  useRemoveReaction,
+} from "../hook/chat.hook";
 import { useChatTyping } from "../hook/use-chat-typing";
 import { chatSocket } from "../lib/chat-socket";
 import { ChatMessage } from "../type/chat.type";
 import { MessageBubble } from "./message-bubble";
+import { ChatInfoDrawer } from "./chat-info-drawer";
+import { ChatSettingsDrawer } from "./chat-settings-drawer";
+import { ForwardModal } from "./forward-modal";
+import { CustomModal, useModal } from "@/components/shared/ui/custom-modal";
 
 interface Props {
   chatId: string;
   currentUserId: string;
+  onChatDeleted?: () => void;
 }
 
-export const ChatConversation = ({ chatId, currentUserId }: Props) => {
+export const ChatConversation = ({ chatId, currentUserId, onChatDeleted }: Props) => {
   const [inputValue, setInputValue] = useState("");
   const [replyTo, setReplyTo] = useState<ChatMessage | null>(null);
   const [editingMsg, setEditingMsg] = useState<ChatMessage | null>(null);
   const [optimistic, setOptimistic] = useState<ChatMessage[]>([]);
+  const [forwardingMsgId, setForwardingMsgId] = useState<string | null>(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const [infoOpen, setInfoOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const recordedChunksRef = useRef<Blob[]>([]);
+  const recordStartRef = useRef<number>(0);
+  const forwardModal = useModal();
 
   const { data: chat } = useGetChatDetail(chatId);
   const { data: messagesData, isLoading } = useGetChatMessages(chatId);
   const sendText = useSendTextMessage();
+  const sendMedia = useSendMediaMessage();
   const editMessage = useEditMessage();
   const deleteMessage = useDeleteMessage();
   const markRead = useMarkChatRead();
+  const addReaction = useAddReaction();
+  const removeReaction = useRemoveReaction();
   const { typingUsers, handleTyping } = useChatTyping(chatId);
 
   const isGroup = chat?.type === "GROUP";
@@ -58,7 +90,7 @@ export const ChatConversation = ({ chatId, currentUserId }: Props) => {
     return () => chatSocket.leaveChat(chatId);
   }, [chatId]);
 
-  // Mark as read when messages load or change
+  // Mark as read
   useEffect(() => {
     if (chatId && messagesData?.messages?.length) {
       const lastMsg = messagesData.messages[messagesData.messages.length - 1];
@@ -66,22 +98,19 @@ export const ChatConversation = ({ chatId, currentUserId }: Props) => {
     }
   }, [chatId, messagesData?.messages?.length]);
 
-  // Combine server messages with optimistic
+  // Combine server + optimistic
   const allMessages = useMemo(() => {
     const server = messagesData?.messages || [];
-    const serverIds = new Set(server.map((m) => m.id));
-    // Filter optimistic that already have server twin
-    const stillPending = optimistic.filter((m) => !m.tempId || !serverIds.has(m.tempId));
+    const stillPending = optimistic.filter((m) => m.pending || m.failed);
     return [...server, ...stillPending];
   }, [messagesData?.messages, optimistic]);
 
-  // Clear optimistic if server caught up
   useEffect(() => {
     if (!messagesData?.messages) return;
     setOptimistic((prev) => prev.filter((m) => m.pending || m.failed));
   }, [messagesData?.messages]);
 
-  // Auto-scroll to bottom on new messages
+  // Auto-scroll
   useEffect(() => {
     if (scrollRef.current) {
       requestAnimationFrame(() => {
@@ -105,21 +134,14 @@ export const ChatConversation = ({ chatId, currentUserId }: Props) => {
     const text = inputValue.trim();
     if (!text) return;
 
-    // Edit mode
     if (editingMsg) {
       editMessage.mutate(
         { messageId: editingMsg.id, content: text },
-        {
-          onSuccess: () => {
-            setEditingMsg(null);
-            setInputValue("");
-          },
-        }
+        { onSuccess: () => { setEditingMsg(null); setInputValue(""); } }
       );
       return;
     }
 
-    // New message — optimistic
     const tempId = `tmp-${Date.now()}`;
     const optimisticMsg: ChatMessage = {
       id: tempId,
@@ -150,19 +172,90 @@ export const ChatConversation = ({ chatId, currentUserId }: Props) => {
     setReplyTo(null);
 
     try {
-      await sendText.mutateAsync({
-        id: chatId,
-        payload: { content: text, replyToId: replyId },
-      });
-      // Server response keladi → optimistic'ni belgilaymiz tempId orqali
-      setOptimistic((prev) =>
-        prev.map((m) => (m.id === tempId ? { ...m, pending: false } : m))
-      );
+      await sendText.mutateAsync({ id: chatId, payload: { content: text, replyToId: replyId } });
+      setOptimistic((prev) => prev.filter((m) => m.id !== tempId));
     } catch {
-      setOptimistic((prev) =>
-        prev.map((m) => (m.id === tempId ? { ...m, pending: false, failed: true } : m))
-      );
+      setOptimistic((prev) => prev.map((m) => (m.id === tempId ? { ...m, pending: false, failed: true } : m)));
     }
+  };
+
+  const handleFileSelect = async (file: File | null) => {
+    if (!file) return;
+    if (file.size > 50 * 1024 * 1024) {
+      alert("Fayl hajmi 50 MB dan oshmasligi kerak");
+      return;
+    }
+    const tempId = `tmp-${Date.now()}`;
+    const fileType = file.type.startsWith("image/")
+      ? "IMAGE"
+      : file.type.startsWith("video/")
+      ? "VIDEO"
+      : file.type.startsWith("audio/")
+      ? "VOICE"
+      : "FILE";
+
+    const optimisticMsg: ChatMessage = {
+      id: tempId,
+      tempId,
+      chatId,
+      senderId: currentUserId,
+      sender: { id: currentUserId, fullname: "Siz", username: "" },
+      type: fileType as ChatMessage["type"],
+      content: "",
+      fileName: file.name,
+      fileSize: file.size,
+      mimeType: file.type,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      pending: true,
+    };
+    setOptimistic((prev) => [...prev, optimisticMsg]);
+
+    try {
+      await sendMedia.mutateAsync({ id: chatId, file });
+      setOptimistic((prev) => prev.filter((m) => m.id !== tempId));
+    } catch {
+      setOptimistic((prev) => prev.map((m) => (m.id === tempId ? { ...m, pending: false, failed: true } : m)));
+    }
+  };
+
+  const handleStartRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream, { mimeType: "audio/webm" });
+      recordedChunksRef.current = [];
+      recordStartRef.current = Date.now();
+
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) recordedChunksRef.current.push(e.data);
+      };
+
+      recorder.onstop = async () => {
+        const duration = Math.round((Date.now() - recordStartRef.current) / 1000);
+        const blob = new Blob(recordedChunksRef.current, { type: "audio/webm" });
+        const file = new File([blob], `voice-${Date.now()}.webm`, { type: "audio/webm" });
+        stream.getTracks().forEach((t) => t.stop());
+
+        try {
+          await sendMedia.mutateAsync({ id: chatId, file, extras: { duration } });
+        } catch (err) {
+          console.error(err);
+        }
+      };
+
+      recorder.start();
+      mediaRecorderRef.current = recorder;
+      setIsRecording(true);
+    } catch (err) {
+      alert("Mikrofonga ruxsat berilmadi");
+    }
+  };
+
+  const handleStopRecording = () => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+      mediaRecorderRef.current.stop();
+    }
+    setIsRecording(false);
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -193,6 +286,19 @@ export const ChatConversation = ({ chatId, currentUserId }: Props) => {
     deleteMessage.mutate({ messageId: msg.id, chatId });
   };
 
+  const handleForward = (msg: ChatMessage) => {
+    setForwardingMsgId(msg.id);
+    forwardModal.openModal();
+  };
+
+  const handleAddReaction = (msg: ChatMessage, emoji: string) => {
+    addReaction.mutate({ messageId: msg.id, emoji, chatId });
+  };
+
+  const handleRemoveReaction = (msg: ChatMessage, emoji: string) => {
+    removeReaction.mutate({ messageId: msg.id, emoji, chatId });
+  };
+
   if (!chat) {
     return (
       <Center style={{ height: "100%" }}>
@@ -209,7 +315,7 @@ export const ChatConversation = ({ chatId, currentUserId }: Props) => {
         p="sm"
         style={{ borderBottom: "1px solid #e9ecef", flexShrink: 0, backgroundColor: "#fff" }}
       >
-        <Group gap="sm">
+        <Group gap="sm" style={{ cursor: "pointer", flex: 1 }} onClick={() => setInfoOpen(true)}>
           <Avatar
             size="md"
             radius="xl"
@@ -226,6 +332,18 @@ export const ChatConversation = ({ chatId, currentUserId }: Props) => {
               {isGroup ? `${chat.membersCount} a'zo` : "Onlayn"}
             </Text>
           </Box>
+        </Group>
+        <Group gap={4}>
+          <Tooltip label="Ma'lumot">
+            <ActionIcon variant="subtle" color="gray" onClick={() => setInfoOpen(true)}>
+              <IconInfoCircle size={18} />
+            </ActionIcon>
+          </Tooltip>
+          <Tooltip label="Sozlamalar">
+            <ActionIcon variant="subtle" color="gray" onClick={() => setSettingsOpen(true)}>
+              <IconSettings size={18} />
+            </ActionIcon>
+          </Tooltip>
         </Group>
       </Group>
 
@@ -260,9 +378,13 @@ export const ChatConversation = ({ chatId, currentUserId }: Props) => {
                     isOwn={isOwn}
                     showAvatar={showAvatar}
                     showSenderName={showSenderName}
+                    currentUserId={currentUserId}
                     onEdit={isOwn ? handleStartEdit : undefined}
                     onDelete={handleDelete}
                     onReply={handleStartReply}
+                    onForward={handleForward}
+                    onAddReaction={handleAddReaction}
+                    onRemoveReaction={handleRemoveReaction}
                   />
                 );
               })}
@@ -289,25 +411,15 @@ export const ChatConversation = ({ chatId, currentUserId }: Props) => {
         >
           <Group justify="space-between" gap="xs">
             <Group gap="xs">
-              {replyTo ? (
-                <IconCornerDownRight size={14} color="#1e3a5f" />
-              ) : (
-                <Text size="xs" fw={600} c="#1e3a5f">
-                  Tahrirlash
-                </Text>
+              {replyTo ? <IconCornerDownRight size={14} color="#1e3a5f" /> : (
+                <Text size="xs" fw={600} c="#1e3a5f">Tahrirlash</Text>
               )}
-              <Box>
-                {replyTo && (
-                  <>
-                    <Text size="xs" fw={600} c="#1e3a5f">
-                      {replyTo.sender.fullname}
-                    </Text>
-                    <Text size="xs" c="dimmed" lineClamp={1}>
-                      {replyTo.content}
-                    </Text>
-                  </>
-                )}
-              </Box>
+              {replyTo && (
+                <Box>
+                  <Text size="xs" fw={600} c="#1e3a5f">{replyTo.sender.fullname}</Text>
+                  <Text size="xs" c="dimmed" lineClamp={1}>{replyTo.content}</Text>
+                </Box>
+              )}
             </Group>
             <ActionIcon
               variant="subtle"
@@ -325,19 +437,21 @@ export const ChatConversation = ({ chatId, currentUserId }: Props) => {
       )}
 
       {/* Input */}
-      <Box
-        p="sm"
-        style={{ borderTop: "1px solid #e9ecef", backgroundColor: "#fff", flexShrink: 0 }}
-      >
+      <Box p="sm" style={{ borderTop: "1px solid #e9ecef", backgroundColor: "#fff", flexShrink: 0 }}>
         <Group gap="xs" align="flex-end">
-          <Tooltip label="Fayl biriktirish (tez orada)">
-            <ActionIcon variant="subtle" size="lg" disabled>
-              <IconPaperclip size={18} />
-            </ActionIcon>
-          </Tooltip>
+          <FileButton onChange={handleFileSelect} accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.zip">
+            {(props) => (
+              <Tooltip label="Fayl biriktirish">
+                <ActionIcon variant="subtle" size="lg" color="gray" {...props}>
+                  <IconPaperclip size={18} />
+                </ActionIcon>
+              </Tooltip>
+            )}
+          </FileButton>
+
           <Textarea
             ref={inputRef}
-            placeholder="Xabar yozing..."
+            placeholder={isRecording ? "Yozib olish davom etmoqda..." : "Xabar yozing..."}
             value={inputValue}
             onChange={(e) => {
               setInputValue(e.target.value);
@@ -347,6 +461,7 @@ export const ChatConversation = ({ chatId, currentUserId }: Props) => {
             autosize
             minRows={1}
             maxRows={5}
+            disabled={isRecording}
             style={{ flex: 1 }}
             styles={{
               input: {
@@ -356,18 +471,66 @@ export const ChatConversation = ({ chatId, currentUserId }: Props) => {
               },
             }}
           />
-          <ActionIcon
-            size="lg"
-            radius="md"
-            onClick={handleSend}
-            disabled={!inputValue.trim() || sendText.isLoading}
-            loading={sendText.isLoading || editMessage.isLoading}
-            style={{ backgroundColor: "#1e3a5f", color: "#fff" }}
-          >
-            <IconSend size={18} />
-          </ActionIcon>
+
+          {inputValue.trim() ? (
+            <ActionIcon
+              size="lg"
+              radius="md"
+              onClick={handleSend}
+              disabled={sendText.isLoading}
+              loading={sendText.isLoading || editMessage.isLoading}
+              style={{ backgroundColor: "#1e3a5f", color: "#fff" }}
+            >
+              <IconSend size={18} />
+            </ActionIcon>
+          ) : (
+            <Tooltip label={isRecording ? "To'xtatish" : "Ovozli xabar"}>
+              <ActionIcon
+                size="lg"
+                radius="md"
+                onClick={isRecording ? handleStopRecording : handleStartRecording}
+                style={{
+                  backgroundColor: isRecording ? "#e74c3c" : "#1e3a5f",
+                  color: "#fff",
+                }}
+              >
+                {isRecording ? <IconMicrophoneOff size={18} /> : <IconMicrophone size={18} />}
+              </ActionIcon>
+            </Tooltip>
+          )}
         </Group>
       </Box>
+
+      {/* Drawers + Modals */}
+      <ChatInfoDrawer
+        opened={infoOpen}
+        onClose={() => setInfoOpen(false)}
+        chatId={chatId}
+        currentUserId={currentUserId}
+        onChatDeleted={onChatDeleted}
+      />
+      <ChatSettingsDrawer opened={settingsOpen} onClose={() => setSettingsOpen(false)} />
+
+      <CustomModal
+        isOpen={forwardModal.isOpen}
+        onClose={() => {
+          forwardModal.closeModal();
+          setForwardingMsgId(null);
+        }}
+        title="Forward"
+        description="Xabarni boshqa suhbatga yuborish"
+        size="md"
+      >
+        {forwardingMsgId && (
+          <ForwardModal
+            messageId={forwardingMsgId}
+            onClose={() => {
+              forwardModal.closeModal();
+              setForwardingMsgId(null);
+            }}
+          />
+        )}
+      </CustomModal>
     </Box>
   );
 };

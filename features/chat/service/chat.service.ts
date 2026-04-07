@@ -6,6 +6,8 @@ import {
   ChatListItem,
   ChatMessagesResponse,
   ChatMessage,
+  ChatMessageReadsResponse,
+  ChatSearchResponse,
   CreateDirectChatPayload,
   CreateGroupChatPayload,
   SendTextMessagePayload,
@@ -157,6 +159,38 @@ export const chatService = {
   // ─── Read receipts ──────────────────────────────────────
   markRead: async (id: string, upToMessageId?: string) => {
     await axiosInstance.post(endpoints.chat.read(id), { upToMessageId });
+  },
+
+  // ─── Mute / Pin / Archive ───────────────────────────────
+  muteChat: async (id: string, mutedUntil: string | null) => {
+    const { data } = await axiosInstance.post(endpoints.chat.mute(id), { mutedUntil });
+    return data;
+  },
+
+  pinChat: async (id: string, pinned: boolean) => {
+    const { data } = await axiosInstance.post(endpoints.chat.pin(id), { pinned });
+    return data;
+  },
+
+  archiveChat: async (id: string, archived: boolean) => {
+    const { data } = await axiosInstance.post(endpoints.chat.archive(id), { archived });
+    return data;
+  },
+
+  // ─── Read receipts (kim o'qigan) ───────────────────────
+  getMessageReads: async (messageId: string): Promise<ChatMessageReadsResponse> => {
+    const { data } = await axiosInstance.get<ChatMessageReadsResponse>(
+      endpoints.chat.messageReads(messageId)
+    );
+    return data;
+  },
+
+  // ─── Search ─────────────────────────────────────────────
+  searchMessages: async (q: string, chatId?: string): Promise<ChatSearchResponse> => {
+    const { data } = await axiosInstance.get<ChatSearchResponse>(endpoints.chat.searchMessages, {
+      params: { q, chatId },
+    });
+    return data;
   },
 
   // ─── Settings ───────────────────────────────────────────

@@ -1,8 +1,18 @@
 "use client";
 
-import { Group, Avatar, Box, Text, Badge, Indicator } from "@mantine/core";
-import { IconPin, IconUsers } from "@tabler/icons-react";
+import { Group, Avatar, Box, Text, Indicator, Menu, ActionIcon } from "@mantine/core";
+import {
+  IconPin,
+  IconPinFilled,
+  IconUsers,
+  IconBellOff,
+  IconArchive,
+  IconArchiveOff,
+  IconDots,
+  IconVolume,
+} from "@tabler/icons-react";
 import { ChatListItem as ChatListItemType } from "../type/chat.type";
+import { useMuteChat, usePinChat, useArchiveChat } from "../hook/chat.hook";
 
 interface Props {
   chat: ChatListItemType;
@@ -28,9 +38,20 @@ const formatTime = (iso?: string | null) => {
 const getInitials = (name: string) =>
   name?.split(" ").map((n) => n[0]).filter(Boolean).join("").toUpperCase().slice(0, 2) || "?";
 
+const isMuted = (mutedUntil?: string | null) => {
+  if (!mutedUntil) return false;
+  return new Date(mutedUntil).getTime() > Date.now();
+};
+
 export const ChatListItemView = ({ chat, isActive, onClick }: Props) => {
   const isGroup = chat.type === "GROUP";
   const lastMsg = chat.lastMessage;
+  const muted = isMuted(chat.mutedUntil);
+
+  const muteMutation = useMuteChat();
+  const pinMutation = usePinChat();
+  const archiveMutation = useArchiveChat();
+
   const preview = lastMsg
     ? lastMsg.type === "TEXT"
       ? lastMsg.content
@@ -45,6 +66,13 @@ export const ChatListItemView = ({ chat, isActive, onClick }: Props) => {
       : lastMsg.content || "Xabar"
     : "Hali xabar yo'q";
 
+  const handleMute = (durationHours: number | null) => {
+    const mutedUntil = durationHours
+      ? new Date(Date.now() + durationHours * 3600 * 1000).toISOString()
+      : null;
+    muteMutation.mutate({ id: chat.id, mutedUntil });
+  };
+
   return (
     <Box
       p="sm"
@@ -54,6 +82,7 @@ export const ChatListItemView = ({ chat, isActive, onClick }: Props) => {
         backgroundColor: isActive ? "#e7f5ff" : "transparent",
         borderLeft: isActive ? "3px solid #1e3a5f" : "3px solid transparent",
         transition: "background-color 0.15s",
+        position: "relative",
       }}
     >
       <Group gap="sm" wrap="nowrap" align="flex-start">
@@ -76,7 +105,8 @@ export const ChatListItemView = ({ chat, isActive, onClick }: Props) => {
         <Box style={{ flex: 1, minWidth: 0 }}>
           <Group justify="space-between" gap={4} wrap="nowrap">
             <Group gap={4} style={{ minWidth: 0 }}>
-              {chat.isPinned && <IconPin size={12} color="#868e96" />}
+              {chat.isPinned && <IconPinFilled size={12} color="#1e3a5f" />}
+              {muted && <IconBellOff size={12} color="#868e96" />}
               <Text size="sm" fw={600} c="#212529" lineClamp={1}>
                 {chat.title}
               </Text>
@@ -94,6 +124,63 @@ export const ChatListItemView = ({ chat, isActive, onClick }: Props) => {
               )}
               {preview}
             </Text>
+            <Menu shadow="md" width={180} position="bottom-end" withinPortal>
+              <Menu.Target>
+                <ActionIcon
+                  variant="subtle"
+                  size="xs"
+                  color="gray"
+                  style={{ opacity: 0.5, flexShrink: 0 }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <IconDots size={14} />
+                </ActionIcon>
+              </Menu.Target>
+              <Menu.Dropdown onClick={(e) => e.stopPropagation()}>
+                <Menu.Item
+                  leftSection={chat.isPinned ? <IconPin size={14} /> : <IconPinFilled size={14} />}
+                  onClick={() => pinMutation.mutate({ id: chat.id, pinned: !chat.isPinned })}
+                >
+                  {chat.isPinned ? "Pinni olib tashlash" : "Pin qilish"}
+                </Menu.Item>
+                {muted ? (
+                  <Menu.Item
+                    leftSection={<IconVolume size={14} />}
+                    onClick={() => handleMute(null)}
+                  >
+                    Ovozni yoqish
+                  </Menu.Item>
+                ) : (
+                  <Menu.Sub>
+                    <Menu.Sub.Target>
+                      <Menu.Sub.Item leftSection={<IconBellOff size={14} />}>
+                        Ovozsiz qilish
+                      </Menu.Sub.Item>
+                    </Menu.Sub.Target>
+                    <Menu.Sub.Dropdown>
+                      <Menu.Item onClick={() => handleMute(1)}>1 soat</Menu.Item>
+                      <Menu.Item onClick={() => handleMute(8)}>8 soat</Menu.Item>
+                      <Menu.Item onClick={() => handleMute(24)}>1 kun</Menu.Item>
+                      <Menu.Item onClick={() => handleMute(24 * 7)}>1 hafta</Menu.Item>
+                      <Menu.Item onClick={() => handleMute(24 * 365 * 100)}>
+                        To'xtatilgunga qadar
+                      </Menu.Item>
+                    </Menu.Sub.Dropdown>
+                  </Menu.Sub>
+                )}
+                <Menu.Divider />
+                <Menu.Item
+                  leftSection={
+                    chat.isArchived ? <IconArchiveOff size={14} /> : <IconArchive size={14} />
+                  }
+                  onClick={() =>
+                    archiveMutation.mutate({ id: chat.id, archived: !chat.isArchived })
+                  }
+                >
+                  {chat.isArchived ? "Arxivdan chiqarish" : "Arxivlash"}
+                </Menu.Item>
+              </Menu.Dropdown>
+            </Menu>
           </Group>
         </Box>
       </Group>
