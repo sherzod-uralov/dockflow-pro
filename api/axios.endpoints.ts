@@ -1,5 +1,9 @@
 // endpoints.ts
 export const endpoints = {
+  ai: {
+    chat: "/ai/chat",
+    history: "/ai/history",
+  },
   auditLog: {
     list: "audit-log",
     create: "audit-log",

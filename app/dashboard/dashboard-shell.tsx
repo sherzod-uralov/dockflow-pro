@@ -10,6 +10,7 @@ import { OnboardingProvider } from "@/hooks/use-onboarding";
 import { SocketProvider } from "@/providers/socket.provider";
 import { TelegramConnectModal } from "@/features/telegram/component/telegram-connect-modal";
 import { useGetProfileQuery } from "@/features/login/hook/login.hook";
+import { AiChatWidget } from "@/features/ai-chat";
 
 export function DashboardShell({ children }: { children: ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -51,6 +52,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
             </Box>
           </Box>
           {user?.id && <TelegramConnectModal userId={user.id} />}
+          <AiChatWidget />
         </SocketProvider>
       </OnboardingProvider>
     </PermissionProvider>
