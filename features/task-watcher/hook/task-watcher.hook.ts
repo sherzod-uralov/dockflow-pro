@@ -8,6 +8,7 @@ export const useGetAllTaskWatchers = (params?: TaskWatcherQueryParams) => {
     queryKey: ["task-watchers", params],
     queryFn: () => taskWatcherService.getAll(params),
     keepPreviousData: true,
+    enabled: !!params?.taskId,
   });
 };
 

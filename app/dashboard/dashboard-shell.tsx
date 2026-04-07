@@ -51,7 +51,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
               </ScrollArea>
             </Box>
           </Box>
-          {user?.id && <TelegramConnectModal userId={user.id} />}
+          {/* {user?.id && <TelegramConnectModal userId={user.id} />} */}
           <AiChatWidget />
         </SocketProvider>
       </OnboardingProvider>

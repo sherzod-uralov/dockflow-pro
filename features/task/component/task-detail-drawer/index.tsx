@@ -140,13 +140,16 @@ export const TaskDetailDrawer = ({
   const shouldFetchRelated = !!taskId && isOpen;
   const safeTaskId = taskId || "";
 
+  // Hooks supporting `enabled` (CRUD factory)
   const { data: commentsData } = useGetAllTaskComments({ taskId: safeTaskId, pageSize: 1 }, { enabled: shouldFetchRelated });
   const { data: attachmentsData } = useGetAllTaskAttachments({ taskId: safeTaskId, pageSize: 1 }, { enabled: shouldFetchRelated });
-  const { data: checklistsData } = useGetAllTaskChecklists({ taskId: safeTaskId, pageSize: 1 }, { enabled: shouldFetchRelated });
   const { data: timeEntriesData } = useGetAllTaskTimeEntries({ taskId: safeTaskId, pageSize: 100 }, { enabled: shouldFetchRelated });
-  const { data: activitiesData } = useGetAllTaskActivities({ taskId: safeTaskId, pageSize: 50 }, { enabled: shouldFetchRelated });
-  const { data: watchersData } = useGetAllTaskWatchers({ taskId: safeTaskId }, { enabled: shouldFetchRelated });
   const { data: dependenciesData } = useGetAllTaskDependencies({ taskId: safeTaskId }, { enabled: shouldFetchRelated });
+
+  // Custom hooks (no enabled support) — pass undefined when not needed
+  const { data: checklistsData } = useGetAllTaskChecklists(shouldFetchRelated ? { taskId: safeTaskId, pageSize: 1 } : undefined);
+  const { data: activitiesData } = useGetAllTaskActivities(shouldFetchRelated ? { taskId: safeTaskId, pageSize: 50 } : undefined);
+  const { data: watchersData } = useGetAllTaskWatchers(shouldFetchRelated ? { taskId: safeTaskId } : undefined);
 
   const { data: subtasksData } = useGetAllTasks({
     parentTaskId: taskId || undefined,
