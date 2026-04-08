@@ -354,7 +354,7 @@ const DocumentView = ({ id }: { id: string }) => {
                             style={{ backgroundColor: "#1e3a5f" }}
                             onClick={() =>
                               router.push(
-                                `/document-edit?id=${file.id}&documentId=${data.id}`
+                                `/document-edit?id=${data.primaryAttachment?.id || file.id}&documentId=${data.id}`
                               )
                             }
                           >
@@ -368,7 +368,7 @@ const DocumentView = ({ id }: { id: string }) => {
                             variant="outline"
                             onClick={() =>
                               router.push(
-                                `/document-edit?id=${file.id}&documentId=${data.id}&readonly=true`
+                                `/document-edit?id=${data.primaryAttachment?.id || file.id}&documentId=${data.id}&readonly=true`
                               )
                             }
                             styles={{
