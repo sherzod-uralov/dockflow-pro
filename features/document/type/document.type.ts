@@ -39,6 +39,18 @@ export interface DocumentGetResponse {
     fileUrl: string;
     fileSize: number;
   }[];
+  primaryAttachment?: {
+    id: string;
+    fileName: string;
+    fileUrl: string;
+    mimeType?: string;
+  };
+  docxAttachment?: { id: string; fileName: string; fileUrl: string };
+  pdfAttachment?: { id: string; fileName: string; fileUrl: string };
+  displayMode?: "EDIT_DOCX" | "ANNOTATE_PDF" | "VIEW_PDF";
+  canEdit?: boolean;
+  hasDocx?: boolean;
+  hasPdf?: boolean;
   createdAt: string;
   updatedAt: string;
 }
