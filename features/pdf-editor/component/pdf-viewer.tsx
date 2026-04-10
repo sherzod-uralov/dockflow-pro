@@ -131,13 +131,18 @@ export function PDFViewer({ documentId, action = "edit" }: PDFViewerProps) {
     }
 
     try {
+      const t0 = performance.now();
       const { documentViewer, Annotations, annotationManager } = instance.Core;
       const qrUrl = `https://e-hujjat.nordicuniversity.org/view/${documentId}`;
       const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrUrl)}`;
 
-      console.log("[QR] Fetching QR image...");
+      const t1 = performance.now();
+      console.log(`[QR] ⏱ setup: ${(t1-t0).toFixed(0)}ms`);
+
       const response = await fetch(qrCodeUrl);
       const blob = await response.blob();
+      const t2 = performance.now();
+      console.log(`[QR] ⏱ fetch: ${(t2-t1).toFixed(0)}ms`);
 
       const base64 = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
@@ -145,46 +150,36 @@ export function PDFViewer({ documentId, action = "edit" }: PDFViewerProps) {
         reader.onerror = reject;
         reader.readAsDataURL(blob);
       });
-      console.log("[QR] base64 length:", base64.length);
+      const t3 = performance.now();
+      console.log(`[QR] ⏱ base64: ${(t3-t2).toFixed(0)}ms, length: ${base64.length}`);
 
       const stamp = new Annotations.StampAnnotation();
-      const page = documentViewer.getCurrentPage();
-      console.log("[QR] currentPage:", page);
-
-      stamp.PageNumber = page;
+      stamp.PageNumber = documentViewer.getCurrentPage();
       stamp.X = 100;
       stamp.Y = 100;
       stamp.Width = 70;
       stamp.Height = 70;
-
-      const stampProto = Object.getOwnPropertyNames(Object.getPrototypeOf(stamp));
-      console.log("[QR] stamp proto methods:", stampProto);
-      console.log("[QR] stamp own keys:", Object.keys(stamp));
+      const t4 = performance.now();
+      console.log(`[QR] ⏱ stamp create: ${(t4-t3).toFixed(0)}ms`);
 
       if (typeof stamp.setImageData === "function") {
-        console.log("[QR] Using setImageData()");
         await stamp.setImageData(base64);
-      } else if ("ImageData" in stamp || "imageData" in stamp) {
-        console.log("[QR] Using ImageData property");
-        stamp.ImageData = base64;
-        stamp.imageData = base64;
       } else {
-        console.log("[QR] No image method found, setting src");
-        stamp.src = base64;
+        stamp.ImageData = base64;
       }
+      const t5 = performance.now();
+      console.log(`[QR] ⏱ setImageData: ${(t5-t4).toFixed(0)}ms`);
 
-      console.log("[QR] addAnnotation...");
       annotationManager.addAnnotation(stamp);
+      const t6 = performance.now();
+      console.log(`[QR] ⏱ addAnnotation: ${(t6-t5).toFixed(0)}ms`);
 
       if (typeof annotationManager.redrawAnnotation === "function") {
-        console.log("[QR] redrawAnnotation...");
         annotationManager.redrawAnnotation(stamp);
       }
-      if (typeof annotationManager.selectAnnotation === "function") {
-        annotationManager.selectAnnotation(stamp);
-      }
-
-      console.log("[QR] Done successfully");
+      const t7 = performance.now();
+      console.log(`[QR] ⏱ redraw: ${(t7-t6).toFixed(0)}ms`);
+      console.log(`[QR] ⏱ TOTAL: ${(t7-t0).toFixed(0)}ms`);
       notifications.show({
         title: "Muvaffaqiyatli",
         message: "QR kod PDF ga qo'shildi",
@@ -221,51 +216,43 @@ export function PDFViewer({ documentId, action = "edit" }: PDFViewerProps) {
     }
 
     try {
+      const t0 = performance.now();
       const { documentViewer, Annotations, annotationManager } = instance.Core;
 
       const stampImage = createStampImage(profileData.fullname, new Date());
       if (!stampImage) {
         throw new Error("Canvas stamp yaratib bo'lmadi");
       }
-      console.log("[Sign] stampImage length:", stampImage.length);
+      const t1 = performance.now();
+      console.log(`[Sign] ⏱ canvas: ${(t1-t0).toFixed(0)}ms, length: ${stampImage.length}`);
 
       const stamp = new Annotations.StampAnnotation();
-      const page = documentViewer.getCurrentPage();
-      console.log("[Sign] currentPage:", page);
-
-      stamp.PageNumber = page;
+      stamp.PageNumber = documentViewer.getCurrentPage();
       stamp.X = 100;
       stamp.Y = 100;
       stamp.Width = 300;
       stamp.Height = 100;
-
-      const stampProto = Object.getOwnPropertyNames(Object.getPrototypeOf(stamp));
-      console.log("[Sign] stamp proto methods:", stampProto);
+      const t2 = performance.now();
+      console.log(`[Sign] ⏱ stamp create: ${(t2-t1).toFixed(0)}ms`);
 
       if (typeof stamp.setImageData === "function") {
-        console.log("[Sign] Using setImageData()");
         await stamp.setImageData(stampImage);
-      } else if ("ImageData" in stamp || "imageData" in stamp) {
-        console.log("[Sign] Using ImageData property");
-        stamp.ImageData = stampImage;
-        stamp.imageData = stampImage;
       } else {
-        console.log("[Sign] No image method found, setting src");
-        stamp.src = stampImage;
+        stamp.ImageData = stampImage;
       }
+      const t3 = performance.now();
+      console.log(`[Sign] ⏱ setImageData: ${(t3-t2).toFixed(0)}ms`);
 
-      console.log("[Sign] addAnnotation...");
       annotationManager.addAnnotation(stamp);
+      const t4 = performance.now();
+      console.log(`[Sign] ⏱ addAnnotation: ${(t4-t3).toFixed(0)}ms`);
 
       if (typeof annotationManager.redrawAnnotation === "function") {
-        console.log("[Sign] redrawAnnotation...");
         annotationManager.redrawAnnotation(stamp);
       }
-      if (typeof annotationManager.selectAnnotation === "function") {
-        annotationManager.selectAnnotation(stamp);
-      }
-
-      console.log("[Sign] Done successfully");
+      const t5 = performance.now();
+      console.log(`[Sign] ⏱ redraw: ${(t5-t4).toFixed(0)}ms`);
+      console.log(`[Sign] ⏱ TOTAL: ${(t5-t0).toFixed(0)}ms`);
       notifications.show({
         title: "Muvaffaqiyatli",
         message: "Tasdiqlash muhri qo'yildi",
