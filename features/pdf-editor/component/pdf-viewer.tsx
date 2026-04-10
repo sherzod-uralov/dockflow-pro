@@ -62,6 +62,17 @@ export function PDFViewer({ documentId, action = "edit" }: PDFViewerProps) {
   }, [documentId]);
 
   const handleReady = (inst: any) => {
+    console.log("[DocVerse] onReady fired, instance:", inst);
+    console.log("[DocVerse] instance keys:", Object.keys(inst || {}));
+    console.log("[DocVerse] instance.Core:", inst?.Core);
+    console.log("[DocVerse] instance.Core keys:", Object.keys(inst?.Core || {}));
+    console.log("[DocVerse] instance.UI:", inst?.UI);
+    console.log("[DocVerse] instance.UI keys:", Object.keys(inst?.UI || {}));
+    console.log("[DocVerse] UI.addQRCode:", typeof inst?.UI?.addQRCode);
+    console.log("[DocVerse] UI.addSignatureStamp:", typeof inst?.UI?.addSignatureStamp);
+    console.log("[DocVerse] Core.documentViewer:", inst?.Core?.documentViewer);
+    console.log("[DocVerse] Core.annotationManager:", inst?.Core?.annotationManager);
+    console.log("[DocVerse] Core.Annotations:", inst?.Core?.Annotations);
     setInstance(inst);
     setIsLoading(false);
   };
@@ -78,8 +89,34 @@ export function PDFViewer({ documentId, action = "edit" }: PDFViewerProps) {
 
     try {
       const qrUrl = `https://e-hujjat.nordicuniversity.org/view/${documentId}`;
-      const currentPage = instance.Core.documentViewer.getCurrentPage() - 1;
-      await instance.UI.addQRCode(qrUrl, currentPage, 100, 100, 70);
+
+      console.log("[DocVerse QR] instance:", instance);
+      console.log("[DocVerse QR] instance.UI methods:", Object.keys(instance.UI || {}));
+      console.log("[DocVerse QR] addQRCode type:", typeof instance.UI?.addQRCode);
+      console.log("[DocVerse QR] Core.documentViewer:", instance.Core?.documentViewer);
+      console.log("[DocVerse QR] getCurrentPage type:", typeof instance.Core?.documentViewer?.getCurrentPage);
+
+      const currentPage = instance.Core?.documentViewer?.getCurrentPage?.();
+      console.log("[DocVerse QR] currentPage:", currentPage);
+
+      if (typeof instance.UI?.addQRCode === "function") {
+        console.log("[DocVerse QR] Calling addQRCode...");
+        const result = await instance.UI.addQRCode(qrUrl, currentPage ? currentPage - 1 : 0, 100, 100, 70);
+        console.log("[DocVerse QR] addQRCode result:", result);
+      } else {
+        console.warn("[DocVerse QR] addQRCode not available! Trying fallback...");
+        console.log("[DocVerse QR] Core.Annotations:", instance.Core?.Annotations);
+        console.log("[DocVerse QR] Core.Annotations keys:", Object.keys(instance.Core?.Annotations || {}));
+        console.log("[DocVerse QR] annotationManager:", instance.Core?.annotationManager);
+        console.log("[DocVerse QR] annotationManager keys:", Object.keys(instance.Core?.annotationManager || {}));
+
+        notifications.show({
+          title: "Debug",
+          message: "addQRCode metodi topilmadi. Console loglarni tekshiring.",
+          color: "yellow",
+        });
+        return;
+      }
 
       notifications.show({
         title: "Muvaffaqiyatli",
@@ -88,10 +125,11 @@ export function PDFViewer({ documentId, action = "edit" }: PDFViewerProps) {
         icon: <IconCheck size={16} />,
       });
     } catch (error) {
-      console.error("QR kod qo'shishda xatolik:", error);
+      console.error("[DocVerse QR] XATOLIK:", error);
+      console.error("[DocVerse QR] Error stack:", (error as Error)?.stack);
       notifications.show({
         title: "Xatolik",
-        message: "QR kod qo'shishda xatolik yuz berdi",
+        message: `QR kod: ${(error as Error)?.message || "Noma'lum xatolik"}`,
         color: "red",
       });
     }
@@ -117,14 +155,36 @@ export function PDFViewer({ documentId, action = "edit" }: PDFViewerProps) {
     }
 
     try {
-      const currentPage = instance.Core.documentViewer.getCurrentPage() - 1;
-      await instance.UI.addSignatureStamp(
-        profileData.fullname,
-        new Date(),
-        currentPage,
-        100,
-        100
-      );
+      console.log("[DocVerse Sign] instance:", instance);
+      console.log("[DocVerse Sign] UI methods:", Object.keys(instance.UI || {}));
+      console.log("[DocVerse Sign] addSignatureStamp type:", typeof instance.UI?.addSignatureStamp);
+      console.log("[DocVerse Sign] Core.documentViewer:", instance.Core?.documentViewer);
+
+      const currentPage = instance.Core?.documentViewer?.getCurrentPage?.();
+      console.log("[DocVerse Sign] currentPage:", currentPage);
+
+      if (typeof instance.UI?.addSignatureStamp === "function") {
+        console.log("[DocVerse Sign] Calling addSignatureStamp...");
+        const result = await instance.UI.addSignatureStamp(
+          profileData.fullname,
+          new Date(),
+          currentPage ? currentPage - 1 : 0,
+          100,
+          100
+        );
+        console.log("[DocVerse Sign] addSignatureStamp result:", result);
+      } else {
+        console.warn("[DocVerse Sign] addSignatureStamp not available!");
+        console.log("[DocVerse Sign] Core.Annotations:", instance.Core?.Annotations);
+        console.log("[DocVerse Sign] annotationManager:", instance.Core?.annotationManager);
+
+        notifications.show({
+          title: "Debug",
+          message: "addSignatureStamp metodi topilmadi. Console loglarni tekshiring.",
+          color: "yellow",
+        });
+        return;
+      }
 
       notifications.show({
         title: "Muvaffaqiyatli",
@@ -133,10 +193,11 @@ export function PDFViewer({ documentId, action = "edit" }: PDFViewerProps) {
         icon: <IconCheck size={16} />,
       });
     } catch (error) {
-      console.error("Muhr qo'yishda xatolik:", error);
+      console.error("[DocVerse Sign] XATOLIK:", error);
+      console.error("[DocVerse Sign] Error stack:", (error as Error)?.stack);
       notifications.show({
         title: "Xatolik",
-        message: "Muhr qo'yishda xatolik yuz berdi",
+        message: `Imzo: ${(error as Error)?.message || "Noma'lum xatolik"}`,
         color: "red",
       });
     }
