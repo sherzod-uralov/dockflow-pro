@@ -21,6 +21,8 @@ import {
   IconCheck,
   IconSignature,
 } from "@tabler/icons-react";
+import QRCode from "qrcode";
+// @ts-ignore
 import { DocVerseViewer } from "@docverse-pdf/next";
 import { pdfService } from "../service/pdf.service";
 import { useGetProfileQuery } from "@/features/login/hook/login.hook";
@@ -134,24 +136,14 @@ export function PDFViewer({ documentId, action = "edit" }: PDFViewerProps) {
       const t0 = performance.now();
       const { documentViewer, Annotations, annotationManager } = instance.Core;
       const qrUrl = `https://e-hujjat.nordicuniversity.org/view/${documentId}`;
-      const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrUrl)}`;
 
-      const t1 = performance.now();
-      console.log(`[QR] ⏱ setup: ${(t1-t0).toFixed(0)}ms`);
-
-      const response = await fetch(qrCodeUrl);
-      const blob = await response.blob();
-      const t2 = performance.now();
-      console.log(`[QR] ⏱ fetch: ${(t2-t1).toFixed(0)}ms`);
-
-      const base64 = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = (e) => resolve(e.target?.result as string);
-        reader.onerror = reject;
-        reader.readAsDataURL(blob);
+      const base64 = await QRCode.toDataURL(qrUrl, {
+        width: 200,
+        margin: 1,
+        color: { dark: "#000000", light: "#ffffff" },
       });
       const t3 = performance.now();
-      console.log(`[QR] ⏱ base64: ${(t3-t2).toFixed(0)}ms, length: ${base64.length}`);
+      console.log(`[QR] ⏱ generate: ${(t3-t0).toFixed(0)}ms, length: ${base64.length}`);
 
       const stamp = new Annotations.StampAnnotation();
       stamp.PageNumber = documentViewer.getCurrentPage();
