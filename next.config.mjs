@@ -4,6 +4,14 @@ const nextConfig = {
 
   turbopack: {
     root: ".",
+    resolveAlias: {
+      "@docverse/viewer": "@docverse-pdf/viewer",
+    },
+  },
+
+  webpack: (config) => {
+    config.resolve.alias["@docverse/viewer"] = "@docverse-pdf/viewer";
+    return config;
   },
 
   experimental: {
