@@ -64,60 +64,50 @@ export function PDFViewer({ documentId, action = "edit" }: PDFViewerProps) {
   }, [documentId]);
 
   const handleReady = (inst: any) => {
-    console.log("[DocVerse] onReady - instance keys:", Object.keys(inst || {}));
-    console.log("[DocVerse] Core keys:", Object.keys(inst?.Core || {}));
-    console.log("[DocVerse] Annotations:", inst?.Core?.Annotations);
-
-    const am = inst?.Core?.annotationManager;
-    if (am) {
-      const proto = Object.getOwnPropertyNames(Object.getPrototypeOf(am));
-      console.log("[DocVerse] annotationManager methods:", proto);
-    }
-
-    const stamp = inst?.Core?.Annotations?.StampAnnotation;
-    if (stamp) {
-      const testStamp = new stamp();
-      console.log("[DocVerse] StampAnnotation instance keys:", Object.keys(testStamp));
-      console.log("[DocVerse] StampAnnotation proto:", Object.getOwnPropertyNames(Object.getPrototypeOf(testStamp)));
-    }
-
     setInstance(inst);
     setIsLoading(false);
   };
 
   const createStampImage = (fullname: string, date: Date) => {
     const canvas = document.createElement("canvas");
-    const width = 600;
-    const height = 200;
-    canvas.width = width;
-    canvas.height = height;
+    canvas.width = 600;
+    canvas.height = 200;
     const ctx = canvas.getContext("2d");
     if (!ctx) return null;
 
-    const radius = 20;
-    ctx.fillStyle = "#e0fcfc";
+    // Fon
+    ctx.fillStyle = "#ecfdf5";
     ctx.beginPath();
-    ctx.roundRect(0, 0, width, height, radius);
+    ctx.roundRect(0, 0, 600, 200, 16);
     ctx.fill();
+    ctx.strokeStyle = "#059669";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.roundRect(2, 2, 596, 196, 14);
+    ctx.stroke();
 
+    // Raqam va sana
     const randomId = Math.floor(1000000 + Math.random() * 9000000);
     const dateStr = date.toLocaleDateString("ru-RU");
     const timeStr = date.toLocaleTimeString("ru-RU");
 
-    ctx.font = "bold 24px sans-serif";
-    ctx.fillStyle = "#000000";
-    ctx.fillText(`№ ${randomId}`, 30, 40);
+    ctx.font = "bold 22px Arial";
+    ctx.fillStyle = "#1f2937";
+    ctx.textAlign = "left";
+    ctx.fillText(`№ ${randomId}`, 20, 35);
     ctx.textAlign = "right";
-    ctx.fillText(`${dateStr} ${timeStr}`, width - 30, 40);
+    ctx.fillText(`${dateStr} ${timeStr}`, 580, 35);
 
+    // TASDIQLANGAN
     ctx.textAlign = "center";
-    ctx.font = "bold 60px sans-serif";
-    ctx.fillStyle = "#00a09d";
-    ctx.fillText("TASDIQLANGAN", width / 2, 110);
+    ctx.font = "bold 52px Arial";
+    ctx.fillStyle = "#059669";
+    ctx.fillText("TASDIQLANGAN", 300, 110);
 
-    ctx.font = "bold 32px sans-serif";
-    ctx.fillStyle = "#000000";
-    ctx.fillText(fullname.toUpperCase(), width / 2, 160);
+    // Ism
+    ctx.font = "bold 28px Arial";
+    ctx.fillStyle = "#1f2937";
+    ctx.fillText(fullname.toUpperCase(), 300, 160);
 
     return canvas.toDataURL("image/png");
   };
@@ -133,53 +123,17 @@ export function PDFViewer({ documentId, action = "edit" }: PDFViewerProps) {
     }
 
     try {
-      const t0 = performance.now();
-      const { documentViewer, Annotations, annotationManager } = instance.Core;
+      const { annotationManager } = instance.Core;
       const qrUrl = `https://e-hujjat.nordicuniversity.org/view/${documentId}`;
 
-      const base64 = await QRCode.toDataURL(qrUrl, {
-        width: 200,
+      const dataUrl = await QRCode.toDataURL(qrUrl, {
+        width: 300,
         margin: 1,
         color: { dark: "#000000", light: "#ffffff" },
       });
-      const t3 = performance.now();
-      console.log(`[QR] ⏱ generate: ${(t3-t0).toFixed(0)}ms, length: ${base64.length}`);
 
-      const stamp = new Annotations.StampAnnotation();
-      stamp.PageNumber = documentViewer.getCurrentPage();
-      stamp.X = 100;
-      stamp.Y = 100;
-      stamp.Width = 70;
-      stamp.Height = 70;
-      const t4 = performance.now();
-      console.log(`[QR] ⏱ stamp create: ${(t4-t3).toFixed(0)}ms`);
+      await annotationManager.placeStamp(dataUrl, 80, 80);
 
-      if (typeof stamp.setImageData === "function") {
-        await stamp.setImageData(base64);
-      } else {
-        stamp.ImageData = base64;
-      }
-      const t5 = performance.now();
-      console.log(`[QR] ⏱ setImageData: ${(t5-t4).toFixed(0)}ms`);
-
-      if (typeof annotationManager.addStampDirect === "function") {
-        console.log("[QR] Using addStampDirect");
-        annotationManager.addStampDirect(stamp);
-      } else {
-        annotationManager.addAnnotation(stamp);
-      }
-      const t6 = performance.now();
-      console.log(`[QR] ⏱ addAnnotation: ${(t6-t5).toFixed(0)}ms`);
-
-      if (typeof annotationManager.renderStamps === "function") {
-        console.log("[QR] renderStamps...");
-        annotationManager.renderStamps();
-      } else if (typeof annotationManager.redrawAnnotation === "function") {
-        annotationManager.redrawAnnotation(stamp);
-      }
-      const t7 = performance.now();
-      console.log(`[QR] ⏱ render: ${(t7-t6).toFixed(0)}ms`);
-      console.log(`[QR] ⏱ TOTAL: ${(t7-t0).toFixed(0)}ms`);
       notifications.show({
         title: "Muvaffaqiyatli",
         message: "QR kod PDF ga qo'shildi",
@@ -187,10 +141,10 @@ export function PDFViewer({ documentId, action = "edit" }: PDFViewerProps) {
         icon: <IconCheck size={16} />,
       });
     } catch (error) {
-      console.error("[QR] XATOLIK:", error);
+      console.error("[QR] Xatolik:", error);
       notifications.show({
         title: "Xatolik",
-        message: `QR kod: ${(error as Error)?.message}`,
+        message: "QR kod qo'shishda xatolik yuz berdi",
         color: "red",
       });
     }
@@ -216,51 +170,15 @@ export function PDFViewer({ documentId, action = "edit" }: PDFViewerProps) {
     }
 
     try {
-      const t0 = performance.now();
-      const { documentViewer, Annotations, annotationManager } = instance.Core;
+      const { annotationManager } = instance.Core;
 
-      const stampImage = createStampImage(profileData.fullname, new Date());
-      if (!stampImage) {
+      const dataUrl = createStampImage(profileData.fullname, new Date());
+      if (!dataUrl) {
         throw new Error("Canvas stamp yaratib bo'lmadi");
       }
-      const t1 = performance.now();
-      console.log(`[Sign] ⏱ canvas: ${(t1-t0).toFixed(0)}ms, length: ${stampImage.length}`);
 
-      const stamp = new Annotations.StampAnnotation();
-      stamp.PageNumber = documentViewer.getCurrentPage();
-      stamp.X = 100;
-      stamp.Y = 100;
-      stamp.Width = 300;
-      stamp.Height = 100;
-      const t2 = performance.now();
-      console.log(`[Sign] ⏱ stamp create: ${(t2-t1).toFixed(0)}ms`);
+      await annotationManager.placeStamp(dataUrl, 280, 95);
 
-      if (typeof stamp.setImageData === "function") {
-        await stamp.setImageData(stampImage);
-      } else {
-        stamp.ImageData = stampImage;
-      }
-      const t3 = performance.now();
-      console.log(`[Sign] ⏱ setImageData: ${(t3-t2).toFixed(0)}ms`);
-
-      if (typeof annotationManager.addStampDirect === "function") {
-        console.log("[Sign] Using addStampDirect");
-        annotationManager.addStampDirect(stamp);
-      } else {
-        annotationManager.addAnnotation(stamp);
-      }
-      const t4 = performance.now();
-      console.log(`[Sign] ⏱ addAnnotation: ${(t4-t3).toFixed(0)}ms`);
-
-      if (typeof annotationManager.renderStamps === "function") {
-        console.log("[Sign] renderStamps...");
-        annotationManager.renderStamps();
-      } else if (typeof annotationManager.redrawAnnotation === "function") {
-        annotationManager.redrawAnnotation(stamp);
-      }
-      const t5 = performance.now();
-      console.log(`[Sign] ⏱ render: ${(t5-t4).toFixed(0)}ms`);
-      console.log(`[Sign] ⏱ TOTAL: ${(t5-t0).toFixed(0)}ms`);
       notifications.show({
         title: "Muvaffaqiyatli",
         message: "Tasdiqlash muhri qo'yildi",
@@ -268,10 +186,10 @@ export function PDFViewer({ documentId, action = "edit" }: PDFViewerProps) {
         icon: <IconCheck size={16} />,
       });
     } catch (error) {
-      console.error("[Sign] XATOLIK:", error);
+      console.error("[Sign] Xatolik:", error);
       notifications.show({
         title: "Xatolik",
-        message: `Imzo: ${(error as Error)?.message}`,
+        message: "Muhr qo'yishda xatolik yuz berdi",
         color: "red",
       });
     }
