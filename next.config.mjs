@@ -30,7 +30,7 @@ const nextConfig = {
     ],
   },
 
-  serverExternalPackages: ["@pdftron/webviewer", "mammoth"],
+  serverExternalPackages: ["@docverse-pdf/viewer", "mammoth"],
 
   productionBrowserSourceMaps: false,
 

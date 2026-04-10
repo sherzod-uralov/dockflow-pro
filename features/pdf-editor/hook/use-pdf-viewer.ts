@@ -15,20 +15,19 @@ export function usePDFViewer(documentId?: string) {
         setIsLoading(true);
         const { pdfUrl } = await pdfService.getDocument(documentId);
 
-        const WebViewerModule = await import('@pdftron/webviewer');
-        const WebViewer = WebViewerModule.default;
+        const DocVerse = (await import('@docverse-pdf/viewer')).default;
 
-        WebViewer(
+        const inst = await DocVerse(
           {
-            path: '/lib/webViewer',
-            licenseKey: 'demo:1762777177081:601eabe40300000000e42ddd407e894dff6198482ac17897bce606c4a2',
+            path: '/wasm/',
+            licenseKey: process.env.NEXT_PUBLIC_DOCVERSE_LICENSE_KEY || '',
             initialDoc: pdfUrl,
           },
           viewer.current as HTMLDivElement,
-        ).then((inst) => {
-          setInstance(inst);
-          setIsLoading(false);
-        });
+        );
+
+        setInstance(inst);
+        setIsLoading(false);
       } catch (error) {
         console.error('PDF yuklashda xatolik:', error);
         toast({
@@ -44,7 +43,7 @@ export function usePDFViewer(documentId?: string) {
 
     return () => {
       if (instance) {
-        instance.UI.dispose();
+        instance.dispose();
       }
     };
   }, [documentId, toast]);
@@ -61,11 +60,7 @@ export function usePDFViewer(documentId?: string) {
 
     try {
       setIsSaving(true);
-      const { annotationManager } = instance.Core;
-      const xfdfString = await annotationManager.exportAnnotations({
-        links: false,
-        widgets: false
-      });
+      const xfdfString = await instance.Core.annotationManager.exportAnnotations();
 
       const result = await pdfService.saveAnnotations({
         documentId,
@@ -95,41 +90,20 @@ export function usePDFViewer(documentId?: string) {
   const addQRCode = async (qrUrl: string) => {
     if (!instance) return;
 
-    const { documentViewer, Annotations, annotationManager } = instance.Core;
-    const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrUrl)}`;
-
     try {
-      const response = await fetch(qrCodeUrl);
-      const blob = await response.blob();
-      const reader = new FileReader();
-
-      reader.onload = async (e) => {
-        const base64 = e.target?.result as string;
-
-        const stampAnnotation = new Annotations.StampAnnotation();
-        stampAnnotation.PageNumber = documentViewer.getCurrentPage();
-        stampAnnotation.X = 100;
-        stampAnnotation.Y = 100;
-        stampAnnotation.Width = 70;
-        stampAnnotation.Height = 70;
-        stampAnnotation.setImageData(base64);
-
-        annotationManager.addAnnotation(stampAnnotation);
-        annotationManager.redrawAnnotation(stampAnnotation);
-      };
-
-      reader.readAsDataURL(blob);
+      const currentPage = instance.Core.documentViewer.getCurrentPage() - 1;
+      await instance.UI.addQRCode(qrUrl, currentPage, 100, 100, 70);
 
       toast({
         title: 'Muvaffaqiyatli',
-        description: 'QR code PDF ga qo\'shildi',
+        description: "QR code PDF ga qo'shildi",
       });
     } catch (error) {
-      console.error('QR code qo\'shishda xatolik:', error);
+      console.error("QR code qo'shishda xatolik:", error);
       toast({
         variant: 'destructive',
         title: 'Xatolik',
-        description: 'QR code qo\'shishda xatolik yuz berdi',
+        description: "QR code qo'shishda xatolik yuz berdi",
       });
     }
   };

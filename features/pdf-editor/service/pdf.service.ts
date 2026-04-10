@@ -7,7 +7,7 @@ import axiosInstance from "@/api/axios.instance";
 import { endpoints } from "@/api/axios.endpoints";
 
 const DEFAULT_PDF_URL =
-  "https://apryse.s3.amazonaws.com/public/files/samples/WebviewerDemoDoc.pdf";
+  "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf";
 
 export const pdfService = {
   getDocument: async (documentId?: string): Promise<GetDocumentResponse> => {

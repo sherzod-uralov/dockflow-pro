@@ -14,7 +14,7 @@ sdfdsfds# DockFlow Pro — Project Documentation
 - **Real-time:** Socket.IO Client
 - **Charts:** Recharts, FullCalendar
 - **DnD:** DND Kit
-- **PDF:** PDFTron WebViewer
+- **PDF:** DocVerse PDF SDK (@docverse-pdf)
 - **Testing:** Jest + Playwright + axe-core
 
 ---

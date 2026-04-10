@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   Box,
@@ -21,6 +21,7 @@ import {
   IconCheck,
   IconSignature,
 } from "@tabler/icons-react";
+import { DocVerseViewer } from "@docverse-pdf/next";
 import { pdfService } from "../service/pdf.service";
 import { useGetProfileQuery } from "@/features/login/hook/login.hook";
 
@@ -30,110 +31,23 @@ interface PDFViewerProps {
 }
 
 export function PDFViewer({ documentId, action = "edit" }: PDFViewerProps) {
-  const viewer = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
   const workflowId = searchParams.get("workflowId");
   const actionType = searchParams.get("actionType") || "QR_CODE";
   const showTips = searchParams.get("showTips") === "true";
-  const { data } = useGetProfileQuery();
+  const { data: profileData } = useGetProfileQuery();
   const [tipsOpen, setTipsOpen] = useState(showTips);
   const [instance, setInstance] = useState<any>(null);
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    const initializePDF = async () => {
+    const loadPdf = async () => {
       try {
-        setIsLoading(true);
         const { pdfUrl } = await pdfService.getDocument(documentId);
-
-        const WebViewerModule = await import("@pdftron/webviewer");
-        const WebViewer = WebViewerModule.default;
-
-        WebViewer(
-          {
-            path: "/webViewer",
-            licenseKey:
-              "demo:1765863910116:60cf415b030000000072a110bb28641e048069f32c1cb555766a944152",
-            initialDoc: pdfUrl,
-          },
-          viewer.current as HTMLDivElement,
-        ).then((inst) => {
-          // Configure based on actionType
-          const { documentViewer, Tools } = inst.Core;
-
-          // Set default tool to Pan (hand tool) for navigation
-          documentViewer.addEventListener('documentLoaded', () => {
-            const panTool = documentViewer.getTool(Tools.ToolNames.PAN);
-            if (panTool) {
-              documentViewer.setToolMode(panTool);
-            }
-
-            setInstance(inst);
-            setIsLoading(false);
-          });
-
-          if (action === "read") {
-            inst.UI.disableFeatures([
-              inst.UI.Feature.Annotations,
-              inst.UI.Feature.Download,
-              inst.UI.Feature.FilePicker,
-              inst.UI.Feature.NotesPanel,
-              inst.UI.Feature.Print,
-              inst.UI.Feature.Redaction,
-              inst.UI.Feature.TextSelection,
-              inst.UI.Feature.Copy,
-            ]);
-
-            inst.UI.disableElements([
-              'header',
-              'toolsHeader',
-              'annotationPopup',
-              'contextMenuPopup',
-              'toolStylePopup',
-              'signatureModal',
-              'printModal',
-              'leftPanel',
-              'leftPanelButton',
-              'searchButton',
-              'notesPanel',
-              'notesPanelButton',
-              'menuButton',
-              'viewControlsButton',
-              'selectToolButton',
-              'annotationToolButton',
-              'toolsButton',
-              'searchPanel',
-            ]);
-
-            // Disable annotation creation and enable read-only
-            documentViewer.addEventListener('documentLoaded', () => {
-              const annotationManager = inst.Core.annotationManager;
-              annotationManager.enableReadOnlyMode();
-
-              // Disable all editing tools except pan
-              const { Tools } = inst.Core;
-              const panTool = documentViewer.getTool(Tools.ToolNames.PAN);
-
-              // Lock to pan tool only
-              documentViewer.setToolMode(panTool);
-
-              // Prevent tool switching
-              documentViewer.addEventListener('toolModeUpdated', (e: any) => {
-                if (e.mode.name !== Tools.ToolNames.PAN) {
-                  documentViewer.setToolMode(panTool);
-                }
-              });
-            });
-          }
-
-          // Disable signature tool click for QR_CODE action (when in edit mode)
-          if (action === "edit" && actionType === "QR_CODE") {
-            // Disable signature-related UI elements
-            inst.UI.disableElements(['signatureToolGroupButton', 'signatureToolButton']);
-          }
-        });
+        setPdfUrl(pdfUrl);
       } catch (error) {
         console.error("PDF yuklashda xatolik:", error);
         notifications.show({
@@ -144,15 +58,13 @@ export function PDFViewer({ documentId, action = "edit" }: PDFViewerProps) {
         setIsLoading(false);
       }
     };
-
-    initializePDF();
-
-    return () => {
-      if (instance) {
-        instance.UI.dispose();
-      }
-    };
+    loadPdf();
   }, [documentId]);
+
+  const handleReady = (inst: any) => {
+    setInstance(inst);
+    setIsLoading(false);
+  };
 
   const handleAddQRCode = async () => {
     if (!instance || !documentId) {
@@ -164,32 +76,10 @@ export function PDFViewer({ documentId, action = "edit" }: PDFViewerProps) {
       return;
     }
 
-    const { documentViewer, Annotations, annotationManager } = instance.Core;
-    const qrUrl = `https://e-hujjat.nordicuniversity.org/view/${documentId}`;
-    const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrUrl)}`;
-
     try {
-      const response = await fetch(qrCodeUrl);
-      const blob = await response.blob();
-
-      const base64 = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = (e) => resolve(e.target?.result as string);
-        reader.onerror = reject;
-        reader.readAsDataURL(blob);
-      });
-
-      const stampAnnotation = new Annotations.StampAnnotation();
-      stampAnnotation.PageNumber = documentViewer.getCurrentPage();
-      stampAnnotation.X = 100;
-      stampAnnotation.Y = 100;
-      stampAnnotation.Width = 70;
-      stampAnnotation.Height = 70;
-
-      await stampAnnotation.setImageData(base64);
-
-      annotationManager.addAnnotation(stampAnnotation);
-      annotationManager.redrawAnnotation(stampAnnotation);
+      const qrUrl = `https://e-hujjat.nordicuniversity.org/view/${documentId}`;
+      const currentPage = instance.Core.documentViewer.getCurrentPage() - 1;
+      await instance.UI.addQRCode(qrUrl, currentPage, 100, 100, 70);
 
       notifications.show({
         title: "Muvaffaqiyatli",
@@ -207,45 +97,6 @@ export function PDFViewer({ documentId, action = "edit" }: PDFViewerProps) {
     }
   };
 
-  const createStampImage = (fullname: string, date: Date) => {
-    const canvas = document.createElement('canvas');
-    const width = 600;
-    const height = 200;
-    canvas.width = width;
-    canvas.height = height;
-    const ctx = canvas.getContext('2d');
-
-    if (!ctx) return null;
-
-    const radius = 20;
-    ctx.fillStyle = '#e0fcfc';
-    ctx.beginPath();
-    ctx.roundRect(0, 0, width, height, radius);
-    ctx.fill();
-
-
-    const randomId = Math.floor(1000000 + Math.random() * 9000000);
-    const dateStr = date.toLocaleDateString('ru-RU');
-    const timeStr = date.toLocaleTimeString('ru-RU');
-
-    ctx.font = 'bold 24px sans-serif';
-    ctx.fillStyle = '#000000';
-    ctx.fillText(`№ ${randomId}`, 30, 40);
-    ctx.textAlign = 'right';
-    ctx.fillText(`${dateStr} ${timeStr}`, width - 30, 40);
-
-    ctx.textAlign = 'center';
-    ctx.font = 'bold 60px sans-serif';
-    ctx.fillStyle = '#00a09d';
-    ctx.fillText('TASDIQLANGAN', width / 2, 110);
-
-    ctx.font = 'bold 32px sans-serif';
-    ctx.fillStyle = '#000000';
-    ctx.fillText(fullname.toUpperCase(), width / 2, 160);
-
-    return canvas.toDataURL('image/png');
-  };
-
   const handleAddSignature = async () => {
     if (!instance || !documentId) {
       notifications.show({
@@ -256,7 +107,7 @@ export function PDFViewer({ documentId, action = "edit" }: PDFViewerProps) {
       return;
     }
 
-    if (!data?.fullname) {
+    if (!profileData?.fullname) {
       notifications.show({
         title: "Xatolik",
         message: "Foydalanuvchi ma'lumotlari yuklanmagan",
@@ -266,28 +117,14 @@ export function PDFViewer({ documentId, action = "edit" }: PDFViewerProps) {
     }
 
     try {
-      const { documentViewer, Annotations, annotationManager } = instance.Core;
-
-      const stampImage = createStampImage(data.fullname, new Date());
-
-      if (!stampImage) {
-        throw new Error("Stamp creation failed");
-      }
-
-      const stampAnnotation = new Annotations.StampAnnotation();
-      stampAnnotation.PageNumber = documentViewer.getCurrentPage();
-      stampAnnotation.X = 100;
-      stampAnnotation.Y = 100;
-      stampAnnotation.Width = 300;
-      stampAnnotation.Height = 100;
-
-      await stampAnnotation.setImageData(stampImage);
-
-      annotationManager.addAnnotation(stampAnnotation);
-      annotationManager.redrawAnnotation(stampAnnotation);
-
-      // Select the annotation so the user can move it immediately
-      annotationManager.selectAnnotation(stampAnnotation);
+      const currentPage = instance.Core.documentViewer.getCurrentPage() - 1;
+      await instance.UI.addSignatureStamp(
+        profileData.fullname,
+        new Date(),
+        currentPage,
+        100,
+        100
+      );
 
       notifications.show({
         title: "Muvaffaqiyatli",
@@ -295,7 +132,6 @@ export function PDFViewer({ documentId, action = "edit" }: PDFViewerProps) {
         color: "green",
         icon: <IconCheck size={16} />,
       });
-
     } catch (error) {
       console.error("Muhr qo'yishda xatolik:", error);
       notifications.show({
@@ -318,11 +154,7 @@ export function PDFViewer({ documentId, action = "edit" }: PDFViewerProps) {
 
     try {
       setIsSaving(true);
-      const { annotationManager } = instance.Core;
-      const xfdfString = await annotationManager.exportAnnotations({
-        links: false,
-        widgets: false,
-      });
+      const xfdfString = await instance.Core.annotationManager.exportAnnotations();
 
       await pdfService.saveAnnotations({
         documentId,
@@ -336,7 +168,6 @@ export function PDFViewer({ documentId, action = "edit" }: PDFViewerProps) {
         icon: <IconCheck size={16} />,
       });
 
-      // Auto redirect after saving
       setTimeout(() => {
         if (workflowId) {
           router.push(`/dashboard/workflow/${workflowId}`);
@@ -363,6 +194,34 @@ export function PDFViewer({ documentId, action = "edit" }: PDFViewerProps) {
       router.back();
     }
   };
+
+  const isReadOnly = action === "read";
+
+  const disabledFeatures = isReadOnly ? ["annotations", "download"] : [];
+  const disabledElements = isReadOnly
+    ? [
+        "header",
+        "toolsHeader",
+        "annotationPopup",
+        "contextMenuPopup",
+        "toolStylePopup",
+        "signatureModal",
+        "printModal",
+        "leftPanel",
+        "leftPanelButton",
+        "searchButton",
+        "notesPanel",
+        "notesPanelButton",
+        "menuButton",
+        "viewControlsButton",
+        "selectToolButton",
+        "annotationToolButton",
+        "toolsButton",
+        "searchPanel",
+      ]
+    : action === "edit" && actionType === "QR_CODE"
+      ? ["signatureToolGroupButton", "signatureToolButton"]
+      : [];
 
   return (
     <Box
@@ -397,18 +256,17 @@ export function PDFViewer({ documentId, action = "edit" }: PDFViewerProps) {
               <IconArrowLeft size={20} />
             </ActionIcon>
             <Text size="md" fw={600} c="#212529">
-              {action === "read"
+              {isReadOnly
                 ? "PDF Ko'rish"
-                : (actionType === "SIGN" ? "Imzolash" : "PDF Editor")
-              }
+                : actionType === "SIGN"
+                  ? "Imzolash"
+                  : "PDF Editor"}
             </Text>
           </Group>
 
           <Group gap="xs">
-            {/* Only show editing buttons when action is "edit" */}
             {action === "edit" && (
               <>
-                {/* QR Code button - only for QR_CODE action */}
                 {actionType === "QR_CODE" && (
                   <Button
                     variant="outline"
@@ -423,7 +281,6 @@ export function PDFViewer({ documentId, action = "edit" }: PDFViewerProps) {
                   </Button>
                 )}
 
-                {/* Signature button - only for SIGN action */}
                 {actionType === "SIGN" && (
                   <Button
                     variant="outline"
@@ -484,15 +341,21 @@ export function PDFViewer({ documentId, action = "edit" }: PDFViewerProps) {
             </Stack>
           </Box>
         )}
-        <div
-          ref={viewer}
-          style={{
-            height: "100%",
-            width: "100%",
-            overflow: "hidden",
-          }}
-        />
+        {pdfUrl && (
+          <DocVerseViewer
+            style={{ height: "100%", width: "100%" }}
+            path="/wasm/"
+            licenseKey={process.env.NEXT_PUBLIC_DOCVERSE_LICENSE_KEY || ""}
+            initialDoc={pdfUrl}
+            readOnly={isReadOnly}
+            locale="uz"
+            disabledFeatures={disabledFeatures}
+            disabledElements={disabledElements}
+            onReady={handleReady}
+          />
+        )}
       </Box>
+
       <Modal
         opened={tipsOpen}
         onClose={() => setTipsOpen(false)}
@@ -501,10 +364,15 @@ export function PDFViewer({ documentId, action = "edit" }: PDFViewerProps) {
       >
         <Stack>
           <Text size="sm">
-            Hujjat aylanmasi yaratildi. Endi hujjatning istalgan joyiga QR kodni joylashtiring.
-            Bu QR kod orqali hujjatni tekshirish mumkin bo'ladi.
+            Hujjat aylanmasi yaratildi. Endi hujjatning istalgan joyiga QR
+            kodni joylashtiring. Bu QR kod orqali hujjatni tekshirish mumkin
+            bo'ladi.
           </Text>
-          <Button onClick={() => setTipsOpen(false)} fullWidth style={{ backgroundColor: "#1e3a5f" }}>
+          <Button
+            onClick={() => setTipsOpen(false)}
+            fullWidth
+            style={{ backgroundColor: "#1e3a5f" }}
+          >
             Tushunarli
           </Button>
         </Stack>
