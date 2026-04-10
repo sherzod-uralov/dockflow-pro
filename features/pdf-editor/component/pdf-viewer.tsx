@@ -170,15 +170,23 @@ export function PDFViewer({ documentId, action = "edit" }: PDFViewerProps) {
       const t5 = performance.now();
       console.log(`[QR] ⏱ setImageData: ${(t5-t4).toFixed(0)}ms`);
 
-      annotationManager.addAnnotation(stamp);
+      if (typeof annotationManager.addStampDirect === "function") {
+        console.log("[QR] Using addStampDirect");
+        annotationManager.addStampDirect(stamp);
+      } else {
+        annotationManager.addAnnotation(stamp);
+      }
       const t6 = performance.now();
       console.log(`[QR] ⏱ addAnnotation: ${(t6-t5).toFixed(0)}ms`);
 
-      if (typeof annotationManager.redrawAnnotation === "function") {
+      if (typeof annotationManager.renderStamps === "function") {
+        console.log("[QR] renderStamps...");
+        annotationManager.renderStamps();
+      } else if (typeof annotationManager.redrawAnnotation === "function") {
         annotationManager.redrawAnnotation(stamp);
       }
       const t7 = performance.now();
-      console.log(`[QR] ⏱ redraw: ${(t7-t6).toFixed(0)}ms`);
+      console.log(`[QR] ⏱ render: ${(t7-t6).toFixed(0)}ms`);
       console.log(`[QR] ⏱ TOTAL: ${(t7-t0).toFixed(0)}ms`);
       notifications.show({
         title: "Muvaffaqiyatli",
@@ -243,15 +251,23 @@ export function PDFViewer({ documentId, action = "edit" }: PDFViewerProps) {
       const t3 = performance.now();
       console.log(`[Sign] ⏱ setImageData: ${(t3-t2).toFixed(0)}ms`);
 
-      annotationManager.addAnnotation(stamp);
+      if (typeof annotationManager.addStampDirect === "function") {
+        console.log("[Sign] Using addStampDirect");
+        annotationManager.addStampDirect(stamp);
+      } else {
+        annotationManager.addAnnotation(stamp);
+      }
       const t4 = performance.now();
       console.log(`[Sign] ⏱ addAnnotation: ${(t4-t3).toFixed(0)}ms`);
 
-      if (typeof annotationManager.redrawAnnotation === "function") {
+      if (typeof annotationManager.renderStamps === "function") {
+        console.log("[Sign] renderStamps...");
+        annotationManager.renderStamps();
+      } else if (typeof annotationManager.redrawAnnotation === "function") {
         annotationManager.redrawAnnotation(stamp);
       }
       const t5 = performance.now();
-      console.log(`[Sign] ⏱ redraw: ${(t5-t4).toFixed(0)}ms`);
+      console.log(`[Sign] ⏱ render: ${(t5-t4).toFixed(0)}ms`);
       console.log(`[Sign] ⏱ TOTAL: ${(t5-t0).toFixed(0)}ms`);
       notifications.show({
         title: "Muvaffaqiyatli",
