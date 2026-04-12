@@ -26,6 +26,7 @@ import QRCode from "qrcode";
 import { DocVerseViewer } from "@docverse-pdf/next";
 import { pdfService } from "../service/pdf.service";
 import { useGetProfileQuery } from "@/features/login/hook/login.hook";
+import { useGetDocumentById } from "@/features/document/hook/document.hook";
 
 interface PDFViewerProps {
   documentId?: string;
@@ -39,6 +40,7 @@ export function PDFViewer({ documentId, action = "edit" }: PDFViewerProps) {
   const actionType = searchParams.get("actionType") || "QR_CODE";
   const showTips = searchParams.get("showTips") === "true";
   const { data: profileData } = useGetProfileQuery();
+  const { data: documentData } = useGetDocumentById(documentId || "", { enabled: !!documentId });
   const [tipsOpen, setTipsOpen] = useState(showTips);
   const [instance, setInstance] = useState<any>(null);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
@@ -66,7 +68,6 @@ export function PDFViewer({ documentId, action = "edit" }: PDFViewerProps) {
     loadPdf();
   }, [documentId]);
 
-  // QR mode: tab yopish / refresh dan himoya
   useEffect(() => {
     if (!isQrMode) return;
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -79,7 +80,6 @@ export function PDFViewer({ documentId, action = "edit" }: PDFViewerProps) {
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [isQrMode, qrPlaced]);
 
-  // QR mode: browser back tugmasidan himoya
   useEffect(() => {
     if (!isQrMode || qrPlaced) return;
     window.history.pushState(null, "", window.location.href);
@@ -286,7 +286,10 @@ export function PDFViewer({ documentId, action = "edit" }: PDFViewerProps) {
     navigateAway();
   };
 
-  const isReadOnly = action === "read";
+  const hasWorkflowAction = !!workflowId || !!searchParams.get("actionType");
+  const editableStatuses = ["DRAFT", "REJECTED"];
+  const isDocumentEditable = documentData?.status ? editableStatuses.includes(documentData.status) : false;
+  const isReadOnly = hasWorkflowAction ? false : (action === "read" || !isDocumentEditable);
 
   const disabledFeatures = isReadOnly ? ["annotations", "download"] : [];
   const disabledElements = isReadOnly
