@@ -3,6 +3,7 @@ export interface WopiTokenResponse {
   accessToken: string;
   expiresAt: string;
   wopiSrc: string;
+  collaboraUrl: string;
   actionType: "APPROVAL" | "SIGN" | "QR_CODE" | "REVIEW" | "ACKNOWLEDGE";
   permissions: {
     UserCanWrite: boolean;

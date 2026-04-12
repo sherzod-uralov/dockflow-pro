@@ -198,9 +198,9 @@ const WorkflowDetailView = memo(({ workflow }: WorkflowDetailViewProps) => {
 
   const handleViewDocument = useCallback(() => {
     if (workflow.document?.id) {
-      router.push(`/pdf/${workflow.document.id}?workflowId=${workflow.id}&actionType=read`);
+      router.push(`/pdf/${workflow.document.id}?action=read`);
     }
-  }, [workflow.document, workflow.id, router]);
+  }, [workflow.document, router]);
 
   const handleDownloadDocument = useCallback(() => {
     if (workflow.document?.id) {
