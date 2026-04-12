@@ -44,6 +44,9 @@ export function PDFViewer({ documentId, action = "edit" }: PDFViewerProps) {
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [qrPlaced, setQrPlaced] = useState(false);
+  const [showLeaveWarning, setShowLeaveWarning] = useState(false);
+  const isQrMode = actionType === "QR_CODE" && action === "edit";
 
   useEffect(() => {
     const loadPdf = async () => {
@@ -62,6 +65,31 @@ export function PDFViewer({ documentId, action = "edit" }: PDFViewerProps) {
     };
     loadPdf();
   }, [documentId]);
+
+  // QR mode: tab yopish / refresh dan himoya
+  useEffect(() => {
+    if (!isQrMode) return;
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (!qrPlaced) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [isQrMode, qrPlaced]);
+
+  // QR mode: browser back tugmasidan himoya
+  useEffect(() => {
+    if (!isQrMode || qrPlaced) return;
+    window.history.pushState(null, "", window.location.href);
+    const handlePopState = () => {
+      setShowLeaveWarning(true);
+      window.history.pushState(null, "", window.location.href);
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [isQrMode, qrPlaced]);
 
   const handleReady = (inst: any) => {
     setInstance(inst);
@@ -133,6 +161,7 @@ export function PDFViewer({ documentId, action = "edit" }: PDFViewerProps) {
       });
 
       await annotationManager.placeStamp(dataUrl, 80, 80);
+      setQrPlaced(true);
 
       notifications.show({
         title: "Muvaffaqiyatli",
@@ -241,12 +270,20 @@ export function PDFViewer({ documentId, action = "edit" }: PDFViewerProps) {
     }
   };
 
-  const handleBack = () => {
+  const navigateAway = () => {
     if (workflowId) {
       router.push(`/dashboard/workflow/${workflowId}`);
     } else {
       router.back();
     }
+  };
+
+  const handleBack = () => {
+    if (isQrMode && !qrPlaced) {
+      setShowLeaveWarning(true);
+      return;
+    }
+    navigateAway();
   };
 
   const isReadOnly = action === "read";
@@ -361,7 +398,7 @@ export function PDFViewer({ documentId, action = "edit" }: PDFViewerProps) {
                       )
                     }
                     onClick={handleSaveAnnotations}
-                    disabled={isSaving || isLoading}
+                    disabled={isSaving || isLoading || (isQrMode && !qrPlaced)}
                     style={{ backgroundColor: "#1e3a5f" }}
                   >
                     {isSaving ? "Saqlanmoqda..." : "Saqlash"}
@@ -429,6 +466,40 @@ export function PDFViewer({ documentId, action = "edit" }: PDFViewerProps) {
           >
             Tushunarli
           </Button>
+        </Stack>
+      </Modal>
+
+      <Modal
+        opened={showLeaveWarning}
+        onClose={() => setShowLeaveWarning(false)}
+        title="QR kod joylashtirilmagan"
+        centered
+      >
+        <Stack>
+          <Text size="sm">
+            QR kod hali joylashtirilmagan. Sahifadan chiqsangiz, hujjatda QR
+            kod bo'lmaydi va hujjat aylanmasida tekshirish imkoni bo'lmaydi.
+          </Text>
+          <Group justify="flex-end" gap="xs">
+            <Button
+              variant="outline"
+              onClick={() => setShowLeaveWarning(false)}
+              styles={{
+                root: { borderColor: "#e9ecef", color: "#495057" },
+              }}
+            >
+              Bekor qilish
+            </Button>
+            <Button
+              color="red"
+              onClick={() => {
+                setShowLeaveWarning(false);
+                navigateAway();
+              }}
+            >
+              Chiqish
+            </Button>
+          </Group>
         </Stack>
       </Modal>
     </Box>

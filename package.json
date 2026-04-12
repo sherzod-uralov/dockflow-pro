@@ -27,7 +27,7 @@
     "@mantine/form": "^8.3.9",
     "@mantine/hooks": "^8.3.9",
     "@mantine/notifications": "^8.3.9",
-    "@docverse-pdf/viewer": "^1.0.0",
+    "@docverse-pdf/viewer": "^1.1.0",
     "@docverse-pdf/next": "^1.0.0",
     "@radix-ui/react-accordion": "1.2.2",
     "@radix-ui/react-alert-dialog": "1.1.4",
