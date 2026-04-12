@@ -354,12 +354,14 @@ export function PDFViewer({ documentId, action = "edit" }: PDFViewerProps) {
                 ? "PDF Ko'rish"
                 : actionType === "SIGN"
                   ? "Imzolash"
-                  : "PDF Editor"}
+                  : actionType === "QR_CODE"
+                    ? "QR kod joylashtirish"
+                    : "PDF Editor"}
             </Text>
           </Group>
 
           <Group gap="xs">
-            {action === "edit" && (
+            {!isReadOnly && (
               <>
                 {actionType === "QR_CODE" && (
                   <Button
