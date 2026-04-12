@@ -342,6 +342,9 @@ export const endpoints = {
     reject: (id: string | number) => `/kpi-reward/${id}/reject`,
     bulkApprove: "/kpi-reward/bulk-approve",
   },
+  search: {
+    query: "/search",
+  },
 } as const;
 
 export type Endpoints = typeof endpoints;
