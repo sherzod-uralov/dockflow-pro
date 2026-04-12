@@ -33,8 +33,6 @@ const formatFileSize = (bytes: number): string => {
     return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i];
 };
 
-};
-
 const DocumentTemplateView = ({ template }: DocumentTemplateViewProps) => {
     const handleDownload = () => {
         if (template.templateFile?.fileUrl) {
