@@ -1,14 +1,16 @@
 "use client";
 
 import { Suspense } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { Box, Loader, Stack, Text } from "@mantine/core";
 import { PDFViewer } from "@/features/pdf-editor/component/pdf-viewer";
 
 function PDFViewerWrapper() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const id = params.id as string;
-  return <PDFViewer documentId={id} />;
+  const action = (searchParams.get("action") as "read" | "edit") || "edit";
+  return <PDFViewer documentId={id} action={action} />;
 }
 
 function LoadingFallback() {

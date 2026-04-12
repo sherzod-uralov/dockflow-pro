@@ -29,26 +29,8 @@ import { CustomModal, useModal } from "@/components/shared/ui/custom-modal";
 import DocumentHistoryView from "./document-history.view";
 import { useGetAllWorkflows, useDownloadDocument } from "@/features/workflow";
 import DocumentStepper from "@/features/document/component/document.stepper";
+import { formatDate } from "@/lib/date-utils";
 
-const formatDate = (dateString: string | undefined): string => {
-  if (!dateString) return "Ma'lumot yo'q";
-
-  try {
-    const date = new Date(dateString);
-
-    if (isNaN(date.getTime())) {
-      return "Ma'lumot yo'q";
-    }
-
-    return new Intl.DateTimeFormat("uz-UZ", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    }).format(date);
-  } catch {
-    return "Ma'lumot yo'q";
-  }
-};
 
 // Status Badge - memo bilan optimizatsiya
 export const StatusBadge = memo(({ status }: { status: string }) => {
@@ -246,23 +228,6 @@ const DocumentView = ({ id }: { id: string }) => {
             <InfoField label="Hujjat turi" value={data.documentType?.name || "—"} />
             <InfoField label="Jurnal" value={data.journal?.name || "—"} />
             <InfoField label="Holati" value={<StatusBadge status={data.status} />} />
-            <InfoField
-              label="Versiya"
-              value={
-                <Badge
-                  size="md"
-                  radius="sm"
-                  variant="light"
-                  style={{
-                    backgroundColor: "#e9ecef",
-                    color: "#1e3a5f",
-                    fontFamily: "monospace",
-                  }}
-                >
-                  v{data.versions || 0}
-                </Badge>
-              }
-            />
           </SimpleGrid>
 
           {/* Yaratuvchi va sanalar */}
@@ -367,9 +332,7 @@ const DocumentView = ({ id }: { id: string }) => {
                             radius="sm"
                             variant="outline"
                             onClick={() =>
-                              router.push(
-                                `/document-edit?id=${data.primaryAttachment?.id || file.id}&documentId=${data.id}&readonly=true`
-                              )
+                              router.push(`/pdf/${data.id}?action=read`)
                             }
                             styles={{
                               root: {
