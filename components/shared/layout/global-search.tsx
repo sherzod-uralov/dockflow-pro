@@ -29,7 +29,7 @@ import {
   IconCheckbox,
 } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery } from "react-query";
 import { axiosInstance } from "@/api/axios.instance";
 import { endpoints } from "@/api/axios.endpoints";
 
@@ -73,17 +73,19 @@ interface SearchResponse {
 }
 
 const useGlobalSearch = (q: string, type: SearchType, page: number) => {
-  return useQuery<SearchResponse>({
-    queryKey: ["global-search", q, type, page],
-    queryFn: async () => {
+  return useQuery<SearchResponse>(
+    ["global-search", q, type, page],
+    async () => {
       const { data } = await axiosInstance.get(endpoints.search.query, {
         params: { q, type, page, limit: 20 },
       });
       return data;
     },
-    enabled: q.length >= 2,
-    keepPreviousData: true,
-  });
+    {
+      enabled: q.length >= 2,
+      keepPreviousData: true,
+    }
+  );
 };
 
 const TYPE_TABS: { value: SearchType; label: string }[] = [
