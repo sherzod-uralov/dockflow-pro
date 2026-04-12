@@ -49,6 +49,7 @@ import {
 import { useGetDocumentById } from "@/features/document";
 import { useGetProfileQuery } from "@/features/login/hook/login.hook";
 import { VerificationStep } from "@/features/workflow/component/verification-step";
+import { colors } from "@/lib/colors";
 
 interface WorkflowDetailViewProps {
   workflow: WorkflowApiResponse;
@@ -217,7 +218,7 @@ const WorkflowDetailView = memo(({ workflow }: WorkflowDetailViewProps) => {
         currentStep.actionType === 'VERIFICATION' ? (
           <VerificationStep stepId={currentStep.id} />
         ) : (
-          <Paper p="lg" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+          <Paper p="lg" radius="sm" withBorder style={{ borderColor: colors.border }}>
             <Group justify="space-between" mb="md">
               <Group gap="sm">
                 <ThemeIcon size={40} radius="sm" variant="light" color="dark">
@@ -225,7 +226,7 @@ const WorkflowDetailView = memo(({ workflow }: WorkflowDetailViewProps) => {
                 </ThemeIcon>
                 <Box>
                   <Text size="sm" c="dimmed">Sizning vazifangiz</Text>
-                  <Text size="lg" fw={600} c="#212529">
+                  <Text size="lg" fw={600} c={colors.textPrimary}>
                     {currentActionLabel.label}
                   </Text>
                 </Box>
@@ -280,7 +281,7 @@ const WorkflowDetailView = memo(({ workflow }: WorkflowDetailViewProps) => {
                   onClick={() => handleComplete(currentStep.id)}
                   disabled={isLoading}
                   loading={completeMutation.isLoading}
-                  style={{ backgroundColor: "#1e3a5f" }}
+                  style={{ backgroundColor: colors.primary }}
                 >
                   {currentActionLabel.label}
                 </Button>
@@ -305,7 +306,7 @@ const WorkflowDetailView = memo(({ workflow }: WorkflowDetailViewProps) => {
         currentStep.status !== "COMPLETED" &&
         currentStep.status !== "REJECTED" &&
         workflow.status !== "COMPLETED" && (
-          <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef", backgroundColor: "#f8f9fa" }}>
+          <Paper p="md" radius="sm" withBorder style={{ borderColor: colors.border, backgroundColor: colors.bg }}>
             <Group gap="sm">
               <Avatar size="md" radius="xl" color="dark">
                 {currentStep.assignedToUser?.fullname
@@ -315,7 +316,7 @@ const WorkflowDetailView = memo(({ workflow }: WorkflowDetailViewProps) => {
               </Avatar>
               <Box style={{ flex: 1 }}>
                 <Text size="xs" c="dimmed">Kutilmoqda</Text>
-                <Text size="sm" fw={500} c="#212529">
+                <Text size="sm" fw={500} c={colors.textPrimary}>
                   {currentStep.assignedToUser?.fullname || "Tayinlanmagan"}
                 </Text>
               </Box>
@@ -329,9 +330,9 @@ const WorkflowDetailView = memo(({ workflow }: WorkflowDetailViewProps) => {
       <SimpleGrid cols={{ base: 1, lg: 3 }} spacing="md">
         {/* Steps timeline */}
         <Box style={{ gridColumn: "span 2" }}>
-          <Paper p="lg" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+          <Paper p="lg" radius="sm" withBorder style={{ borderColor: colors.border }}>
             <Group justify="space-between" mb="lg">
-              <Text size="md" fw={600} c="#212529">Bosqichlar</Text>
+              <Text size="md" fw={600} c={colors.textPrimary}>Bosqichlar</Text>
               <Badge variant="light" color={workflow.status === "COMPLETED" ? "green" : "gray"}>
                 {STATUS_LABELS[workflow.status] || workflow.status}
               </Badge>
@@ -359,7 +360,7 @@ const WorkflowDetailView = memo(({ workflow }: WorkflowDetailViewProps) => {
                           variant={isCompleted ? "filled" : isCurrentStep ? "light" : "outline"}
                           style={{
                             border: isCompleted ? "none" : "2px solid",
-                            borderColor: stepStatus.color === "green" ? "#51cf66" : stepStatus.color === "blue" ? "#339af0" : "#ced4da"
+                            borderColor: stepStatus.color === "green" ? colors.success : stepStatus.color === "blue" ? colors.info : colors.borderDark
                           }}
                         >
                           <ActionIcon size={18} />
@@ -368,7 +369,7 @@ const WorkflowDetailView = memo(({ workflow }: WorkflowDetailViewProps) => {
                       title={
                         <Group justify="space-between" wrap="nowrap">
                           <Group gap="xs">
-                            <Text size="md" fw={600} c="#212529">
+                            <Text size="md" fw={600} c={colors.textPrimary}>
                               {actionLabel.label}
                             </Text>
                             {isCurrentStep && (
@@ -385,10 +386,10 @@ const WorkflowDetailView = memo(({ workflow }: WorkflowDetailViewProps) => {
                         p="md"
                         mt="sm"
                         radius="sm"
-                        bg={isCurrentStep ? "#f1f3f5" : "white"}
+                        bg={isCurrentStep ? colors.bgSubtle : "white"}
                         withBorder={isCurrentStep}
                         style={{
-                          borderColor: isCurrentStep ? "#339af0" : "transparent",
+                          borderColor: isCurrentStep ? colors.info : "transparent",
                           transition: "all 0.2s ease"
                         }}
                       >
@@ -406,7 +407,7 @@ const WorkflowDetailView = memo(({ workflow }: WorkflowDetailViewProps) => {
                               .join("") || "??"}
                           </Avatar>
                           <Box style={{ flex: 1 }}>
-                            <Text size="sm" fw={500} c="#212529">
+                            <Text size="sm" fw={500} c={colors.textPrimary}>
                               {step.assignedToUser?.fullname || "Tayinlanmagan"}
                             </Text>
                             <Text size="xs" c="dimmed">
@@ -418,7 +419,7 @@ const WorkflowDetailView = memo(({ workflow }: WorkflowDetailViewProps) => {
                         {/* Completion Time */}
                         {step.completedAt && (
                           <Group gap="xs" mb="sm">
-                            <IconCheck size={14} color="#51cf66" />
+                            <IconCheck size={14} color={colors.success} />
                             <Text size="xs" c="dimmed">
                               Bajarilgan: {formatDateTime(step.completedAt)}
                             </Text>
@@ -428,7 +429,7 @@ const WorkflowDetailView = memo(({ workflow }: WorkflowDetailViewProps) => {
                         {/* Started Time for current step */}
                         {isCurrentStep && step.startedAt && (
                           <Group gap="xs" mb="sm">
-                            <IconClock size={14} color="#339af0" />
+                            <IconClock size={14} color={colors.info} />
                             <Text size="xs" c="dimmed">
                               Boshlangan: {formatDateTime(step.startedAt)}
                             </Text>
@@ -452,7 +453,7 @@ const WorkflowDetailView = memo(({ workflow }: WorkflowDetailViewProps) => {
                         {/* Due Date */}
                         {step.dueDate && (
                           <Group gap="xs" mb="sm">
-                            <IconCalendar size={14} color={new Date(step.dueDate) < new Date() && step.status !== "COMPLETED" ? "#c92a2a" : "#868e96"} />
+                            <IconCalendar size={14} color={new Date(step.dueDate) < new Date() && step.status !== "COMPLETED" ? colors.errorDark : colors.textDimmed} />
                             <Text
                               size="xs"
                               c={new Date(step.dueDate) < new Date() && step.status !== "COMPLETED" ? "red" : "dimmed"}
@@ -470,18 +471,18 @@ const WorkflowDetailView = memo(({ workflow }: WorkflowDetailViewProps) => {
                             p="sm"
                             mb="sm"
                             style={{
-                              backgroundColor: "#fff5f5",
+                              backgroundColor: colors.errorLight,
                               borderRadius: 6,
-                              border: "1px solid #ffe3e3",
+                              border: `1px solid ${colors.errorBg}`,
                             }}
                           >
                             <Group gap="xs" mb={4}>
-                              <IconAlertCircle size={14} color="#c92a2a" />
-                              <Text size="xs" fw={600} c="#c92a2a">
+                              <IconAlertCircle size={14} color={colors.errorDark} />
+                              <Text size="xs" fw={600} c={colors.errorDark}>
                                 Rad etildi
                               </Text>
                             </Group>
-                            <Text size="xs" c="#c92a2a">
+                            <Text size="xs" c={colors.errorDark}>
                               {step.rejectionReason}
                             </Text>
                           </Box>
@@ -501,14 +502,14 @@ const WorkflowDetailView = memo(({ workflow }: WorkflowDetailViewProps) => {
                                   wrap="nowrap"
                                   p="xs"
                                   style={{
-                                    backgroundColor: "#f8f9fa",
+                                    backgroundColor: colors.bg,
                                     borderRadius: 6,
                                   }}
                                 >
                                   <Group gap="xs" style={{ flex: 1, minWidth: 0 }}>
-                                    <IconFile size={16} color="#868e96" />
+                                    <IconFile size={16} color={colors.textDimmed} />
                                     <Box style={{ minWidth: 0, flex: 1 }}>
-                                      <Text size="xs" fw={500} c="#212529" truncate>
+                                      <Text size="xs" fw={500} c={colors.textPrimary} truncate>
                                         {att.attachment.fileName}
                                       </Text>
                                       <Text size="xs" c="dimmed">
@@ -545,22 +546,22 @@ const WorkflowDetailView = memo(({ workflow }: WorkflowDetailViewProps) => {
         {/* Right sidebar */}
         <Stack gap="md">
           {/* Document info */}
-          <Paper p="lg" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+          <Paper p="lg" radius="sm" withBorder style={{ borderColor: colors.border }}>
             <Group gap="xs" mb="md">
-              <IconFileText size={18} color="#1e3a5f" />
-              <Text size="md" fw={600} c="#212529">Hujjat</Text>
+              <IconFileText size={18} color={colors.primary} />
+              <Text size="md" fw={600} c={colors.textPrimary}>Hujjat</Text>
             </Group>
 
             <Stack gap="md">
               <Box>
                 <Text size="xs" c="dimmed" mb={4}>Nomi</Text>
-                <Text size="sm" fw={500} c="#212529">
+                <Text size="sm" fw={500} c={colors.textPrimary}>
                   {workflow.document?.title || "—"}
                 </Text>
               </Box>
               <Box>
                 <Text size="xs" c="dimmed" mb={4}>Raqam</Text>
-                <Text size="sm" style={{ fontFamily: "monospace" }} c="#495057">
+                <Text size="sm" style={{ fontFamily: "monospace" }} c={colors.textSecondary}>
                   {workflow.document?.documentNumber || "—"}
                 </Text>
               </Box>
@@ -600,7 +601,7 @@ const WorkflowDetailView = memo(({ workflow }: WorkflowDetailViewProps) => {
                     leftSection={<IconDownload size={16} />}
                     onClick={handleDownloadDocument}
                     loading={downloadMutation.isLoading}
-                    style={{ backgroundColor: "#1e3a5f" }}
+                    style={{ backgroundColor: colors.primary }}
                   >
                     Tasdiqlangan PDF
                   </Button>
@@ -611,10 +612,10 @@ const WorkflowDetailView = memo(({ workflow }: WorkflowDetailViewProps) => {
 
           {/* Creator */}
           {documentData?.createdBy && (
-            <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+            <Paper p="md" radius="sm" withBorder style={{ borderColor: colors.border }}>
               <Group gap="xs" mb="sm">
-                <IconUser size={16} color="#1e3a5f" />
-                <Text size="sm" fw={600} c="#212529">Yaratuvchi</Text>
+                <IconUser size={16} color={colors.primary} />
+                <Text size="sm" fw={600} c={colors.textPrimary}>Yaratuvchi</Text>
               </Group>
 
               <Group gap="sm">
@@ -624,7 +625,7 @@ const WorkflowDetailView = memo(({ workflow }: WorkflowDetailViewProps) => {
                     .map((n: string) => n[0])
                     .join("") || "??"}
                 </Avatar>
-                <Text size="sm" c="#212529">
+                <Text size="sm" c={colors.textPrimary}>
                   {documentData.createdBy.fullname}
                 </Text>
               </Group>
@@ -632,17 +633,17 @@ const WorkflowDetailView = memo(({ workflow }: WorkflowDetailViewProps) => {
           )}
 
           {/* Progress & Stats */}
-          <Paper p="lg" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+          <Paper p="lg" radius="sm" withBorder style={{ borderColor: colors.border }}>
             <Group gap="xs" mb="md">
-              <IconClock size={18} color="#1e3a5f" />
-              <Text size="md" fw={600} c="#212529">Ish jarayoni</Text>
+              <IconClock size={18} color={colors.primary} />
+              <Text size="md" fw={600} c={colors.textPrimary}>Ish jarayoni</Text>
             </Group>
 
             <Stack gap="md">
               <Box>
                 <Group justify="space-between" mb={6}>
                   <Text size="xs" c="dimmed">Jarayon</Text>
-                  <Text size="xs" fw={600} c="#1e3a5f">
+                  <Text size="xs" fw={600} c={colors.primary}>
                     {completedSteps}/{totalSteps}
                   </Text>
                 </Group>
@@ -663,13 +664,13 @@ const WorkflowDetailView = memo(({ workflow }: WorkflowDetailViewProps) => {
 
               <Box>
                 <Text size="xs" c="dimmed" mb={4}>Yaratilgan</Text>
-                <Text size="sm" c="#495057">{formatDateTime(workflow.createdAt)}</Text>
+                <Text size="sm" c={colors.textSecondary}>{formatDateTime(workflow.createdAt)}</Text>
               </Box>
 
               {workflow.updatedAt && workflow.updatedAt !== workflow.createdAt && (
                 <Box>
                   <Text size="xs" c="dimmed" mb={4}>Yangilangan</Text>
-                  <Text size="sm" c="#495057">{formatDateTime(workflow.updatedAt)}</Text>
+                  <Text size="sm" c={colors.textSecondary}>{formatDateTime(workflow.updatedAt)}</Text>
                 </Box>
               )}
 
@@ -678,7 +679,7 @@ const WorkflowDetailView = memo(({ workflow }: WorkflowDetailViewProps) => {
                   <Text size="xs" c="dimmed" mb={4}>Muddat</Text>
                   <Text
                     size="sm"
-                    c={new Date(workflow.deadline) < new Date() && workflow.status !== 'COMPLETED' ? "red" : "#495057"}
+                    c={new Date(workflow.deadline) < new Date() && workflow.status !== 'COMPLETED' ? "red" : colors.textSecondary}
                     fw={500}
                   >
                     {formatDateTime(workflow.deadline)}
@@ -709,7 +710,7 @@ const WorkflowDetailView = memo(({ workflow }: WorkflowDetailViewProps) => {
       <Modal
         opened={rejectModalOpen}
         onClose={() => setRejectModalOpen(false)}
-        title={<Text fw={600} c="#212529">Rad etish</Text>}
+        title={<Text fw={600} c={colors.textPrimary}>Rad etish</Text>}
         size="md"
         radius="sm"
         centered
@@ -718,12 +719,12 @@ const WorkflowDetailView = memo(({ workflow }: WorkflowDetailViewProps) => {
           <Box
             p="sm"
             style={{
-              backgroundColor: "#fff5f5",
+              backgroundColor: colors.errorLight,
               borderRadius: 4,
-              border: "1px solid #ffe3e3",
+              border: `1px solid ${colors.errorBg}`,
             }}
           >
-            <Text size="sm" c="#c92a2a">
+            <Text size="sm" c={colors.errorDark}>
               Hujjat tanlangan foydalanuvchiga qaytariladi
             </Text>
           </Box>

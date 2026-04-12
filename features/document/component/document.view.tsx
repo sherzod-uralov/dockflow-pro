@@ -30,57 +30,23 @@ import DocumentHistoryView from "./document-history.view";
 import { useGetAllWorkflows, useDownloadDocument } from "@/features/workflow";
 import DocumentStepper from "@/features/document/component/document.stepper";
 import { formatDate } from "@/lib/date-utils";
+import { DOCUMENT_STATUS, getStatusConfig, colors } from "@/lib/colors";
 
 
 // Status Badge - memo bilan optimizatsiya
 export const StatusBadge = memo(({ status }: { status: string }) => {
-  const config: Record<string, { label: string; bg: string; color: string; icon: typeof IconClock }> = {
-    DRAFT: {
-      label: "Tayyorlanmoqda",
-      bg: "#f1f3f5",
-      color: "#495057",
-      icon: IconClock
-    },
-    PENDING: {
-      label: "Jarayonda",
-      bg: "#fff3bf",
-      color: "#e67700",
-      icon: IconClock
-    },
-    IN_REVIEW: {
-      label: "Tekshiruvda",
-      bg: "#d0ebff",
-      color: "#1971c2",
-      icon: IconClock
-    },
-    APPROVED: {
-      label: "Tasdiqlangan",
-      bg: "#d3f9d8",
-      color: "#2b8a3e",
-      icon: IconCheck
-    },
-    REJECTED: {
-      label: "Bekor qilingan",
-      bg: "#ffe3e3",
-      color: "#c92a2a",
-      icon: IconAlertCircle
-    },
-    ARCHIVED: {
-      label: "Arxiv",
-      bg: "#e9ecef",
-      color: "#868e96",
-      icon: IconAlertCircle
-    },
-    PUBLISHED: {
-      label: "Chop etilgan",
-      bg: "#d3f9d8",
-      color: "#2b8a3e",
-      icon: IconCheck
-    },
+  const iconMap: Record<string, typeof IconClock> = {
+    DRAFT: IconClock,
+    PENDING: IconClock,
+    IN_REVIEW: IconClock,
+    APPROVED: IconCheck,
+    REJECTED: IconAlertCircle,
+    ARCHIVED: IconAlertCircle,
+    PUBLISHED: IconCheck,
   };
 
-  const cfg = config[status] || { label: status, bg: "#f1f3f5", color: "#495057", icon: IconAlertCircle };
-  const Icon = cfg.icon;
+  const cfg = getStatusConfig(DOCUMENT_STATUS, status);
+  const Icon = iconMap[status] || IconAlertCircle;
 
   return (
     <Badge
@@ -114,7 +80,7 @@ const InfoField = ({ label, value, style = {} }: { label: string; value: any; st
       size="sm"
       fw={500}
       style={{
-        color: "#1F3A5F",
+        color: colors.primary,
         wordBreak: "break-word",
         overflowWrap: "break-word",
         whiteSpace: "normal"
@@ -141,7 +107,7 @@ const InfoCard = memo(({
     gap="sm"
     p="sm"
     style={{
-      backgroundColor: "#f8f9fa",
+      backgroundColor: colors.bg,
       borderRadius: 4,
     }}
   >
@@ -149,7 +115,7 @@ const InfoCard = memo(({
       size="md"
       radius="xl"
       variant="light"
-      style={{ backgroundColor: "#e9ecef", color: "#495057" }}
+      style={{ backgroundColor: colors.border, color: colors.textSecondary }}
     >
       {icon}
     </ThemeIcon>
@@ -157,7 +123,7 @@ const InfoCard = memo(({
       <Text size="xs" c="dimmed">
         {label}
       </Text>
-      <Text size="sm" fw={500} c="#212529" lineClamp={1}>
+      <Text size="sm" fw={500} c={colors.textPrimary} lineClamp={1}>
         {value || "—"}
       </Text>
     </Box>
@@ -213,8 +179,8 @@ const DocumentView = ({ id }: { id: string }) => {
 
       {data && (
         <>
-          <Box pb="md" style={{ borderBottom: "1px solid #e9ecef" }}>
-            <Text size="lg" fw={600} c="#212529" mb={4}>
+          <Box pb="md" style={{ borderBottom: "1px solid ${colors.border}" }}>
+            <Text size="lg" fw={600} c={colors.textPrimary} mb={4}>
               {data.title}
             </Text>
             {data.description && (
@@ -231,7 +197,7 @@ const DocumentView = ({ id }: { id: string }) => {
           </SimpleGrid>
 
           {/* Yaratuvchi va sanalar */}
-          <Box pt="md" style={{ borderTop: "1px solid #e9ecef" }}>
+          <Box pt="md" style={{ borderTop: "1px solid ${colors.border}" }}>
             <SimpleGrid cols={{ base: 1, md: 2 }} spacing="sm">
               <InfoCard
                 icon={<IconUser size={14} />}
@@ -260,11 +226,11 @@ const DocumentView = ({ id }: { id: string }) => {
 
           {/* Biriktirilgan fayllar */}
           {data.attachments && data.attachments.length > 0 && (
-            <Box pt="md" style={{ borderTop: "1px solid #e9ecef" }}>
+            <Box pt="md" style={{ borderTop: "1px solid ${colors.border}" }}>
               <Group justify="space-between" mb="sm">
                 <Group gap="xs">
                   <IconFileText size={16} color="#868e96" />
-                  <Text size="sm" fw={600} c="#212529">
+                  <Text size="sm" fw={600} c={colors.textPrimary}>
                     Biriktirilgan fayllar
                   </Text>
                 </Group>
@@ -277,7 +243,7 @@ const DocumentView = ({ id }: { id: string }) => {
                   styles={{
                     root: {
                       backgroundColor: "#f0f4ff",
-                      color: "#1e3a5f",
+                      color: colors.primary,
                       "&:hover": { backgroundColor: "#dbe4ff" },
                     },
                   }}
@@ -293,7 +259,7 @@ const DocumentView = ({ id }: { id: string }) => {
                     p="sm"
                     radius="sm"
                     withBorder
-                    style={{ borderColor: "#e9ecef" }}
+                    style={{ borderColor: colors.border }}
                   >
                     <Group justify="space-between" wrap="nowrap">
                       <Group gap="sm" style={{ flex: 1, minWidth: 0 }}>
@@ -301,11 +267,11 @@ const DocumentView = ({ id }: { id: string }) => {
                           size="sm"
                           radius="sm"
                           variant="light"
-                          style={{ backgroundColor: "#e9ecef", color: "#1e3a5f" }}
+                          style={{ backgroundColor: colors.border, color: colors.primary }}
                         >
                           <IconFileText size={14} />
                         </ThemeIcon>
-                        <Text size="sm" fw={500} c="#212529" lineClamp={1}>
+                        <Text size="sm" fw={500} c={colors.textPrimary} lineClamp={1}>
                           {file.fileName}
                         </Text>
                       </Group>
@@ -316,7 +282,7 @@ const DocumentView = ({ id }: { id: string }) => {
                             size="xs"
                             radius="sm"
                             variant="filled"
-                            style={{ backgroundColor: "#1e3a5f" }}
+                            style={{ backgroundColor: colors.primary }}
                             onClick={() =>
                               router.push(
                                 `/document-edit?id=${data.primaryAttachment?.id || file.id}&documentId=${data.id}`
@@ -336,9 +302,9 @@ const DocumentView = ({ id }: { id: string }) => {
                             }
                             styles={{
                               root: {
-                                borderColor: "#e9ecef",
-                                color: "#495057",
-                                "&:hover": { backgroundColor: "#f8f9fa" },
+                                borderColor: colors.border,
+                                color: colors.textSecondary,
+                                "&:hover": { backgroundColor: colors.bg },
                               },
                             }}
                           >
@@ -354,10 +320,10 @@ const DocumentView = ({ id }: { id: string }) => {
                           loading={downloadMutation.isLoading}
                           styles={{
                             root: {
-                              borderColor: "#e9ecef",
-                              color: "#495057",
+                              borderColor: colors.border,
+                              color: colors.textSecondary,
                               "&:hover": {
-                                backgroundColor: "#f8f9fa",
+                                backgroundColor: colors.bg,
                               },
                             },
                           }}

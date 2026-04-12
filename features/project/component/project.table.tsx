@@ -6,6 +6,7 @@ import { ProjectGetResponse, PROJECT_STATUS_OPTIONS } from "../type/project.type
 import { useRouter } from "next/navigation";
 import { GuardedActionIcon } from "@/components/shared/permission";
 import { formatDate } from "@/lib/date-utils";
+import { colors } from "@/lib/colors";
 
 interface ProjectTableProps {
     projects: ProjectGetResponse[];
@@ -18,7 +19,7 @@ const ProjectTable = ({ projects, onEdit, onDelete }: ProjectTableProps) => {
 
     const rows = projects.map((project) => {
         const statusOption = PROJECT_STATUS_OPTIONS.find((s) => s.value === project.status);
-        const projectColor = project.color || "#3498db";
+        const projectColor = project.color || colors.info;
 
         return (
             <Table.Tr key={project.id} style={{ cursor: "pointer" }}>
@@ -124,8 +125,8 @@ const ProjectTable = ({ projects, onEdit, onDelete }: ProjectTableProps) => {
                     backgroundColor: "white",
                 },
                 th: {
-                    backgroundColor: "#f8f9fa",
-                    color: "#495057",
+                    backgroundColor: colors.bg,
+                    color: colors.textSecondary,
                     fontWeight: 600,
                     fontSize: "0.875rem",
                 },

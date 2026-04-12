@@ -38,6 +38,7 @@ import { useGetAllDepartments } from "@/features/department/hook/department.hook
 import ProjectForm from "../component/project.form";
 import ProjectCard from "../component/project.card";
 import ProjectTable from "../component/project.table";
+import { colors } from "@/lib/colors";
 
 const ProjectPage = () => {
     const createModal = useModal();
@@ -117,7 +118,7 @@ const ProjectPage = () => {
                 {/* Header */}
                 <Group justify="space-between">
                     <div>
-                        <Text size="xl" fw={700} c="#212529">
+                        <Text size="xl" fw={700} c={colors.textPrimary}>
                             Loyihalar
                         </Text>
                         <Text size="sm" c="dimmed">
@@ -128,7 +129,7 @@ const ProjectPage = () => {
                         permission="project:create"
                         leftSection={<IconPlus size={16} />}
                         onClick={createModal.openModal}
-                        style={{ backgroundColor: "#1e3a5f" }}
+                        style={{ backgroundColor: colors.primary }}
                     >
                         Yangi loyiha
                     </GuardedButton>
@@ -145,8 +146,8 @@ const ProjectPage = () => {
                             style={{ flex: 1, maxWidth: 400 }}
                             styles={{
                                 input: {
-                                    backgroundColor: "#f8f9fa",
-                                    border: "1px solid #e9ecef",
+                                    backgroundColor: colors.bg,
+                                    border: `1px solid ${colors.border}`,
                                 },
                             }}
                         />
@@ -163,8 +164,8 @@ const ProjectPage = () => {
                             style={{ width: 200 }}
                             styles={{
                                 input: {
-                                    backgroundColor: "#f8f9fa",
-                                    border: "1px solid #e9ecef",
+                                    backgroundColor: colors.bg,
+                                    border: `1px solid ${colors.border}`,
                                 },
                             }}
                         />
@@ -181,8 +182,8 @@ const ProjectPage = () => {
                             style={{ width: 200 }}
                             styles={{
                                 input: {
-                                    backgroundColor: "#f8f9fa",
-                                    border: "1px solid #e9ecef",
+                                    backgroundColor: colors.bg,
+                                    border: `1px solid ${colors.border}`,
                                 },
                             }}
                         />
@@ -215,7 +216,7 @@ const ProjectPage = () => {
                 {/* Content */}
                 {isLoading ? (
                     <Center py="xl">
-                        <Loader color="#1e3a5f" />
+                        <Loader color={colors.primary} />
                     </Center>
                 ) : data?.data && data.data.length > 0 ? (
                     <>
@@ -245,7 +246,7 @@ const ProjectPage = () => {
                                     total={Math.ceil(data.count / pageSize)}
                                     value={pageNumber}
                                     onChange={handlePageChange}
-                                    color="#1e3a5f"
+                                    color={colors.primary}
                                 />
                             </Group>
                         )}
@@ -260,7 +261,7 @@ const ProjectPage = () => {
                                 permission="project:create"
                                 leftSection={<IconPlus size={16} />}
                                 onClick={createModal.openModal}
-                                style={{ backgroundColor: "#1e3a5f" }}
+                                style={{ backgroundColor: colors.primary }}
                             >
                                 Birinchi loyihani yaratish
                             </GuardedButton>

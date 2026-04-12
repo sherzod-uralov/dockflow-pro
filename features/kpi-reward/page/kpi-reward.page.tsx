@@ -50,6 +50,7 @@ import {
 import { DataTable, DataTableColumn } from "@/components/shared/ui/custom-table";
 import KpiRewardView from "../component/kpi-reward.view";
 import KpiRewardRejectForm from "../component/kpi-reward-reject.form";
+import { colors } from "@/lib/colors";
 
 const MONTH_OPTIONS = [
   { value: "1", label: "Yanvar" },
@@ -193,10 +194,10 @@ const KpiRewardPage = () => {
       cell: ({ row }) =>
         row.original.user ? (
           <Group gap="sm" wrap="nowrap">
-            <Avatar size="sm" radius="xl" src={row.original.user.avatarUrl} style={{ backgroundColor: "#e7f5ff", flexShrink: 0 }}>
-              <Text size="xs" c="#1e3a5f" fw={500}>{getInitials(row.original.user.fullname)}</Text>
+            <Avatar size="sm" radius="xl" src={row.original.user.avatarUrl} style={{ backgroundColor: colors.primaryLight, flexShrink: 0 }}>
+              <Text size="xs" c={colors.primary} fw={500}>{getInitials(row.original.user.fullname)}</Text>
             </Avatar>
-            <Text size="sm" fw={500} c="#212529" lineClamp={1}>{row.original.user.fullname}</Text>
+            <Text size="sm" fw={500} c={colors.textPrimary} lineClamp={1}>{row.original.user.fullname}</Text>
           </Group>
         ) : <Text size="sm" c="dimmed">—</Text>,
       meta: { minWidth: 170 },
@@ -205,7 +206,7 @@ const KpiRewardPage = () => {
       accessorKey: "period",
       header: "Davr",
       cell: ({ row }) => (
-        <Text size="sm" c="#495057">
+        <Text size="sm" c={colors.textSecondary}>
           {MONTH_OPTIONS.find((m) => m.value === String(row.original.month))?.label} {row.original.year}
         </Text>
       ),
@@ -236,7 +237,7 @@ const KpiRewardPage = () => {
       accessorKey: "rewardAmount",
       header: "So'm",
       cell: ({ row }) => (
-        <Text size="sm" fw={500} c="#212529">{row.original.rewardAmount?.toLocaleString("uz-UZ") ?? "—"}</Text>
+        <Text size="sm" fw={500} c={colors.textPrimary}>{row.original.rewardAmount?.toLocaleString("uz-UZ") ?? "—"}</Text>
       ),
       meta: { width: 120 },
     },
@@ -244,7 +245,7 @@ const KpiRewardPage = () => {
       accessorKey: "rewardBhm",
       header: "BHM",
       cell: ({ row }) => (
-        <Text size="sm" c="#495057">{row.original.rewardBhm ?? "—"}</Text>
+        <Text size="sm" c={colors.textSecondary}>{row.original.rewardBhm ?? "—"}</Text>
       ),
       meta: { width: 60 },
     },
@@ -290,7 +291,7 @@ const KpiRewardPage = () => {
       accessorKey: "period",
       header: "Davr",
       cell: ({ row }) => (
-        <Text size="sm" c="#495057">
+        <Text size="sm" c={colors.textSecondary}>
           {MONTH_OPTIONS.find((m) => m.value === String(row.original.month))?.label} {row.original.year}
         </Text>
       ),
@@ -321,7 +322,7 @@ const KpiRewardPage = () => {
       accessorKey: "rewardAmount",
       header: "So'm",
       cell: ({ row }) => (
-        <Text size="sm" fw={500} c="#212529">{row.original.rewardAmount?.toLocaleString("uz-UZ") ?? "—"}</Text>
+        <Text size="sm" fw={500} c={colors.textPrimary}>{row.original.rewardAmount?.toLocaleString("uz-UZ") ?? "—"}</Text>
       ),
       meta: { width: 120 },
     },
@@ -329,7 +330,7 @@ const KpiRewardPage = () => {
       accessorKey: "rewardBhm",
       header: "BHM",
       cell: ({ row }) => (
-        <Text size="sm" c="#495057">{row.original.rewardBhm ?? "—"}</Text>
+        <Text size="sm" c={colors.textSecondary}>{row.original.rewardBhm ?? "—"}</Text>
       ),
       meta: { width: 60 },
     },
@@ -344,10 +345,10 @@ const KpiRewardPage = () => {
   const EmptyState = () => (
     <Center py={60}>
       <Stack align="center" gap="md">
-        <Box p={16} style={{ backgroundColor: "#f1f3f5", borderRadius: 12 }}>
-          <IconGift size={40} color="#868e96" stroke={1.5} />
+        <Box p={16} style={{ backgroundColor: colors.bgSubtle, borderRadius: 12 }}>
+          <IconGift size={40} color={colors.textDimmed} stroke={1.5} />
         </Box>
-        <Text size="lg" fw={500} c="#495057">
+        <Text size="lg" fw={500} c={colors.textSecondary}>
           Mukofot topilmadi
         </Text>
       </Stack>
@@ -359,7 +360,7 @@ const KpiRewardPage = () => {
       {/* Header */}
       <Group justify="space-between" mb="md">
         <Box>
-          <Text size="lg" fw={600} c="#212529">
+          <Text size="lg" fw={600} c={colors.textPrimary}>
             KPI Mukofotlar
           </Text>
           <Text size="sm" c="dimmed">
@@ -372,7 +373,7 @@ const KpiRewardPage = () => {
             leftSection={<IconChecks size={18} />}
             onClick={bulkApproveModal.openModal}
             radius="sm"
-            style={{ backgroundColor: "#1e3a5f" }}
+            style={{ backgroundColor: colors.primary }}
           >
             Barchasini tasdiqlash ({pendingCount})
           </GuardedButton>
@@ -380,7 +381,7 @@ const KpiRewardPage = () => {
       </Group>
 
       {/* Filters */}
-      <Paper p="md" radius="sm" withBorder mb="md" style={{ borderColor: "#e9ecef" }}>
+      <Paper p="md" radius="sm" withBorder mb="md" style={{ borderColor: colors.border }}>
         <Group gap="md">
           <Select
             placeholder="Yil"
@@ -427,7 +428,7 @@ const KpiRewardPage = () => {
 
         <Tabs.Panel value="all">
           {!isLoading && data?.data?.length === 0 ? (
-            <Paper radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+            <Paper radius="sm" withBorder style={{ borderColor: colors.border }}>
               <EmptyState />
             </Paper>
           ) : (
@@ -451,7 +452,7 @@ const KpiRewardPage = () => {
 
         <Tabs.Panel value="my">
           {!myLoading && (!myData?.data || myData.data.length === 0) ? (
-            <Paper radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+            <Paper radius="sm" withBorder style={{ borderColor: colors.border }}>
               <EmptyState />
             </Paper>
           ) : (

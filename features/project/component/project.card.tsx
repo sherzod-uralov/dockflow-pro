@@ -6,6 +6,7 @@ import { ProjectGetResponse, PROJECT_STATUS_OPTIONS, PROJECT_VISIBILITY_OPTIONS 
 import { useRouter } from "next/navigation";
 import { GuardedMenuItem } from "@/components/shared/permission";
 import { formatDate } from "@/lib/date-utils";
+import { colors } from "@/lib/colors";
 
 interface ProjectCardProps {
     project: ProjectGetResponse;
@@ -17,7 +18,7 @@ const ProjectCard = ({ project, onEdit, onDelete }: ProjectCardProps) => {
     const router = useRouter();
 
     const statusOption = PROJECT_STATUS_OPTIONS.find((s) => s.value === project.status);
-    const projectColor = project.color || "#3498db";
+    const projectColor = project.color || colors.info;
 
     // Calculate progress (mock - you can implement real logic based on tasks)
     const progress = project.status === "COMPLETED" ? 100 : project.status === "ACTIVE" ? 60 : 20;
@@ -59,7 +60,7 @@ const ProjectCard = ({ project, onEdit, onDelete }: ProjectCardProps) => {
                         <IconFolder size={20} color={projectColor} />
                     </div>
                     <div>
-                        <Text fw={600} size="md" c="#212529">
+                        <Text fw={600} size="md" c={colors.textPrimary}>
                             {project.name}
                         </Text>
                         <Text size="xs" c="dimmed">
@@ -150,7 +151,7 @@ const ProjectCard = ({ project, onEdit, onDelete }: ProjectCardProps) => {
                 color={projectColor}
                 styles={{
                     root: {
-                        backgroundColor: "#f1f3f5",
+                        backgroundColor: colors.bgSubtle,
                     },
                 }}
             />

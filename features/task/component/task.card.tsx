@@ -38,6 +38,7 @@ import {
 import { useUpdateTask, useCompleteTask, useUncompleteTask } from "../hook/task.hook";
 import { useGetUserQuery } from "@/features/admin/admin-users/hook/user.hook";
 import { formatDate } from "@/lib/date-utils";
+import { colors, TASK_PRIORITY } from "@/lib/colors";
 
 interface TaskCardProps {
     task: TaskGetResponse;
@@ -48,13 +49,13 @@ interface TaskCardProps {
     draggable?: boolean;
 }
 
-// Priority indicator colors
+// Priority indicator colors (from centralized color system)
 const PRIORITY_COLORS: Record<TaskPriority, string> = {
-    [TaskPriority.LOW]: "#95a5a6",
-    [TaskPriority.MEDIUM]: "#3498db",
-    [TaskPriority.HIGH]: "#f39c12",
-    [TaskPriority.URGENT]: "#e74c3c",
-    [TaskPriority.CRITICAL]: "#c0392b",
+    [TaskPriority.LOW]: TASK_PRIORITY.LOW.color,
+    [TaskPriority.MEDIUM]: TASK_PRIORITY.MEDIUM.color,
+    [TaskPriority.HIGH]: TASK_PRIORITY.HIGH.color,
+    [TaskPriority.URGENT]: TASK_PRIORITY.URGENT.color,
+    [TaskPriority.CRITICAL]: TASK_PRIORITY.CRITICAL.color,
 };
 
 const TaskCard = ({ task, onEdit, onDelete, onClick, onAddSubtask, draggable = false }: TaskCardProps) => {
@@ -65,7 +66,7 @@ const TaskCard = ({ task, onEdit, onDelete, onClick, onAddSubtask, draggable = f
     const [assigneeSearch, setAssigneeSearch] = useState("");
     const inputRef = useRef<HTMLInputElement>(null);
 
-    const priorityColor = PRIORITY_COLORS[task.priority] || "#95a5a6";
+    const priorityColor = PRIORITY_COLORS[task.priority] || TASK_PRIORITY.LOW.color;
     const isOverdue = task.dueDate && new Date(task.dueDate) < new Date() && !task.boardColumn?.isClosed;
 
     // Users and update mutation
@@ -132,7 +133,7 @@ const TaskCard = ({ task, onEdit, onDelete, onClick, onAddSubtask, draggable = f
             style={{
                 cursor: draggable ? "grab" : onClick ? "pointer" : "default",
                 transition: "all 0.15s ease",
-                borderColor: isHovered ? "#dee2e6" : "#e9ecef",
+                borderColor: isHovered ? colors.borderLight : colors.border,
                 backgroundColor: isHovered ? "#fafafa" : "#fff",
             }}
             onMouseEnter={() => setIsHovered(true)}
@@ -146,7 +147,7 @@ const TaskCard = ({ task, onEdit, onDelete, onClick, onAddSubtask, draggable = f
             {/* Parent task indicator */}
             {task.parentTaskId && task.parentTask && (
                 <Group gap={4} mb={4} style={{ opacity: 0.7 }}>
-                    <IconSubtask size={12} color="#868e96" />
+                    <IconSubtask size={12} color={colors.textDimmed} />
                     <Text size="xs" c="dimmed" lineClamp={1}>
                         {task.parentTask.title}
                     </Text>
@@ -292,7 +293,7 @@ const TaskCard = ({ task, onEdit, onDelete, onClick, onAddSubtask, draggable = f
                         flex: 1,
                         fontSize: 14,
                         fontWeight: 500,
-                        color: isCompleted ? "#868e96" : "#212529",
+                        color: isCompleted ? colors.textDimmed : colors.textPrimary,
                         textDecoration: isCompleted ? "line-through" : "none",
                         padding: 0,
                         lineHeight: 1.4,
@@ -303,7 +304,7 @@ const TaskCard = ({ task, onEdit, onDelete, onClick, onAddSubtask, draggable = f
                 <Text
                     fw={500}
                     size="sm"
-                    c={isCompleted ? "dimmed" : "#212529"}
+                    c={isCompleted ? "dimmed" : colors.textPrimary}
                     lineClamp={2}
                     lh={1.4}
                     style={{
@@ -383,17 +384,17 @@ const TaskCard = ({ task, onEdit, onDelete, onClick, onAddSubtask, draggable = f
                                     radius="xl"
                                     color="gray"
                                     style={{
-                                        border: "2px dashed #dee2e6",
+                                        border: `2px dashed ${colors.borderLight}`,
                                         backgroundColor: "transparent",
                                     }}
                                 >
-                                    <IconPlus size={12} color="#adb5bd" />
+                                    <IconPlus size={12} color={colors.textMuted} />
                                 </Avatar>
                             )}
                         </div>
                     </Popover.Target>
                     <Popover.Dropdown p={0} onClick={(e) => e.stopPropagation()}>
-                        <Box p="xs" style={{ borderBottom: "1px solid #e9ecef" }}>
+                        <Box p="xs" style={{ borderBottom: `1px solid ${colors.border}` }}>
                             <TextInput
                                 placeholder="Qidirish..."
                                 size="xs"
@@ -403,8 +404,8 @@ const TaskCard = ({ task, onEdit, onDelete, onClick, onAddSubtask, draggable = f
                                 onKeyDown={(e) => e.stopPropagation()}
                                 styles={{
                                     input: {
-                                        backgroundColor: "#f8f9fa",
-                                        border: "1px solid #e9ecef",
+                                        backgroundColor: colors.bg,
+                                        border: `1px solid ${colors.border}`,
                                     },
                                 }}
                             />
@@ -423,7 +424,7 @@ const TaskCard = ({ task, onEdit, onDelete, onClick, onAddSubtask, draggable = f
                                                 p="xs"
                                                 style={{
                                                     borderRadius: 6,
-                                                    backgroundColor: isAssigned ? "#e7f5ff" : "transparent",
+                                                    backgroundColor: isAssigned ? colors.primaryLight : "transparent",
                                                     cursor: "pointer",
                                                     transition: "background-color 0.15s ease",
                                                 }}
@@ -433,7 +434,7 @@ const TaskCard = ({ task, onEdit, onDelete, onClick, onAddSubtask, draggable = f
                                                 }}
                                                 onMouseEnter={(e) => {
                                                     if (!isAssigned) {
-                                                        e.currentTarget.style.backgroundColor = "#f8f9fa";
+                                                        e.currentTarget.style.backgroundColor = colors.bg;
                                                     }
                                                 }}
                                                 onMouseLeave={(e) => {
@@ -484,7 +485,7 @@ const TaskCard = ({ task, onEdit, onDelete, onClick, onAddSubtask, draggable = f
                     {/* Due date */}
                     {task.dueDate && (
                         <Group gap={4}>
-                            <IconCalendar size={12} color={isOverdue ? "#e74c3c" : "#adb5bd"} />
+                            <IconCalendar size={12} color={isOverdue ? colors.error : colors.textMuted} />
                             <Text size="xs" c={isOverdue ? "red" : "dimmed"} fw={isOverdue ? 500 : 400}>
                                 {formatDate(task.dueDate)}
                             </Text>
@@ -494,7 +495,7 @@ const TaskCard = ({ task, onEdit, onDelete, onClick, onAddSubtask, draggable = f
                     {/* Subtasks count */}
                     {task._count?.subtasks ? (
                         <Group gap={3}>
-                            <IconSubtask size={12} color="#adb5bd" />
+                            <IconSubtask size={12} color={colors.textMuted} />
                             <Text size="xs" c="dimmed">
                                 {task._count.subtasks}
                             </Text>
@@ -504,7 +505,7 @@ const TaskCard = ({ task, onEdit, onDelete, onClick, onAddSubtask, draggable = f
                     {/* Comments count */}
                     {task._count?.comments ? (
                         <Group gap={3}>
-                            <IconMessage size={12} color="#adb5bd" />
+                            <IconMessage size={12} color={colors.textMuted} />
                             <Text size="xs" c="dimmed">
                                 {task._count.comments}
                             </Text>
@@ -514,7 +515,7 @@ const TaskCard = ({ task, onEdit, onDelete, onClick, onAddSubtask, draggable = f
                     {/* Attachments count */}
                     {task._count?.attachments ? (
                         <Group gap={3}>
-                            <IconPaperclip size={12} color="#adb5bd" />
+                            <IconPaperclip size={12} color={colors.textMuted} />
                             <Text size="xs" c="dimmed">
                                 {task._count.attachments}
                             </Text>

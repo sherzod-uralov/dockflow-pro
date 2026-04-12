@@ -4,6 +4,7 @@ import { Box, Table, Text, Badge, Group, Avatar, ActionIcon, Menu, rem } from "@
 import { IconDots, IconPencil, IconTrash } from "@tabler/icons-react";
 import { TaskGetResponse, TASK_PRIORITY_OPTIONS } from "../type/task.type";
 import { formatDate } from "@/lib/date-utils";
+import { colors } from "@/lib/colors";
 
 interface TaskListViewProps {
     tasks: TaskGetResponse[];
@@ -46,8 +47,8 @@ const TaskListView = ({ tasks, onEditTask, onDeleteTask }: TaskListViewProps) =>
                         style={{
                             textTransform: 'capitalize',
                             fontWeight: 600,
-                            backgroundColor: `${boardColumn?.color || "#95a5a6"}20`,
-                            color: boardColumn?.color || "#95a5a6",
+                            backgroundColor: `${boardColumn?.color || colors.textDimmed}20`,
+                            color: boardColumn?.color || colors.textDimmed,
                         }}
                     >
                         {boardColumn?.name || "Noma'lum"}
@@ -162,19 +163,19 @@ const TaskListView = ({ tasks, onEditTask, onDeleteTask }: TaskListViewProps) =>
             style={{
                 backgroundColor: "white",
                 borderRadius: 8,
-                border: "1px solid #e9ecef",
+                border: `1px solid ${colors.border}`,
                 overflow: "hidden",
                 boxShadow: "0 1px 3px rgba(0,0,0,0.05)"
             }}
         >
             <Table verticalSpacing="md" highlightOnHover withRowBorders>
-                <Table.Thead style={{ backgroundColor: "#f8f9fa", borderBottom: '1px solid #e9ecef' }}>
+                <Table.Thead style={{ backgroundColor: colors.bg, borderBottom: `1px solid ${colors.border}` }}>
                     <Table.Tr>
-                        <Table.Th style={{ fontWeight: 600, color: '#495057' }}>Vazifa nomi</Table.Th>
-                        <Table.Th style={{ fontWeight: 600, color: '#495057' }}>Holati</Table.Th>
-                        <Table.Th style={{ fontWeight: 600, color: '#495057' }}>Muhimlik</Table.Th>
-                        <Table.Th style={{ fontWeight: 600, color: '#495057' }}>Mas'ul</Table.Th>
-                        <Table.Th style={{ fontWeight: 600, color: '#495057' }}>Muddat</Table.Th>
+                        <Table.Th style={{ fontWeight: 600, color: colors.textSecondary }}>Vazifa nomi</Table.Th>
+                        <Table.Th style={{ fontWeight: 600, color: colors.textSecondary }}>Holati</Table.Th>
+                        <Table.Th style={{ fontWeight: 600, color: colors.textSecondary }}>Muhimlik</Table.Th>
+                        <Table.Th style={{ fontWeight: 600, color: colors.textSecondary }}>Mas'ul</Table.Th>
+                        <Table.Th style={{ fontWeight: 600, color: colors.textSecondary }}>Muddat</Table.Th>
                         <Table.Th style={{ width: 50 }}></Table.Th>
                     </Table.Tr>
                 </Table.Thead>

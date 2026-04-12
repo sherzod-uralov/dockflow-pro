@@ -23,6 +23,7 @@ import {
   KPI_REWARD_STATUS_OPTIONS,
 } from "../type/kpi-reward.type";
 import { formatDate } from "@/lib/date-utils";
+import { colors } from "@/lib/colors";
 
 interface KpiRewardViewProps {
   reward: KpiRewardGetResponse;
@@ -68,14 +69,14 @@ const KpiRewardView = ({ reward }: KpiRewardViewProps) => {
                   size="lg"
                   radius="xl"
                   src={reward.user.avatarUrl}
-                  style={{ backgroundColor: "#e7f5ff" }}
+                  style={{ backgroundColor: colors.primaryLight }}
                 >
-                  <Text size="sm" c="#1e3a5f" fw={500}>
+                  <Text size="sm" c={colors.primary} fw={500}>
                     {getInitials(reward.user.fullname)}
                   </Text>
                 </Avatar>
                 <Box>
-                  <Text size="xl" fw={600} c="#212529">
+                  <Text size="xl" fw={600} c={colors.textPrimary}>
                     {reward.user.fullname}
                   </Text>
                   <Text size="sm" c="dimmed">
@@ -85,7 +86,7 @@ const KpiRewardView = ({ reward }: KpiRewardViewProps) => {
               </>
             ) : (
               <Box>
-                <Text size="xl" fw={600} c="#212529">
+                <Text size="xl" fw={600} c={colors.textPrimary}>
                   Mukofot ma'lumotlari
                 </Text>
               </Box>
@@ -106,21 +107,21 @@ const KpiRewardView = ({ reward }: KpiRewardViewProps) => {
 
       {/* Period, Score, Reward, Tier */}
       <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
-        <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+        <Paper p="md" radius="sm" withBorder style={{ borderColor: colors.border }}>
           <Group gap="xs" mb="sm">
-            <IconCalendar size={16} color="#868e96" />
+            <IconCalendar size={16} color={colors.textDimmed} />
             <Text size="xs" c="dimmed" tt="uppercase" fw={600}>
               Davr
             </Text>
           </Group>
-          <Text size="lg" fw={600} c="#212529">
+          <Text size="lg" fw={600} c={colors.textPrimary}>
             {MONTH_LABELS[reward.month]} {reward.year}
           </Text>
         </Paper>
 
-        <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+        <Paper p="md" radius="sm" withBorder style={{ borderColor: colors.border }}>
           <Group gap="xs" mb="sm">
-            <IconTrophy size={16} color="#868e96" />
+            <IconTrophy size={16} color={colors.textDimmed} />
             <Text size="xs" c="dimmed" tt="uppercase" fw={600}>
               Yakuniy ball
             </Text>
@@ -130,26 +131,26 @@ const KpiRewardView = ({ reward }: KpiRewardViewProps) => {
           </Badge>
         </Paper>
 
-        <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+        <Paper p="md" radius="sm" withBorder style={{ borderColor: colors.border }}>
           <Group gap="xs" mb="sm">
-            <IconCash size={16} color="#868e96" />
+            <IconCash size={16} color={colors.textDimmed} />
             <Text size="xs" c="dimmed" tt="uppercase" fw={600}>
               Mukofot
             </Text>
           </Group>
           <Stack gap={4}>
-            <Text size="lg" fw={600} c="#212529">
+            <Text size="lg" fw={600} c={colors.textPrimary}>
               {reward.rewardAmount?.toLocaleString("uz-UZ") ?? "—"} so'm
             </Text>
-            <Text size="sm" c="#495057">
+            <Text size="sm" c={colors.textSecondary}>
               {reward.rewardBhm} BHM
             </Text>
           </Stack>
         </Paper>
 
-        <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+        <Paper p="md" radius="sm" withBorder style={{ borderColor: colors.border }}>
           <Group gap="xs" mb="sm">
-            <IconTrophy size={16} color={reward.rewardTier?.color || "#868e96"} />
+            <IconTrophy size={16} color={reward.rewardTier?.color || colors.textDimmed} />
             <Text size="xs" c="dimmed" tt="uppercase" fw={600}>
               Daraja
             </Text>
@@ -182,14 +183,14 @@ const KpiRewardView = ({ reward }: KpiRewardViewProps) => {
       {/* Dates */}
       <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
         {reward.approvedAt && (
-          <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+          <Paper p="md" radius="sm" withBorder style={{ borderColor: colors.border }}>
             <Group gap="xs" mb="sm">
-              <IconCalendar size={16} color="#3498db" />
+              <IconCalendar size={16} color={colors.info} />
               <Text size="xs" c="dimmed" tt="uppercase" fw={600}>
                 Tasdiqlangan
               </Text>
             </Group>
-            <Text size="sm" c="#495057">
+            <Text size="sm" c={colors.textSecondary}>
               {formatDate(reward.approvedAt)}
               {reward.approvedBy && ` — ${reward.approvedBy.fullname}`}
             </Text>
@@ -197,28 +198,28 @@ const KpiRewardView = ({ reward }: KpiRewardViewProps) => {
         )}
 
         {reward.paidAt && (
-          <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+          <Paper p="md" radius="sm" withBorder style={{ borderColor: colors.border }}>
             <Group gap="xs" mb="sm">
-              <IconCalendar size={16} color="#2ecc71" />
+              <IconCalendar size={16} color={colors.success} />
               <Text size="xs" c="dimmed" tt="uppercase" fw={600}>
                 To'langan sana
               </Text>
             </Group>
-            <Text size="sm" c="#495057">
+            <Text size="sm" c={colors.textSecondary}>
               {formatDate(reward.paidAt)}
             </Text>
           </Paper>
         )}
 
         {reward.rejectedAt && (
-          <Paper p="md" radius="sm" withBorder style={{ borderColor: "#fde2e2" }}>
+          <Paper p="md" radius="sm" withBorder style={{ borderColor: colors.errorBg }}>
             <Group gap="xs" mb="sm">
-              <IconCalendar size={16} color="#e74c3c" />
+              <IconCalendar size={16} color={colors.error} />
               <Text size="xs" c="dimmed" tt="uppercase" fw={600}>
                 Rad etilgan sana
               </Text>
             </Group>
-            <Text size="sm" c="#495057">
+            <Text size="sm" c={colors.textSecondary}>
               {formatDate(reward.rejectedAt)}
             </Text>
           </Paper>
@@ -227,14 +228,14 @@ const KpiRewardView = ({ reward }: KpiRewardViewProps) => {
 
       {/* Rejection Reason */}
       {reward.rejectionReason && (
-        <Paper p="md" radius="sm" withBorder style={{ borderColor: "#fde2e2" }}>
+        <Paper p="md" radius="sm" withBorder style={{ borderColor: colors.errorBg }}>
           <Group gap="xs" mb="sm">
-            <IconFileDescription size={16} color="#e74c3c" />
+            <IconFileDescription size={16} color={colors.error} />
             <Text size="xs" c="red" tt="uppercase" fw={600}>
               Rad etish sababi
             </Text>
           </Group>
-          <Text size="sm" c="#495057" style={{ lineHeight: 1.6 }}>
+          <Text size="sm" c={colors.textSecondary} style={{ lineHeight: 1.6 }}>
             {reward.rejectionReason}
           </Text>
         </Paper>

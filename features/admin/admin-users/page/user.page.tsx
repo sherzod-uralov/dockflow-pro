@@ -43,6 +43,7 @@ import { useDebounce } from "@/hooks/use-debaunce";
 import { DataTable, DataTableColumn } from "@/components/shared/ui/custom-table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatDateTime } from "@/lib/date-utils";
+import { colors } from "@/lib/colors";
 
 const UserPage = () => {
   const router = useRouter();
@@ -142,7 +143,7 @@ const UserPage = () => {
                   .join("")}
               </AvatarFallback>
             </Avatar>
-            <Text size="sm" fw={500} c="#212529">
+            <Text size="sm" fw={500} c={colors.textPrimary}>
               {user.fullname}
             </Text>
           </Group>
@@ -154,7 +155,7 @@ const UserPage = () => {
       accessorKey: "role",
       header: "ROL",
       cell: ({ row }) => (
-        <Text size="sm" c="#495057">
+        <Text size="sm" c={colors.textSecondary}>
           {row.original.role?.name}
         </Text>
       ),
@@ -164,7 +165,7 @@ const UserPage = () => {
       accessorKey: "department",
       header: "BO'LIMI",
       cell: ({ row }) => (
-        <Text size="sm" c="#495057">
+        <Text size="sm" c={colors.textSecondary}>
           {row.original.department?.name || "-"}
         </Text>
       ),
@@ -180,7 +181,7 @@ const UserPage = () => {
         }
         const date = new Date(lastLogin);
         return (
-          <Text size="sm" c="#495057">
+          <Text size="sm" c={colors.textSecondary}>
             {formatDateTime(date)}
           </Text>
         );
@@ -235,13 +236,13 @@ const UserPage = () => {
         <Box
           p={16}
           style={{
-            backgroundColor: "#f1f3f5",
+            backgroundColor: colors.bgSubtle,
             borderRadius: 12,
           }}
         >
-          <IconUser size={40} color="#868e96" stroke={1.5} />
+          <IconUser size={40} color={colors.textDimmed} stroke={1.5} />
         </Box>
-        <Text size="lg" fw={500} c="#495057">
+        <Text size="lg" fw={500} c={colors.textSecondary}>
           Foydalanuvchi topilmadi
         </Text>
         <Text size="sm" c="dimmed" ta="center">
@@ -256,7 +257,7 @@ const UserPage = () => {
       {/* Header */}
       <Group justify="space-between" mb="md">
         <Box>
-          <Text size="lg" fw={600} c="#212529">
+          <Text size="lg" fw={600} c={colors.textPrimary}>
             Foydalanuvchilar
           </Text>
           <Text size="sm" c="dimmed">
@@ -270,8 +271,8 @@ const UserPage = () => {
           radius="sm"
           styles={{
             root: {
-              backgroundColor: "#1e3a5f",
-              "&:hover": { backgroundColor: "#162d4a" },
+              backgroundColor: colors.primary,
+              "&:hover": { backgroundColor: colors.primaryHover },
             },
           }}
         >
@@ -285,11 +286,11 @@ const UserPage = () => {
         radius="sm"
         withBorder
         mb="md"
-        style={{ borderColor: "#e9ecef" }}
+        style={{ borderColor: colors.border }}
       >
         <TextInput
           placeholder="Foydalanuvchi qidirish..."
-          leftSection={<IconSearch size={18} color="#868e96" />}
+          leftSection={<IconSearch size={18} color={colors.textDimmed} />}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           radius="sm"
@@ -300,7 +301,7 @@ const UserPage = () => {
       {/* Table */}
       <Box>
         {!isLoading && data?.data?.length === 0 ? (
-          <Paper radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+          <Paper radius="sm" withBorder style={{ borderColor: colors.border }}>
             <EmptyState />
           </Paper>
         ) : (

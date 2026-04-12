@@ -92,6 +92,7 @@ import { useGetAllTaskAttachments } from "@/features/task-attachment/hook/task-a
 import { useGetAllTaskChecklists } from "@/features/task-checklist/hook/task-checklist.hook";
 import { useGetUserQuery } from "@/features/admin/admin-users/hook/user.hook";
 
+import { colors } from "@/lib/colors";
 import { StatusBadge } from "./status-badge";
 import { PriorityBadge } from "./priority-badge";
 import { TimeEntryItem } from "./time-entry-item";
@@ -235,16 +236,16 @@ export const TaskDetailDrawer = ({
       >
         {taskLoading ? (
           <Box style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%" }}>
-            <Loader size="md" color="#1e3a5f" />
+            <Loader size="md" color={colors.primary} />
           </Box>
         ) : task ? (
           <Box style={{ display: "flex", flexDirection: "column", height: "100%", overflow: "hidden" }}>
             {/* ─── Header ─── */}
-            <Box p="md" style={{ borderBottom: "1px solid #e9ecef", flexShrink: 0 }}>
+            <Box p="md" style={{ borderBottom: `1px solid ${colors.border}`, flexShrink: 0 }}>
               <Group justify="space-between" mb="sm">
                 <Group gap="sm">
                   {task.project && (
-                    <Badge size="sm" variant="light" style={{ backgroundColor: `${task.project.color || "#1e3a5f"}20`, color: task.project.color || "#1e3a5f" }}>
+                    <Badge size="sm" variant="light" style={{ backgroundColor: `${task.project.color || colors.primary}20`, color: task.project.color || colors.primary }}>
                       {task.project.key}-{task.taskNumber}
                     </Badge>
                   )}
@@ -329,8 +330,8 @@ export const TaskDetailDrawer = ({
                       setIsEditingTitle(true);
                     }}
                   >
-                    <Text size="lg" fw={600} c="#212529">{task.title}</Text>
-                    {canUpdateTask && <IconEdit size={14} color="#adb5bd" />}
+                    <Text size="lg" fw={600} c={colors.textPrimary}>{task.title}</Text>
+                    {canUpdateTask && <IconEdit size={14} color={colors.textMuted} />}
                   </Group>
                 </Tooltip>
               )}
@@ -371,7 +372,7 @@ export const TaskDetailDrawer = ({
                   <Stack gap="lg">
                     {/* Tavsif */}
                     <Box>
-                      <Text size="sm" fw={600} c="#495057" mb={6}>Tavsif</Text>
+                      <Text size="sm" fw={600} c={colors.textSecondary} mb={6}>Tavsif</Text>
                       {isEditingDesc ? (
                         <Textarea
                           value={editDesc}
@@ -383,7 +384,7 @@ export const TaskDetailDrawer = ({
                       ) : (
                         <Paper
                           p="sm" radius="sm"
-                          style={{ backgroundColor: "#f8f9fa", cursor: canUpdateTask ? "pointer" : "default", minHeight: 60 }}
+                          style={{ backgroundColor: colors.bg, cursor: canUpdateTask ? "pointer" : "default", minHeight: 60 }}
                           onClick={() => {
                             if (!canUpdateTask) return;
                             setEditDesc(task.description || "");
@@ -392,10 +393,10 @@ export const TaskDetailDrawer = ({
                           title={canUpdateTask ? "" : "Bu amalni bajarish uchun ruxsat yo'q"}
                         >
                           {task.description ? (
-                            <Text size="sm" c="#495057" style={{ whiteSpace: "pre-wrap" }}>{task.description}</Text>
+                            <Text size="sm" c={colors.textSecondary} style={{ whiteSpace: "pre-wrap" }}>{task.description}</Text>
                           ) : (
                             <Group gap={6}>
-                              <IconEdit size={14} color="#adb5bd" />
+                              <IconEdit size={14} color={colors.textMuted} />
                               <Text size="sm" c="dimmed">Tavsif yozish uchun bosing</Text>
                             </Group>
                           )}
@@ -407,37 +408,37 @@ export const TaskDetailDrawer = ({
 
                     {/* Muhimlik */}
                     <Box>
-                      <Text size="sm" fw={600} c="#495057" mb={6}>Muhimlik</Text>
+                      <Text size="sm" fw={600} c={colors.textSecondary} mb={6}>Muhimlik</Text>
                       <Select
                         data={TASK_PRIORITY_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
                         value={task.priority}
                         onChange={(value) => value && handleUpdateField("priority", value)}
                         size="sm"
                         radius="sm"
-                        styles={{ input: { backgroundColor: "#f8f9fa", border: "1px solid #e9ecef" } }}
+                        styles={{ input: { backgroundColor: colors.bg, border: `1px solid ${colors.border}` } }}
                       />
                     </Box>
 
                     {/* Sanalar */}
                     <Group grow>
                       <Box>
-                        <Text size="sm" fw={600} c="#495057" mb={6}>Boshlanish</Text>
+                        <Text size="sm" fw={600} c={colors.textSecondary} mb={6}>Boshlanish</Text>
                         <DatePickerInput
                           value={task.startDate ? new Date(task.startDate) : null}
                           onChange={(date) => handleUpdateField("startDate", date ? new Date(date).toISOString() : null)}
                           placeholder="Tanlang"
                           size="sm" radius="sm" clearable locale="uz"
-                          styles={{ input: { backgroundColor: "#f8f9fa", border: "1px solid #e9ecef" } }}
+                          styles={{ input: { backgroundColor: colors.bg, border: `1px solid ${colors.border}` } }}
                         />
                       </Box>
                       <Box>
-                        <Text size="sm" fw={600} c="#495057" mb={6}>Muddat</Text>
+                        <Text size="sm" fw={600} c={colors.textSecondary} mb={6}>Muddat</Text>
                         <DatePickerInput
                           value={task.dueDate ? new Date(task.dueDate) : null}
                           onChange={(date) => handleUpdateField("dueDate", date ? new Date(date).toISOString() : null)}
                           placeholder="Tanlang"
                           size="sm" radius="sm" clearable locale="uz"
-                          styles={{ input: { backgroundColor: "#f8f9fa", border: "1px solid #e9ecef" } }}
+                          styles={{ input: { backgroundColor: colors.bg, border: `1px solid ${colors.border}` } }}
                         />
                       </Box>
                     </Group>
@@ -446,13 +447,13 @@ export const TaskDetailDrawer = ({
 
                     {/* Mas'ullar */}
                     <Box>
-                      <Text size="sm" fw={600} c="#495057" mb={6}>Mas'ullar</Text>
+                      <Text size="sm" fw={600} c={colors.textSecondary} mb={6}>Mas'ullar</Text>
                       <Group gap="xs">
                         {task.assignees?.map((assignee) => (
                           <Tooltip key={assignee.id} label={`${assignee.user.fullname} — olib tashlash uchun bosing`}>
                             <Avatar
                               size="sm" radius="xl" color="blue" src={assignee.user.avatarUrl}
-                              style={{ cursor: "pointer", border: "2px solid #e7f5ff" }}
+                              style={{ cursor: "pointer", border: `2px solid ${colors.primaryLight}` }}
                               onClick={() => {
                                 const newIds = task.assignees?.map((a) => a.user.id).filter((id) => id !== assignee.user.id) || [];
                                 handleUpdateField("assigneeIds", newIds);
@@ -474,20 +475,20 @@ export const TaskDetailDrawer = ({
                               size="sm"
                               radius="xl"
                               onClick={() => setAssigneePopoverOpen((o) => !o)}
-                              style={{ backgroundColor: "#f8f9fa", border: "1px dashed #dee2e6" }}
+                              style={{ backgroundColor: colors.bg, border: `1px dashed ${colors.borderLight}` }}
                             >
                               <IconPlus size={14} />
                             </GuardedActionIcon>
                           </Popover.Target>
                           <Popover.Dropdown p={0}>
-                            <Box p="xs" style={{ borderBottom: "1px solid #e9ecef" }}>
+                            <Box p="xs" style={{ borderBottom: `1px solid ${colors.border}` }}>
                               <TextInput
                                 placeholder="Qidirish..."
                                 size="xs"
                                 leftSection={<IconSearch size={14} />}
                                 value={assigneeSearch}
                                 onChange={(e) => setAssigneeSearch(e.target.value)}
-                                styles={{ input: { backgroundColor: "#f8f9fa", border: "1px solid #e9ecef" } }}
+                                styles={{ input: { backgroundColor: colors.bg, border: `1px solid ${colors.border}` } }}
                               />
                             </Box>
                             <ScrollArea.Autosize mah={200} p="xs">
@@ -500,7 +501,7 @@ export const TaskDetailDrawer = ({
                                     return (
                                       <Paper
                                         key={user.id} p="xs" radius="sm"
-                                        style={{ backgroundColor: isAssigned ? "#e7f5ff" : "transparent", cursor: "pointer" }}
+                                        style={{ backgroundColor: isAssigned ? colors.primaryLight : "transparent", cursor: "pointer" }}
                                         onClick={() => {
                                           const newIds = isAssigned ? currentIds.filter((id) => id !== user.id) : [...currentIds, user.id];
                                           handleUpdateField("assigneeIds", newIds);
@@ -530,11 +531,11 @@ export const TaskDetailDrawer = ({
                       <>
                         <Divider />
                         <Box>
-                          <Text size="sm" fw={600} c="#495057" mb={6}>Asosiy vazifa</Text>
-                          <Paper p="xs" radius="sm" style={{ backgroundColor: "#e7f5ff", cursor: "pointer" }}>
+                          <Text size="sm" fw={600} c={colors.textSecondary} mb={6}>Asosiy vazifa</Text>
+                          <Paper p="xs" radius="sm" style={{ backgroundColor: colors.primaryLight, cursor: "pointer" }}>
                             <Group gap="sm">
                               <IconChevronRight size={14} style={{ transform: "rotate(180deg)" }} />
-                              <Text size="sm" c="#1e3a5f" fw={500}>{parentTask.title}</Text>
+                              <Text size="sm" c={colors.primary} fw={500}>{parentTask.title}</Text>
                             </Group>
                           </Paper>
                         </Box>
@@ -546,7 +547,7 @@ export const TaskDetailDrawer = ({
                     {/* Vaqt */}
                     <Box>
                       <Group justify="space-between" mb={6}>
-                        <Text size="sm" fw={600} c="#495057">
+                        <Text size="sm" fw={600} c={colors.textSecondary}>
                           Sarflangan vaqt {totalTimeLogged > 0 && <Text span c="dimmed" fw={400}>({totalTimeLogged} soat)</Text>}
                         </Text>
                         <GuardedButton
@@ -582,10 +583,10 @@ export const TaskDetailDrawer = ({
                       <>
                         <Divider />
                         <Box>
-                          <Text size="sm" fw={600} c="#495057" mb={6}>Bog'liq vazifalar</Text>
+                          <Text size="sm" fw={600} c={colors.textSecondary} mb={6}>Bog'liq vazifalar</Text>
                           <Stack gap="xs">
                             {dependencies.map((dep) => (
-                              <Paper key={dep.id} p="xs" radius="sm" style={{ backgroundColor: "#f8f9fa" }}>
+                              <Paper key={dep.id} p="xs" radius="sm" style={{ backgroundColor: colors.bg }}>
                                 <Group justify="space-between">
                                   <Text size="sm">{dep.dependsOnTask?.title || "Noma'lum"}</Text>
                                   <GuardedActionIcon
@@ -611,7 +612,7 @@ export const TaskDetailDrawer = ({
                       <>
                         <Divider />
                         <Box>
-                          <Text size="sm" fw={600} c="#495057" mb={6}>Kuzatuvchilar ({watchers.length})</Text>
+                          <Text size="sm" fw={600} c={colors.textSecondary} mb={6}>Kuzatuvchilar ({watchers.length})</Text>
                           <Group gap="xs">
                             {watchers.map((w) => (
                               <Tooltip key={w.id} label={w.user?.fullname}>
@@ -627,7 +628,7 @@ export const TaskDetailDrawer = ({
 
                     {/* Ro'yxat / Tekshiruv */}
                     <Box>
-                      <Text size="sm" fw={600} c="#495057" mb={6}>Tekshiruv ro'yxati</Text>
+                      <Text size="sm" fw={600} c={colors.textSecondary} mb={6}>Tekshiruv ro'yxati</Text>
                       <TaskChecklist taskId={taskId} />
                     </Box>
 
@@ -635,7 +636,7 @@ export const TaskDetailDrawer = ({
 
                     {/* Faoliyat */}
                     <Box>
-                      <Text size="sm" fw={600} c="#495057" mb={6}>Faoliyat tarixi</Text>
+                      <Text size="sm" fw={600} c={colors.textSecondary} mb={6}>Faoliyat tarixi</Text>
                       {activities.length > 0 ? (
                         <Stack gap="sm">
                           {activities.slice(0, 10).map((activity) => (
@@ -651,7 +652,7 @@ export const TaskDetailDrawer = ({
                     </Box>
 
                     {/* Meta */}
-                    <Paper p="xs" radius="sm" style={{ backgroundColor: "#f8f9fa" }}>
+                    <Paper p="xs" radius="sm" style={{ backgroundColor: colors.bg }}>
                       <Text size="xs" c="dimmed">
                         Yaratildi: {format(new Date(task.createdAt), "d-MMM yyyy, HH:mm", { locale: uz })}
                         {task.createdBy && ` — ${task.createdBy.fullname}`}
@@ -673,14 +674,14 @@ export const TaskDetailDrawer = ({
                       <Box>
                         <Group justify="space-between" mb={6}>
                           <Text size="sm" c="dimmed">{completedSubtasks.length}/{subtasks.length} bajarildi</Text>
-                          <Text size="sm" fw={600} c={completedSubtasks.length === subtasks.length ? "#2ecc71" : "#1e3a5f"}>
+                          <Text size="sm" fw={600} c={completedSubtasks.length === subtasks.length ? colors.success : colors.primary}>
                             {Math.round((completedSubtasks.length / subtasks.length) * 100)}%
                           </Text>
                         </Group>
                         <Progress
                           value={(completedSubtasks.length / subtasks.length) * 100}
                           size={6} radius="xl"
-                          color={completedSubtasks.length === subtasks.length ? "green" : "#1e3a5f"}
+                          color={completedSubtasks.length === subtasks.length ? "green" : colors.primary}
                         />
                       </Box>
                     )}
@@ -691,7 +692,7 @@ export const TaskDetailDrawer = ({
                         {subtasks.map((subtask) => {
                           const isDone = !!subtask.completedAt;
                           return (
-                            <Paper key={subtask.id} p="xs" radius="sm" style={{ backgroundColor: isDone ? "#f0fdf4" : "#f8f9fa", cursor: "pointer" }}
+                            <Paper key={subtask.id} p="xs" radius="sm" style={{ backgroundColor: isDone ? "#f0fdf4" : colors.bg, cursor: "pointer" }}
                               onClick={() => setSelectedSubtaskId(subtask.id)}
                             >
                               <Group justify="space-between" wrap="nowrap">
@@ -707,7 +708,7 @@ export const TaskDetailDrawer = ({
                                       style={{
                                         borderRadius: "50%",
                                         border: isDone ? "none" : "2px solid #dee2e6",
-                                        backgroundColor: isDone ? "#2ecc71" : "transparent",
+                                        backgroundColor: isDone ? colors.success : "transparent",
                                         display: "flex", alignItems: "center", justifyContent: "center",
                                         flexShrink: 0,
                                         cursor: canCompleteTask ? "pointer" : "not-allowed",
@@ -722,7 +723,7 @@ export const TaskDetailDrawer = ({
                                       {isDone && <IconCheck size={10} color="white" />}
                                     </Box>
                                   </Tooltip>
-                                  <Text size="sm" c={isDone ? "dimmed" : "#212529"} lineClamp={1}
+                                  <Text size="sm" c={isDone ? "dimmed" : colors.textPrimary} lineClamp={1}
                                     style={{ textDecoration: isDone ? "line-through" : "none", flex: 1 }}
                                   >
                                     {subtask.title}
@@ -734,7 +735,7 @@ export const TaskDetailDrawer = ({
                                       {subtask.boardColumn.name}
                                     </Badge>
                                   )}
-                                  <IconChevronRight size={14} color="#868e96" />
+                                  <IconChevronRight size={14} color={colors.textDimmed} />
                                 </Group>
                               </Group>
                             </Paper>
@@ -742,8 +743,8 @@ export const TaskDetailDrawer = ({
                         })}
                       </Stack>
                     ) : (
-                      <Paper p="xl" radius="sm" style={{ backgroundColor: "#f8f9fa", textAlign: "center" }}>
-                        <IconSubtask size={32} color="#adb5bd" style={{ margin: "0 auto 8px" }} />
+                      <Paper p="xl" radius="sm" style={{ backgroundColor: colors.bg, textAlign: "center" }}>
+                        <IconSubtask size={32} color={colors.textMuted} style={{ margin: "0 auto 8px" }} />
                         <Text size="sm" c="dimmed">Ichki vazifalar yo'q</Text>
                       </Paper>
                     )}
@@ -761,7 +762,7 @@ export const TaskDetailDrawer = ({
                         variant="light" fullWidth
                         leftSection={<IconPlus size={16} />}
                         onClick={() => setShowSubtaskForm(true)}
-                        style={{ backgroundColor: "#f8f9fa", color: "#495057", border: "1px dashed #dee2e6" }}
+                        style={{ backgroundColor: colors.bg, color: colors.textSecondary, border: `1px dashed ${colors.borderLight}` }}
                       >
                         Ichki vazifa qo'shish
                       </GuardedButton>

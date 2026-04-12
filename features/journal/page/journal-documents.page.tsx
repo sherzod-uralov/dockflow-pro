@@ -36,18 +36,12 @@ import { useGetJournalById } from "@/features/journal/hook/journal.hook";
 import { DocumentGetResponse } from "@/features/document/type/document.type";
 import { handleCopyToClipboard } from "@/utils/copy-text";
 import { formatDate } from "@/lib/date-utils";
+import { colors, DOCUMENT_STATUS, TASK_PRIORITY, getStatusConfig, getStatusMantineColor } from "@/lib/colors";
 
-const statusColors: Record<string, { color: string; label: string }> = {
-    PUBLISHED: { color: "green", label: "Chop etilgan" },
-    DRAFT: { color: "yellow", label: "Qoralama" },
-    ARCHIVED: { color: "gray", label: "Arxivlangan" },
-};
-
-const priorityColors: Record<string, { color: string; label: string }> = {
-    HIGH: { color: "red", label: "Yuqori" },
-    MEDIUM: { color: "orange", label: "O'rta" },
-    LOW: { color: "blue", label: "Past" },
-};
+const getDocStatusBadgeColor = (status: string) => getStatusMantineColor(DOCUMENT_STATUS, status);
+const getDocStatusLabel = (status: string) => getStatusConfig(DOCUMENT_STATUS, status).label;
+const getPriorityBadgeColor = (priority: string) => getStatusMantineColor(TASK_PRIORITY, priority);
+const getPriorityLabel = (priority: string) => getStatusConfig(TASK_PRIORITY, priority).label;
 
 const JournalDocumentsPage = () => {
     const params = useParams();
@@ -86,7 +80,7 @@ const JournalDocumentsPage = () => {
             {isJournalLoading ? (
                 <Skeleton height={100} radius="sm" mb="md" />
             ) : journal ? (
-                <Paper p="lg" radius="sm" withBorder mb="md" style={{ borderColor: "#e9ecef" }}>
+                <Paper p="lg" radius="sm" withBorder mb="md" style={{ borderColor: colors.border }}>
                     <Group justify="space-between" wrap="wrap">
                         <Group gap="md">
                             <ActionIcon
@@ -94,21 +88,21 @@ const JournalDocumentsPage = () => {
                                 size="lg"
                                 radius="sm"
                                 onClick={handleBack}
-                                style={{ backgroundColor: "#f1f3f5" }}
+                                style={{ backgroundColor: colors.bgSubtle }}
                             >
-                                <IconArrowLeft size={20} color="#495057" />
+                                <IconArrowLeft size={20} color={colors.textSecondary} />
                             </ActionIcon>
                             <Box
                                 p={10}
                                 style={{
-                                    backgroundColor: "#f1f3f5",
+                                    backgroundColor: colors.bgSubtle,
                                     borderRadius: 8,
                                 }}
                             >
-                                <IconBook size={24} color="#1e3a5f" />
+                                <IconBook size={24} color={colors.primary} />
                             </Box>
                             <Box>
-                                <Text size="lg" fw={600} c="#212529">
+                                <Text size="lg" fw={600} c={colors.textPrimary}>
                                     {journal.name}
                                 </Text>
                                 <Text size="sm" c="dimmed">
@@ -118,13 +112,13 @@ const JournalDocumentsPage = () => {
                         </Group>
                         <Group gap="lg">
                             <Group gap="xs">
-                                <IconBuilding size={16} color="#868e96" />
+                                <IconBuilding size={16} color={colors.textDimmed} />
                                 <Badge variant="light" color="green" radius="sm">
                                     {journal.department?.name}
                                 </Badge>
                             </Group>
                             <Group gap="xs">
-                                <IconUser size={16} color="#868e96" />
+                                <IconUser size={16} color={colors.textDimmed} />
                                 <Badge variant="light" color="indigo" radius="sm">
                                     {journal.responsibleUser?.username}
                                 </Badge>
@@ -133,23 +127,23 @@ const JournalDocumentsPage = () => {
                     </Group>
                     <Group gap="lg" mt="md">
                         <Text size="sm" c="dimmed">
-                            Prefiks: <Text span fw={500} c="#1e3a5f" ff="monospace">{journal.prefix}</Text>
+                            Prefiks: <Text span fw={500} c={colors.primary} ff="monospace">{journal.prefix}</Text>
                         </Text>
                         <Text size="sm" c="dimmed">
-                            Format: <Text span fw={500} c="#495057" ff="monospace">{journal.format}</Text>
+                            Format: <Text span fw={500} c={colors.textSecondary} ff="monospace">{journal.format}</Text>
                         </Text>
                         <Text size="sm" c="dimmed">
-                            Jami hujjatlar: <Text span fw={600} c="#212529">{documentsData?.count || 0}</Text>
+                            Jami hujjatlar: <Text span fw={600} c={colors.textPrimary}>{documentsData?.count || 0}</Text>
                         </Text>
                     </Group>
                 </Paper>
             ) : null}
 
             {/* Search */}
-            <Paper p="md" radius="sm" withBorder mb="md" style={{ borderColor: "#e9ecef" }}>
+            <Paper p="md" radius="sm" withBorder mb="md" style={{ borderColor: colors.border }}>
                 <TextInput
                     placeholder="Hujjatlarni qidirish..."
-                    leftSection={<IconSearch size={18} color="#868e96" />}
+                    leftSection={<IconSearch size={18} color={colors.textDimmed} />}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     radius="sm"
@@ -158,7 +152,7 @@ const JournalDocumentsPage = () => {
             </Paper>
 
             {/* Documents Table */}
-            <Paper radius="sm" withBorder style={{ borderColor: "#e9ecef", overflow: "hidden" }}>
+            <Paper radius="sm" withBorder style={{ borderColor: colors.border, overflow: "hidden" }}>
                 {isDocumentsLoading ? (
                     <Stack p="xl" gap="md">
                         {[...Array(5)].map((_, i) => (
@@ -171,13 +165,13 @@ const JournalDocumentsPage = () => {
                             <Box
                                 p={16}
                                 style={{
-                                    backgroundColor: "#f1f3f5",
+                                    backgroundColor: colors.bgSubtle,
                                     borderRadius: 12,
                                 }}
                             >
-                                <IconFileText size={40} color="#868e96" stroke={1.5} />
+                                <IconFileText size={40} color={colors.textDimmed} stroke={1.5} />
                             </Box>
-                            <Text size="lg" fw={500} c="#495057">
+                            <Text size="lg" fw={500} c={colors.textSecondary}>
                                 Hujjat topilmadi
                             </Text>
                             <Text size="sm" c="dimmed" ta="center">
@@ -188,30 +182,30 @@ const JournalDocumentsPage = () => {
                 ) : (
                     <Table.ScrollContainer minWidth={900}>
                         <Table verticalSpacing="md" horizontalSpacing="md">
-                            <Table.Thead style={{ backgroundColor: "#f8f9fa" }}>
+                            <Table.Thead style={{ backgroundColor: colors.bg }}>
                                 <Table.Tr>
-                                    <Table.Th style={{ color: "#495057", fontWeight: 600 }}>
+                                    <Table.Th style={{ color: colors.textSecondary, fontWeight: 600 }}>
                                         Hujjat raqami
                                     </Table.Th>
-                                    <Table.Th style={{ color: "#495057", fontWeight: 600 }}>
+                                    <Table.Th style={{ color: colors.textSecondary, fontWeight: 600 }}>
                                         Sarlavha
                                     </Table.Th>
-                                    <Table.Th style={{ color: "#495057", fontWeight: 600 }}>
+                                    <Table.Th style={{ color: colors.textSecondary, fontWeight: 600 }}>
                                         Holat
                                     </Table.Th>
-                                    <Table.Th style={{ color: "#495057", fontWeight: 600 }}>
+                                    <Table.Th style={{ color: colors.textSecondary, fontWeight: 600 }}>
                                         Muhimlik
                                     </Table.Th>
-                                    <Table.Th style={{ color: "#495057", fontWeight: 600 }}>
+                                    <Table.Th style={{ color: colors.textSecondary, fontWeight: 600 }}>
                                         Hujjat turi
                                     </Table.Th>
-                                    <Table.Th style={{ color: "#495057", fontWeight: 600 }}>
+                                    <Table.Th style={{ color: colors.textSecondary, fontWeight: 600 }}>
                                         Yaratuvchi
                                     </Table.Th>
-                                    <Table.Th style={{ color: "#495057", fontWeight: 600 }}>
+                                    <Table.Th style={{ color: colors.textSecondary, fontWeight: 600 }}>
                                         Sana
                                     </Table.Th>
-                                    <Table.Th style={{ color: "#495057", fontWeight: 600, width: 80 }}>
+                                    <Table.Th style={{ color: colors.textSecondary, fontWeight: 600, width: 80 }}>
                                         Amallar
                                     </Table.Th>
                                 </Table.Tr>
@@ -224,45 +218,45 @@ const JournalDocumentsPage = () => {
                                         onClick={() => handleViewDocument(doc)}
                                     >
                                         <Table.Td>
-                                            <Text size="sm" fw={500} c="#1e3a5f" ff="monospace">
+                                            <Text size="sm" fw={500} c={colors.primary} ff="monospace">
                                                 {doc.documentNumber}
                                             </Text>
                                         </Table.Td>
                                         <Table.Td>
-                                            <Text size="sm" fw={500} c="#212529" lineClamp={1}>
+                                            <Text size="sm" fw={500} c={colors.textPrimary} lineClamp={1}>
                                                 {doc.title}
                                             </Text>
                                         </Table.Td>
                                         <Table.Td>
                                             <Badge
                                                 variant="light"
-                                                color={statusColors[doc.status]?.color || "gray"}
+                                                color={getDocStatusBadgeColor(doc.status)}
                                                 radius="sm"
                                             >
-                                                {statusColors[doc.status]?.label || doc.status}
+                                                {getDocStatusLabel(doc.status)}
                                             </Badge>
                                         </Table.Td>
                                         <Table.Td>
                                             <Badge
                                                 variant="light"
-                                                color={priorityColors[doc.priority]?.color || "gray"}
+                                                color={getPriorityBadgeColor(doc.priority)}
                                                 radius="sm"
                                             >
-                                                {priorityColors[doc.priority]?.label || doc.priority}
+                                                {getPriorityLabel(doc.priority)}
                                             </Badge>
                                         </Table.Td>
                                         <Table.Td>
-                                            <Text size="sm" c="#495057">
+                                            <Text size="sm" c={colors.textSecondary}>
                                                 {doc.documentType?.name || "—"}
                                             </Text>
                                         </Table.Td>
                                         <Table.Td>
-                                            <Text size="sm" c="#495057">
+                                            <Text size="sm" c={colors.textSecondary}>
                                                 {doc.createdBy?.fullname || "—"}
                                             </Text>
                                         </Table.Td>
                                         <Table.Td>
-                                            <Text size="sm" c="#495057">
+                                            <Text size="sm" c={colors.textSecondary}>
                                                 {formatDate(doc.createdAt)}
                                             </Text>
                                         </Table.Td>
@@ -298,7 +292,7 @@ const JournalDocumentsPage = () => {
 
                 {/* Pagination */}
                 {documentsData && documentsData.count > 0 && (
-                    <Group justify="space-between" p="md" style={{ borderTop: "1px solid #e9ecef" }}>
+                    <Group justify="space-between" p="md" style={{ borderTop: `1px solid ${colors.border}` }}>
                         <Group gap="xs">
                             <Text size="sm" c="dimmed">
                                 Ko'rsatish:
@@ -332,8 +326,8 @@ const JournalDocumentsPage = () => {
                                 styles={{
                                     control: {
                                         "&[data-active]": {
-                                            backgroundColor: "#1e3a5f",
-                                            borderColor: "#1e3a5f",
+                                            backgroundColor: colors.primary,
+                                            borderColor: colors.primary,
                                         },
                                     },
                                 }}

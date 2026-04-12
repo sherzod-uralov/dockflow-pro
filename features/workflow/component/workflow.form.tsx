@@ -48,6 +48,7 @@ import {
 import { useCreateWorkflow, useUpdateWorkflowStep } from "@/features/workflow";
 import { useSearchParams, useRouter } from "next/navigation";
 import { showError, showSuccess } from "@/utils/show-error";
+import { colors } from "@/lib/colors";
 
 const WorkflowForm = ({
   modal,
@@ -232,14 +233,14 @@ const WorkflowForm = ({
             radius="sm"
             styles={{
               input: {
-                backgroundColor: "#f8f9fa",
-                border: "1px solid #e9ecef",
+                backgroundColor: colors.bg,
+                border: `1px solid ${colors.border}`,
                 "&:focus": {
-                  borderColor: "#1e3a5f",
+                  borderColor: colors.primary,
                 },
               },
               label: {
-                color: "#495057",
+                color: colors.textSecondary,
                 fontWeight: 500,
                 marginBottom: 4,
               },
@@ -260,14 +261,14 @@ const WorkflowForm = ({
             radius="sm"
             styles={{
               input: {
-                backgroundColor: "#f8f9fa",
-                border: "1px solid #e9ecef",
+                backgroundColor: colors.bg,
+                border: `1px solid ${colors.border}`,
                 "&:focus": {
-                  borderColor: "#1e3a5f",
+                  borderColor: colors.primary,
                 },
               },
               label: {
-                color: "#495057",
+                color: colors.textSecondary,
                 fontWeight: 500,
                 marginBottom: 4,
               },
@@ -284,14 +285,14 @@ const WorkflowForm = ({
             radius="sm"
             styles={{
               input: {
-                backgroundColor: "#f8f9fa",
-                border: "1px solid #e9ecef",
+                backgroundColor: colors.bg,
+                border: `1px solid ${colors.border}`,
                 "&:focus": {
-                  borderColor: "#1e3a5f",
+                  borderColor: colors.primary,
                 },
               },
               label: {
-                color: "#495057",
+                color: colors.textSecondary,
                 fontWeight: 500,
                 marginBottom: 4,
               },
@@ -305,26 +306,26 @@ const WorkflowForm = ({
           radius="sm"
           styles={{
             root: {
-              backgroundColor: "#f8f9fa",
-              border: "1px solid #e9ecef",
+              backgroundColor: colors.bg,
+              border: `1px solid ${colors.border}`,
             },
             message: {
-              color: "#495057",
+              color: colors.textSecondary,
             },
           }}
         >
           {isUpdate ? (
             <>
-              <Text size="sm" fw={500} c="#212529">
+              <Text size="sm" fw={500} c={colors.textPrimary}>
                 Tahrirlash rejimi:
               </Text>
-              <Text size="sm" c="#495057">
+              <Text size="sm" c={colors.textSecondary}>
                 Siz yangi bosqichlar qo'shishingiz yoki mavjudlarini
                 o'chirishingiz mumkin. Hujjatni o'zgartirish mumkin emas.
               </Text>
             </>
           ) : (
-            <Text size="sm" c="#495057">
+            <Text size="sm" c={colors.textSecondary}>
               Hujjat aylanmasi bosqichlari ketma-ket bajariladi. Har bir bosqich
               uchun mas'ul shaxs va amal turini belgilang.
             </Text>
@@ -335,7 +336,7 @@ const WorkflowForm = ({
         <Box>
           <Group justify="space-between" mb="sm">
             <Box>
-              <Text size="md" fw={600} c="#212529">
+              <Text size="md" fw={600} c={colors.textPrimary}>
                 Aylanma bosqichlari
               </Text>
               <Text size="sm" c="dimmed">
@@ -350,7 +351,7 @@ const WorkflowForm = ({
               leftSection={<IconPlus size={14} />}
               onClick={handleAddStep}
               disabled={fields.length >= 20}
-              style={{ backgroundColor: "#1e3a5f" }}
+              style={{ backgroundColor: colors.primary }}
             >
               Bosqich qo'shish
             </Button>
@@ -390,12 +391,12 @@ const WorkflowForm = ({
                     p="md"
                     radius="sm"
                     withBorder
-                    style={{ borderColor: "#e9ecef" }}
+                    style={{ borderColor: colors.border }}
                   >
                     <Group justify="space-between" mb="sm">
                       <Group gap="xs">
-                        <IconGripVertical size={16} color="#adb5bd" style={{ cursor: "grab" }} />
-                        <Text size="sm" fw={600} c="#212529">
+                        <IconGripVertical size={16} color={colors.textMuted} style={{ cursor: "grab" }} />
+                        <Text size="sm" fw={600} c={colors.textPrimary}>
                           Bosqich {index + 1}
                         </Text>
                       </Group>
@@ -460,14 +461,14 @@ const WorkflowForm = ({
                         }
                         styles={{
                           input: {
-                            backgroundColor: "#f8f9fa",
-                            border: "1px solid #e9ecef",
+                            backgroundColor: colors.bg,
+                            border: `1px solid ${colors.border}`,
                             "&:focus": {
-                              borderColor: "#1e3a5f",
+                              borderColor: colors.primary,
                             },
                           },
                           label: {
-                            color: "#495057",
+                            color: colors.textSecondary,
                             fontWeight: 500,
                             marginBottom: 4,
                           },
@@ -497,14 +498,14 @@ const WorkflowForm = ({
                         }
                         styles={{
                           input: {
-                            backgroundColor: "#f8f9fa",
-                            border: "1px solid #e9ecef",
+                            backgroundColor: colors.bg,
+                            border: `1px solid ${colors.border}`,
                             "&:focus": {
-                              borderColor: "#1e3a5f",
+                              borderColor: colors.primary,
                             },
                           },
                           label: {
-                            color: "#495057",
+                            color: colors.textSecondary,
                             fontWeight: 500,
                             marginBottom: 4,
                           },
@@ -525,14 +526,14 @@ const WorkflowForm = ({
                         clearable
                         styles={{
                           input: {
-                            backgroundColor: "#f8f9fa",
-                            border: "1px solid #e9ecef",
+                            backgroundColor: colors.bg,
+                            border: `1px solid ${colors.border}`,
                             "&:focus": {
-                              borderColor: "#1e3a5f",
+                              borderColor: colors.primary,
                             },
                           },
                           label: {
-                            color: "#495057",
+                            color: colors.textSecondary,
                             fontWeight: 500,
                             marginBottom: 4,
                           },
@@ -557,7 +558,7 @@ const WorkflowForm = ({
           justify="flex-end"
           gap="xs"
           pt="md"
-          style={{ borderTop: "1px solid #e9ecef" }}
+          style={{ borderTop: `1px solid ${colors.border}` }}
         >
           <Button
             variant="outline"
@@ -567,10 +568,10 @@ const WorkflowForm = ({
             disabled={isLoading}
             styles={{
               root: {
-                borderColor: "#e9ecef",
-                color: "#495057",
+                borderColor: colors.border,
+                color: colors.textSecondary,
                 "&:hover": {
-                  backgroundColor: "#f8f9fa",
+                  backgroundColor: colors.bg,
                 },
               },
             }}
@@ -582,7 +583,7 @@ const WorkflowForm = ({
             size="sm"
             radius="sm"
             loading={isLoading}
-            style={{ backgroundColor: "#1e3a5f" }}
+            style={{ backgroundColor: colors.primary }}
           >
             {isLoading
               ? isUpdate

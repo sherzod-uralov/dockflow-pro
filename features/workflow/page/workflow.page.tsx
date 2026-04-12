@@ -75,12 +75,13 @@ import { useGetAllDocumentTypes } from "@/features/document-type/hook/document-t
 import { useGetUserQuery } from "@/features/admin/admin-users/hook/user.hook";
 import { useOnboarding, TourButton } from "@/hooks/use-onboarding";
 import { ACTION_TYPE_OPTIONS } from "@/features/workflow/type/workflow.type";
+import { colors, WORKFLOW_STATUS, getStatusConfig } from "@/lib/colors";
 
-const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; icon: any }> = {
-  ACTIVE: { label: "Faol", color: "#1971c2", bg: "#e7f5ff", icon: IconPlayerPlay },
-  COMPLETED: { label: "Tugallangan", color: "#2b8a3e", bg: "#ebfbee", icon: IconCircleCheck },
-  CANCELLED: { label: "Bekor qilingan", color: "#c92a2a", bg: "#fff5f5", icon: IconCircleX },
-  DRAFT: { label: "Tayyorlanmoqda", color: "#868e96", bg: "#f8f9fa", icon: IconHourglass },
+const STATUS_ICONS: Record<string, any> = {
+  ACTIVE: IconPlayerPlay,
+  COMPLETED: IconCircleCheck,
+  CANCELLED: IconCircleX,
+  DRAFT: IconHourglass,
 };
 
 const TYPE_OPTIONS = [
@@ -99,8 +100,8 @@ const WorkflowItem = memo(({
   onEdit: () => void;
   onDelete: () => void;
 }) => {
-  const status = STATUS_CONFIG[workflow.status] || STATUS_CONFIG.DRAFT;
-  const StatusIcon = status.icon;
+  const status = getStatusConfig(WORKFLOW_STATUS, workflow.status);
+  const StatusIcon = STATUS_ICONS[workflow.status] || IconHourglass;
 
   const totalSteps = workflow.workflowSteps?.length || 0;
   const completedSteps = workflow.workflowSteps?.filter(s => s.status === "COMPLETED").length || 0;
@@ -116,14 +117,14 @@ const WorkflowItem = memo(({
       radius="sm"
       withBorder
       style={{
-        borderColor: "#e9ecef",
+        borderColor: colors.border,
         borderLeft: `3px solid ${status.color}`,
         cursor: "pointer",
         transition: "all 0.15s ease",
       }}
       onClick={onView}
       onMouseEnter={(e) => {
-        e.currentTarget.style.backgroundColor = "#f8f9fa";
+        e.currentTarget.style.backgroundColor = colors.bg;
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.backgroundColor = "white";
@@ -133,7 +134,7 @@ const WorkflowItem = memo(({
         {/* Asosiy ma'lumot */}
         <Box style={{ flex: 1, minWidth: 0 }}>
           <Group gap="sm" mb={8} wrap="nowrap">
-            <Text size="md" fw={600} c="#212529" lineClamp={1}>
+            <Text size="md" fw={600} c={colors.textPrimary} lineClamp={1}>
               {workflow.document?.title || "Nomsiz hujjat"}
             </Text>
             <Badge
@@ -149,24 +150,24 @@ const WorkflowItem = memo(({
           <Group gap="lg" wrap="nowrap">
             {/* Hujjat raqami */}
             <Group gap={6} wrap="nowrap">
-              <IconFileText size={14} color="#868e96" />
-              <Text size="sm" c="#495057" style={{ fontFamily: "monospace" }}>
+              <IconFileText size={14} color={colors.textDimmed} />
+              <Text size="sm" c={colors.textSecondary} style={{ fontFamily: "monospace" }}>
                 {workflow.document?.documentNumber || "—"}
               </Text>
             </Group>
 
             {/* Joriy bosqich */}
             <Group gap={6} wrap="nowrap">
-              <IconUser size={14} color="#868e96" />
-              <Text size="sm" c="#495057" lineClamp={1}>
+              <IconUser size={14} color={colors.textDimmed} />
+              <Text size="sm" c={colors.textSecondary} lineClamp={1}>
                 {currentStep?.assignedToUser?.fullname || "Tayinlanmagan"}
               </Text>
             </Group>
 
             {/* Sana */}
             <Group gap={6} wrap="nowrap">
-              <IconClock size={14} color="#868e96" />
-              <Text size="sm" c="#868e96">
+              <IconClock size={14} color={colors.textDimmed} />
+              <Text size="sm" c={colors.textDimmed}>
                 {formatDate(workflow.createdAt)}
               </Text>
             </Group>
@@ -174,8 +175,8 @@ const WorkflowItem = memo(({
             {/* Deadline */}
             {workflow.deadline && (
               <Group gap={6} wrap="nowrap">
-                <IconClock size={14} color={new Date(workflow.deadline) < new Date() && workflow.status !== 'COMPLETED' ? "red" : "#868e96"} />
-                <Text size="sm" c={new Date(workflow.deadline) < new Date() && workflow.status !== 'COMPLETED' ? "red" : "#868e96"}>
+                <IconClock size={14} color={new Date(workflow.deadline) < new Date() && workflow.status !== 'COMPLETED' ? "red" : colors.textDimmed} />
+                <Text size="sm" c={new Date(workflow.deadline) < new Date() && workflow.status !== 'COMPLETED' ? "red" : colors.textDimmed}>
                   {formatDate(workflow.deadline)}
                 </Text>
               </Group>
@@ -186,8 +187,8 @@ const WorkflowItem = memo(({
         {/* Progress */}
         <Box w={120} style={{ flexShrink: 0 }}>
           <Group justify="space-between" mb={4}>
-            <Text size="xs" c="#868e96">Jarayon</Text>
-            <Text size="xs" fw={500} c="#495057">{completedSteps}/{totalSteps}</Text>
+            <Text size="xs" c={colors.textDimmed}>Jarayon</Text>
+            <Text size="xs" fw={500} c={colors.textSecondary}>{completedSteps}/{totalSteps}</Text>
           </Group>
           <Progress
             value={progress}
@@ -249,7 +250,7 @@ const WorkflowItem = memo(({
             </Menu.Dropdown>
           </Menu>
 
-          <IconChevronRight size={18} color="#868e96" />
+          <IconChevronRight size={18} color={colors.textDimmed} />
         </Group>
       </Group>
     </Paper>
@@ -262,7 +263,7 @@ WorkflowItem.displayName = "WorkflowItem";
 const LoadingSkeleton = () => (
   <Stack gap="sm">
     {[1, 2, 3, 4, 5].map((i) => (
-      <Paper key={i} p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+      <Paper key={i} p="md" radius="sm" withBorder style={{ borderColor: colors.border }}>
         <Group justify="space-between">
           <Box style={{ flex: 1 }}>
             <Skeleton height={20} width="60%" mb={8} />
@@ -281,22 +282,22 @@ const LoadingSkeleton = () => (
 
 // Empty state
 const EmptyState = ({ onCreateNew }: { onCreateNew: () => void }) => (
-  <Paper p="xl" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+  <Paper p="xl" radius="sm" withBorder style={{ borderColor: colors.border }}>
     <Stack align="center" gap="md" py="xl">
       <Box
         style={{
           width: 80,
           height: 80,
           borderRadius: "50%",
-          backgroundColor: "#f1f3f5",
+          backgroundColor: colors.bgSubtle,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
         }}
       >
-        <IconInbox size={40} color="#adb5bd" stroke={1.5} />
+        <IconInbox size={40} color={colors.textMuted} stroke={1.5} />
       </Box>
-      <Text size="lg" fw={600} c="#495057">
+      <Text size="lg" fw={600} c={colors.textSecondary}>
         Hujjat aylanmasi topilmadi
       </Text>
       <Text size="sm" c="dimmed" ta="center" maw={400}>
@@ -307,7 +308,7 @@ const EmptyState = ({ onCreateNew }: { onCreateNew: () => void }) => (
         radius="sm"
         leftSection={<IconPlus size={18} />}
         onClick={onCreateNew}
-        style={{ backgroundColor: "#1e3a5f" }}
+        style={{ backgroundColor: colors.primary }}
       >
         Yangi aylanma yaratish
       </Button>
@@ -452,7 +453,7 @@ const WorkflowPage = () => {
       {/* Header */}
       <Group justify="space-between" mb="lg">
         <Box>
-          <Text size="xl" fw={700} c="#212529">
+          <Text size="xl" fw={700} c={colors.textPrimary}>
             Hujjat aylanmalari
           </Text>
           <Text size="sm" c="dimmed">
@@ -472,10 +473,10 @@ const WorkflowPage = () => {
             data-tour="workflow-template"
             styles={{
               root: {
-                borderColor: "#dee2e6",
-                color: "#495057",
+                borderColor: colors.borderLight,
+                color: colors.textSecondary,
                 "&:hover": {
-                  backgroundColor: "#f8f9fa",
+                  backgroundColor: colors.bg,
                 },
               },
             }}
@@ -488,7 +489,7 @@ const WorkflowPage = () => {
             radius="sm"
             leftSection={<IconPlus size={16} />}
             onClick={() => createModal.openModal()}
-            style={{ backgroundColor: "#1e3a5f" }}
+            style={{ backgroundColor: colors.primary }}
             data-tour="workflow-create"
           >
             Yangi aylanma
@@ -497,24 +498,24 @@ const WorkflowPage = () => {
       </Group>
 
       {/* Filters */}
-      <Paper p="md" radius="sm" mb="md" withBorder style={{ borderColor: "#e9ecef" }}>
+      <Paper p="md" radius="sm" mb="md" withBorder style={{ borderColor: colors.border }}>
         <Group justify="space-between" mb={filtersOpen ? "sm" : 0}>
           <Group gap="sm">
             <TextInput
               placeholder="Qidirish..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              leftSection={<IconSearch size={16} color="#868e96" />}
+              leftSection={<IconSearch size={16} color={colors.textDimmed} />}
               size="sm"
               radius="sm"
               w={250}
               data-tour="workflow-search"
               styles={{
                 input: {
-                  backgroundColor: "#f8f9fa",
-                  border: "1px solid #e9ecef",
+                  backgroundColor: colors.bg,
+                  border: `1px solid ${colors.border}`,
                   "&:focus": {
-                    borderColor: "#1e3a5f",
+                    borderColor: colors.primary,
                   },
                 },
               }}
@@ -526,8 +527,8 @@ const WorkflowPage = () => {
               onClick={() => setFiltersOpen(!filtersOpen)}
               data-tour="workflow-filter"
               style={{
-                backgroundColor: filtersOpen ? "#1e3a5f" : "#f1f3f5",
-                color: filtersOpen ? "#fff" : "#495057",
+                backgroundColor: filtersOpen ? colors.primary : colors.bgSubtle,
+                color: filtersOpen ? colors.white : colors.textSecondary,
                 position: "relative",
               }}
             >
@@ -590,13 +591,13 @@ const WorkflowPage = () => {
             mt="sm"
             p="sm"
             style={{
-              backgroundColor: "#f8f9fa",
+              backgroundColor: colors.bg,
               borderRadius: 8,
-              border: "1px solid #e9ecef",
+              border: `1px solid ${colors.border}`,
             }}
           >
             <Group justify="space-between" mb="xs">
-              <Text size="xs" fw={600} c="#495057" tt="uppercase">
+              <Text size="xs" fw={600} c={colors.textSecondary} tt="uppercase">
                 Qo'shimcha filterlar
               </Text>
               {activeFilterCount > 0 && (
@@ -782,7 +783,7 @@ const WorkflowPage = () => {
                 checked={overdueFilter === "true"}
                 onChange={(e) => setOverdueFilter(e.currentTarget.checked ? "true" : "")}
                 styles={{
-                  label: { fontSize: 12, fontWeight: 500, color: "#495057" },
+                  label: { fontSize: 12, fontWeight: 500, color: colors.textSecondary },
                 }}
               />
               {sortBy && (
@@ -831,7 +832,7 @@ const WorkflowPage = () => {
           {totalPages > 1 && (
             <Group justify="space-between">
               <Text size="sm" c="dimmed">
-                Jami: <Text span fw={600} c="#212529">{data.count}</Text> ta
+                Jami: <Text span fw={600} c={colors.textPrimary}>{data.count}</Text> ta
               </Text>
               <Pagination
                 value={pageNumber}
@@ -842,10 +843,10 @@ const WorkflowPage = () => {
                 withEdges
                 styles={{
                   control: {
-                    borderColor: "#e9ecef",
+                    borderColor: colors.border,
                     "&[data-active]": {
-                      backgroundColor: "#1e3a5f",
-                      borderColor: "#1e3a5f",
+                      backgroundColor: colors.primary,
+                      borderColor: colors.primary,
                     },
                   },
                 }}

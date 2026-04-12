@@ -53,6 +53,7 @@ import {
 } from "../hook/statistics.hook";
 import { AnalyticsFilters, TimeRange } from "../type/statistics.type";
 import { useOnboarding, TourButton } from "@/hooks/use-onboarding";
+import { colors } from "@/lib/colors";
 
 export default function StatisticsPage() {
   const [filters] = useState<AnalyticsFilters>({
@@ -98,11 +99,11 @@ export default function StatisticsPage() {
     if (!documentsQuery.data?.documentsByStatus) return [];
 
     const statusMap: Record<string, { label: string; color: string }> = {
-      draft: { label: "Qoralama", color: "#868e96" },
-      pending: { label: "Kutilmoqda", color: "#495057" },
-      inReview: { label: "Ko'rib chiqilmoqda", color: "#1e3a5f" },
-      approved: { label: "Tasdiqlangan", color: "#2b8a3e" },
-      rejected: { label: "Rad etilgan", color: "#c92a2a" },
+      draft: { label: "Qoralama", color: colors.textDimmed },
+      pending: { label: "Kutilmoqda", color: colors.textSecondary },
+      inReview: { label: "Ko'rib chiqilmoqda", color: colors.primary },
+      approved: { label: "Tasdiqlangan", color: colors.successDark },
+      rejected: { label: "Rad etilgan", color: colors.errorDark },
       archived: { label: "Arxivlangan", color: "#5c7a99" },
     };
 
@@ -110,7 +111,7 @@ export default function StatisticsPage() {
       ([key, value]) => ({
         status: statusMap[key]?.label || key,
         count: value,
-        color: statusMap[key]?.color || "#868e96",
+        color: statusMap[key]?.color || colors.textDimmed,
       })
     );
   };
@@ -174,16 +175,16 @@ export default function StatisticsPage() {
 
       <Tabs defaultValue="dashboard" radius="sm">
         <Tabs.List mb="lg" style={{ borderBottom: "1px solid var(--mantine-color-default-border)" }}>
-          <Tabs.Tab value="dashboard" fz="sm" fw={500} px="md" c="#495057">
+          <Tabs.Tab value="dashboard" fz="sm" fw={500} px="md" c={colors.textSecondary}>
             Umumiy
           </Tabs.Tab>
-          <Tabs.Tab value="documents" fz="sm" fw={500} px="md" c="#495057">
+          <Tabs.Tab value="documents" fz="sm" fw={500} px="md" c={colors.textSecondary}>
             Hujjatlar
           </Tabs.Tab>
-          <Tabs.Tab value="workflows" fz="sm" fw={500} px="md" c="#495057">
+          <Tabs.Tab value="workflows" fz="sm" fw={500} px="md" c={colors.textSecondary}>
             Hujjat aylanmasi
           </Tabs.Tab>
-          <Tabs.Tab value="users" fz="sm" fw={500} px="md" c="#495057">
+          <Tabs.Tab value="users" fz="sm" fw={500} px="md" c={colors.textSecondary}>
             Foydalanuvchilar
           </Tabs.Tab>
         </Tabs.List>
@@ -314,8 +315,8 @@ export default function StatisticsPage() {
                 <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="md">
                   <DocumentStatusChart data={transformDocumentStatusData()} />
 
-                  <Paper p="lg" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
-                    <Text size="md" fw={600} c="#212529" mb={4}>
+                  <Paper p="lg" radius="sm" withBorder style={{ borderColor: colors.border }}>
+                    <Text size="md" fw={600} c={colors.textPrimary} mb={4}>
                       Muhimlik darajasi
                     </Text>
                     <Text size="sm" c="dimmed" mb="lg">
@@ -327,22 +328,22 @@ export default function StatisticsPage() {
                         <PriorityItem
                           label="Yuqori"
                           value={documentsQuery.data.documentsByPriority.urgent}
-                          color="#c92a2a"
+                          color={colors.errorDark}
                         />
                         <PriorityItem
                           label="O'rtacha yuqori"
                           value={documentsQuery.data.documentsByPriority.high}
-                          color="#495057"
+                          color={colors.textSecondary}
                         />
                         <PriorityItem
                           label="O'rtacha"
                           value={documentsQuery.data.documentsByPriority.medium}
-                          color="#868e96"
+                          color={colors.textDimmed}
                         />
                         <PriorityItem
                           label="Past"
                           value={documentsQuery.data.documentsByPriority.low}
-                          color="#2b8a3e"
+                          color={colors.successDark}
                         />
                       </Stack>
                     )}
@@ -400,8 +401,8 @@ export default function StatisticsPage() {
                   />
                 </SimpleGrid>
 
-                <Paper p="lg" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
-                  <Text size="md" fw={600} c="#212529" mb="lg">
+                <Paper p="lg" radius="sm" withBorder style={{ borderColor: colors.border }}>
+                  <Text size="md" fw={600} c={colors.textPrimary} mb="lg">
                     Status bo'yicha
                   </Text>
 
@@ -410,22 +411,22 @@ export default function StatisticsPage() {
                       <StatusBox
                         label="Kutilmoqda"
                         value={workflowsQuery.data.workflowsByStatus.pending}
-                        color="#495057"
+                        color={colors.textSecondary}
                       />
                       <StatusBox
                         label="Jarayonda"
                         value={workflowsQuery.data.workflowsByStatus.inProgress}
-                        color="#1e3a5f"
+                        color={colors.primary}
                       />
                       <StatusBox
                         label="Yakunlangan"
                         value={workflowsQuery.data.workflowsByStatus.completed}
-                        color="#2b8a3e"
+                        color={colors.successDark}
                       />
                       <StatusBox
                         label="Rad etilgan"
                         value={workflowsQuery.data.workflowsByStatus.rejected}
-                        color="#c92a2a"
+                        color={colors.errorDark}
                       />
                     </SimpleGrid>
                   )}
@@ -433,17 +434,17 @@ export default function StatisticsPage() {
 
                 {workflowsQuery.data?.stepCompletionRates &&
                   workflowsQuery.data.stepCompletionRates.length > 0 && (
-                    <Paper p="lg" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
-                      <Text size="md" fw={600} c="#212529" mb="lg">
+                    <Paper p="lg" radius="sm" withBorder style={{ borderColor: colors.border }}>
+                      <Text size="md" fw={600} c={colors.textPrimary} mb="lg">
                         Qadam bajarilish darajasi
                       </Text>
 
                       <Table striped highlightOnHover>
                         <Table.Thead>
                           <Table.Tr>
-                            <Table.Th style={{ color: "#495057" }}>Qadam</Table.Th>
-                            <Table.Th style={{ color: "#495057" }}>Bajarilish</Table.Th>
-                            <Table.Th style={{ color: "#495057" }}>O'rtacha vaqt</Table.Th>
+                            <Table.Th style={{ color: colors.textSecondary }}>Qadam</Table.Th>
+                            <Table.Th style={{ color: colors.textSecondary }}>Bajarilish</Table.Th>
+                            <Table.Th style={{ color: colors.textSecondary }}>O'rtacha vaqt</Table.Th>
                           </Table.Tr>
                         </Table.Thead>
                         <Table.Tbody>
@@ -454,7 +455,7 @@ export default function StatisticsPage() {
                                   <Text size="sm" c="dimmed">
                                     #{step.stepOrder}
                                   </Text>
-                                  <Text size="sm" c="#212529">
+                                  <Text size="sm" c={colors.textPrimary}>
                                     {step.stepName}
                                   </Text>
                                 </Group>
@@ -466,15 +467,15 @@ export default function StatisticsPage() {
                                     size="md"
                                     radius="sm"
                                     w={80}
-                                    color="#1e3a5f"
+                                    color={colors.primary}
                                   />
-                                  <Text size="sm" fw={500} c="#212529">
+                                  <Text size="sm" fw={500} c={colors.textPrimary}>
                                     {step.completionRate}%
                                   </Text>
                                 </Group>
                               </Table.Td>
                               <Table.Td>
-                                <Text size="sm" c="#495057">
+                                <Text size="sm" c={colors.textSecondary}>
                                   {step.averageCompletionTime.toFixed(1)} soat
                                 </Text>
                               </Table.Td>
@@ -525,18 +526,18 @@ export default function StatisticsPage() {
 
                 {usersQuery.data?.topActiveUsers &&
                   usersQuery.data.topActiveUsers.length > 0 && (
-                    <Paper p="lg" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
-                      <Text size="md" fw={600} c="#212529" mb="lg">
+                    <Paper p="lg" radius="sm" withBorder style={{ borderColor: colors.border }}>
+                      <Text size="md" fw={600} c={colors.textPrimary} mb="lg">
                         Eng faol foydalanuvchilar
                       </Text>
 
                       <Table striped highlightOnHover>
                         <Table.Thead>
                           <Table.Tr>
-                            <Table.Th style={{ color: "#495057" }}>Foydalanuvchi</Table.Th>
-                            <Table.Th style={{ color: "#495057" }}>Yaratilgan</Table.Th>
-                            <Table.Th style={{ color: "#495057" }}>Bajarilgan</Table.Th>
-                            <Table.Th style={{ color: "#495057" }}>Kutilayotgan</Table.Th>
+                            <Table.Th style={{ color: colors.textSecondary }}>Foydalanuvchi</Table.Th>
+                            <Table.Th style={{ color: colors.textSecondary }}>Yaratilgan</Table.Th>
+                            <Table.Th style={{ color: colors.textSecondary }}>Bajarilgan</Table.Th>
+                            <Table.Th style={{ color: colors.textSecondary }}>Kutilayotgan</Table.Th>
                           </Table.Tr>
                         </Table.Thead>
                         <Table.Tbody>
@@ -544,7 +545,7 @@ export default function StatisticsPage() {
                             <Table.Tr key={user.userId}>
                               <Table.Td>
                                 <Box>
-                                  <Text size="sm" fw={500} c="#212529">
+                                  <Text size="sm" fw={500} c={colors.textPrimary}>
                                     {user.fullName}
                                   </Text>
                                   <Text size="xs" c="dimmed">
@@ -553,17 +554,17 @@ export default function StatisticsPage() {
                                 </Box>
                               </Table.Td>
                               <Table.Td>
-                                <Text size="sm" fw={500} c="#212529">
+                                <Text size="sm" fw={500} c={colors.textPrimary}>
                                   {user.documentsCreated}
                                 </Text>
                               </Table.Td>
                               <Table.Td>
-                                <Text size="sm" fw={500} c="#2b8a3e">
+                                <Text size="sm" fw={500} c={colors.successDark}>
                                   {user.workflowStepsCompleted}
                                 </Text>
                               </Table.Td>
                               <Table.Td>
-                                <Text size="sm" fw={500} c="#495057">
+                                <Text size="sm" fw={500} c={colors.textSecondary}>
                                   {user.workflowStepsPending}
                                 </Text>
                               </Table.Td>
@@ -598,9 +599,9 @@ function PriorityItem({
       justify="space-between"
       py={8}
       px="sm"
-      style={{ backgroundColor: "#f8f9fa", borderRadius: 4 }}
+      style={{ backgroundColor: colors.bg, borderRadius: 4 }}
     >
-      <Text size="sm" c="#495057">
+      <Text size="sm" c={colors.textSecondary}>
         {label}
       </Text>
       <Text size="sm" fw={600} style={{ color }}>
@@ -620,7 +621,7 @@ function StatusBox({
   color: string;
 }) {
   return (
-    <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+    <Paper p="md" radius="sm" withBorder style={{ borderColor: colors.border }}>
       <Text size="xl" fw={700} style={{ color }}>
         {value}
       </Text>

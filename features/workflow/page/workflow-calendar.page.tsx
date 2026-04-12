@@ -38,21 +38,22 @@ import { GuardedButton } from "@/components/shared/permission";
 
 import "dayjs/locale/uz-latn";
 import uzLocale from "@fullcalendar/core/locales/uz";
+import { colors, WORKFLOW_STEP_STATUS } from "@/lib/colors";
 
 const STEP_STATUS_COLORS: Record<string, string> = {
-    NOT_STARTED: "#868e96",
-    PENDING: "#868e96",
-    IN_PROGRESS: "#228be6",
-    COMPLETED: "#40c057",
-    REJECTED: "#fa5252",
+    NOT_STARTED: colors.textDimmed,
+    PENDING: colors.textDimmed,
+    IN_PROGRESS: colors.info,
+    COMPLETED: colors.success,
+    REJECTED: colors.error,
 };
 
 const STEP_STATUS_LABELS: Record<string, string> = {
-    NOT_STARTED: "Kutilmoqda",
-    PENDING: "Kutilmoqda",
-    IN_PROGRESS: "Jarayonda",
-    COMPLETED: "Bajarildi",
-    REJECTED: "Rad etildi",
+    NOT_STARTED: WORKFLOW_STEP_STATUS.NOT_STARTED.label,
+    PENDING: WORKFLOW_STEP_STATUS.PENDING.label,
+    IN_PROGRESS: WORKFLOW_STEP_STATUS.IN_PROGRESS.label,
+    COMPLETED: WORKFLOW_STEP_STATUS.COMPLETED.label,
+    REJECTED: WORKFLOW_STEP_STATUS.REJECTED.label,
 };
 
 const ACTION_LABELS: Record<string, string> = {
@@ -104,8 +105,8 @@ export default function WorkflowCalendarPage() {
                 id: step.id,
                 title: `${ACTION_LABELS[step.actionType] || step.actionType}`,
                 start: dayData.date,
-                backgroundColor: STEP_STATUS_COLORS[step.status] || "#868e96",
-                borderColor: STEP_STATUS_COLORS[step.status] || "#868e96",
+                backgroundColor: STEP_STATUS_COLORS[step.status] || colors.textDimmed,
+                borderColor: STEP_STATUS_COLORS[step.status] || colors.textDimmed,
                 extendedProps: {
                     step,
                     documentNumber: step.workflow?.document?.documentNumber,
@@ -157,12 +158,12 @@ export default function WorkflowCalendarPage() {
     return (
         <Box>
             <Stack gap="md">
-                <Paper p="lg" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+                <Paper p="lg" radius="sm" withBorder style={{ borderColor: colors.border }}>
                     <Group justify="space-between" mb="md">
                         <Group gap="sm">
-                            <IconCalendar size={28} color="#1e3a5f" />
+                            <IconCalendar size={28} color={colors.primary} />
                             <div>
-                                <Text size="xl" fw={600} c="#212529">
+                                <Text size="xl" fw={600} c={colors.textPrimary}>
                                     Vazifalar taqvimi
                                 </Text>
                                 <Text size="sm" c="dimmed">
@@ -212,7 +213,7 @@ export default function WorkflowCalendarPage() {
                                 onChange={setStatusFilter}
                                 clearable
                                 size="sm"
-                                styles={{ input: { backgroundColor: "#f8f9fa" } }}
+                                styles={{ input: { backgroundColor: colors.bg } }}
                             />
 
                             <DatePickerInput
@@ -224,14 +225,14 @@ export default function WorkflowCalendarPage() {
                                 leftSection={<IconCalendar size={16} />}
                                 clearable={false}
                                 size="sm"
-                                styles={{ input: { backgroundColor: "#f8f9fa" } }}
+                                styles={{ input: { backgroundColor: colors.bg } }}
                             />
                         </Group>
                     </Stack>
                 </Paper>
 
 
-                <Paper p="lg" radius="sm" withBorder style={{ minHeight: 600, borderColor: "#e9ecef", position: "relative" }}>
+                <Paper p="lg" radius="sm" withBorder style={{ minHeight: 600, borderColor: colors.border, position: "relative" }}>
                     <LoadingOverlay visible={isLoading} zIndex={1000} overlayProps={{ radius: "sm", blur: 2 }} loaderProps={{ color: "dark", type: "dots" }} />
                     <Box>
                         <FullCalendar
@@ -266,8 +267,8 @@ export default function WorkflowCalendarPage() {
                 onClose={() => setModalOpen(false)}
                 title={
                     <Group gap="xs">
-                        <IconFileText size={20} color="#1e3a5f" />
-                        <Text fw={600} size="lg" c="#212529">Vazifa tafsilotlari</Text>
+                        <IconFileText size={20} color={colors.primary} />
+                        <Text fw={600} size="lg" c={colors.textPrimary}>Vazifa tafsilotlari</Text>
                     </Group>
                 }
                 size="md"
@@ -276,10 +277,10 @@ export default function WorkflowCalendarPage() {
             >
                 {selectedStep && (
                     <Stack gap="md">
-                        <Paper p="sm" radius="sm" bg="#f8f9fa">
+                        <Paper p="sm" radius="sm" bg={colors.bg}>
                             <Group gap="xs">
                                 <Text size="sm" c="dimmed">Amal turi:</Text>
-                                <Text size="sm" fw={600} c="#1e3a5f">
+                                <Text size="sm" fw={600} c={colors.primary}>
                                     {ACTION_LABELS[selectedStep.actionType] || selectedStep.actionType}
                                 </Text>
                             </Group>
@@ -303,9 +304,9 @@ export default function WorkflowCalendarPage() {
                         {selectedStep.workflow?.document && (
                             <Box>
                                 <Text size="xs" c="dimmed" mb={6}>Hujjat</Text>
-                                <Paper p="sm" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+                                <Paper p="sm" radius="sm" withBorder style={{ borderColor: colors.border }}>
                                     <Stack gap={4}>
-                                        <Text size="sm" fw={500} c="#212529">{selectedStep.workflow.document.title}</Text>
+                                        <Text size="sm" fw={500} c={colors.textPrimary}>{selectedStep.workflow.document.title}</Text>
                                         <Text size="xs" c="dimmed" style={{ fontFamily: "monospace" }}>
                                             №{selectedStep.workflow.document.documentNumber}
                                         </Text>
@@ -318,7 +319,7 @@ export default function WorkflowCalendarPage() {
                             <Box>
                                 <Text size="xs" c="dimmed" mb={6}>Mas'ul shaxs</Text>
                                 <Group gap="xs">
-                                    <IconUser size={16} color="#495057" />
+                                    <IconUser size={16} color={colors.textSecondary} />
                                     <Text size="sm" fw={500}>{selectedStep.assignedToUser.fullname}</Text>
                                 </Group>
                             </Box>
@@ -328,8 +329,8 @@ export default function WorkflowCalendarPage() {
                             <Box>
                                 <Text size="xs" c="dimmed" mb={6}>Muddat</Text>
                                 <Group gap="xs">
-                                    <IconClock size={16} color="#fa5252" />
-                                    <Text size="sm" fw={500} c={new Date(selectedStep.dueDate) < new Date() ? "red" : "#495057"}>
+                                    <IconClock size={16} color={colors.error} />
+                                    <Text size="sm" fw={500} c={new Date(selectedStep.dueDate) < new Date() ? "red" : colors.textSecondary}>
                                         {formatDateTime(selectedStep.dueDate)}
                                     </Text>
                                 </Group>
@@ -347,7 +348,7 @@ export default function WorkflowCalendarPage() {
                                     permission="workflow:read"
                                     onClick={handleWorkflowNavigate}
                                     rightSection={<IconArrowRight size={16} />}
-                                    style={{ backgroundColor: "#1e3a5f" }}
+                                    style={{ backgroundColor: colors.primary }}
                                 >
                                     Jarayonga o'tish
                                 </GuardedButton>
