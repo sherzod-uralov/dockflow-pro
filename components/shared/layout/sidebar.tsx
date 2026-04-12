@@ -137,18 +137,22 @@ const menuItems: MenuItem[] = [
       {
         label: "Ball sozlamalari",
         href: "/dashboard/kpi/task-score-config",
+        permission: "task-score-config:list",
       },
       {
         label: "Mukofot darajalari",
         href: "/dashboard/kpi/reward-tiers",
+        permission: "kpi-reward-tier:list",
       },
       {
         label: "Oylik KPI",
         href: "/dashboard/kpi/monthly-kpi",
+        permission: "user-monthly-kpi:list",
       },
       {
         label: "Mukofotlar",
         href: "/dashboard/kpi/rewards",
+        permission: "kpi-reward:list",
       },
     ],
   },
@@ -201,6 +205,7 @@ interface SidebarBodyProps {
   isProjectsLoading: boolean;
   onCreateProject: () => void;
   pathname: string | null;
+  hasPermission: (key: string) => boolean;
 }
 
 const SidebarBody = ({
@@ -215,6 +220,7 @@ const SidebarBody = ({
   isProjectsLoading,
   onCreateProject,
   pathname,
+  hasPermission,
 }: SidebarBodyProps) => {
   return (
     <Box
@@ -398,7 +404,7 @@ const SidebarBody = ({
         ))}
 
         {/* Vazifalar boshqaruvi - Dynamic Projects Menu */}
-        <Box mb={2}>
+        {hasPermission("project:list") && <Box mb={2}>
           <NavLink
             label={
               <Group justify="space-between" wrap="nowrap" style={{ width: "100%" }}>
@@ -561,7 +567,7 @@ const SidebarBody = ({
               )}
             </Box>
           </Collapse>
-        </Box>
+        </Box>}
       </ScrollArea>
 
       {/* Footer */}
@@ -688,6 +694,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
     isProjectsLoading,
     onCreateProject: handleCreateProject,
     pathname,
+    hasPermission,
   };
 
   return (
