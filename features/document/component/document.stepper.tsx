@@ -293,10 +293,14 @@ const WorkflowTracker = ({ workflow }: { workflow: any }) => {
   const workflowData = workflow[0];
   const steps: WorkflowStep[] = workflowData?.workflowSteps || [];
 
-  const totalTime = dayjs(steps[steps.length - 1]?.completedAt).diff(
-    dayjs(steps[0]?.createdAt),
-    "minute"
-  );
+  const lastCompleted = steps[steps.length - 1]?.completedAt;
+  const firstCreated = steps[0]?.createdAt;
+  const totalTime =
+    lastCompleted && firstCreated
+      ? Math.round(
+          (new Date(lastCompleted).getTime() - new Date(firstCreated).getTime()) / 60000
+        )
+      : 0;
 
   return (
     <Paper
