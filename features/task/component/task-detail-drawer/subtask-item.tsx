@@ -4,6 +4,7 @@ import {
   TaskGetResponse,
   TASK_PRIORITY_OPTIONS,
 } from "../../type/task.type";
+import { colors } from "@/lib/colors";
 
 interface SubtaskItemProps {
   subtask: TaskGetResponse;
@@ -26,7 +27,7 @@ export const SubtaskItem = ({
       p="xs"
       radius="sm"
       style={{
-        backgroundColor: "#f8f9fa",
+        backgroundColor: colors.bg,
         cursor: "pointer",
         transition: "background-color 0.2s",
       }}
@@ -48,7 +49,7 @@ export const SubtaskItem = ({
           </ActionIcon>
           <Text
             size="sm"
-            c={isCompleted ? "dimmed" : "#212529"}
+            c={isCompleted ? "dimmed" : colors.textPrimary}
             lineClamp={1}
             style={{
               textDecoration: isCompleted ? "line-through" : "none",
@@ -71,7 +72,7 @@ export const SubtaskItem = ({
               {priorityOption.label}
             </Badge>
           )}
-          <IconChevronRight size={14} color="#868e96" />
+          <IconChevronRight size={14} color={colors.textDimmed} />
         </Group>
       </Group>
     </Paper>

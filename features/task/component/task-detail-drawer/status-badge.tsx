@@ -1,11 +1,12 @@
 import { Badge } from "@mantine/core";
+import { colors } from "@/lib/colors";
 
 interface StatusBadgeProps {
   boardColumn?: { name: string; color?: string; isClosed?: boolean };
 }
 
 export const StatusBadge = ({ boardColumn }: StatusBadgeProps) => {
-  const color = boardColumn?.color || "#95a5a6";
+  const color = boardColumn?.color || colors.textDimmed;
   const label = boardColumn?.name || "Noma'lum";
 
   return (

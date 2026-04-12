@@ -38,6 +38,7 @@ import {
 } from "@/features/board-column/hook/board-column.hook";
 import TaskCard from "./task.card";
 import { useUpdateTask, useCreateTask } from "../hook/task.hook";
+import { colors } from "@/lib/colors";
 
 
 interface TaskKanbanBoardProps {
@@ -105,7 +106,7 @@ const InlineSubtaskInput = ({
                 alignItems: "center",
                 gap: 6,
                 padding: "6px 8px",
-                backgroundColor: "#fff",
+                backgroundColor: colors.white,
                 borderRadius: 8,
                 border: "1px solid #228be6",
                 boxShadow: "0 0 0 1px rgba(34, 139, 230, 0.2)",
@@ -133,7 +134,7 @@ const InlineSubtaskInput = ({
                     outline: "none",
                     background: "transparent",
                     fontSize: 13,
-                    color: "#212529",
+                    color: colors.textPrimary,
                     fontFamily: "inherit",
                     minWidth: 0,
                 }}
@@ -267,8 +268,8 @@ const SubtaskConnector = ({ isLast, children }: { isLast: boolean; children: Rea
             style={{
                 position: "absolute",
                 left: 8, top: 0, height: "50%", width: 14,
-                borderLeft: "2px solid #dee2e6",
-                borderBottom: "2px solid #dee2e6",
+                borderLeft: `2px solid ${colors.borderLight}`,
+                borderBottom: `2px solid ${colors.borderLight}`,
                 borderBottomLeftRadius: 10,
             }}
         />
@@ -277,7 +278,7 @@ const SubtaskConnector = ({ isLast, children }: { isLast: boolean; children: Rea
                 style={{
                     position: "absolute",
                     left: 8, top: "50%", bottom: 0, width: 2,
-                    backgroundColor: "#dee2e6",
+                    backgroundColor: colors.borderLight,
                 }}
             />
         )}
@@ -401,10 +402,10 @@ const ParentTaskWithSubtasks = ({
                     style={{
                         position: "absolute", bottom: -9, left: "50%",
                         transform: "translateX(-50%)", zIndex: 10,
-                        backgroundColor: "#e9ecef", border: "2px solid #f8f9fa",
+                        backgroundColor: colors.border, border: `2px solid ${colors.bg}`,
                     }}
                 >
-                    {opened ? <IconChevronDown size={10} color="#495057" /> : <IconChevronRight size={10} color="#495057" />}
+                    {opened ? <IconChevronDown size={10} color={colors.textSecondary} /> : <IconChevronRight size={10} color={colors.textSecondary} />}
                 </ActionIcon>
             </Box>
             <Collapse in={opened}>
@@ -477,9 +478,9 @@ const AddColumnCard = ({
                     onClick={() => setIsAdding(true)}
                     style={{
                         height: 48,
-                        border: "2px dashed #dee2e6",
+                        border: `2px dashed ${colors.borderLight}`,
                         borderRadius: 8,
-                        color: "#868e96",
+                        color: colors.textDimmed,
                         fontWeight: 500,
                     }}
                 >
@@ -491,7 +492,7 @@ const AddColumnCard = ({
 
     return (
         <Box style={{ minWidth: 300, maxWidth: 300, flex: "0 0 300px" }}>
-            <Stack gap="xs" p="sm" style={{ backgroundColor: "#f8f9fa", borderRadius: 8, border: "1px solid #e9ecef" }}>
+            <Stack gap="xs" p="sm" style={{ backgroundColor: colors.bg, borderRadius: 8, border: `1px solid ${colors.border}` }}>
                 <TextInput
                     ref={inputRef}
                     placeholder="Ustun nomi"
@@ -502,7 +503,7 @@ const AddColumnCard = ({
                         if (e.key === "Enter") handleSubmit();
                         if (e.key === "Escape") setIsAdding(false);
                     }}
-                    styles={{ input: { backgroundColor: "#fff", border: "1px solid #e9ecef" } }}
+                    styles={{ input: { backgroundColor: colors.white, border: `1px solid ${colors.border}` } }}
                 />
                 <ColorInput
                     placeholder="Rang"
@@ -510,10 +511,10 @@ const AddColumnCard = ({
                     value={color}
                     onChange={setColor}
                     swatches={["#3B82F6", "#22C55E", "#F59E0B", "#EF4444", "#8B5CF6", "#EC4899", "#14B8A6", "#F97316", "#6366F1", "#95a5a6"]}
-                    styles={{ input: { backgroundColor: "#fff", border: "1px solid #e9ecef" } }}
+                    styles={{ input: { backgroundColor: colors.white, border: `1px solid ${colors.border}` } }}
                 />
                 <Group gap="xs">
-                    <Button size="xs" style={{ backgroundColor: "#1e3a5f" }} onClick={handleSubmit} disabled={!name.trim()}>
+                    <Button size="xs" style={{ backgroundColor: colors.primary }} onClick={handleSubmit} disabled={!name.trim()}>
                         Qo'shish
                     </Button>
                     <Button size="xs" variant="subtle" color="gray" onClick={() => setIsAdding(false)}>
@@ -556,7 +557,7 @@ const ColumnHeaderActions = ({
 
     if (isEditing) {
         return (
-            <Stack gap={4} pb="sm" mb="sm" style={{ borderBottom: "1px solid #e9ecef" }}>
+            <Stack gap={4} pb="sm" mb="sm" style={{ borderBottom: `1px solid ${colors.border}` }}>
                 <TextInput
                     ref={editInputRef}
                     size="xs"
@@ -566,14 +567,14 @@ const ColumnHeaderActions = ({
                         if (e.key === "Enter") handleSave();
                         if (e.key === "Escape") setIsEditing(false);
                     }}
-                    styles={{ input: { backgroundColor: "#fff", border: "1px solid #e9ecef" } }}
+                    styles={{ input: { backgroundColor: colors.white, border: `1px solid ${colors.border}` } }}
                 />
                 <ColorInput
                     size="xs"
                     value={editColor}
                     onChange={setEditColor}
                     swatches={["#3B82F6", "#22C55E", "#F59E0B", "#EF4444", "#8B5CF6", "#EC4899", "#14B8A6", "#F97316", "#6366F1", "#95a5a6"]}
-                    styles={{ input: { backgroundColor: "#fff", border: "1px solid #e9ecef" } }}
+                    styles={{ input: { backgroundColor: colors.white, border: `1px solid ${colors.border}` } }}
                 />
                 <Group gap={4}>
                     <ActionIcon size="xs" color="green" onClick={handleSave}><IconCheck size={12} /></ActionIcon>
@@ -584,10 +585,10 @@ const ColumnHeaderActions = ({
     }
 
     return (
-        <Group justify="space-between" pb="sm" mb="sm" style={{ borderBottom: "1px solid #e9ecef" }}>
+        <Group justify="space-between" pb="sm" mb="sm" style={{ borderBottom: `1px solid ${colors.border}` }}>
             <Group gap={8}>
-                <Box w={10} h={10} style={{ borderRadius: "50%", backgroundColor: column.color || "#95a5a6" }} />
-                <Text fw={600} size="sm" c="#495057">{column.name}</Text>
+                <Box w={10} h={10} style={{ borderRadius: "50%", backgroundColor: column.color || colors.textDimmed }} />
+                <Text fw={600} size="sm" c={colors.textSecondary}>{column.name}</Text>
                 <Text size="sm" c="dimmed" fw={500}>{taskCount}</Text>
             </Group>
             <Group gap={4}>
@@ -684,7 +685,7 @@ const KanbanColumnView = ({
                     onCreateTask={onCreateTask}
                 />
 
-                <Box ref={setNodeRef} style={{ height: "calc(100vh - 260px)", backgroundColor: "#f8f9fa", borderRadius: 8, padding: 8 }}>
+                <Box ref={setNodeRef} style={{ height: "calc(100vh - 260px)", backgroundColor: colors.bg, borderRadius: 8, padding: 8 }}>
                     <SortableContext id={column.id} items={tasks.map((t) => t.id)} strategy={verticalListSortingStrategy}>
                         <ScrollArea h="100%">
                             <Stack gap={8} pb="md" style={{ minHeight: 80 }}>
@@ -712,7 +713,7 @@ const KanbanColumnView = ({
                                         />
                                     );
                                 }) : tasks.length === 0 ? (
-                                    <Box p="lg" style={{ textAlign: "center", borderRadius: 8, border: "2px dashed #dee2e6" }}>
+                                    <Box p="lg" style={{ textAlign: "center", borderRadius: 8, border: `2px dashed ${colors.borderLight}` }}>
                                         <Text size="xs" c="dimmed">Vazifalar yo'q</Text>
                                     </Box>
                                 ) : null}
@@ -748,7 +749,7 @@ const TaskKanbanBoard = ({
         if (!cols || cols.length === 0) return [];
         return [...cols]
             .sort((a, b) => a.position - b.position)
-            .map((col) => ({ id: col.id, name: col.name, color: col.color || "#95a5a6", isDynamic: true }));
+            .map((col) => ({ id: col.id, name: col.name, color: col.color || colors.textDimmed, isDynamic: true }));
     }, [boardColumnsData]);
 
     // Board column CRUD handlers
@@ -1059,7 +1060,7 @@ const TaskKanbanBoard = ({
                                     </Box>
                                 )}
                                 <Box style={{
-                                    backgroundColor: "#495057", color: "#e9ecef", borderRadius: 4,
+                                    backgroundColor: colors.textSecondary, color: colors.border, borderRadius: 4,
                                     padding: "2px 8px", fontSize: 9, fontWeight: 500, whiteSpace: "nowrap", opacity: 0.8,
                                 }}>
                                     Shift = subtask

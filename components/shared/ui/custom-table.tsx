@@ -38,6 +38,7 @@ import {
   IconChevronLeft,
   IconChevronRight,
 } from "@tabler/icons-react";
+import { colors } from "@/lib/colors";
 
 interface ColumnMeta {
   width?: number | string;
@@ -166,12 +167,12 @@ export function DataTable<TData, TValue = unknown>({
     const sorted = column.getIsSorted();
     if (sorted === "asc") return <IconChevronUp size={12} stroke={2} />;
     if (sorted === "desc") return <IconChevronDown size={12} stroke={2} />;
-    return <IconSelector size={12} stroke={1.5} color="#adb5bd" />;
+    return <IconSelector size={12} stroke={1.5} color={colors.textMuted} />;
   };
 
   return (
     <Box>
-      <Paper radius="sm" withBorder style={{ borderColor: "#dee2e6", overflow: "hidden" }}>
+      <Paper radius="sm" withBorder style={{ borderColor: colors.borderLight, overflow: "hidden" }}>
         <Table.ScrollContainer minWidth={500}>
           <Table
             highlightOnHover
@@ -181,7 +182,7 @@ export function DataTable<TData, TValue = unknown>({
           >
             <Table.Thead>
               {table.getHeaderGroups().map((headerGroup) => (
-                <Table.Tr key={headerGroup.id} style={{ borderBottom: "1px solid #dee2e6" }}>
+                <Table.Tr key={headerGroup.id} style={{ borderBottom: `1px solid ${colors.borderLight}` }}>
                   {headerGroup.headers.map((header) => {
                     const columnMeta = header.column.columnDef.meta as ColumnMeta | undefined;
                     return (
@@ -192,7 +193,7 @@ export function DataTable<TData, TValue = unknown>({
                           minWidth: columnMeta?.minWidth,
                           maxWidth: columnMeta?.maxWidth || 200,
                           padding: "10px 12px",
-                          backgroundColor: "#fff",
+                          backgroundColor: colors.white,
                           borderBottom: "none",
                         }}
                       >
@@ -211,7 +212,7 @@ export function DataTable<TData, TValue = unknown>({
                             <Text
                               size="xs"
                               fw={500}
-                              c="#868e96"
+                              c={colors.textDimmed}
                               tt="uppercase"
                               style={{ letterSpacing: "0.3px" }}
                             >
@@ -223,7 +224,7 @@ export function DataTable<TData, TValue = unknown>({
                           <Text
                             size="xs"
                             fw={500}
-                            c="#868e96"
+                            c={colors.textDimmed}
                             tt="uppercase"
                             style={{ letterSpacing: "0.3px" }}
                           >
@@ -241,7 +242,7 @@ export function DataTable<TData, TValue = unknown>({
                 <Table.Tr>
                   <Table.Td colSpan={columns.length} style={{ height: 150, textAlign: "center" }}>
                     <Group justify="center" gap="xs">
-                      <Loader size="sm" color="#1e3a5f" />
+                      <Loader size="sm" color={colors.primary} />
                       <Text size="sm" c="dimmed">
                         Yuklanmoqda...
                       </Text>
@@ -255,8 +256,8 @@ export function DataTable<TData, TValue = unknown>({
                     data-selected={row.getIsSelected() || undefined}
                     onClick={() => onRowClick?.(row.original)}
                     style={{
-                      backgroundColor: row.getIsSelected() ? "#f8f9fa" : undefined,
-                      borderBottom: "1px solid #f1f3f5",
+                      backgroundColor: row.getIsSelected() ? colors.bg : undefined,
+                      borderBottom: `1px solid ${colors.bgSubtle}`,
                       cursor: onRowClick ? "pointer" : undefined,
                     }}
                   >
@@ -272,7 +273,7 @@ export function DataTable<TData, TValue = unknown>({
                             maxWidth: columnMeta?.maxWidth || 200,
                             padding: "10px 12px",
                             fontSize: 13,
-                            color: "#495057",
+                            color: colors.textSecondary,
                             overflow: shouldTruncate ? "hidden" : undefined,
                             textOverflow: shouldTruncate ? "ellipsis" : undefined,
                             whiteSpace: shouldTruncate ? "nowrap" : undefined,
@@ -293,7 +294,7 @@ export function DataTable<TData, TValue = unknown>({
                 <Table.Tr>
                   <Table.Td colSpan={columns.length} style={{ height: 150, textAlign: "center" }}>
                     <Box py="md">
-                      <IconInbox size={28} color="#ced4da" style={{ margin: "0 auto" }} />
+                      <IconInbox size={28} color={colors.borderDark} style={{ margin: "0 auto" }} />
                       <Text size="sm" c="dimmed" mt={8}>
                         {emptyMessage}
                       </Text>
@@ -311,12 +312,12 @@ export function DataTable<TData, TValue = unknown>({
             justify="space-between"
             px="sm"
             py="xs"
-            style={{ borderTop: "1px solid #f1f3f5", backgroundColor: "#fff" }}
+            style={{ borderTop: `1px solid ${colors.bgSubtle}`, backgroundColor: colors.white }}
           >
             <Text size="xs" c="dimmed">
               {startIndex}-{endIndex} / {totalRecords}
               {selectedRowsCount > 0 && (
-                <Text span c="#1e3a5f" fw={500} ml={8}>
+                <Text span c={colors.primary} fw={500} ml={8}>
                   ({selectedRowsCount} tanlangan)
                 </Text>
               )}
@@ -337,7 +338,7 @@ export function DataTable<TData, TValue = unknown>({
                   styles={{
                     input: {
                       fontSize: 12,
-                      color: "#868e96",
+                      color: colors.textDimmed,
                       textAlign: "center",
                       minHeight: 24,
                       height: 24,
@@ -363,7 +364,7 @@ export function DataTable<TData, TValue = unknown>({
                   <IconChevronLeft size={14} />
                 </ActionIcon>
 
-                <Text size="xs" c="#495057" px={8} style={{ minWidth: 50, textAlign: "center" }}>
+                <Text size="xs" c={colors.textSecondary} px={8} style={{ minWidth: 50, textAlign: "center" }}>
                   {isServerSide ? currentPage : table.getState().pagination!.pageIndex + 1} /{" "}
                   {totalPages || 1}
                 </Text>
@@ -402,10 +403,10 @@ export function createSortableHeader(title: string) {
         gap: 4,
       }}
     >
-      <Text size="xs" fw={500} c="#868e96" tt="uppercase" style={{ letterSpacing: "0.3px" }}>
+      <Text size="xs" fw={500} c={colors.textDimmed} tt="uppercase" style={{ letterSpacing: "0.3px" }}>
         {title}
       </Text>
-      <IconSelector size={12} stroke={1.5} color="#adb5bd" />
+      <IconSelector size={12} stroke={1.5} color={colors.textMuted} />
     </UnstyledButton>
   );
 }

@@ -28,6 +28,7 @@ import {
 } from "@tabler/icons-react";
 import { ReactNode, memo, useCallback, useState } from "react";
 import { GuardedButton } from "@/components/shared/permission";
+import { colors } from "@/lib/colors";
 
 interface Tab {
   value: string;
@@ -118,42 +119,42 @@ const StatusBadge = memo(({ status }: { status: string }) => {
   const config: Record<string, { label: string; bg: string; color: string }> = {
     DRAFT: {
       label: "Tayyorlanmoqda",
-      bg: "#f1f3f5",
-      color: "#495057"
+      bg: colors.bgSubtle,
+      color: colors.textSecondary,
     },
     PENDING: {
       label: "Jarayonda",
-      bg: "#fff3bf",
-      color: "#e67700"
+      bg: colors.warningLight,
+      color: colors.warningDark,
     },
     IN_REVIEW: {
       label: "Tekshiruvda",
-      bg: "#d0ebff",
-      color: "#1971c2"
+      bg: colors.infoBg,
+      color: colors.infoDark,
     },
     APPROVED: {
       label: "Tasdiqlangan",
-      bg: "#d3f9d8",
-      color: "#2b8a3e"
+      bg: colors.successBg,
+      color: colors.successDark,
     },
     REJECTED: {
       label: "Bekor qilingan",
-      bg: "#ffe3e3",
-      color: "#c92a2a"
+      bg: colors.errorBg,
+      color: colors.errorDark,
     },
     ARCHIVED: {
       label: "Arxiv",
-      bg: "#e9ecef",
-      color: "#868e96"
+      bg: colors.border,
+      color: colors.textDimmed,
     },
     PUBLISHED: {
       label: "Chop etilgan",
-      bg: "#d3f9d8",
-      color: "#2b8a3e"
+      bg: colors.successBg,
+      color: colors.successDark,
     },
   };
 
-  const cfg = config[status] || { label: status, bg: "#f1f3f5", color: "#495057" };
+  const cfg = config[status] || { label: status, bg: colors.bgSubtle, color: colors.textSecondary };
 
   return (
     <Badge
@@ -178,27 +179,27 @@ const PriorityBadge = memo(({ priority }: { priority: string }) => {
   const config: Record<string, { label: string; bg: string; color: string }> = {
     LOW: {
       label: "Oddiy",
-      bg: "#f1f3f5",
-      color: "#495057"
+      bg: colors.bgSubtle,
+      color: colors.textSecondary,
     },
     MEDIUM: {
       label: "O'rtacha",
-      bg: "#fff3bf",
-      color: "#e67700"
+      bg: colors.warningLight,
+      color: colors.warningDark,
     },
     HIGH: {
       label: "Muhim",
-      bg: "#ffe8cc",
-      color: "#d9480f"
+      bg: colors.warningBg,
+      color: "#d9480f",
     },
     URGENT: {
       label: "Juda muhim",
-      bg: "#ffe3e3",
-      color: "#c92a2a"
+      bg: colors.errorBg,
+      color: colors.errorDark,
     },
   };
 
-  const cfg = config[priority] || { label: priority, bg: "#f1f3f5", color: "#495057" };
+  const cfg = config[priority] || { label: priority, bg: colors.bgSubtle, color: colors.textSecondary };
 
   return (
     <Badge
@@ -236,11 +237,11 @@ const ListItemCard = memo(({
     onClick={onClick}
     style={{
       cursor: "pointer",
-      borderColor: isSelected ? "#1e3a5f" : "#e9ecef",
-      backgroundColor: isSelected ? "#f8f9fa" : "#fff",
+      borderColor: isSelected ? colors.primary : colors.border,
+      backgroundColor: isSelected ? colors.bg : colors.white,
     }}
   >
-    <Text size="sm" fw={500} c="#212529" mb={4} lineClamp={1}>
+    <Text size="sm" fw={500} c={colors.textPrimary} mb={4} lineClamp={1}>
       {item.title}
     </Text>
     <Text size="xs" c="dimmed" lineClamp={2} mb="xs">
@@ -322,8 +323,8 @@ export const SplitLayoutWithTabs = ({
         <Box
           px="md"
           style={{
-            borderBottom: "1px solid #e9ecef",
-            backgroundColor: "#fff",
+            borderBottom: `1px solid ${colors.border}`,
+            backgroundColor: colors.white,
           }}
         >
 
@@ -338,7 +339,7 @@ export const SplitLayoutWithTabs = ({
                   style={{ fontSize: 14 }}
                   rightSection={
                     tab.badge !== undefined ? (
-                      <Badge size="xs" circle color="#1e3a5f">
+                      <Badge size="xs" circle color={colors.primary}>
                         {tab.badge}
                       </Badge>
                     ) : null
@@ -355,7 +356,7 @@ export const SplitLayoutWithTabs = ({
                 size="sm"
                 radius="sm"
                 onClick={onCreateNew}
-                style={{ backgroundColor: "#1e3a5f" }}
+                style={{ backgroundColor: colors.primary }}
                 data-tour="document-create"
               >
                 {createButtonLabel}
@@ -370,27 +371,27 @@ export const SplitLayoutWithTabs = ({
           <Box
             style={{
               width: leftPanelWidth,
-              borderRight: "1px solid #e9ecef",
+              borderRight: `1px solid ${colors.border}`,
               display: "flex",
               flexDirection: "column",
-              backgroundColor: "#fff",
+              backgroundColor: colors.white,
             }}
           >
             {/* Search and Filter Toggle */}
-            <Box p="sm" style={{ borderBottom: "1px solid #e9ecef" }} data-tour="document-search">
+            <Box p="sm" style={{ borderBottom: `1px solid ${colors.border}` }} data-tour="document-search">
               <Group gap="xs">
                 <TextInput
                   placeholder={searchPlaceholder}
                   value={searchValue}
                   onChange={(e) => onSearchChange(e.target.value)}
-                  leftSection={<IconSearch size={16} color="#868e96" />}
+                  leftSection={<IconSearch size={16} color={colors.textDimmed} />}
                   size="sm"
                   radius="sm"
                   style={{ flex: 1 }}
                   styles={{
                     input: {
-                      backgroundColor: "#f8f9fa",
-                      border: "1px solid #e9ecef",
+                      backgroundColor: colors.bg,
+                      border: `1px solid ${colors.border}`,
                     },
                   }}
                 />
@@ -401,8 +402,8 @@ export const SplitLayoutWithTabs = ({
                     radius="sm"
                     onClick={() => setFiltersOpen(!filtersOpen)}
                     style={{
-                      backgroundColor: filtersOpen ? "#1e3a5f" : "#f1f3f5",
-                      color: filtersOpen ? "#fff" : "#495057",
+                      backgroundColor: filtersOpen ? colors.primary : colors.bgSubtle,
+                      color: filtersOpen ? colors.white : colors.textSecondary,
                     }}
                     data-tour="document-filter"
                   >
@@ -428,13 +429,13 @@ export const SplitLayoutWithTabs = ({
                     mt="sm"
                     p="sm"
                     style={{
-                      backgroundColor: "#f8f9fa",
+                      backgroundColor: colors.bg,
                       borderRadius: 8,
-                      border: "1px solid #e9ecef",
+                      border: `1px solid ${colors.border}`,
                     }}
                   >
                     <Group justify="space-between" mb="xs">
-                      <Text size="xs" fw={600} c="#495057" tt="uppercase">
+                      <Text size="xs" fw={600} c={colors.textSecondary} tt="uppercase">
                         Filterlar
                       </Text>
                       {activeFilterCount > 0 && (
@@ -461,7 +462,7 @@ export const SplitLayoutWithTabs = ({
                           data={filters.status.options}
                           styles={{
                             input: {
-                              backgroundColor: "#fff",
+                              backgroundColor: colors.white,
                               fontSize: 12,
                             },
                           }}
@@ -478,7 +479,7 @@ export const SplitLayoutWithTabs = ({
                           data={filters.priority.options}
                           styles={{
                             input: {
-                              backgroundColor: "#fff",
+                              backgroundColor: colors.white,
                               fontSize: 12,
                             },
                           }}
@@ -496,7 +497,7 @@ export const SplitLayoutWithTabs = ({
                           data={filters.journalId.options}
                           styles={{
                             input: {
-                              backgroundColor: "#fff",
+                              backgroundColor: colors.white,
                               fontSize: 12,
                             },
                           }}
@@ -514,7 +515,7 @@ export const SplitLayoutWithTabs = ({
                           data={filters.templateId.options}
                           styles={{
                             input: {
-                              backgroundColor: "#fff",
+                              backgroundColor: colors.white,
                               fontSize: 12,
                             },
                           }}
@@ -556,8 +557,8 @@ export const SplitLayoutWithTabs = ({
             <Box
               p="xs"
               style={{
-                borderTop: "1px solid #e9ecef",
-                backgroundColor: "#f8f9fa",
+                borderTop: `1px solid ${colors.border}`,
+                backgroundColor: colors.bg,
               }}
             >
               <Group justify="space-between">
@@ -600,8 +601,8 @@ export const SplitLayoutWithTabs = ({
                   px="md"
                   py="sm"
                   style={{
-                    borderBottom: "1px solid #e9ecef",
-                    backgroundColor: "#fff",
+                    borderBottom: `1px solid ${colors.border}`,
+                    backgroundColor: colors.white,
                   }}
                 >
                   <Group justify="space-between">
@@ -617,10 +618,10 @@ export const SplitLayoutWithTabs = ({
                           onClick={action.onClick}
                           styles={{
                             root: {
-                              borderColor: "#e9ecef",
-                              color: "#495057",
+                              borderColor: colors.border,
+                              color: colors.textSecondary,
                               "&:hover": {
-                                backgroundColor: "#f8f9fa",
+                                backgroundColor: colors.bg,
                               },
                             },
                           }}
@@ -635,7 +636,7 @@ export const SplitLayoutWithTabs = ({
 
                 {/* Content */}
                 <ScrollArea style={{ flex: 1 }} p="md" type="auto">
-                  <Paper p="lg" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+                  <Paper p="lg" radius="sm" withBorder style={{ borderColor: colors.border }}>
                     {rightPanelContent}
                   </Paper>
                 </ScrollArea>
@@ -650,8 +651,8 @@ export const SplitLayoutWithTabs = ({
                 }}
               >
                 <Box ta="center">
-                  <IconFileText size={48} color="#dee2e6" stroke={1} />
-                  <Text size="md" fw={500} c="#495057" mt="md">
+                  <IconFileText size={48} color={colors.borderLight} stroke={1} />
+                  <Text size="md" fw={500} c={colors.textSecondary} mt="md">
                     Element tanlanmagan
                   </Text>
                   <Text size="sm" c="dimmed" mt={4}>

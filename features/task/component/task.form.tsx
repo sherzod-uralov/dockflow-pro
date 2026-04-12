@@ -37,6 +37,7 @@ import { useGetAllTaskCategories } from "@/features/task-category/hook/task-cate
 import { useGetAllTaskScoreConfigs } from "@/features/task-score-config/hook/task-score-config.hook";
 import { useCreateAttachment } from "@/features/attachment/hook/attachment.hook";
 import { FileUpload } from "@/components/shared/ui/custom-file-upload";
+import { colors } from "@/lib/colors";
 
 interface TaskFormProps {
     modal: ModalState;
@@ -242,14 +243,14 @@ const TaskForm = ({
                     {...form.register("title")}
                     styles={{
                         input: {
-                            backgroundColor: "#f8f9fa",
-                            border: "1px solid #e9ecef",
+                            backgroundColor: colors.bg,
+                            border: `1px solid ${colors.border}`,
                             "&:focus": {
-                                borderColor: "#1e3a5f",
+                                borderColor: colors.primary,
                             },
                         },
                         label: {
-                            color: "#495057",
+                            color: colors.textSecondary,
                             fontWeight: 500,
                             marginBottom: 4,
                         },
@@ -267,14 +268,14 @@ const TaskForm = ({
                     {...form.register("description")}
                     styles={{
                         input: {
-                            backgroundColor: "#f8f9fa",
-                            border: "1px solid #e9ecef",
+                            backgroundColor: colors.bg,
+                            border: `1px solid ${colors.border}`,
                             "&:focus": {
-                                borderColor: "#1e3a5f",
+                                borderColor: colors.primary,
                             },
                         },
                         label: {
-                            color: "#495057",
+                            color: colors.textSecondary,
                             fontWeight: 500,
                             marginBottom: 4,
                         },
@@ -299,14 +300,14 @@ const TaskForm = ({
                         error={form.formState.errors.priority?.message}
                         styles={{
                             input: {
-                                backgroundColor: "#f8f9fa",
-                                border: "1px solid #e9ecef",
+                                backgroundColor: colors.bg,
+                                border: `1px solid ${colors.border}`,
                                 "&:focus": {
-                                    borderColor: "#1e3a5f",
+                                    borderColor: colors.primary,
                                 },
                             },
                             label: {
-                                color: "#495057",
+                                color: colors.textSecondary,
                                 fontWeight: 500,
                                 marginBottom: 4,
                             },
@@ -332,14 +333,14 @@ const TaskForm = ({
                     error={form.formState.errors.assigneeIds?.message}
                     styles={{
                         input: {
-                            backgroundColor: "#f8f9fa",
-                            border: "1px solid #e9ecef",
+                            backgroundColor: colors.bg,
+                            border: `1px solid ${colors.border}`,
                             "&:focus": {
-                                borderColor: "#1e3a5f",
+                                borderColor: colors.primary,
                             },
                         },
                         label: {
-                            color: "#495057",
+                            color: colors.textSecondary,
                             fontWeight: 500,
                             marginBottom: 4,
                         },
@@ -363,11 +364,11 @@ const TaskForm = ({
                         error={form.formState.errors.categoryId?.message}
                         styles={{
                             input: {
-                                backgroundColor: "#f8f9fa",
-                                border: "1px solid #e9ecef",
-                                "&:focus": { borderColor: "#1e3a5f" },
+                                backgroundColor: colors.bg,
+                                border: `1px solid ${colors.border}`,
+                                "&:focus": { borderColor: colors.primary },
                             },
-                            label: { color: "#495057", fontWeight: 500, marginBottom: 4 },
+                            label: { color: colors.textSecondary, fontWeight: 500, marginBottom: 4 },
                         }}
                     />
 
@@ -387,11 +388,11 @@ const TaskForm = ({
                         error={form.formState.errors.boardColumnId?.message}
                         styles={{
                             input: {
-                                backgroundColor: "#f8f9fa",
-                                border: "1px solid #e9ecef",
-                                "&:focus": { borderColor: "#1e3a5f" },
+                                backgroundColor: colors.bg,
+                                border: `1px solid ${colors.border}`,
+                                "&:focus": { borderColor: colors.primary },
                             },
-                            label: { color: "#495057", fontWeight: 500, marginBottom: 4 },
+                            label: { color: colors.textSecondary, fontWeight: 500, marginBottom: 4 },
                         }}
                     />
                 </SimpleGrid>
@@ -416,11 +417,11 @@ const TaskForm = ({
                     }
                     styles={{
                         input: {
-                            backgroundColor: "#f8f9fa",
-                            border: "1px solid #e9ecef",
-                            "&:focus": { borderColor: "#1e3a5f" },
+                            backgroundColor: colors.bg,
+                            border: `1px solid ${colors.border}`,
+                            "&:focus": { borderColor: colors.primary },
                         },
-                        label: { color: "#495057", fontWeight: 500, marginBottom: 4 },
+                        label: { color: colors.textSecondary, fontWeight: 500, marginBottom: 4 },
                     }}
                 />
 
@@ -447,14 +448,14 @@ const TaskForm = ({
                         error={form.formState.errors.startDate?.message}
                         styles={{
                             input: {
-                                backgroundColor: "#f8f9fa",
-                                border: "1px solid #e9ecef",
+                                backgroundColor: colors.bg,
+                                border: `1px solid ${colors.border}`,
                                 "&:focus": {
-                                    borderColor: "#1e3a5f",
+                                    borderColor: colors.primary,
                                 },
                             },
                             label: {
-                                color: "#495057",
+                                color: colors.textSecondary,
                                 fontWeight: 500,
                                 marginBottom: 4,
                             },
@@ -482,14 +483,14 @@ const TaskForm = ({
                         error={form.formState.errors.dueDate?.message}
                         styles={{
                             input: {
-                                backgroundColor: "#f8f9fa",
-                                border: "1px solid #e9ecef",
+                                backgroundColor: colors.bg,
+                                border: `1px solid ${colors.border}`,
                                 "&:focus": {
-                                    borderColor: "#1e3a5f",
+                                    borderColor: colors.primary,
                                 },
                             },
                             label: {
-                                color: "#495057",
+                                color: colors.textSecondary,
                                 fontWeight: 500,
                                 marginBottom: 4,
                             },
@@ -527,7 +528,7 @@ const TaskForm = ({
                     justify="flex-end"
                     gap="xs"
                     pt="md"
-                    style={{ borderTop: "1px solid #e9ecef" }}
+                    style={{ borderTop: `1px solid ${colors.border}` }}
                 >
                     <Button
                         variant="outline"
@@ -536,10 +537,10 @@ const TaskForm = ({
                         onClick={modal.closeModal}
                         styles={{
                             root: {
-                                borderColor: "#e9ecef",
-                                color: "#495057",
+                                borderColor: colors.border,
+                                color: colors.textSecondary,
                                 "&:hover": {
-                                    backgroundColor: "#f8f9fa",
+                                    backgroundColor: colors.bg,
                                 },
                             },
                         }}
@@ -557,7 +558,7 @@ const TaskForm = ({
                             createMutation.isLoading ||
                             updateMutation.isLoading
                         }
-                        style={{ backgroundColor: "#1e3a5f" }}
+                        style={{ backgroundColor: colors.primary }}
                     >
                         {form.formState.isSubmitting ||
                             isUploading ||

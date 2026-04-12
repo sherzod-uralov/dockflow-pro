@@ -5,6 +5,7 @@ import { Paper, Group, TextInput, ActionIcon } from "@mantine/core";
 import { IconX, IconCheck } from "@tabler/icons-react";
 import { useCreateTask } from "../../hook/task.hook";
 import { TaskPriority } from "../../type/task.type";
+import { colors } from "@/lib/colors";
 
 interface SubtaskFormProps {
   parentTaskId: string;
@@ -42,7 +43,7 @@ export const SubtaskForm = ({
   };
 
   return (
-    <Paper p="sm" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+    <Paper p="sm" radius="sm" withBorder style={{ borderColor: colors.border }}>
       <Group gap="xs">
         <TextInput
           placeholder="Ichki vazifa nomini kiriting..."

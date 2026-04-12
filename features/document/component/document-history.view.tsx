@@ -39,6 +39,7 @@ import {
   HistoryFileVersion,
 } from "../type/document-history.type";
 import { formatDateTime } from "@/lib/date-utils";
+import { colors } from "@/lib/colors";
 
 interface DocumentHistoryViewProps {
   documentId: string;
@@ -56,20 +57,20 @@ const getInitials = (name?: string) =>
   (name || "?").split(" ").map((n) => n[0]).filter(Boolean).join("").toUpperCase().slice(0, 2);
 
 const TIMELINE_ICON_MAP: Record<string, { icon: any; color: string; bg: string }> = {
-  DOCUMENT_CREATED: { icon: IconFileText, color: "#1971c2", bg: "#e7f5ff" },
-  DOCUMENT_UPDATED: { icon: IconEdit, color: "#f59f00", bg: "#fff9db" },
-  FILE_UPLOADED: { icon: IconUpload, color: "#2f9e44", bg: "#ebfbee" },
-  WORKFLOW_STARTED: { icon: IconPlayerPlay, color: "#1e3a5f", bg: "#f0f4ff" },
-  WORKFLOW_COMPLETED: { icon: IconCircleCheck, color: "#2f9e44", bg: "#ebfbee" },
-  STEP_STARTED: { icon: IconClock, color: "#1971c2", bg: "#e7f5ff" },
-  STEP_APPROVED: { icon: IconCheck, color: "#2f9e44", bg: "#ebfbee" },
-  STEP_REJECTED: { icon: IconX, color: "#e03131", bg: "#fff5f5" },
-  STEP_REASSIGNED: { icon: IconUserPlus, color: "#7950f2", bg: "#f3f0ff" },
-  AUDIT_UPDATE: { icon: IconActivity, color: "#868e96", bg: "#f8f9fa" },
+  DOCUMENT_CREATED: { icon: IconFileText, color: colors.infoDark, bg: colors.infoLight },
+  DOCUMENT_UPDATED: { icon: IconEdit, color: colors.warningDark, bg: colors.warningLight },
+  FILE_UPLOADED: { icon: IconUpload, color: colors.successDark, bg: colors.successLight },
+  WORKFLOW_STARTED: { icon: IconPlayerPlay, color: colors.primary, bg: colors.primaryLight },
+  WORKFLOW_COMPLETED: { icon: IconCircleCheck, color: colors.successDark, bg: colors.successLight },
+  STEP_STARTED: { icon: IconClock, color: colors.infoDark, bg: colors.infoLight },
+  STEP_APPROVED: { icon: IconCheck, color: colors.successDark, bg: colors.successLight },
+  STEP_REJECTED: { icon: IconX, color: colors.errorDark, bg: colors.errorLight },
+  STEP_REASSIGNED: { icon: IconUserPlus, color: colors.primary, bg: colors.primaryLight },
+  AUDIT_UPDATE: { icon: IconActivity, color: colors.textDimmed, bg: colors.bg },
 };
 
 const getEventStyle = (type: string) => {
-  return TIMELINE_ICON_MAP[type] || { icon: IconActivity, color: "#868e96", bg: "#f8f9fa" };
+  return TIMELINE_ICON_MAP[type] || { icon: IconActivity, color: colors.textDimmed, bg: colors.bg };
 };
 
 const TimelineItem = ({ event, isLast }: { event: TimelineEvent; isLast: boolean }) => {
@@ -87,7 +88,7 @@ const TimelineItem = ({ event, isLast }: { event: TimelineEvent; isLast: boolean
             top: 36,
             bottom: -12,
             width: 2,
-            backgroundColor: "#e9ecef",
+            backgroundColor: colors.border,
           }}
         />
       )}
@@ -117,12 +118,12 @@ const TimelineItem = ({ event, isLast }: { event: TimelineEvent; isLast: boolean
               </Text>
             </Avatar>
           )}
-          <Text size="sm" fw={600} c="#212529" lineClamp={1}>
+          <Text size="sm" fw={600} c={colors.textPrimary} lineClamp={1}>
             {event.title}
           </Text>
         </Group>
         {event.description && (
-          <Text size="sm" c="#495057" mb={4} style={{ whiteSpace: "pre-wrap" }}>
+          <Text size="sm" c={colors.textSecondary} mb={4} style={{ whiteSpace: "pre-wrap" }}>
             {event.description}
           </Text>
         )}
@@ -142,14 +143,14 @@ const TimelineItem = ({ event, isLast }: { event: TimelineEvent; isLast: boolean
 };
 
 const FileVersionItem = ({ version }: { version: HistoryFileVersion }) => (
-  <Paper p="sm" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+  <Paper p="sm" radius="sm" withBorder style={{ borderColor: colors.border }}>
     <Group justify="space-between" wrap="nowrap">
       <Group gap="sm" style={{ flex: 1, minWidth: 0 }}>
         <ThemeIcon size="sm" radius="sm" variant="light" color="blue">
           <IconFileText size={14} />
         </ThemeIcon>
         <Box style={{ flex: 1, minWidth: 0 }}>
-          <Text size="sm" fw={500} c="#212529" lineClamp={1}>
+          <Text size="sm" fw={500} c={colors.textPrimary} lineClamp={1}>
             {version.fileName}
           </Text>
           <Group gap="xs">
@@ -188,8 +189,8 @@ const SummaryCard = ({
   icon: Icon,
   label,
   value,
-  color = "#1e3a5f",
-  bg = "#f0f4ff",
+  color = colors.primary,
+  bg = colors.primaryLight,
 }: {
   icon: any;
   label: string;
@@ -197,7 +198,7 @@ const SummaryCard = ({
   color?: string;
   bg?: string;
 }) => (
-  <Paper p="md" radius="sm" style={{ backgroundColor: bg, border: "1px solid #e9ecef" }}>
+  <Paper p="md" radius="sm" style={{ backgroundColor: bg, border: `1px solid ${colors.border}` }}>
     <Group gap="xs" mb={4}>
       <Icon size={16} color={color} />
       <Text size="xs" c={color} fw={600} tt="uppercase">
@@ -216,7 +217,7 @@ export const DocumentHistoryView = ({ documentId }: DocumentHistoryViewProps) =>
   if (isLoading) {
     return (
       <Center py={60}>
-        <Loader color="#1e3a5f" />
+        <Loader color={colors.primary} />
       </Center>
     );
   }
@@ -245,29 +246,29 @@ export const DocumentHistoryView = ({ documentId }: DocumentHistoryViewProps) =>
           icon={IconPackage}
           label="Versiyalar"
           value={data.summary.totalVersions}
-          color="#1e3a5f"
-          bg="#f0f4ff"
+          color={colors.primary}
+          bg={colors.primaryLight}
         />
         <SummaryCard
           icon={IconList}
           label="Bosqichlar"
           value={data.summary.totalSteps}
-          color="#2f9e44"
-          bg="#ebfbee"
+          color={colors.successDark}
+          bg={colors.successLight}
         />
         <SummaryCard
           icon={IconActivity}
           label="Harakatlar"
           value={data.summary.totalActions}
-          color="#f59f00"
-          bg="#fff9db"
+          color={colors.warningDark}
+          bg={colors.warningLight}
         />
         <SummaryCard
           icon={IconPlayerPlay}
           label="Aylanmalar"
           value={data.summary.workflowsCount}
-          color="#7950f2"
-          bg="#f3f0ff"
+          color={colors.primary}
+          bg={colors.primaryLight}
         />
       </SimpleGrid>
 
@@ -317,7 +318,7 @@ export const DocumentHistoryView = ({ documentId }: DocumentHistoryViewProps) =>
                 {fileVersionGroups.map(([mimeType, versions]) => (
                   <Box key={mimeType}>
                     <Group gap="xs" mb="xs">
-                      <Text size="sm" fw={600} c="#495057" tt="uppercase">
+                      <Text size="sm" fw={600} c={colors.textSecondary} tt="uppercase">
                         {mimeType.includes("pdf")
                           ? "PDF fayllar"
                           : mimeType.includes("word") || mimeType.includes("docx")

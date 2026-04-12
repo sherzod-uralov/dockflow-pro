@@ -40,6 +40,7 @@ import {
   GuardedActionIcon,
   GuardedMenuItem,
 } from "@/components/shared/permission";
+import { colors } from "@/lib/colors";
 
 interface TaskChecklistProps {
   taskId: string;
@@ -81,8 +82,8 @@ const ChecklistItemRow = ({
           input: {
             cursor: "pointer",
             "&:checked": {
-              backgroundColor: "#1e3a5f",
-              borderColor: "#1e3a5f",
+              backgroundColor: colors.primary,
+              borderColor: colors.primary,
             },
           },
         }}
@@ -98,8 +99,8 @@ const ChecklistItemRow = ({
           autoFocus
           styles={{
             input: {
-              backgroundColor: "#f8f9fa",
-              border: "1px solid #e9ecef",
+              backgroundColor: colors.bg,
+              border: `1px solid ${colors.border}`,
             },
           }}
         />
@@ -109,7 +110,7 @@ const ChecklistItemRow = ({
           style={{
             flex: 1,
             textDecoration: item.isCompleted ? "line-through" : "none",
-            color: item.isCompleted ? "#adb5bd" : "#212529",
+            color: item.isCompleted ? colors.textMuted : colors.textPrimary,
             cursor: "pointer",
           }}
           onClick={() => setIsEditing(true)}
@@ -191,7 +192,7 @@ const ChecklistSection = ({
   };
 
   return (
-    <Paper p="sm" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+    <Paper p="sm" radius="sm" withBorder style={{ borderColor: colors.border }}>
       {/* Header */}
       <Group justify="space-between" mb="xs">
         <Group gap="xs" style={{ cursor: "pointer" }} onClick={() => setIsOpen(!isOpen)}>
@@ -207,13 +208,13 @@ const ChecklistSection = ({
               onClick={(e) => e.stopPropagation()}
               styles={{
                 input: {
-                  backgroundColor: "#f8f9fa",
-                  border: "1px solid #e9ecef",
+                  backgroundColor: colors.bg,
+                  border: `1px solid ${colors.border}`,
                 },
               }}
             />
           ) : (
-            <Text size="sm" fw={600} c="#212529">
+            <Text size="sm" fw={600} c={colors.textPrimary}>
               {checklist.title}
             </Text>
           )}
@@ -253,7 +254,7 @@ const ChecklistSection = ({
         value={progress}
         size="xs"
         mb="sm"
-        color={progress === 100 ? "green" : "#1e3a5f"}
+        color={progress === 100 ? "green" : colors.primary}
       />
 
       {/* Items */}
@@ -282,8 +283,8 @@ const ChecklistSection = ({
                 autoFocus
                 styles={{
                   input: {
-                    backgroundColor: "#f8f9fa",
-                    border: "1px solid #e9ecef",
+                    backgroundColor: colors.bg,
+                    border: `1px solid ${colors.border}`,
                   },
                 }}
               />
@@ -306,9 +307,9 @@ const ChecklistSection = ({
               mt="xs"
               styles={{
                 root: {
-                  color: "#868e96",
+                  color: colors.textDimmed,
                   "&:hover": {
-                    backgroundColor: "#f8f9fa",
+                    backgroundColor: colors.bg,
                   },
                 },
               }}
@@ -357,7 +358,7 @@ export const TaskChecklist = ({ taskId }: TaskChecklistProps) => {
   if (isLoading) {
     return (
       <Box py="md" style={{ display: "flex", justifyContent: "center" }}>
-        <Loader size="sm" color="#1e3a5f" />
+        <Loader size="sm" color={colors.primary} />
       </Box>
     );
   }
@@ -374,7 +375,7 @@ export const TaskChecklist = ({ taskId }: TaskChecklistProps) => {
 
       {/* Add checklist */}
       {showAddChecklist ? (
-        <Paper p="sm" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+        <Paper p="sm" radius="sm" withBorder style={{ borderColor: colors.border }}>
           <Group gap="xs">
             <TextInput
               placeholder="Checklist nomi..."
@@ -386,8 +387,8 @@ export const TaskChecklist = ({ taskId }: TaskChecklistProps) => {
               autoFocus
               styles={{
                 input: {
-                  backgroundColor: "#f8f9fa",
-                  border: "1px solid #e9ecef",
+                  backgroundColor: colors.bg,
+                  border: `1px solid ${colors.border}`,
                 },
               }}
             />
@@ -395,7 +396,7 @@ export const TaskChecklist = ({ taskId }: TaskChecklistProps) => {
               size="sm"
               onClick={handleAddChecklist}
               loading={createMutation.isLoading}
-              style={{ backgroundColor: "#1e3a5f" }}
+              style={{ backgroundColor: colors.primary }}
             >
               Qo'shish
             </Button>
@@ -420,11 +421,11 @@ export const TaskChecklist = ({ taskId }: TaskChecklistProps) => {
           onClick={() => setShowAddChecklist(true)}
           styles={{
             root: {
-              backgroundColor: "#f8f9fa",
-              color: "#495057",
-              border: "1px dashed #e9ecef",
+              backgroundColor: colors.bg,
+              color: colors.textSecondary,
+              border: `1px dashed ${colors.border}`,
               "&:hover": {
-                backgroundColor: "#e9ecef",
+                backgroundColor: colors.border,
               },
             },
           }}

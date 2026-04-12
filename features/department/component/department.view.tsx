@@ -24,6 +24,7 @@ import {
     IconSitemap,
 } from "@tabler/icons-react";
 import { DepartmentResponse } from "../type/department.type";
+import { colors } from "@/lib/colors";
 
 interface DepartmentViewProps {
     department: DepartmentResponse;
@@ -48,14 +49,14 @@ const DepartmentView = ({ department }: DepartmentViewProps) => {
                         <Box
                             p={10}
                             style={{
-                                backgroundColor: "#f1f3f5",
+                                backgroundColor: colors.bgSubtle,
                                 borderRadius: 8,
                             }}
                         >
-                            <IconBuilding size={24} color="#1e3a5f" />
+                            <IconBuilding size={24} color={colors.primary} />
                         </Box>
                         <Box>
-                            <Text size="xl" fw={600} c="#212529">
+                            <Text size="xl" fw={600} c={colors.textPrimary}>
                                 {department.name}
                             </Text>
                             <Text size="sm" c="dimmed">
@@ -93,14 +94,14 @@ const DepartmentView = ({ department }: DepartmentViewProps) => {
 
             {/* Description */}
             {department.description && (
-                <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+                <Paper p="md" radius="sm" withBorder style={{ borderColor: colors.border }}>
                     <Group gap="xs" mb="sm">
-                        <IconFileDescription size={16} color="#868e96" />
+                        <IconFileDescription size={16} color={colors.textDimmed} />
                         <Text size="xs" c="dimmed" tt="uppercase" fw={600}>
                             Tavsif
                         </Text>
                     </Group>
-                    <Text size="sm" c="#495057" style={{ lineHeight: 1.6 }}>
+                    <Text size="sm" c={colors.textSecondary} style={{ lineHeight: 1.6 }}>
                         {department.description}
                     </Text>
                 </Paper>
@@ -108,9 +109,9 @@ const DepartmentView = ({ department }: DepartmentViewProps) => {
 
             {/* Code and Location */}
             <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
-                <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+                <Paper p="md" radius="sm" withBorder style={{ borderColor: colors.border }}>
                     <Group gap="xs" mb="sm">
-                        <IconHash size={16} color="#868e96" />
+                        <IconHash size={16} color={colors.textDimmed} />
                         <Text size="xs" c="dimmed" tt="uppercase" fw={600}>
                             Kod
                         </Text>
@@ -122,20 +123,20 @@ const DepartmentView = ({ department }: DepartmentViewProps) => {
                                     p="sm"
                                     radius="sm"
                                     style={{
-                                        backgroundColor: copied ? "#d3f9d8" : "#e7f5ff",
+                                        backgroundColor: copied ? colors.successBg : colors.primaryLight,
                                         cursor: "pointer",
-                                        border: `1px solid ${copied ? "#8ce99a" : "#a5d8ff"}`,
+                                        border: `1px solid ${copied ? colors.successBg : colors.infoBg}`,
                                     }}
                                     onClick={copy}
                                 >
                                     <Group justify="space-between">
-                                        <Text size="md" fw={600} c={copied ? "#2b8a3e" : "#1e3a5f"} ff="monospace">
+                                        <Text size="md" fw={600} c={copied ? colors.successDark : colors.primary} ff="monospace">
                                             {department.code}
                                         </Text>
                                         {copied ? (
-                                            <IconCheck size={16} color="#2b8a3e" />
+                                            <IconCheck size={16} color={colors.successDark} />
                                         ) : (
-                                            <IconCopy size={16} color="#1e3a5f" />
+                                            <IconCopy size={16} color={colors.primary} />
                                         )}
                                     </Group>
                                 </Paper>
@@ -146,14 +147,14 @@ const DepartmentView = ({ department }: DepartmentViewProps) => {
                     )}
                 </Paper>
 
-                <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+                <Paper p="md" radius="sm" withBorder style={{ borderColor: colors.border }}>
                     <Group gap="xs" mb="sm">
-                        <IconMapPin size={16} color="#868e96" />
+                        <IconMapPin size={16} color={colors.textDimmed} />
                         <Text size="xs" c="dimmed" tt="uppercase" fw={600}>
                             Joylashuv
                         </Text>
                     </Group>
-                    <Text size="md" c="#495057">
+                    <Text size="md" c={colors.textSecondary}>
                         {department.location || "Kiritilmagan"}
                     </Text>
                 </Paper>
@@ -162,9 +163,9 @@ const DepartmentView = ({ department }: DepartmentViewProps) => {
             {/* Parent Department and Director */}
             <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
                 {department.parent && (
-                    <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+                    <Paper p="md" radius="sm" withBorder style={{ borderColor: colors.border }}>
                         <Group gap="xs" mb="sm">
-                            <IconSitemap size={16} color="#868e96" />
+                            <IconSitemap size={16} color={colors.textDimmed} />
                             <Text size="xs" c="dimmed" tt="uppercase" fw={600}>
                                 Bosh bo'lim
                             </Text>
@@ -181,9 +182,9 @@ const DepartmentView = ({ department }: DepartmentViewProps) => {
                 )}
 
                 {department.director && (
-                    <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+                    <Paper p="md" radius="sm" withBorder style={{ borderColor: colors.border }}>
                         <Group gap="xs" mb="sm">
-                            <IconUser size={16} color="#868e96" />
+                            <IconUser size={16} color={colors.textDimmed} />
                             <Text size="xs" c="dimmed" tt="uppercase" fw={600}>
                                 Bo'lim boshlig'i
                             </Text>
@@ -193,14 +194,14 @@ const DepartmentView = ({ department }: DepartmentViewProps) => {
                                 size="md"
                                 radius="xl"
                                 src={department.director.avatarUrl}
-                                style={{ backgroundColor: "#e7f5ff" }}
+                                style={{ backgroundColor: colors.primaryLight }}
                             >
-                                <Text size="sm" c="#1e3a5f" fw={500}>
+                                <Text size="sm" c={colors.primary} fw={500}>
                                     {getInitials(department.director.fullname)}
                                 </Text>
                             </Avatar>
                             <Box>
-                                <Text size="md" fw={500} c="#212529">
+                                <Text size="md" fw={500} c={colors.textPrimary}>
                                     {department.director.fullname}
                                 </Text>
                                 <Text size="xs" c="dimmed">

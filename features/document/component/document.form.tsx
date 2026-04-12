@@ -19,6 +19,7 @@ import {
   SegmentedControl,
 } from "@mantine/core";
 import { IconTag, IconLoader2, IconUpload, IconFileText } from "@tabler/icons-react";
+import { colors } from "@/lib/colors";
 import { FileUpload } from "@/components/shared/ui/custom-file-upload";
 import {
   DocumentFormType,
@@ -268,14 +269,14 @@ const DocumentFormModal = ({
           error={form.formState.errors.documentTypeId?.message}
           styles={{
             input: {
-              backgroundColor: "#f8f9fa",
-              border: "1px solid #e9ecef",
+              backgroundColor: colors.bg,
+              border: `1px solid ${colors.border}`,
               "&:focus": {
-                borderColor: "#1e3a5f",
+                borderColor: colors.primary,
               },
             },
             label: {
-              color: "#495057",
+              color: colors.textSecondary,
               fontWeight: 500,
               marginBottom: 4,
             },
@@ -291,14 +292,14 @@ const DocumentFormModal = ({
           {...form.register("title")}
           styles={{
             input: {
-              backgroundColor: "#f8f9fa",
-              border: "1px solid #e9ecef",
+              backgroundColor: colors.bg,
+              border: `1px solid ${colors.border}`,
               "&:focus": {
-                borderColor: "#1e3a5f",
+                borderColor: colors.primary,
               },
             },
             label: {
-              color: "#495057",
+              color: colors.textSecondary,
               fontWeight: 500,
               marginBottom: 4,
             },
@@ -316,14 +317,14 @@ const DocumentFormModal = ({
           {...form.register("description")}
           styles={{
             input: {
-              backgroundColor: "#f8f9fa",
-              border: "1px solid #e9ecef",
+              backgroundColor: colors.bg,
+              border: `1px solid ${colors.border}`,
               "&:focus": {
-                borderColor: "#1e3a5f",
+                borderColor: colors.primary,
               },
             },
             label: {
-              color: "#495057",
+              color: colors.textSecondary,
               fontWeight: 500,
               marginBottom: 4,
             },
@@ -334,7 +335,7 @@ const DocumentFormModal = ({
         {/* Create mode selector — faqat create rejimda */}
         {!isUpdate && (
           <Box>
-            <Text size="sm" fw={500} c="#495057" mb={4}>
+            <Text size="sm" fw={500} c={colors.textSecondary} mb={4}>
               Hujjat yaratish usuli
             </Text>
             <SegmentedControl
@@ -348,7 +349,7 @@ const DocumentFormModal = ({
                 { value: "office", label: "Office da yaratish" },
               ]}
               styles={{
-                root: { backgroundColor: "#f8f9fa" },
+                root: { backgroundColor: colors.bg },
               }}
             />
           </Box>
@@ -369,11 +370,11 @@ const DocumentFormModal = ({
             ]}
             styles={{
               input: {
-                backgroundColor: "#f8f9fa",
-                border: "1px solid #e9ecef",
-                "&:focus": { borderColor: "#1e3a5f" },
+                backgroundColor: colors.bg,
+                border: `1px solid ${colors.border}`,
+                "&:focus": { borderColor: colors.primary },
               },
-              label: { color: "#495057", fontWeight: 500, marginBottom: 4 },
+              label: { color: colors.textSecondary, fontWeight: 500, marginBottom: 4 },
             }}
           />
         )}
@@ -391,14 +392,14 @@ const DocumentFormModal = ({
             error={form.formState.errors.journalId?.message}
             styles={{
               input: {
-                backgroundColor: "#f8f9fa",
-                border: "1px solid #e9ecef",
+                backgroundColor: colors.bg,
+                border: `1px solid ${colors.border}`,
                 "&:focus": {
-                  borderColor: "#1e3a5f",
+                  borderColor: colors.primary,
                 },
               },
               label: {
-                color: "#495057",
+                color: colors.textSecondary,
                 fontWeight: 500,
                 marginBottom: 4,
               },
@@ -417,14 +418,14 @@ const DocumentFormModal = ({
             disabled={isLoadingTemplates}
             styles={{
               input: {
-                backgroundColor: "#f8f9fa",
-                border: "1px solid #e9ecef",
+                backgroundColor: colors.bg,
+                border: `1px solid ${colors.border}`,
                 "&:focus": {
-                  borderColor: "#1e3a5f",
+                  borderColor: colors.primary,
                 },
               },
               label: {
-                color: "#495057",
+                color: colors.textSecondary,
                 fontWeight: 500,
                 marginBottom: 4,
               },
@@ -435,16 +436,16 @@ const DocumentFormModal = ({
         {/* Dynamic Tag Fields */}
         {isLoadingTemplate && selectedTemplateId && (
           <Group gap="xs" c="dimmed">
-            <Loader size="xs" color="#1e3a5f" />
+            <Loader size="xs" color={colors.primary} />
             <Text size="sm">Shablon yuklanmoqda...</Text>
           </Group>
         )}
 
         {hasRequiredTags && (
-          <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+          <Paper p="md" radius="sm" withBorder style={{ borderColor: colors.border }}>
             <Group gap="xs" mb="md">
-              <IconTag size={16} color="#1e3a5f" />
-              <Text size="sm" fw={600} c="#212529">
+              <IconTag size={16} color={colors.primary} />
+              <Text size="sm" fw={600} c={colors.textPrimary}>
                 Shablon maydonlari
               </Text>
             </Group>
@@ -460,14 +461,14 @@ const DocumentFormModal = ({
                   onChange={(e) => handleTagChange(tagName, e.target.value)}
                   styles={{
                     input: {
-                      backgroundColor: "#f8f9fa",
-                      border: "1px solid #e9ecef",
+                      backgroundColor: colors.bg,
+                      border: `1px solid ${colors.border}`,
                       "&:focus": {
-                        borderColor: "#1e3a5f",
+                        borderColor: colors.primary,
                       },
                     },
                     label: {
-                      color: "#495057",
+                      color: colors.textSecondary,
                       fontWeight: 500,
                       marginBottom: 4,
                       textTransform: "capitalize",
@@ -482,7 +483,7 @@ const DocumentFormModal = ({
         {/* File Upload - only show in upload mode when no template selected */}
         {createMode === "upload" && !selectedTemplateId && (
           <Box>
-            <Text size="sm" fw={500} c="#495057" mb={4}>
+            <Text size="sm" fw={500} c={colors.textSecondary} mb={4}>
               Fayllar <span style={{ color: "var(--mantine-color-error)" }}>*</span>
             </Text>
             <FileUpload
@@ -554,7 +555,7 @@ const DocumentFormModal = ({
         )}
 
         {/* Actions */}
-        <Group justify="flex-end" gap="xs" pt="md" style={{ borderTop: "1px solid #e9ecef" }}>
+        <Group justify="flex-end" gap="xs" pt="md" style={{ borderTop: `1px solid ${colors.border}` }}>
           <Button
             variant="outline"
             size="sm"
@@ -562,10 +563,10 @@ const DocumentFormModal = ({
             onClick={modal.closeModal}
             styles={{
               root: {
-                borderColor: "#e9ecef",
-                color: "#495057",
+                borderColor: colors.border,
+                color: colors.textSecondary,
                 "&:hover": {
-                  backgroundColor: "#f8f9fa",
+                  backgroundColor: colors.bg,
                 },
               },
             }}
@@ -588,7 +589,7 @@ const DocumentFormModal = ({
               updateMutation.isLoading ||
               createWithOfficeMutation.isLoading
             }
-            style={{ backgroundColor: "#1e3a5f" }}
+            style={{ backgroundColor: colors.primary }}
           >
             {form.formState.isSubmitting ||
               createMutation.isLoading ||

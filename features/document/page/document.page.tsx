@@ -36,6 +36,7 @@ import {
   GuardedActionIcon,
   GuardedMenuItem,
 } from "@/components/shared/permission";
+import { colors } from "@/lib/colors";
 
 // Status options
 const STATUS_OPTIONS = [
@@ -291,7 +292,7 @@ const DocumentPage: FC<{ children: ReactNode }> = ({ children }) => {
                       key={type.id}
                       onClick={() => setSelectedTab(type.id)}
                       fw={selectedTab === type.id ? 600 : 400}
-                      c={selectedTab === type.id ? "#1e3a5f" : undefined}
+                      c={selectedTab === type.id ? colors.primary : undefined}
                     >
                       {type.name}
                     </Menu.Item>

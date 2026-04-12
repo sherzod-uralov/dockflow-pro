@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Paper, Stack, TextInput, Group, ActionIcon } from "@mantine/core";
 import { IconX, IconCheck } from "@tabler/icons-react";
 import { useCreateTaskTimeEntry } from "@/features/task-time-entry/hook/task-time-entry.hook";
+import { colors } from "@/lib/colors";
 
 interface TimeEntryFormProps {
   taskId: string;
@@ -35,7 +36,7 @@ export const TimeEntryForm = ({ taskId, onClose }: TimeEntryFormProps) => {
   };
 
   return (
-    <Paper p="sm" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+    <Paper p="sm" radius="sm" withBorder style={{ borderColor: colors.border }}>
       <Stack gap="xs">
         <TextInput
           placeholder="Soatlar (masalan: 2.5)"

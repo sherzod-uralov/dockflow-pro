@@ -43,6 +43,7 @@ import { useDebounce } from "@/hooks/use-debaunce";
 import { handleCopyToClipboard } from "@/utils/copy-text";
 import { useOnboarding, TourButton } from "@/hooks/use-onboarding";
 import { DataTable, DataTableColumn } from "@/components/shared/ui/custom-table";
+import { colors } from "@/lib/colors";
 
 const DocumentTypePage = () => {
   const router = useRouter();
@@ -130,8 +131,8 @@ const DocumentTypePage = () => {
       header: "Nomi",
       cell: ({ row }) => (
         <Group gap="sm" wrap="nowrap">
-          <IconFileText size={18} color="#1e3a5f" style={{ flexShrink: 0 }} />
-          <Text size="sm" fw={500} c="#212529">
+          <IconFileText size={18} color={colors.primary} style={{ flexShrink: 0 }} />
+          <Text size="sm" fw={500} c={colors.textPrimary}>
             {row.original.name}
           </Text>
         </Group>
@@ -142,7 +143,7 @@ const DocumentTypePage = () => {
       accessorKey: "description",
       header: "Tavsif",
       cell: ({ row }) => (
-        <Text size="sm" c="#495057" lineClamp={1}>
+        <Text size="sm" c={colors.textSecondary} lineClamp={1}>
           {row.original.description || "—"}
         </Text>
       ),
@@ -202,13 +203,13 @@ const DocumentTypePage = () => {
         <Box
           p={16}
           style={{
-            backgroundColor: "#f1f3f5",
+            backgroundColor: colors.bgSubtle,
             borderRadius: 12,
           }}
         >
-          <IconFileText size={40} color="#868e96" stroke={1.5} />
+          <IconFileText size={40} color={colors.textDimmed} stroke={1.5} />
         </Box>
-        <Text size="lg" fw={500} c="#495057">
+        <Text size="lg" fw={500} c={colors.textSecondary}>
           Hujjat turi topilmadi
         </Text>
         <Text size="sm" c="dimmed" ta="center">
@@ -223,7 +224,7 @@ const DocumentTypePage = () => {
       {/* Header */}
       <Group justify="space-between" mb="md">
         <Box>
-          <Text size="lg" fw={600} c="#212529">
+          <Text size="lg" fw={600} c={colors.textPrimary}>
             Hujjat turlari
           </Text>
           <Text size="sm" c="dimmed">
@@ -240,8 +241,8 @@ const DocumentTypePage = () => {
             data-tour="doctype-create"
             styles={{
               root: {
-                backgroundColor: "#1e3a5f",
-                "&:hover": { backgroundColor: "#162d4a" },
+                backgroundColor: colors.primary,
+                "&:hover": { backgroundColor: colors.primaryHover },
               },
             }}
           >
@@ -256,12 +257,12 @@ const DocumentTypePage = () => {
         radius="sm"
         withBorder
         mb="md"
-        style={{ borderColor: "#e9ecef" }}
+        style={{ borderColor: colors.border }}
         data-tour="doctype-search"
       >
         <TextInput
           placeholder="Hujjat turini qidirish..."
-          leftSection={<IconSearch size={18} color="#868e96" />}
+          leftSection={<IconSearch size={18} color={colors.textDimmed} />}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           radius="sm"
@@ -272,7 +273,7 @@ const DocumentTypePage = () => {
       {/* Table */}
       <Box data-tour="doctype-list">
         {!isLoading && data?.data?.length === 0 ? (
-          <Paper radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+          <Paper radius="sm" withBorder style={{ borderColor: colors.border }}>
             <EmptyState />
           </Paper>
         ) : (

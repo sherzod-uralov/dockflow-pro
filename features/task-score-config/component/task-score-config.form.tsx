@@ -20,6 +20,7 @@ import {
   useCreateTaskScoreConfig,
   useUpdateTaskScoreConfig,
 } from "@/features/task-score-config";
+import { colors } from "@/lib/colors";
 
 interface TaskScoreConfigFormProps {
   mode: "create" | "update";
@@ -112,7 +113,7 @@ const TaskScoreConfigForm = ({
             size="md"
             radius="sm"
             required
-            leftSection={<IconHash size={18} color="#868e96" />}
+            leftSection={<IconHash size={18} color={colors.textDimmed} />}
             {...form.getInputProps("priorityCode")}
             styles={{ label: { fontWeight: 500, marginBottom: 6 } }}
           />
@@ -169,7 +170,7 @@ const TaskScoreConfigForm = ({
           radius="sm"
           required
           rows={3}
-          leftSection={<IconFileDescription size={18} color="#868e96" />}
+          leftSection={<IconFileDescription size={18} color={colors.textDimmed} />}
           {...form.getInputProps("description")}
           styles={{ label: { fontWeight: 500, marginBottom: 6 } }}
         />
@@ -209,8 +210,8 @@ const TaskScoreConfigForm = ({
             loading={isSubmitting}
             styles={{
               root: {
-                backgroundColor: "#1e3a5f",
-                "&:hover": { backgroundColor: "#162d4a" },
+                backgroundColor: colors.primary,
+                "&:hover": { backgroundColor: colors.primaryHover },
               },
             }}
           >

@@ -39,6 +39,7 @@ import { handleCopyToClipboard } from "@/utils/copy-text";
 import { DataTable, DataTableColumn } from "@/components/shared/ui/custom-table";
 import TaskScoreConfigForm from "../component/task-score-config.form";
 import TaskScoreConfigView from "../component/task-score-config.view";
+import { colors } from "@/lib/colors";
 
 const TaskScoreConfigPage = () => {
   const createModal = useModal();
@@ -97,7 +98,7 @@ const TaskScoreConfigPage = () => {
           <Badge variant="filled" color="blue" radius="sm" size="sm" w={28} style={{ fontWeight: 700 }}>
             {row.original.priorityLevel}
           </Badge>
-          <Text size="sm" fw={600} c="#212529">
+          <Text size="sm" fw={600} c={colors.textPrimary}>
             {row.original.priorityCode}
           </Text>
         </Group>
@@ -108,7 +109,7 @@ const TaskScoreConfigPage = () => {
       accessorKey: "baseScore",
       header: "Ball",
       cell: ({ row }) => (
-        <Text size="sm" fw={600} c="#2ecc71">{row.original.baseScore}</Text>
+        <Text size="sm" fw={600} c={colors.success}>{row.original.baseScore}</Text>
       ),
       meta: { width: 70 },
     },
@@ -116,7 +117,7 @@ const TaskScoreConfigPage = () => {
       accessorKey: "recommendedDays",
       header: "Muddat",
       cell: ({ row }) => (
-        <Text size="sm" c="#495057">{row.original.recommendedDays} kun</Text>
+        <Text size="sm" c={colors.textSecondary}>{row.original.recommendedDays} kun</Text>
       ),
       meta: { width: 80 },
     },
@@ -124,7 +125,7 @@ const TaskScoreConfigPage = () => {
       accessorKey: "penaltyPerDay",
       header: "Jarima/kun",
       cell: ({ row }) => (
-        <Text size="sm" fw={500} c="#e74c3c">-{row.original.penaltyPerDay}</Text>
+        <Text size="sm" fw={500} c={colors.error}>-{row.original.penaltyPerDay}</Text>
       ),
       meta: { width: 90 },
     },
@@ -132,7 +133,7 @@ const TaskScoreConfigPage = () => {
       accessorKey: "maxPenaltyDays",
       header: "Maks. kun",
       cell: ({ row }) => (
-        <Text size="sm" c="#495057">{row.original.maxPenaltyDays ?? "—"}</Text>
+        <Text size="sm" c={colors.textSecondary}>{row.original.maxPenaltyDays ?? "—"}</Text>
       ),
       meta: { width: 80 },
     },
@@ -140,7 +141,7 @@ const TaskScoreConfigPage = () => {
       accessorKey: "description",
       header: "Tavsif",
       cell: ({ row }) => (
-        <Text size="sm" c="#495057" lineClamp={1}>
+        <Text size="sm" c={colors.textSecondary} lineClamp={1}>
           {row.original.description || "—"}
         </Text>
       ),
@@ -152,7 +153,7 @@ const TaskScoreConfigPage = () => {
       cell: ({ row }) => (
         <Box w={8} h={8} style={{
           borderRadius: "50%",
-          backgroundColor: row.original.isActive ? "#2ecc71" : "#adb5bd",
+          backgroundColor: row.original.isActive ? colors.success : colors.textMuted,
         }} />
       ),
       meta: { width: 50, truncate: false },
@@ -190,11 +191,11 @@ const TaskScoreConfigPage = () => {
       <Stack align="center" gap="md">
         <Box
           p={16}
-          style={{ backgroundColor: "#f1f3f5", borderRadius: 12 }}
+          style={{ backgroundColor: colors.bgSubtle, borderRadius: 12 }}
         >
-          <IconSettings size={40} color="#868e96" stroke={1.5} />
+          <IconSettings size={40} color={colors.textDimmed} stroke={1.5} />
         </Box>
-        <Text size="lg" fw={500} c="#495057">
+        <Text size="lg" fw={500} c={colors.textSecondary}>
           Ball konfiguratsiyasi topilmadi
         </Text>
         <Text size="sm" c="dimmed" ta="center">
@@ -209,7 +210,7 @@ const TaskScoreConfigPage = () => {
       {/* Header */}
       <Group justify="space-between" mb="md">
         <Box>
-          <Text size="lg" fw={600} c="#212529">
+          <Text size="lg" fw={600} c={colors.textPrimary}>
             Ball konfiguratsiyasi
           </Text>
           <Text size="sm" c="dimmed">
@@ -223,8 +224,8 @@ const TaskScoreConfigPage = () => {
           radius="sm"
           styles={{
             root: {
-              backgroundColor: "#1e3a5f",
-              "&:hover": { backgroundColor: "#162d4a" },
+              backgroundColor: colors.primary,
+              "&:hover": { backgroundColor: colors.primaryHover },
             },
           }}
         >
@@ -234,7 +235,7 @@ const TaskScoreConfigPage = () => {
 
       {/* Table */}
       {!isLoading && data?.data?.length === 0 ? (
-        <Paper radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+        <Paper radius="sm" withBorder style={{ borderColor: colors.border }}>
           <EmptyState />
         </Paper>
       ) : (

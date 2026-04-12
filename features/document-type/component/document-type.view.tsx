@@ -14,6 +14,7 @@ import { IconFileText, IconInfoCircle, IconCopy } from "@tabler/icons-react";
 import { handleCopyToClipboard } from "@/utils/copy-text";
 import { useSearchParams } from "next/navigation";
 import { useGetDocumentTypeById } from "../hook/document-type.hook";
+import { colors } from "@/lib/colors";
 
 const DocumentTypeView = () => {
   const params = useSearchParams();
@@ -38,7 +39,7 @@ const DocumentTypeView = () => {
   if (!documentType) {
     return (
       <Box ta="center" py="xl">
-        <IconFileText size={48} color="#dee2e6" />
+        <IconFileText size={48} color={colors.borderLight} />
         <Text size="sm" c="dimmed" mt="md">
           Ma'lumot topilmadi
         </Text>
@@ -49,7 +50,7 @@ const DocumentTypeView = () => {
   return (
     <Stack gap="md">
       {/* Header */}
-      <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+      <Paper p="md" radius="sm" withBorder style={{ borderColor: colors.border }}>
         <Group justify="space-between" align="flex-start">
           <Group gap="sm">
             <Box
@@ -57,16 +58,16 @@ const DocumentTypeView = () => {
                 width: 40,
                 height: 40,
                 borderRadius: 8,
-                backgroundColor: "#f1f3f5",
+                backgroundColor: colors.bgSubtle,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
               }}
             >
-              <IconFileText size={20} color="#1e3a5f" />
+              <IconFileText size={20} color={colors.primary} />
             </Box>
             <Box>
-              <Text size="lg" fw={600} c="#212529">
+              <Text size="lg" fw={600} c={colors.textPrimary}>
                 {documentType.name}
               </Text>
               <Text size="sm" c="dimmed">
@@ -81,8 +82,8 @@ const DocumentTypeView = () => {
               radius="sm"
               variant="outline"
               style={{
-                borderColor: "#e9ecef",
-                color: "#495057",
+                borderColor: colors.border,
+                color: colors.textSecondary,
                 cursor: "pointer",
                 fontFamily: "monospace",
               }}
@@ -98,21 +99,21 @@ const DocumentTypeView = () => {
       </Paper>
 
       {/* Nomi */}
-      <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+      <Paper p="md" radius="sm" withBorder style={{ borderColor: colors.border }}>
         <Group gap="xs" mb="sm">
-          <IconFileText size={16} color="#868e96" />
-          <Text size="sm" fw={600} c="#495057">
+          <IconFileText size={16} color={colors.textDimmed} />
+          <Text size="sm" fw={600} c={colors.textSecondary}>
             Nomi
           </Text>
         </Group>
         <Box
           p="sm"
           style={{
-            backgroundColor: "#f8f9fa",
+            backgroundColor: colors.bg,
             borderRadius: 4,
           }}
         >
-          <Text size="sm" c="#212529">
+          <Text size="sm" c={colors.textPrimary}>
             {documentType.name}
           </Text>
         </Box>
@@ -120,17 +121,17 @@ const DocumentTypeView = () => {
 
       {/* Tavsif */}
       {documentType.description && (
-        <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+        <Paper p="md" radius="sm" withBorder style={{ borderColor: colors.border }}>
           <Group gap="xs" mb="sm">
-            <IconInfoCircle size={16} color="#868e96" />
-            <Text size="sm" fw={600} c="#495057">
+            <IconInfoCircle size={16} color={colors.textDimmed} />
+            <Text size="sm" fw={600} c={colors.textSecondary}>
               Tavsif
             </Text>
           </Group>
           <Box
             p="sm"
             style={{
-              backgroundColor: "#f8f9fa",
+              backgroundColor: colors.bg,
               borderRadius: 4,
             }}
           >

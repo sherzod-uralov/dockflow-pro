@@ -40,6 +40,7 @@ import TaskListView from "../component/task-list-view";
 import TaskCalendarView from "../component/task-calendar-view";
 import { TaskDetailDrawer } from "../component/task-detail-drawer";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { colors } from "@/lib/colors";
 
 const TaskPage = () => {
     const createModal = useModal();
@@ -163,7 +164,7 @@ const TaskPage = () => {
             <Stack gap="xl">
                 <Group justify="space-between">
                     <div>
-                        <Text size="xl" fw={700} c="#212529">
+                        <Text size="xl" fw={700} c={colors.textPrimary}>
                             Vazifalar
                         </Text>
                         <Text size="sm" c="dimmed">
@@ -174,7 +175,7 @@ const TaskPage = () => {
                         permission="task:create"
                         leftSection={<IconPlus size={16} />}
                         onClick={() => handleCreateTask()}
-                        style={{ backgroundColor: "#1e3a5f" }}
+                        style={{ backgroundColor: colors.primary }}
                     >
                         Yangi vazifa
                     </GuardedButton>
@@ -189,8 +190,8 @@ const TaskPage = () => {
                             style={{ flex: 1, maxWidth: 300 }}
                             styles={{
                                 input: {
-                                    backgroundColor: "#f8f9fa",
-                                    border: "1px solid #e9ecef",
+                                    backgroundColor: colors.bg,
+                                    border: `1px solid ${colors.border}`,
                                 },
                             }}
                         />
@@ -204,8 +205,8 @@ const TaskPage = () => {
                             style={{ width: 200 }}
                             styles={{
                                 input: {
-                                    backgroundColor: "#f8f9fa",
-                                    border: "1px solid #e9ecef",
+                                    backgroundColor: colors.bg,
+                                    border: `1px solid ${colors.border}`,
                                 },
                             }}
                         />
@@ -219,8 +220,8 @@ const TaskPage = () => {
                             style={{ width: 180 }}
                             styles={{
                                 input: {
-                                    backgroundColor: "#f8f9fa",
-                                    border: "1px solid #e9ecef",
+                                    backgroundColor: colors.bg,
+                                    border: `1px solid ${colors.border}`,
                                 },
                             }}
                         />
@@ -235,8 +236,8 @@ const TaskPage = () => {
                             style={{ width: 200 }}
                             styles={{
                                 input: {
-                                    backgroundColor: "#f8f9fa",
-                                    border: "1px solid #e9ecef",
+                                    backgroundColor: colors.bg,
+                                    border: `1px solid ${colors.border}`,
                                 },
                             }}
                         />
@@ -277,7 +278,7 @@ const TaskPage = () => {
                 {/* Content */}
                 {isLoading ? (
                     <Center py="xl">
-                        <Loader color="#1e3a5f" />
+                        <Loader color={colors.primary} />
                     </Center>
                 ) : (
                     <>

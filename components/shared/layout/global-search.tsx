@@ -32,6 +32,7 @@ import { useRouter } from "next/navigation";
 import { useQuery } from "react-query";
 import { axiosInstance } from "@/api/axios.instance";
 import { endpoints } from "@/api/axios.endpoints";
+import { colors } from "@/lib/colors";
 
 type SearchType = "all" | "document" | "task" | "project" | "workflow" | "user" | "journal";
 
@@ -99,12 +100,12 @@ const TYPE_TABS: { value: SearchType; label: string }[] = [
 ];
 
 const TYPE_ICONS: Record<string, React.ReactNode> = {
-  document: <IconFileText size={16} color="#3498db" />,
-  task: <IconCheckbox size={16} color="#2ecc71" />,
-  project: <IconLayoutKanban size={16} color="#f39c12" />,
+  document: <IconFileText size={16} color={colors.info} />,
+  task: <IconCheckbox size={16} color={colors.success} />,
+  project: <IconLayoutKanban size={16} color={colors.warning} />,
   workflow: <IconArrowsExchange size={16} color="#9b59b6" />,
-  user: <IconUser size={16} color="#1e3a5f" />,
-  journal: <IconBook size={16} color="#e74c3c" />,
+  user: <IconUser size={16} color={colors.primary} />,
+  journal: <IconBook size={16} color={colors.error} />,
 };
 
 const TYPE_ROUTES: Record<string, (item: SearchResult) => string> = {
@@ -148,7 +149,7 @@ function ResultItem({
   isActive: boolean;
   onClick: () => void;
 }) {
-  const icon = TYPE_ICONS[item.type] || <IconFile size={16} color="#868e96" />;
+  const icon = TYPE_ICONS[item.type] || <IconFile size={16} color={colors.textDimmed} />;
 
   return (
     <UnstyledButton
@@ -158,7 +159,7 @@ function ResultItem({
       py="sm"
       style={{
         borderRadius: 6,
-        backgroundColor: isActive ? "#1e3a5f" : "transparent",
+        backgroundColor: isActive ? colors.primary : "transparent",
         color: isActive ? "white" : "inherit",
         transition: "background-color 100ms ease",
       }}
@@ -174,7 +175,7 @@ function ResultItem({
             h={36}
             style={{
               borderRadius: 6,
-              backgroundColor: isActive ? "rgba(255,255,255,0.15)" : "#f1f3f5",
+              backgroundColor: isActive ? "rgba(255,255,255,0.15)" : colors.bgSubtle,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -351,15 +352,15 @@ export function GlobalSearch() {
         py={6}
         style={{
           borderRadius: 6,
-          backgroundColor: "#f8f9fa",
-          border: "1px solid #e9ecef",
+          backgroundColor: colors.bg,
+          border: `1px solid ${colors.border}`,
           display: "flex",
           alignItems: "center",
           gap: 8,
           width: 280,
         }}
       >
-        <IconSearch size={16} color="#868e96" />
+        <IconSearch size={16} color={colors.textDimmed} />
         <Text size="sm" c="dimmed" style={{ flex: 1 }}>
           Qidirish...
         </Text>
@@ -391,7 +392,7 @@ export function GlobalSearch() {
             onChange={(e) => setQuery(e.target.value)}
             leftSection={
               isLoading || isFetching ? (
-                <Loader size={16} color="#1e3a5f" />
+                <Loader size={16} color={colors.primary} />
               ) : (
                 <IconSearch size={16} />
               )
@@ -400,9 +401,9 @@ export function GlobalSearch() {
             radius="sm"
             styles={{
               input: {
-                backgroundColor: "#f8f9fa",
-                border: "1px solid #e9ecef",
-                "&:focus": { borderColor: "#1e3a5f" },
+                backgroundColor: colors.bg,
+                border: `1px solid ${colors.border}`,
+                "&:focus": { borderColor: colors.primary },
               },
             }}
           />
@@ -424,8 +425,8 @@ export function GlobalSearch() {
                       style={{
                         borderRadius: 4,
                         backgroundColor:
-                          activeType === tab.value ? "#1e3a5f" : "#f1f3f5",
-                        color: activeType === tab.value ? "white" : "#495057",
+                          activeType === tab.value ? colors.primary : colors.bgSubtle,
+                        color: activeType === tab.value ? "white" : colors.textSecondary,
                         whiteSpace: "nowrap",
                         fontSize: 13,
                         fontWeight: 500,
@@ -442,9 +443,9 @@ export function GlobalSearch() {
                             backgroundColor:
                               activeType === tab.value
                                 ? "rgba(255,255,255,0.25)"
-                                : "#dee2e6",
+                                : colors.borderLight,
                             color:
-                              activeType === tab.value ? "white" : "#495057",
+                              activeType === tab.value ? "white" : colors.textSecondary,
                           }}
                         >
                           {count}
@@ -458,12 +459,12 @@ export function GlobalSearch() {
           </Box>
         )}
 
-        <Box style={{ borderTop: "1px solid #e9ecef" }}>
+        <Box style={{ borderTop: `1px solid ${colors.border}` }}>
           {/* Results */}
           {query.length < 2 ? (
             <Center py={60}>
               <Stack align="center" gap="xs">
-                <IconSearch size={40} color="#dee2e6" />
+                <IconSearch size={40} color={colors.borderLight} />
                 <Text size="sm" c="dimmed">
                   Kamida 2 belgi kiriting
                 </Text>
@@ -480,7 +481,7 @@ export function GlobalSearch() {
           ) : results.length === 0 && !isLoading ? (
             <Center py={60}>
               <Stack align="center" gap="xs">
-                <IconSearch size={40} color="#dee2e6" />
+                <IconSearch size={40} color={colors.borderLight} />
                 <Text size="sm" fw={500}>
                   Natija topilmadi
                 </Text>
@@ -511,8 +512,8 @@ export function GlobalSearch() {
             px="md"
             py="xs"
             style={{
-              borderTop: "1px solid #e9ecef",
-              backgroundColor: "#f8f9fa",
+              borderTop: `1px solid ${colors.border}`,
+              backgroundColor: colors.bg,
             }}
           >
             <Group justify="space-between">

@@ -12,6 +12,7 @@ import {
 import { ComponentType } from "react";
 import { usePermission } from "@/providers/permission-provider";
 import { DEFAULT_DENIAL_REASON } from "@/components/shared/permission";
+import { colors } from "@/lib/colors";
 
 export interface ActionItem {
   id: string;
@@ -119,7 +120,7 @@ export const CustomAction = ({
           styles={{
             root: {
               "&:hover": {
-                backgroundColor: "#f8f9fa",
+                backgroundColor: colors.bg,
               },
             },
           }}
@@ -130,7 +131,7 @@ export const CustomAction = ({
       <Menu.Dropdown
         styles={{
           dropdown: {
-            border: "1px solid #e9ecef",
+            border: `1px solid ${colors.border}`,
             boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
           },
         }}

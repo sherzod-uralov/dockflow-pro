@@ -35,6 +35,7 @@ import {
   GuardedActionIcon,
   usePermissionCheck,
 } from "@/components/shared/permission";
+import { colors } from "@/lib/colors";
 
 interface TaskAttachmentsProps {
   taskId: string;
@@ -51,18 +52,18 @@ const formatBytes = (bytes?: number) => {
 const getFileIcon = (mimeType?: string, fileName?: string) => {
   const ext = fileName?.split(".").pop()?.toLowerCase();
   if (mimeType?.startsWith("image/") || ["jpg", "jpeg", "png", "gif"].includes(ext || "")) {
-    return <IconPhoto size={20} color="#2b8a3e" />;
+    return <IconPhoto size={20} color={colors.successDark} />;
   }
   if (mimeType === "application/pdf" || ext === "pdf") {
-    return <IconFileText size={20} color="#c92a2a" />;
+    return <IconFileText size={20} color={colors.errorDark} />;
   }
   if (
     mimeType?.includes("word") ||
     ["doc", "docx"].includes(ext || "")
   ) {
-    return <IconFileText size={20} color="#1e3a5f" />;
+    return <IconFileText size={20} color={colors.primary} />;
   }
-  return <IconFile size={20} color="#868e96" />;
+  return <IconFile size={20} color={colors.textDimmed} />;
 };
 
 const AttachmentItem = ({
@@ -76,7 +77,7 @@ const AttachmentItem = ({
   const isImage = file?.mimeType?.startsWith("image/");
 
   return (
-    <Paper p="xs" radius="sm" style={{ backgroundColor: "#f8f9fa" }}>
+    <Paper p="xs" radius="sm" style={{ backgroundColor: colors.bg }}>
       <Group gap="sm" wrap="nowrap">
         {/* Preview */}
         <Box
@@ -84,7 +85,7 @@ const AttachmentItem = ({
             width: 48,
             height: 48,
             borderRadius: 4,
-            backgroundColor: "#e9ecef",
+            backgroundColor: colors.border,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -108,7 +109,7 @@ const AttachmentItem = ({
 
         {/* Info */}
         <Box style={{ flex: 1, minWidth: 0 }}>
-          <Text size="sm" fw={500} c="#212529" lineClamp={1}>
+          <Text size="sm" fw={500} c={colors.textPrimary} lineClamp={1}>
             {file?.fileName || "Noma'lum fayl"}
           </Text>
           <Group gap="xs">
@@ -226,9 +227,9 @@ export const TaskAttachments = ({ taskId }: TaskAttachmentsProps) => {
           {...getRootProps()}
           p="md"
           style={{
-            border: `2px dashed ${isDragActive ? "#1e3a5f" : "#e9ecef"}`,
+            border: `2px dashed ${isDragActive ? colors.primary : colors.border}`,
             borderRadius: 8,
-            backgroundColor: isDragActive ? "#f8f9fa" : "#fff",
+            backgroundColor: isDragActive ? colors.bg : colors.white,
             cursor: "pointer",
             transition: "all 0.2s",
           }}
@@ -239,11 +240,11 @@ export const TaskAttachments = ({ taskId }: TaskAttachmentsProps) => {
               size="lg"
               radius="xl"
               variant="light"
-              style={{ backgroundColor: "#f1f3f5", color: "#868e96" }}
+              style={{ backgroundColor: colors.bgSubtle, color: colors.textDimmed }}
             >
               <IconUpload size={20} />
             </ThemeIcon>
-            <Text size="sm" c="#495057">
+            <Text size="sm" c={colors.textSecondary}>
               {isDragActive
                 ? "Faylni bu yerga tashlang"
                 : "Fayl yuklash uchun bosing yoki sudrab keling"}
@@ -257,13 +258,13 @@ export const TaskAttachments = ({ taskId }: TaskAttachmentsProps) => {
         <Box
           p="md"
           style={{
-            border: "2px dashed #fde2e2",
+            border: `2px dashed ${colors.errorBg}`,
             borderRadius: 8,
-            backgroundColor: "#fff5f5",
+            backgroundColor: colors.errorLight,
             textAlign: "center",
           }}
         >
-          <Text size="sm" c="#e74c3c">
+          <Text size="sm" c={colors.error}>
             Fayl yuklash uchun ruxsat yo'q
           </Text>
         </Box>
@@ -271,10 +272,10 @@ export const TaskAttachments = ({ taskId }: TaskAttachmentsProps) => {
 
       {/* Uploading indicator */}
       {isUploading && (
-        <Paper p="sm" radius="sm" style={{ backgroundColor: "#e7f5ff" }}>
+        <Paper p="sm" radius="sm" style={{ backgroundColor: colors.primaryLight }}>
           <Group gap="sm">
-            <Loader size="xs" color="#1e3a5f" />
-            <Text size="sm" c="#1e3a5f">
+            <Loader size="xs" color={colors.primary} />
+            <Text size="sm" c={colors.primary}>
               {uploadingFiles.length} ta fayl yuklanmoqda...
             </Text>
           </Group>
@@ -284,11 +285,11 @@ export const TaskAttachments = ({ taskId }: TaskAttachmentsProps) => {
       {/* Attachments list */}
       {isLoading ? (
         <Box py="md" style={{ display: "flex", justifyContent: "center" }}>
-          <Loader size="sm" color="#1e3a5f" />
+          <Loader size="sm" color={colors.primary} />
         </Box>
       ) : attachments.length > 0 ? (
         <Stack gap="xs">
-          <Text size="sm" fw={500} c="#212529">
+          <Text size="sm" fw={500} c={colors.textPrimary}>
             Biriktirilgan fayllar ({attachments.length})
           </Text>
           {attachments.map((attachment) => (

@@ -2,6 +2,7 @@ import { Paper, Group, Box, Text, Badge, ActionIcon } from "@mantine/core";
 import { IconTrash } from "@tabler/icons-react";
 import { format } from "date-fns";
 import { uz } from "date-fns/locale";
+import { colors } from "@/lib/colors";
 
 export interface TimeEntry {
   id: string;
@@ -18,11 +19,11 @@ interface TimeEntryItemProps {
 }
 
 export const TimeEntryItem = ({ entry, onDelete }: TimeEntryItemProps) => (
-  <Paper p="xs" radius="sm" style={{ backgroundColor: "#f8f9fa" }}>
+  <Paper p="xs" radius="sm" style={{ backgroundColor: colors.bg }}>
     <Group justify="space-between" wrap="nowrap">
       <Box style={{ flex: 1 }}>
         <Group gap="xs">
-          <Text size="sm" fw={600} c="#1e3a5f">
+          <Text size="sm" fw={600} c={colors.primary}>
             {entry.hours}h
           </Text>
           {entry.isBillable && (

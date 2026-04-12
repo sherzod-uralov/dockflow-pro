@@ -7,6 +7,7 @@ import {
   IconSearch,
   IconFilter,
 } from "@tabler/icons-react";
+import { colors } from "@/lib/colors";
 
 interface UserToolbarProps {
   selectedCount?: number;
@@ -41,16 +42,16 @@ export function UserToolbar({
           placeholder={searchPlaceholder}
           value={searchQuery}
           onChange={(e) => onSearch(e.target.value)}
-          leftSection={<IconSearch size={16} color="#868e96" />}
+          leftSection={<IconSearch size={16} color={colors.textDimmed} />}
           size="sm"
           radius="sm"
           w={320}
           styles={{
             input: {
-              backgroundColor: "#f8f9fa",
-              border: "1px solid #e9ecef",
+              backgroundColor: colors.bg,
+              border: `1px solid ${colors.border}`,
               "&:focus": {
-                borderColor: "#1e3a5f",
+                borderColor: colors.primary,
               },
             },
           }}
@@ -64,10 +65,10 @@ export function UserToolbar({
             onClick={onFilter}
             styles={{
               root: {
-                borderColor: "#e9ecef",
-                color: "#495057",
+                borderColor: colors.border,
+                color: colors.textSecondary,
                 "&:hover": {
-                  backgroundColor: "#f8f9fa",
+                  backgroundColor: colors.bg,
                 },
               },
             }}
@@ -97,7 +98,7 @@ export function UserToolbar({
             radius="sm"
             leftSection={<IconPlus size={16} />}
             onClick={onCreate}
-            style={{ backgroundColor: "#1e3a5f" }}
+            style={{ backgroundColor: colors.primary }}
           >
             {createLabel}
           </Button>

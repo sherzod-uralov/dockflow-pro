@@ -32,6 +32,7 @@ import {
 } from "@/features/document-template";
 import { parseWordFile, ExtractedTags } from "../utils/word-parser";
 import { notifications } from "@mantine/notifications";
+import { colors } from "@/lib/colors";
 
 interface DocumentTemplateFormModalProps {
     mode: "create" | "update";
@@ -291,10 +292,10 @@ const DocumentTemplateFormModal = ({
 
                 {/* Extracted Tags */}
                 {tagCount > 0 && (
-                    <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+                    <Paper p="md" radius="sm" withBorder style={{ borderColor: colors.border }}>
                         <Group gap="xs" mb="sm">
-                            <IconTag size={18} color="#495057" />
-                            <Text fw={500} size="sm" c="#212529">
+                            <IconTag size={18} color={colors.textSecondary} />
+                            <Text fw={500} size="sm" c={colors.textPrimary}>
                                 Topilgan taglar ({tagCount})
                             </Text>
                         </Group>
@@ -344,8 +345,8 @@ const DocumentTemplateFormModal = ({
                         disabled={!hasFile}
                         styles={{
                             root: {
-                                backgroundColor: "#1e3a5f",
-                                "&:hover": { backgroundColor: "#162d4a" },
+                                backgroundColor: colors.primary,
+                                "&:hover": { backgroundColor: colors.primaryHover },
                             },
                         }}
                     >

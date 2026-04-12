@@ -43,6 +43,7 @@ import {
 } from "@tabler/icons-react"
 
 import { DepartmentResponse } from "../type/department.type";
+import { colors } from "@/lib/colors";
 
 interface DepartmentGraphViewProps {
     departments: DepartmentResponse[]
@@ -72,7 +73,7 @@ function DepartmentNode({ data, isConnectable }: { data: any; isConnectable: boo
         width: 16,
         height: 16,
         borderRadius: "50%",
-        backgroundColor: "#228be6",
+        backgroundColor: colors.info,
         border: "3px solid white",
         boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
         zIndex: 100, // Ensure handles are above the card
@@ -146,7 +147,7 @@ function DepartmentNode({ data, isConnectable }: { data: any; isConnectable: boo
                 withBorder
                 shadow="lg"
                 style={{
-                    borderColor: isRoot ? "#1e3a5f" : "#dee2e6",
+                    borderColor: isRoot ? colors.primary : colors.borderLight,
                     borderWidth: isRoot ? 2 : 1,
                     backgroundColor: "white",
                     width: 320,
@@ -161,17 +162,17 @@ function DepartmentNode({ data, isConnectable }: { data: any; isConnectable: boo
                         <Box
                             style={{
                                 background: isRoot
-                                    ? "linear-gradient(135deg, #1e3a5f 0%, #2c5282 100%)"
-                                    : "linear-gradient(135deg, #e7f5ff 0%, #d0ebff 100%)",
+                                    ? `linear-gradient(135deg, ${colors.primary} 0%, ${colors.primaryHover} 100%)`
+                                    : `linear-gradient(135deg, ${colors.primaryLight} 0%, ${colors.infoBg} 100%)`,
                                 padding: 10,
                                 borderRadius: 10,
                                 flexShrink: 0,
                             }}
                         >
-                            <IconBuilding size={20} color={isRoot ? "white" : "#1e3a5f"} />
+                            <IconBuilding size={20} color={isRoot ? "white" : colors.primary} />
                         </Box>
                         <Box style={{ flex: 1, minWidth: 0 }}>
-                            <Text size="sm" fw={600} c="#212529" lineClamp={1}>
+                            <Text size="sm" fw={600} c={colors.textPrimary} lineClamp={1}>
                                 {dept.name}
                             </Text>
                             {dept.code && (
@@ -189,7 +190,7 @@ function DepartmentNode({ data, isConnectable }: { data: any; isConnectable: boo
                             wrap="nowrap"
                             p="xs"
                             style={{
-                                backgroundColor: "#f8f9fa",
+                                backgroundColor: colors.bg,
                                 borderRadius: 6,
                             }}
                         >
@@ -198,11 +199,11 @@ function DepartmentNode({ data, isConnectable }: { data: any; isConnectable: boo
                                 radius="xl"
                                 src={dept.director.avatarUrl}
                                 style={{
-                                    backgroundColor: "#e7f5ff",
+                                    backgroundColor: colors.primaryLight,
                                     flexShrink: 0,
                                 }}
                             >
-                                <Text size="xs" c="#1e3a5f" fw={600}>
+                                <Text size="xs" c={colors.primary} fw={600}>
                                     {getInitials(dept.director.fullname)}
                                 </Text>
                             </Avatar>
@@ -210,7 +211,7 @@ function DepartmentNode({ data, isConnectable }: { data: any; isConnectable: boo
                                 <Text size="xs" c="dimmed" fw={500}>
                                     Bo'lim boshlig'i
                                 </Text>
-                                <Text size="xs" c="#212529" fw={500} lineClamp={1}>
+                                <Text size="xs" c={colors.textPrimary} fw={500} lineClamp={1}>
                                     {dept.director.fullname}
                                 </Text>
                             </Box>
@@ -223,12 +224,12 @@ function DepartmentNode({ data, isConnectable }: { data: any; isConnectable: boo
                             gap={4}
                             p={4}
                             style={{
-                                backgroundColor: "#fff3bf",
+                                backgroundColor: colors.warningLight,
                                 borderRadius: 4,
                             }}
                         >
                             <Text size="xs">📍</Text>
-                            <Text size="xs" c="#495057" fw={500} lineClamp={1}>
+                            <Text size="xs" c={colors.textSecondary} fw={500} lineClamp={1}>
                                 {dept.location}
                             </Text>
                         </Group>
@@ -533,10 +534,10 @@ export default function DepartmentGraphView({
                 sourceHandle: "bottom",
                 targetHandle: "target-top",
                 animated: false,
-                style: { stroke: "#1e3a5f", strokeWidth: 2 },
+                style: { stroke: colors.primary, strokeWidth: 2 },
                 markerEnd: {
                     type: MarkerType.ArrowClosed,
-                    color: "#1e3a5f",
+                    color: colors.primary,
                 },
             }))
 
@@ -584,7 +585,7 @@ export default function DepartmentGraphView({
     }
     if (!departments || departments.length === 0) {
         return (
-            <Paper p="xl" radius="sm" withBorder style={{ borderColor: "#e9ecef", minHeight: 500 }}>
+            <Paper p="xl" radius="sm" withBorder style={{ borderColor: colors.border, minHeight: 500 }}>
                 <Center h={400}>
                     <Text c="dimmed">Bo'limlar mavjud emas</Text>
                 </Center>
@@ -599,7 +600,7 @@ export default function DepartmentGraphView({
                 withBorder
                 style={{
                     height: 700,
-                    borderColor: "#e9ecef",
+                    borderColor: colors.border,
                     position: "relative",
                     overflow: "hidden",
                 }}
@@ -617,16 +618,16 @@ export default function DepartmentGraphView({
                     minZoom={0.4}
                     maxZoom={2}
                     connectionLineStyle={{
-                        stroke: "#228be6",
+                        stroke: colors.info,
                         strokeWidth: 3,
                     }}
                     defaultEdgeOptions={{
                         type: "smoothstep",
                         animated: false,
-                        style: { stroke: "#1e3a5f", strokeWidth: 2 },
+                        style: { stroke: colors.primary, strokeWidth: 2 },
                         markerEnd: {
                             type: MarkerType.ArrowClosed,
-                            color: "#1e3a5f",
+                            color: colors.primary,
                         },
                     }}
                     proOptions={{ hideAttribution: true }}
@@ -635,7 +636,7 @@ export default function DepartmentGraphView({
                         variant={BackgroundVariant.Dots}
                         gap={20}
                         size={1}
-                        color="#e9ecef"
+                        color={colors.border}
                     />
                     <Controls
                         showInteractive={false}
@@ -652,7 +653,7 @@ export default function DepartmentGraphView({
                 }}
                 title={
                     <Group gap="xs">
-                        <IconBuilding size={20} color="#1e3a5f" />
+                        <IconBuilding size={20} color={colors.primary} />
                         <Text fw={600} size="lg">
                             Bo'limni bog'lash
                         </Text>
@@ -682,7 +683,7 @@ export default function DepartmentGraphView({
                                 >
                                     Bekor qilish
                                 </Button>
-                                <Button onClick={handleConnectConfirm} style={{ backgroundColor: "#1e3a5f" }}>
+                                <Button onClick={handleConnectConfirm} style={{ backgroundColor: colors.primary }}>
                                     Tasdiqlash
                                 </Button>
                             </Group>

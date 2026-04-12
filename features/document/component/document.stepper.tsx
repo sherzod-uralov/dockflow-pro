@@ -26,6 +26,7 @@ import {
   IconWritingSign,
 } from "@tabler/icons-react";
 import { formatDateTime } from "@/lib/date-utils";
+import { colors } from "@/lib/colors";
 import Link from "next/link";
 
 
@@ -98,15 +99,15 @@ const getActionIcon = (step: WorkflowStep) => {
 };
 
 const getStatusColor = (status: string, isRejected: boolean): string => {
-  if (isRejected) return "#c92a2a";
-  if (status === "COMPLETED") return "#2b8a3e";
-  return "#868e96";
+  if (isRejected) return colors.errorDark;
+  if (status === "COMPLETED") return colors.successDark;
+  return colors.textDimmed;
 };
 
 const getStatusBgColor = (status: string, isRejected: boolean): string => {
-  if (isRejected) return "#ffe3e3";
-  if (status === "COMPLETED") return "#d3f9d8";
-  return "#f1f3f5";
+  if (isRejected) return colors.errorBg;
+  if (status === "COMPLETED") return colors.successBg;
+  return colors.bgSubtle;
 };
 
 // Step Card komponenti
@@ -179,7 +180,7 @@ const StepCard = memo(({ step, isLast }: { step: WorkflowStep; isLast: boolean }
           <Divider />
           <Box>
             <Text size="xs" c="dimmed" fw={600}>Rad etish sababi</Text>
-            <Text size="sm" c="#c92a2a" fs="italic">{step.rejectionReason}</Text>
+            <Text size="sm" c={colors.errorDark} fs="italic">{step.rejectionReason}</Text>
           </Box>
         </>
       )}
@@ -208,9 +209,9 @@ const StepCard = memo(({ step, isLast }: { step: WorkflowStep; isLast: boolean }
           w={280}
           styles={{
             tooltip: {
-              backgroundColor: "#fff",
-              color: "#212529",
-              border: "1px solid #e9ecef",
+              backgroundColor: colors.white,
+              color: colors.textPrimary,
+              border: `1px solid ${colors.border}`,
               boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
             },
           }}
@@ -239,11 +240,11 @@ const StepCard = memo(({ step, isLast }: { step: WorkflowStep; isLast: boolean }
                     size="xs"
                     radius="xl"
                     src={step.assignedToUser.avatarUrl}
-                    style={{ backgroundColor: "#1e3a5f" }}
+                    style={{ backgroundColor: colors.primary }}
                   >
                     <IconUser size={10} />
                   </Avatar>
-                  <Text size="xs" fw={500} c="#212529" lineClamp={1}>
+                  <Text size="xs" fw={500} c={colors.textPrimary} lineClamp={1}>
                     {step.assignedToUser.fullname.split(" ")[0]}
                   </Text>
                 </Group>
@@ -275,7 +276,7 @@ const StepCard = memo(({ step, isLast }: { step: WorkflowStep; isLast: boolean }
           style={{
             flex: 1,
             height: 2,
-            backgroundColor: "#e9ecef",
+            backgroundColor: colors.border,
             marginTop: 18,
             minWidth: 24,
           }}
@@ -307,15 +308,15 @@ const WorkflowTracker = ({ workflow }: { workflow: any }) => {
       p="md"
       radius="sm"
       withBorder
-      style={{ borderColor: "#e9ecef", marginBottom: 16 }}
+      style={{ borderColor: colors.border, marginBottom: 16 }}
     >
       <Stack gap="md">
         {/* Header */}
         <Group justify="space-between">
           <Box>
             <Group gap="xs">
-              <IconUsers size={18} color="#1e3a5f" />
-              <Text size="md" fw={600} c="#212529">
+              <IconUsers size={18} color={colors.primary} />
+              <Text size="md" fw={600} c={colors.textPrimary}>
                 Jarayon Tarixi
               </Text>
             </Group>
@@ -327,7 +328,7 @@ const WorkflowTracker = ({ workflow }: { workflow: any }) => {
             size="md"
             radius="sm"
             variant="light"
-            style={{ backgroundColor: "#f1f3f5", color: "#495057" }}
+            style={{ backgroundColor: colors.bgSubtle, color: colors.textSecondary }}
           >
             {steps.length}
           </Badge>

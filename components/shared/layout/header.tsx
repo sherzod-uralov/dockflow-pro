@@ -29,6 +29,7 @@ import { TourSettingsButton } from "@/hooks/use-onboarding";
 import { NotificationBell } from "@/components/shared/notification-bell";
 import { useOnlineUsers } from "@/hooks/socket";
 import { Popover, ScrollArea } from "@mantine/core";
+import { colors } from "@/lib/colors";
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -47,8 +48,8 @@ export function Header({ onMenuClick }: HeaderProps) {
         px="md"
         py="sm"
         style={{
-          borderBottom: "1px solid #e9ecef",
-          backgroundColor: "#fff",
+          borderBottom: `1px solid ${colors.border}`,
+          backgroundColor: colors.white,
         }}
       >
         <Group justify="space-between">
@@ -195,7 +196,7 @@ export function Header({ onMenuClick }: HeaderProps) {
                   color="blue"
                   styles={{
                     root: {
-                      backgroundColor: "#1e3a5f",
+                      backgroundColor: colors.primary,
                     },
                   }}
                 >

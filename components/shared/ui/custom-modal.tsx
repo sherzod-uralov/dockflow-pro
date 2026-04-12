@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Modal, Button, Text, Group, Box, Stack } from "@mantine/core";
+import { colors } from "@/lib/colors";
 
 export interface CustomModalProps {
   isOpen: boolean;
@@ -47,7 +48,7 @@ export function CustomModal({
       title={
         title && (
           <Box>
-            <Text size="lg" fw={600} c="#212529">
+            <Text size="lg" fw={600} c={colors.textPrimary}>
               {title}
             </Text>
             {description && (
@@ -69,16 +70,16 @@ export function CustomModal({
       }}
       styles={{
         header: {
-          borderBottom: "1px solid #e9ecef",
+          borderBottom: `1px solid ${colors.border}`,
           paddingBottom: 12,
         },
         title: {
           flex: 1,
         },
         close: {
-          color: "#495057",
+          color: colors.textSecondary,
           "&:hover": {
-            backgroundColor: "#f8f9fa",
+            backgroundColor: colors.bg,
           },
         },
         body: {
@@ -141,7 +142,7 @@ export function ConfirmationModal({
       opened={isOpen}
       onClose={onClose}
       title={
-        <Text size="lg" fw={600} c="#212529">
+        <Text size="lg" fw={600} c={colors.textPrimary}>
           {title}
         </Text>
       }
@@ -155,13 +156,13 @@ export function ConfirmationModal({
       }}
       styles={{
         header: {
-          borderBottom: "1px solid #e9ecef",
+          borderBottom: `1px solid ${colors.border}`,
           paddingBottom: 12,
         },
         close: {
-          color: "#495057",
+          color: colors.textSecondary,
           "&:hover": {
-            backgroundColor: "#f8f9fa",
+            backgroundColor: colors.bg,
           },
         },
         body: {
@@ -181,10 +182,10 @@ export function ConfirmationModal({
             onClick={onClose}
             styles={{
               root: {
-                borderColor: "#e9ecef",
-                color: "#495057",
+                borderColor: colors.border,
+                color: colors.textSecondary,
                 "&:hover": {
-                  backgroundColor: "#f8f9fa",
+                  backgroundColor: colors.bg,
                 },
               },
             }}
@@ -199,7 +200,7 @@ export function ConfirmationModal({
               onClose();
             }}
             style={{
-              backgroundColor: variant === "destructive" ? "#c92a2a" : "#1e3a5f",
+              backgroundColor: variant === "destructive" ? colors.errorDark : colors.primary,
             }}
           >
             {confirmText}
@@ -225,7 +226,7 @@ export function InfoModal({
       opened={isOpen}
       onClose={onClose}
       title={
-        <Text size="lg" fw={600} c="#212529">
+        <Text size="lg" fw={600} c={colors.textPrimary}>
           {title}
         </Text>
       }
@@ -239,13 +240,13 @@ export function InfoModal({
       }}
       styles={{
         header: {
-          borderBottom: "1px solid #e9ecef",
+          borderBottom: `1px solid ${colors.border}`,
           paddingBottom: 12,
         },
         close: {
-          color: "#495057",
+          color: colors.textSecondary,
           "&:hover": {
-            backgroundColor: "#f8f9fa",
+            backgroundColor: colors.bg,
           },
         },
         body: {
@@ -260,7 +261,7 @@ export function InfoModal({
             size="sm"
             radius="sm"
             onClick={onClose}
-            style={{ backgroundColor: "#1e3a5f" }}
+            style={{ backgroundColor: colors.primary }}
           >
             {okText}
           </Button>

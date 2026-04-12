@@ -21,6 +21,7 @@ import {
   IconPhoto,
 } from "@tabler/icons-react";
 import { notifications } from "@mantine/notifications";
+import { colors } from "@/lib/colors";
 
 interface ExistingFile {
   id: string;
@@ -60,12 +61,12 @@ const isPdf = (type: string) => type === "application/pdf";
 
 const getFileIcon = (fileName: string) => {
   const ext = fileName.split(".").pop()?.toLowerCase();
-  if (ext === "pdf") return <IconFileText size={20} color="#c92a2a" />;
+  if (ext === "pdf") return <IconFileText size={20} color={colors.errorDark} />;
   if (["doc", "docx"].includes(ext || ""))
-    return <IconFileText size={20} color="#1e3a5f" />;
+    return <IconFileText size={20} color={colors.primary} />;
   if (["jpg", "jpeg", "png", "gif"].includes(ext || ""))
-    return <IconPhoto size={20} color="#2b8a3e" />;
-  return <IconFile size={20} color="#868e96" />;
+    return <IconPhoto size={20} color={colors.successDark} />;
+  return <IconFile size={20} color={colors.textDimmed} />;
 };
 
 type DisplayFile = {
@@ -174,9 +175,9 @@ export function FileUpload({
         {...getRootProps()}
         p="lg"
         style={{
-          border: `2px dashed ${isDragActive ? "#1e3a5f" : "#e9ecef"}`,
+          border: `2px dashed ${isDragActive ? colors.primary : colors.border}`,
           borderRadius: 8,
-          backgroundColor: isDragActive ? "#f8f9fa" : "#fff",
+          backgroundColor: isDragActive ? colors.bg : colors.white,
           cursor: "pointer",
           transition: "all 0.2s",
         }}
@@ -187,11 +188,11 @@ export function FileUpload({
             size="xl"
             radius="xl"
             variant="light"
-            style={{ backgroundColor: "#f1f3f5", color: "#868e96" }}
+            style={{ backgroundColor: colors.bgSubtle, color: colors.textDimmed }}
           >
             <IconUpload size={24} />
           </ThemeIcon>
-          <Text size="sm" fw={500} c="#212529">
+          <Text size="sm" fw={500} c={colors.textPrimary}>
             {isDragActive
               ? "Fayl(lar)ni bu yerga tashlang"
               : hasFiles
@@ -211,8 +212,8 @@ export function FileUpload({
 
       {/* File list */}
       {hasFiles && (
-        <Paper p="sm" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
-          <Text size="sm" fw={500} c="#212529" mb="xs">
+        <Paper p="sm" radius="sm" withBorder style={{ borderColor: colors.border }}>
+          <Text size="sm" fw={500} c={colors.textPrimary} mb="xs">
             Yuklangan fayllar ({allFiles.length})
           </Text>
           <Stack gap="xs">
@@ -221,7 +222,7 @@ export function FileUpload({
                 key={item.type === "existing" ? item.id : `new-${idx}`}
                 p="xs"
                 radius="sm"
-                style={{ backgroundColor: "#f8f9fa" }}
+                style={{ backgroundColor: colors.bg }}
               >
                 <Group gap="sm" wrap="nowrap">
                   {/* File icon/preview */}
@@ -230,7 +231,7 @@ export function FileUpload({
                       width: 40,
                       height: 40,
                       borderRadius: 4,
-                      backgroundColor: "#e9ecef",
+                      backgroundColor: colors.border,
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
@@ -252,11 +253,11 @@ export function FileUpload({
                     ) : item.type === "new" &&
                       item.file &&
                       isPdf(item.file.type) ? (
-                      <IconFileText size={20} color="#c92a2a" />
+                      <IconFileText size={20} color={colors.errorDark} />
                     ) : item.type === "new" &&
                       item.file &&
                       isWord(item.file.type) ? (
-                      <IconFileText size={20} color="#1e3a5f" />
+                      <IconFileText size={20} color={colors.primary} />
                     ) : (
                       getFileIcon(item.fileName)
                     )}
@@ -265,7 +266,7 @@ export function FileUpload({
                   {/* File info */}
                   <Box style={{ flex: 1, minWidth: 0 }}>
                     <Group gap="xs" wrap="nowrap">
-                      <Text size="sm" fw={500} c="#212529" lineClamp={1}>
+                      <Text size="sm" fw={500} c={colors.textPrimary} lineClamp={1}>
                         {item.fileName}
                       </Text>
                       {item.type === "new" && (
@@ -274,8 +275,8 @@ export function FileUpload({
                           radius="sm"
                           variant="light"
                           style={{
-                            backgroundColor: "#e7f5ff",
-                            color: "#1e3a5f",
+                            backgroundColor: colors.primaryLight,
+                            color: colors.primary,
                           }}
                         >
                           Yangi

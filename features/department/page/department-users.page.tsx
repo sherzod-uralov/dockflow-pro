@@ -33,6 +33,7 @@ import { User } from "@/features/admin/admin-users/type/user.types";
 import { handleCopyToClipboard } from "@/utils/copy-text";
 import { DataTable, DataTableColumn } from "@/components/shared/ui/custom-table";
 import { formatDate } from "@/lib/date-utils";
+import { colors } from "@/lib/colors";
 
 const DepartmentUsersPage = () => {
     const params = useParams();
@@ -82,14 +83,14 @@ const DepartmentUsersPage = () => {
                         size="sm"
                         radius="xl"
                         src={row.original.avatarUrl}
-                        style={{ backgroundColor: "#e7f5ff" }}
+                        style={{ backgroundColor: colors.primaryLight }}
                     >
-                        <Text size="xs" c="#1e3a5f" fw={500}>
+                        <Text size="xs" c={colors.primary} fw={500}>
                             {row.original.fullname ? getInitials(row.original.fullname) : "?"}
                         </Text>
                     </Avatar>
                     <Box>
-                        <Text size="sm" fw={500} c="#212529">
+                        <Text size="sm" fw={500} c={colors.textPrimary}>
                             {row.original.fullname}
                         </Text>
                         <Text size="xs" c="dimmed">
@@ -128,7 +129,7 @@ const DepartmentUsersPage = () => {
             accessorKey: "lastLogin",
             header: "Oxirgi kirish",
             cell: ({ row }) => (
-                <Text size="sm" c="#495057">
+                <Text size="sm" c={colors.textSecondary}>
                     {row.original.lastLogin ? formatDate(row.original.lastLogin) : "Hali kirmagan"}
                 </Text>
             ),
@@ -138,7 +139,7 @@ const DepartmentUsersPage = () => {
             accessorKey: "createdAt",
             header: "Ro'yxatdan o'tgan",
             cell: ({ row }) => (
-                <Text size="sm" c="#495057">
+                <Text size="sm" c={colors.textSecondary}>
                     {formatDate(row.original.createdAt)}
                 </Text>
             ),
@@ -181,13 +182,13 @@ const DepartmentUsersPage = () => {
                 <Box
                     p={16}
                     style={{
-                        backgroundColor: "#f1f3f5",
+                        backgroundColor: colors.bgSubtle,
                         borderRadius: 12,
                     }}
                 >
-                    <IconUsers size={40} color="#868e96" stroke={1.5} />
+                    <IconUsers size={40} color={colors.textDimmed} stroke={1.5} />
                 </Box>
-                <Text size="lg" fw={500} c="#495057">
+                <Text size="lg" fw={500} c={colors.textSecondary}>
                     Foydalanuvchi topilmadi
                 </Text>
                 <Text size="sm" c="dimmed" ta="center">
@@ -228,12 +229,12 @@ const DepartmentUsersPage = () => {
                         size="lg"
                         radius="sm"
                         onClick={handleBack}
-                        style={{ backgroundColor: "#f1f3f5" }}
+                        style={{ backgroundColor: colors.bgSubtle }}
                     >
-                        <IconArrowLeft size={20} color="#495057" />
+                        <IconArrowLeft size={20} color={colors.textSecondary} />
                     </ActionIcon>
                     <Box>
-                        <Text size="lg" fw={600} c="#212529">
+                        <Text size="lg" fw={600} c={colors.textPrimary}>
                             {department.name}
                         </Text>
                         <Group gap="xs" c="dimmed">
@@ -246,20 +247,20 @@ const DepartmentUsersPage = () => {
                 </Group>
 
                 {department.director && (
-                    <Paper px="md" py="xs" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+                    <Paper px="md" py="xs" radius="sm" withBorder style={{ borderColor: colors.border }}>
                         <Group gap="sm">
                             <Text size="xs" c="dimmed" tt="uppercase" fw={600}>Rahbar:</Text>
                             <Avatar
                                 size="sm"
                                 radius="xl"
                                 src={department.director.avatarUrl}
-                                style={{ backgroundColor: "#e7f5ff" }}
+                                style={{ backgroundColor: colors.primaryLight }}
                             >
-                                <Text size="xs" c="#1e3a5f" fw={500}>
+                                <Text size="xs" c={colors.primary} fw={500}>
                                     {getInitials(department.director.fullname)}
                                 </Text>
                             </Avatar>
-                            <Text size="sm" fw={500} c="#212529">
+                            <Text size="sm" fw={500} c={colors.textPrimary}>
                                 {department.director.fullname}
                             </Text>
                         </Group>
@@ -268,10 +269,10 @@ const DepartmentUsersPage = () => {
             </Group>
 
             {/* Search */}
-            <Paper p="md" radius="sm" withBorder mb="md" style={{ borderColor: "#e9ecef" }}>
+            <Paper p="md" radius="sm" withBorder mb="md" style={{ borderColor: colors.border }}>
                 <TextInput
                     placeholder="Foydalanuvchilarni qidirish..."
-                    leftSection={<IconSearch size={18} color="#868e96" />}
+                    leftSection={<IconSearch size={18} color={colors.textDimmed} />}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     radius="sm"
@@ -282,7 +283,7 @@ const DepartmentUsersPage = () => {
             {/* Users Table */}
             <Box>
                 {usersData?.data?.length === 0 && !isUsersLoading ? (
-                    <Paper radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+                    <Paper radius="sm" withBorder style={{ borderColor: colors.border }}>
                         <EmptyState />
                     </Paper>
                 ) : (

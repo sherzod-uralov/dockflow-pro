@@ -12,6 +12,7 @@ import {
   useUpdateDocumentType,
 } from "../hook/document-type.hook";
 import { DocumentType as DocumentTypeModel } from "../type/document-type.type";
+import { colors } from "@/lib/colors";
 
 type DocumentTypeFormType = z.infer<typeof documentTypeScheme>;
 
@@ -101,14 +102,14 @@ const DocumentTypeFormModal = ({
           {...form.register("name")}
           styles={{
             input: {
-              backgroundColor: "#f8f9fa",
-              border: "1px solid #e9ecef",
+              backgroundColor: colors.bg,
+              border: `1px solid ${colors.border}`,
               "&:focus": {
-                borderColor: "#1e3a5f",
+                borderColor: colors.primary,
               },
             },
             label: {
-              color: "#495057",
+              color: colors.textSecondary,
               fontWeight: 500,
               marginBottom: 4,
             },
@@ -126,14 +127,14 @@ const DocumentTypeFormModal = ({
           {...form.register("description")}
           styles={{
             input: {
-              backgroundColor: "#f8f9fa",
-              border: "1px solid #e9ecef",
+              backgroundColor: colors.bg,
+              border: `1px solid ${colors.border}`,
               "&:focus": {
-                borderColor: "#1e3a5f",
+                borderColor: colors.primary,
               },
             },
             label: {
-              color: "#495057",
+              color: colors.textSecondary,
               fontWeight: 500,
               marginBottom: 4,
             },
@@ -144,7 +145,7 @@ const DocumentTypeFormModal = ({
           justify="flex-end"
           gap="xs"
           pt="md"
-          style={{ borderTop: "1px solid #e9ecef" }}
+          style={{ borderTop: `1px solid ${colors.border}` }}
         >
           <Button
             variant="outline"
@@ -154,10 +155,10 @@ const DocumentTypeFormModal = ({
             disabled={isLoading}
             styles={{
               root: {
-                borderColor: "#e9ecef",
-                color: "#495057",
+                borderColor: colors.border,
+                color: colors.textSecondary,
                 "&:hover": {
-                  backgroundColor: "#f8f9fa",
+                  backgroundColor: colors.bg,
                 },
               },
             }}
@@ -169,7 +170,7 @@ const DocumentTypeFormModal = ({
             size="sm"
             radius="sm"
             loading={isLoading}
-            style={{ backgroundColor: "#1e3a5f" }}
+            style={{ backgroundColor: colors.primary }}
           >
             {isLoading
               ? isUpdate

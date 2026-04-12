@@ -5,6 +5,7 @@ import { IconChevronRight } from "@tabler/icons-react";
 import type { ReactNode } from "react";
 import React from "react";
 import Link from "next/link";
+import { colors } from "@/lib/colors";
 
 type BreadcrumbItemType = {
   label: string;
@@ -33,19 +34,19 @@ export function PageHeader({
           component={Link}
           href={item.href}
           size="sm"
-          c="#495057"
+          c={colors.textSecondary}
           style={{
             display: "flex",
             alignItems: "center",
             gap: 4,
             textDecoration: "none",
             "&:hover": {
-              color: "#1e3a5f",
+              color: colors.primary,
             },
           }}
         >
           {item.icon && (
-            <Box component="span" c="#1e3a5f" style={{ display: "flex" }}>
+            <Box component="span" c={colors.primary} style={{ display: "flex" }}>
               {item.icon}
             </Box>
           )}
@@ -71,10 +72,10 @@ export function PageHeader({
       <Box
         pl="sm"
         style={{
-          borderLeft: "4px solid #1e3a5f",
+          borderLeft: `4px solid ${colors.primary}`,
         }}
       >
-        <Text size="xl" fw={600} c="#212529">
+        <Text size="xl" fw={600} c={colors.textPrimary}>
           {title}
         </Text>
         {description && (
@@ -86,7 +87,7 @@ export function PageHeader({
 
       {items.length > 0 && (
         <Breadcrumbs
-          separator={<IconChevronRight size={14} color="#868e96" />}
+          separator={<IconChevronRight size={14} color={colors.textDimmed} />}
           separatorMargin={6}
         >
           {breadcrumbItems}

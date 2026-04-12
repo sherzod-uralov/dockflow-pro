@@ -54,6 +54,7 @@ import {
 } from "../type/task-comment.type";
 import { formatDistanceToNow } from "date-fns";
 import { uz } from "date-fns/locale";
+import { colors } from "@/lib/colors";
 
 interface TaskCommentsInlineProps {
   taskId: string;
@@ -154,7 +155,7 @@ const EmojiPicker = ({
             size="lg"
             radius="sm"
             onClick={onClose}
-            style={{ color: opened ? "#1e3a5f" : "#868e96" }}
+            style={{ color: opened ? colors.primary : colors.textDimmed }}
           >
             <IconMoodSmile size={20} />
           </ActionIcon>
@@ -252,9 +253,9 @@ const AudioPlayer = ({ src, isOwn }: { src: string; isOwn: boolean }) => {
   };
 
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
-  const accent = isOwn ? "rgba(255,255,255,0.85)" : "#1e3a5f";
-  const trackBg = isOwn ? "rgba(255,255,255,0.2)" : "#dee2e6";
-  const timColor = isOwn ? "rgba(255,255,255,0.6)" : "#868e96";
+  const accent = isOwn ? "rgba(255,255,255,0.85)" : colors.primary;
+  const trackBg = isOwn ? "rgba(255,255,255,0.2)" : colors.borderLight;
+  const timColor = isOwn ? "rgba(255,255,255,0.6)" : colors.textDimmed;
 
   return (
     <Box mb={4}>
@@ -372,16 +373,16 @@ const AttachmentPreview = ({ att, isOwn }: { att: CommentAttachment; isOwn: bool
       onClick={() => window.open(file.fileUrl, "_blank")}
     >
       <Group gap="xs" wrap="nowrap">
-        <IconFile size={20} color={isOwn ? "rgba(255,255,255,0.7)" : "#868e96"} />
+        <IconFile size={20} color={isOwn ? "rgba(255,255,255,0.7)" : colors.textDimmed} />
         <Box style={{ flex: 1, minWidth: 0 }}>
-          <Text size="xs" fw={500} c={isOwn ? "#fff" : "#212529"} lineClamp={1}>
+          <Text size="xs" fw={500} c={isOwn ? colors.white : colors.textPrimary} lineClamp={1}>
             {file.fileName}
           </Text>
-          <Text style={{ fontSize: 10 }} c={isOwn ? "rgba(255,255,255,0.5)" : "#adb5bd"}>
+          <Text style={{ fontSize: 10 }} c={isOwn ? "rgba(255,255,255,0.5)" : colors.textMuted}>
             {formatBytes(file.fileSize)}
           </Text>
         </Box>
-        <IconDownload size={14} color={isOwn ? "rgba(255,255,255,0.5)" : "#adb5bd"} />
+        <IconDownload size={14} color={isOwn ? "rgba(255,255,255,0.5)" : colors.textMuted} />
       </Group>
     </Paper>
   );
@@ -410,7 +411,7 @@ const PendingFilePreview = ({
             p={4}
             radius="sm"
             style={{
-              backgroundColor: "#f1f3f5",
+              backgroundColor: colors.bgSubtle,
               position: "relative",
               maxWidth: isImg ? 64 : 160,
             }}
@@ -426,7 +427,7 @@ const PendingFilePreview = ({
               />
             ) : (
               <Group gap={4} wrap="nowrap" px={4}>
-                <IconFile size={14} color="#868e96" />
+                <IconFile size={14} color={colors.textDimmed} />
                 <Text size="xs" lineClamp={1} style={{ maxWidth: 100 }}>
                   {file.name}
                 </Text>
@@ -517,14 +518,14 @@ const CommentBubble = ({
         px="sm"
         py={8}
         style={{
-          backgroundColor: isOwn ? "#1e3a5f" : "#f1f3f5",
+          backgroundColor: isOwn ? colors.primary : colors.bgSubtle,
           borderRadius: isOwn ? "12px 12px 2px 12px" : "12px 12px 12px 2px",
           maxWidth: "85%",
           minWidth: 80,
         }}
       >
         {!isOwn && (
-          <Text size="xs" fw={600} c="#1971c2" mb={2}>
+          <Text size="xs" fw={600} c={colors.infoDark} mb={2}>
             {comment.user?.fullname || "Noma'lum"}
           </Text>
         )}
@@ -536,17 +537,17 @@ const CommentBubble = ({
             pl="xs"
             py={3}
             style={{
-              borderLeft: isOwn ? "2px solid rgba(255,255,255,0.5)" : "2px solid #1e3a5f",
+              borderLeft: isOwn ? "2px solid rgba(255,255,255,0.5)" : `2px solid ${colors.primary}`,
               backgroundColor: isOwn ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.04)",
               borderRadius: "0 4px 4px 0",
               cursor: "pointer",
             }}
             onClick={() => scrollToComment(replyTo.id)}
           >
-            <Text size="xs" fw={600} c={isOwn ? "rgba(255,255,255,0.8)" : "#1971c2"} lineClamp={1}>
+            <Text size="xs" fw={600} c={isOwn ? "rgba(255,255,255,0.8)" : colors.infoDark} lineClamp={1}>
               {replyTo.user?.fullname}
             </Text>
-            <Text size="xs" c={isOwn ? "rgba(255,255,255,0.6)" : "#868e96"} lineClamp={1}>
+            <Text size="xs" c={isOwn ? "rgba(255,255,255,0.6)" : colors.textDimmed} lineClamp={1}>
               {getReplyPreviewText(replyTo)}
             </Text>
           </Box>
@@ -561,7 +562,7 @@ const CommentBubble = ({
         {hasContent && (
           <Text
             size={onlyEmoji ? "xl" : "sm"}
-            c={onlyEmoji ? undefined : isOwn ? "#fff" : "#212529"}
+            c={onlyEmoji ? undefined : isOwn ? colors.white : colors.textPrimary}
             style={{
               whiteSpace: "pre-wrap",
               wordBreak: "break-word",
@@ -576,11 +577,11 @@ const CommentBubble = ({
         {/* Time + Menu */}
         <Group gap={4} justify="flex-end" mt={2} wrap="nowrap">
           {comment.isEdited && (
-            <Text style={{ fontSize: 10 }} c={isOwn ? "rgba(255,255,255,0.5)" : "#adb5bd"} fs="italic">
+            <Text style={{ fontSize: 10 }} c={isOwn ? "rgba(255,255,255,0.5)" : colors.textMuted} fs="italic">
               tahrirlangan
             </Text>
           )}
-          <Text style={{ fontSize: 10 }} c={isOwn ? "rgba(255,255,255,0.5)" : "#adb5bd"}>
+          <Text style={{ fontSize: 10 }} c={isOwn ? "rgba(255,255,255,0.5)" : colors.textMuted}>
             {timeAgo}
           </Text>
           <Menu shadow="md" width={150} position={isOwn ? "bottom-start" : "bottom-end"} withinPortal>
@@ -589,7 +590,7 @@ const CommentBubble = ({
                 variant="subtle"
                 size={16}
                 radius="sm"
-                style={{ color: isOwn ? "rgba(255,255,255,0.5)" : "#adb5bd" }}
+                style={{ color: isOwn ? "rgba(255,255,255,0.5)" : colors.textMuted }}
               >
                 <IconDots size={12} />
               </ActionIcon>
@@ -842,13 +843,13 @@ export const TaskCommentsInline = ({ taskId }: TaskCommentsInlineProps) => {
     <Stack gap={0} style={{ height: "100%" }}>
       {/* Messages */}
       <ScrollArea
-        style={{ flex: 1, backgroundColor: "#fff", borderRadius: 8 }}
+        style={{ flex: 1, backgroundColor: colors.white, borderRadius: 8 }}
         viewportRef={scrollAreaRef}
         offsetScrollbars
       >
         {isLoading ? (
           <Box style={{ display: "flex", justifyContent: "center", alignItems: "center", height: 150 }}>
-            <Loader size="sm" color="#1e3a5f" />
+            <Loader size="sm" color={colors.primary} />
           </Box>
         ) : comments.length === 0 ? (
           <Box style={{ display: "flex", justifyContent: "center", alignItems: "center", height: 150 }}>
@@ -871,10 +872,10 @@ export const TaskCommentsInline = ({ taskId }: TaskCommentsInlineProps) => {
       </ScrollArea>
 
       {/* Input area */}
-      <Box pt="md" style={{ borderTop: "1px solid #e9ecef" }}>
+      <Box pt="md" style={{ borderTop: `1px solid ${colors.border}` }}>
         {!canCreateComment ? (
-          <Paper p="md" radius="sm" style={{ backgroundColor: "#fff5f5", border: "1px solid #fde2e2", textAlign: "center" }}>
-            <Text size="sm" c="#e74c3c">
+          <Paper p="md" radius="sm" style={{ backgroundColor: colors.errorLight, border: `1px solid ${colors.errorBg}`, textAlign: "center" }}>
+            <Text size="sm" c={colors.error}>
               {createReason || "Izoh yozish uchun ruxsat yo'q"}
             </Text>
           </Paper>
@@ -886,11 +887,11 @@ export const TaskCommentsInline = ({ taskId }: TaskCommentsInlineProps) => {
             p="xs"
             mb="sm"
             radius="sm"
-            style={{ backgroundColor: "#e7f5ff", borderLeft: "3px solid #1e3a5f" }}
+            style={{ backgroundColor: colors.primaryLight, borderLeft: `3px solid ${colors.primary}` }}
           >
             <Group justify="space-between">
               <Box>
-                <Text size="xs" c="#1e3a5f" fw={500}>
+                <Text size="xs" c={colors.primary} fw={500}>
                   {editingComment ? "Tahrirlash" : `@${replyingTo?.user?.fullname} ga javob`}
                 </Text>
                 {!editingComment && replyingTo && (
@@ -932,16 +933,16 @@ export const TaskCommentsInline = ({ taskId }: TaskCommentsInlineProps) => {
               h={8}
               style={{
                 borderRadius: "50%",
-                backgroundColor: "#e74c3c",
+                backgroundColor: colors.error,
                 boxShadow: "0 0 0 3px rgba(231,76,60,0.25)",
               }}
             />
-            <Text size="sm" c="#e74c3c" fw={600} style={{ fontVariantNumeric: "tabular-nums", minWidth: 36 }}>
+            <Text size="sm" c={colors.error} fw={600} style={{ fontVariantNumeric: "tabular-nums", minWidth: 36 }}>
               {formatRecordDuration(recordDuration)}
             </Text>
             <Text size="xs" c="dimmed" style={{ flex: 1 }}>Yozilmoqda...</Text>
             <Tooltip label="Yuborish">
-              <ActionIcon size="lg" radius="xl" onClick={stopVoiceRecording} style={{ backgroundColor: "#1e3a5f", color: "#fff" }}>
+              <ActionIcon size="lg" radius="xl" onClick={stopVoiceRecording} style={{ backgroundColor: colors.primary, color: colors.white }}>
                 <IconSend size={18} />
               </ActionIcon>
             </Tooltip>
@@ -955,7 +956,7 @@ export const TaskCommentsInline = ({ taskId }: TaskCommentsInlineProps) => {
                 size="lg"
                 radius="sm"
                 onClick={() => fileInputRef.current?.click()}
-                style={{ color: "#868e96" }}
+                style={{ color: colors.textDimmed }}
               >
                 <IconPaperclip size={20} />
               </ActionIcon>
@@ -974,9 +975,9 @@ export const TaskCommentsInline = ({ taskId }: TaskCommentsInlineProps) => {
               style={{ flex: 1 }}
               styles={{
                 input: {
-                  backgroundColor: "#f8f9fa",
-                  border: "1px solid #e9ecef",
-                  "&:focus": { borderColor: "#1e3a5f" },
+                  backgroundColor: colors.bg,
+                  border: `1px solid ${colors.border}`,
+                  "&:focus": { borderColor: colors.primary },
                 },
               }}
             />
@@ -996,7 +997,7 @@ export const TaskCommentsInline = ({ taskId }: TaskCommentsInlineProps) => {
                 onClick={handleSend}
                 disabled={isSending}
                 loading={isSending}
-                style={{ backgroundColor: "#1e3a5f", color: "#fff" }}
+                style={{ backgroundColor: colors.primary, color: colors.white }}
               >
                 <IconSend size={18} />
               </ActionIcon>
@@ -1007,7 +1008,7 @@ export const TaskCommentsInline = ({ taskId }: TaskCommentsInlineProps) => {
                   size="lg"
                   radius="sm"
                   onClick={startVoiceRecording}
-                  style={{ color: micDenied ? "#e74c3c" : "#868e96" }}
+                  style={{ color: micDenied ? colors.error : colors.textDimmed }}
                 >
                   <IconMicrophone size={20} />
                 </ActionIcon>

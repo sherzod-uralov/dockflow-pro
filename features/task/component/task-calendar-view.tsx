@@ -9,6 +9,7 @@ import listPlugin from "@fullcalendar/list";
 import uzLocale from "@fullcalendar/core/locales/uz";
 import { Box } from "@mantine/core";
 import { TaskGetResponse, TASK_PRIORITY_OPTIONS } from "../type/task.type";
+import { colors } from "@/lib/colors";
 
 interface TaskCalendarViewProps {
     tasks: TaskGetResponse[];
@@ -23,7 +24,7 @@ const TaskCalendarView = ({ tasks, onEditTask, onCreateTask }: TaskCalendarViewP
         .map((task) => {
             const priorityColor =
                 TASK_PRIORITY_OPTIONS.find((p) => p.value === task.priority)?.color ||
-                "#3498db";
+                colors.info;
 
             return {
                 id: task.id,
@@ -69,12 +70,12 @@ const TaskCalendarView = ({ tasks, onEditTask, onCreateTask }: TaskCalendarViewP
                                 cursor: 'pointer',
                                 opacity: 0,
                                 transition: 'opacity 0.2s',
-                                color: '#868e96',
+                                color: colors.textDimmed,
                                 fontSize: '18px',
                                 lineHeight: 1,
                                 fontWeight: 'bold',
                             }}
-                            onMouseEnter={(e) => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.color = '#1e3a5f'; }}
+                            onMouseEnter={(e) => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.color = colors.primary; }}
                             onMouseLeave={(e) => { e.currentTarget.style.opacity = '0'; }}
                             title="Vazifa qo'shish"
                         >
@@ -102,7 +103,7 @@ const TaskCalendarView = ({ tasks, onEditTask, onCreateTask }: TaskCalendarViewP
                 backgroundColor: "white",
                 borderRadius: 8,
                 padding: 16,
-                border: "1px solid #e9ecef",
+                border: `1px solid ${colors.border}`,
                 height: "calc(100vh - 200px)",
                 // We can use Mantine's sx or style to inject global styles for this component's scope effectively
             }}

@@ -55,6 +55,7 @@ const DepartmentGraphView = dynamic(
 );
 import { handleCopyToClipboard } from "@/utils/copy-text";
 import { DataTable, DataTableColumn } from "@/components/shared/ui/custom-table";
+import { colors } from "@/lib/colors";
 
 const DepartmentPage = () => {
   const router = useRouter();
@@ -162,8 +163,8 @@ const DepartmentPage = () => {
       header: "Nomi",
       cell: ({ row }) => (
         <Group gap="sm" wrap="nowrap">
-          <IconBuilding size={18} color="#1e3a5f" style={{ flexShrink: 0 }} />
-          <Text size="sm" fw={500} c="#212529">
+          <IconBuilding size={18} color={colors.primary} style={{ flexShrink: 0 }} />
+          <Text size="sm" fw={500} c={colors.textPrimary}>
             {row.original.name}
           </Text>
         </Group>
@@ -174,7 +175,7 @@ const DepartmentPage = () => {
       accessorKey: "description",
       header: "Tavsif",
       cell: ({ row }) => (
-        <Text size="sm" c="#495057" lineClamp={1}>
+        <Text size="sm" c={colors.textSecondary} lineClamp={1}>
           {row.original.description || "—"}
         </Text>
       ),
@@ -197,7 +198,7 @@ const DepartmentPage = () => {
       accessorKey: "location",
       header: "Joylashuv",
       cell: ({ row }) => (
-        <Text size="sm" c="#495057">
+        <Text size="sm" c={colors.textSecondary}>
           {row.original.location || "—"}
         </Text>
       ),
@@ -213,13 +214,13 @@ const DepartmentPage = () => {
               size="sm"
               radius="xl"
               src={row.original.director.avatarUrl}
-              style={{ backgroundColor: "#e7f5ff", flexShrink: 0 }}
+              style={{ backgroundColor: colors.primaryLight, flexShrink: 0 }}
             >
-              <Text size="xs" c="#1e3a5f" fw={500}>
+              <Text size="xs" c={colors.primary} fw={500}>
                 {getInitials(row.original.director.fullname)}
               </Text>
             </Avatar>
-            <Text size="sm" c="#212529" lineClamp={1}>
+            <Text size="sm" c={colors.textPrimary} lineClamp={1}>
               {row.original.director.fullname}
             </Text>
           </Group>
@@ -289,13 +290,13 @@ const DepartmentPage = () => {
         <Box
           p={16}
           style={{
-            backgroundColor: "#f1f3f5",
+            backgroundColor: colors.bgSubtle,
             borderRadius: 12,
           }}
         >
-          <IconBuilding size={40} color="#868e96" stroke={1.5} />
+          <IconBuilding size={40} color={colors.textDimmed} stroke={1.5} />
         </Box>
-        <Text size="lg" fw={500} c="#495057">
+        <Text size="lg" fw={500} c={colors.textSecondary}>
           Bo'lim topilmadi
         </Text>
         <Text size="sm" c="dimmed" ta="center">
@@ -310,7 +311,7 @@ const DepartmentPage = () => {
       {/* Header */}
       <Group justify="space-between" mb="md">
         <Box>
-          <Text size="lg" fw={600} c="#212529">
+          <Text size="lg" fw={600} c={colors.textPrimary}>
             Bo'limlar
           </Text>
           <Text size="sm" c="dimmed">
@@ -324,8 +325,8 @@ const DepartmentPage = () => {
           radius="sm"
           styles={{
             root: {
-              backgroundColor: "#1e3a5f",
-              "&:hover": { backgroundColor: "#162d4a" },
+              backgroundColor: colors.primary,
+              "&:hover": { backgroundColor: colors.primaryHover },
             },
           }}
         >
@@ -334,10 +335,10 @@ const DepartmentPage = () => {
       </Group>
 
       {/* Search */}
-      <Paper p="md" radius="sm" withBorder mb="md" style={{ borderColor: "#e9ecef" }}>
+      <Paper p="md" radius="sm" withBorder mb="md" style={{ borderColor: colors.border }}>
         <TextInput
           placeholder="Bo'limlarni qidirish..."
-          leftSection={<IconSearch size={18} color="#868e96" />}
+          leftSection={<IconSearch size={18} color={colors.textDimmed} />}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           radius="sm"
@@ -358,7 +359,7 @@ const DepartmentPage = () => {
 
         <Tabs.Panel value="table">
           {!isLoading && data?.data?.length === 0 ? (
-            <Paper radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+            <Paper radius="sm" withBorder style={{ borderColor: colors.border }}>
               <EmptyState />
             </Paper>
           ) : (

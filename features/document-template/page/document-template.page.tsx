@@ -37,6 +37,7 @@ import DocumentTemplateFormModal from "../component/document-template.form";
 import DocumentTemplateView from "../component/document-template.view";
 import { DataTable, DataTableColumn } from "@/components/shared/ui/custom-table";
 import { CustomModal, ConfirmationModal, useModal } from "@/components/shared/ui/custom-modal";
+import { colors } from "@/lib/colors";
 
 const DocumentTemplatePage = () => {
   // Modals
@@ -99,7 +100,7 @@ const DocumentTemplatePage = () => {
       header: "Nomi",
       cell: ({ row }) => (
         <Box>
-          <Text size="sm" fw={500} c="#212529" lineClamp={1}>
+          <Text size="sm" fw={500} c={colors.textPrimary} lineClamp={1}>
             {row.original.name}
           </Text>
           {row.original.description && (
@@ -115,7 +116,7 @@ const DocumentTemplatePage = () => {
       accessorKey: "documentType",
       header: "Hujjat turi",
       cell: ({ row }) => (
-        <Text size="sm" c="#495057">
+        <Text size="sm" c={colors.textSecondary}>
           {row.original.documentType?.name || "—"}
         </Text>
       ),
@@ -127,8 +128,8 @@ const DocumentTemplatePage = () => {
       cell: ({ row }) =>
         row.original.templateFile ? (
           <Group gap="xs" wrap="nowrap">
-            <IconFileText size={16} color="#868e96" style={{ flexShrink: 0 }} />
-            <Text size="sm" c="#495057" lineClamp={1}>
+            <IconFileText size={16} color={colors.textDimmed} style={{ flexShrink: 0 }} />
+            <Text size="sm" c={colors.textSecondary} lineClamp={1}>
               {row.original.templateFile.fileName}
             </Text>
           </Group>
@@ -201,13 +202,13 @@ const DocumentTemplatePage = () => {
         <Box
           p={16}
           style={{
-            backgroundColor: "#f1f3f5",
+            backgroundColor: colors.bgSubtle,
             borderRadius: 12,
           }}
         >
-          <IconTemplate size={40} color="#868e96" stroke={1.5} />
+          <IconTemplate size={40} color={colors.textDimmed} stroke={1.5} />
         </Box>
-        <Text size="lg" fw={500} c="#495057">
+        <Text size="lg" fw={500} c={colors.textSecondary}>
           Shablon topilmadi
         </Text>
         <Text size="sm" c="dimmed" ta="center">
@@ -222,7 +223,7 @@ const DocumentTemplatePage = () => {
       {/* Header */}
       <Group justify="space-between" mb="md">
         <Box>
-          <Text size="lg" fw={600} c="#212529">
+          <Text size="lg" fw={600} c={colors.textPrimary}>
             Hujjat shablonlari
           </Text>
           <Text size="sm" c="dimmed">
@@ -236,8 +237,8 @@ const DocumentTemplatePage = () => {
           radius="sm"
           styles={{
             root: {
-              backgroundColor: "#1e3a5f",
-              "&:hover": { backgroundColor: "#162d4a" },
+              backgroundColor: colors.primary,
+              "&:hover": { backgroundColor: colors.primaryHover },
             },
           }}
         >
@@ -246,10 +247,10 @@ const DocumentTemplatePage = () => {
       </Group>
 
       {/* Search */}
-      <Paper p="md" radius="sm" withBorder mb="md" style={{ borderColor: "#e9ecef" }}>
+      <Paper p="md" radius="sm" withBorder mb="md" style={{ borderColor: colors.border }}>
         <TextInput
           placeholder="Shablonlarni qidirish..."
-          leftSection={<IconSearch size={18} color="#868e96" />}
+          leftSection={<IconSearch size={18} color={colors.textDimmed} />}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           radius="sm"
@@ -264,7 +265,7 @@ const DocumentTemplatePage = () => {
 
       {/* Table */}
       {!isLoading && data?.data?.length === 0 ? (
-        <Paper radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+        <Paper radius="sm" withBorder style={{ borderColor: colors.border }}>
           <EmptyState />
         </Paper>
       ) : (

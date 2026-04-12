@@ -19,6 +19,7 @@ import {
 } from "@tabler/icons-react";
 import { DocumentTemplateResponse } from "@/features/document-template";
 import { formatDate } from "@/lib/date-utils";
+import { colors } from "@/lib/colors";
 
 interface DocumentTemplateViewProps {
     template: DocumentTemplateResponse;
@@ -46,7 +47,7 @@ const DocumentTemplateView = ({ template }: DocumentTemplateViewProps) => {
         <Stack gap="lg">
             {/* Header Info */}
             <Box>
-                <Text size="xl" fw={600} c="#212529" mb={4}>
+                <Text size="xl" fw={600} c={colors.textPrimary} mb={4}>
                     {template.name}
                 </Text>
                 {template.description && (
@@ -61,17 +62,17 @@ const DocumentTemplateView = ({ template }: DocumentTemplateViewProps) => {
             {/* Main Info */}
             <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
                 {/* Hujjat turi */}
-                <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+                <Paper p="md" radius="sm" withBorder style={{ borderColor: colors.border }}>
                     <Text size="xs" c="dimmed" tt="uppercase" fw={600} mb={4}>
                         Hujjat turi
                     </Text>
-                    <Text size="md" fw={500} c="#212529">
+                    <Text size="md" fw={500} c={colors.textPrimary}>
                         {template.documentType?.name || "—"}
                     </Text>
                 </Paper>
 
                 {/* Holat */}
-                <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+                <Paper p="md" radius="sm" withBorder style={{ borderColor: colors.border }}>
                     <Text size="xs" c="dimmed" tt="uppercase" fw={600} mb={4}>
                         Holati
                     </Text>
@@ -96,26 +97,26 @@ const DocumentTemplateView = ({ template }: DocumentTemplateViewProps) => {
                 </Paper>
 
                 {/* Yaratilgan */}
-                <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+                <Paper p="md" radius="sm" withBorder style={{ borderColor: colors.border }}>
                     <Text size="xs" c="dimmed" tt="uppercase" fw={600} mb={4}>
                         Yaratilgan
                     </Text>
                     <Group gap="xs">
-                        <IconCalendar size={16} color="#868e96" />
-                        <Text size="md" c="#495057">
+                        <IconCalendar size={16} color={colors.textDimmed} />
+                        <Text size="md" c={colors.textSecondary}>
                             {formatDate(template.createdAt)}
                         </Text>
                     </Group>
                 </Paper>
 
                 {/* Yangilangan */}
-                <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+                <Paper p="md" radius="sm" withBorder style={{ borderColor: colors.border }}>
                     <Text size="xs" c="dimmed" tt="uppercase" fw={600} mb={4}>
                         Yangilangan
                     </Text>
                     <Group gap="xs">
-                        <IconCalendar size={16} color="#868e96" />
-                        <Text size="md" c="#495057">
+                        <IconCalendar size={16} color={colors.textDimmed} />
+                        <Text size="md" c={colors.textSecondary}>
                             {formatDate(template.updatedAt)}
                         </Text>
                     </Group>
@@ -124,20 +125,20 @@ const DocumentTemplateView = ({ template }: DocumentTemplateViewProps) => {
 
             {/* File */}
             {template.templateFile && (
-                <Paper p="lg" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+                <Paper p="lg" radius="sm" withBorder style={{ borderColor: colors.border }}>
                     <Group justify="space-between" wrap="nowrap">
                         <Group gap="md" wrap="nowrap">
                             <Box
                                 p={12}
                                 style={{
-                                    backgroundColor: "#f1f3f5",
+                                    backgroundColor: colors.bgSubtle,
                                     borderRadius: 8,
                                 }}
                             >
-                                <IconFileText size={24} color="#495057" stroke={1.5} />
+                                <IconFileText size={24} color={colors.textSecondary} stroke={1.5} />
                             </Box>
                             <Box>
-                                <Text size="md" fw={500} c="#212529">
+                                <Text size="md" fw={500} c={colors.textPrimary}>
                                     {template.templateFile.fileName}
                                 </Text>
                                 <Text size="sm" c="dimmed">
@@ -162,10 +163,10 @@ const DocumentTemplateView = ({ template }: DocumentTemplateViewProps) => {
 
             {/* Tags */}
             {tagCount > 0 && (
-                <Paper p="lg" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+                <Paper p="lg" radius="sm" withBorder style={{ borderColor: colors.border }}>
                     <Group gap="xs" mb="md">
-                        <IconTag size={18} color="#495057" />
-                        <Text fw={600} size="sm" c="#212529">
+                        <IconTag size={18} color={colors.textSecondary} />
+                        <Text fw={600} size="sm" c={colors.textPrimary}>
                             Taglar ({tagCount})
                         </Text>
                     </Group>

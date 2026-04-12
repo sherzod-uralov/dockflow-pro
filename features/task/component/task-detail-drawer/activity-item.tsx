@@ -1,6 +1,7 @@
 import { Group, Box, Text } from "@mantine/core";
 import { formatDistanceToNow } from "date-fns";
 import { uz } from "date-fns/locale";
+import { colors } from "@/lib/colors";
 
 export interface Activity {
   id: string;
@@ -21,13 +22,13 @@ export const ActivityItem = ({ activity }: ActivityItemProps) => (
         width: 8,
         height: 8,
         borderRadius: "50%",
-        backgroundColor: "#1e3a5f",
+        backgroundColor: colors.primary,
         marginTop: 6,
         flexShrink: 0,
       }}
     />
     <Box style={{ flex: 1 }}>
-      <Text size="sm" c="#495057">
+      <Text size="sm" c={colors.textSecondary}>
         <Text span fw={500}>
           {activity.user?.fullname}
         </Text>{" "}
