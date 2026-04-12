@@ -25,15 +25,9 @@ import {
   IconUsers,
   IconWritingSign,
 } from "@tabler/icons-react";
-import dayjs from "dayjs";
-import "dayjs/locale/uz";
-import utc from "dayjs/plugin/utc";
-import timezone from "dayjs/plugin/timezone";
+import { formatDateTime } from "@/lib/date-utils";
 import Link from "next/link";
 
-dayjs.extend(utc);
-dayjs.extend(timezone);
-dayjs.locale("uz");
 
 interface WorkflowStep {
   id?: string;
@@ -162,7 +156,7 @@ const StepCard = memo(({ step, isLast }: { step: WorkflowStep; isLast: boolean }
           <Box>
             <Text size="xs" c="dimmed" fw={600}>Boshlandi</Text>
             <Text size="sm">
-              {dayjs(step.startedAt).tz("Asia/Tashkent").format("DD MMM, HH:mm")}
+              {formatDateTime(step.startedAt)}
             </Text>
           </Box>
         </>
@@ -174,7 +168,7 @@ const StepCard = memo(({ step, isLast }: { step: WorkflowStep; isLast: boolean }
           <Box>
             <Text size="xs" c="dimmed" fw={600}>Tugallandi</Text>
             <Text size="sm">
-              {dayjs(step.completedAt).tz("Asia/Tashkent").format("DD MMM, HH:mm")}
+              {formatDateTime(step.completedAt)}
             </Text>
           </Box>
         </>
@@ -266,7 +260,7 @@ const StepCard = memo(({ step, isLast }: { step: WorkflowStep; isLast: boolean }
 
                 {step.completedAt && (
                   <Text size="xs" c="dimmed">
-                    {dayjs(step.completedAt).tz("Asia/Tashkent").format("DD MMM, HH:mm")}
+                    {formatDateTime(step.completedAt)}
                   </Text>
                 )}
               </Stack>

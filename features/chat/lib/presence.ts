@@ -1,3 +1,5 @@
+import { formatDateTime } from "@/lib/date-utils";
+
 /**
  * Foydalanuvchining onlayn holatini matn shaklida formatlash.
  *
@@ -19,10 +21,5 @@ export const formatPresence = (isOnline?: boolean, lastSeen?: string | null): st
   if (diff < 86400) return `${Math.floor(diff / 3600)} soat oldin faol edi`;
   if (diff < 86400 * 7) return `${Math.floor(diff / 86400)} kun oldin faol edi`;
 
-  return date.toLocaleDateString("uz-UZ", {
-    day: "numeric",
-    month: "short",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  return formatDateTime(date);
 };

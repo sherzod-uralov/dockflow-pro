@@ -33,6 +33,7 @@ import {
 import { useGetProfileQuery } from "@/features/login/hook/login.hook";
 import { useUpdateUserMutation } from "@/features/admin/admin-users/hook/user.hook";
 import { useCreateAttachment } from "@/features/attachment/hook/attachment.hook";
+import { formatDate, formatDateTime } from "@/lib/date-utils";
 
 export default function ProfilePage() {
     const { data: profile, isLoading, refetch } = useGetProfileQuery();
@@ -69,14 +70,6 @@ export default function ProfilePage() {
             .slice(0, 2);
     };
 
-    const formatDate = (dateString: string | null) => {
-        if (!dateString) return "Ma'lumot yo'q";
-        return new Date(dateString).toLocaleDateString("oz-UZ", {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-        });
-    };
 
     const validateForm = () => {
         const errors: any = {};
@@ -316,7 +309,7 @@ export default function ProfilePage() {
                                         <Grid.Col span={6}>
                                             <TextInput
                                                 label="Yaratilgan vaqt"
-                                                value={new Date(profile.createdAt).toLocaleString()}
+                                                value={formatDateTime(profile.createdAt)}
                                                 readOnly
                                                 variant="filled"
                                             />
@@ -324,7 +317,7 @@ export default function ProfilePage() {
                                         <Grid.Col span={6}>
                                             <TextInput
                                                 label="So'nggi tahrir"
-                                                value={new Date(profile.updatedAt).toLocaleString()}
+                                                value={formatDateTime(profile.updatedAt)}
                                                 readOnly
                                                 variant="filled"
                                             />

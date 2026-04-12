@@ -79,35 +79,6 @@ export const getRemainingStepsCount = (
     .length;
 };
 
-/**
- * Форматировать дату для отображения
- */
-export const formatDate = (date: string | null): string => {
-  if (!date) return "—";
-
-  return new Date(date).toLocaleDateString("uz-UZ", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-};
-
-/**
- * Форматировать дату и время для отображения
- */
-export const formatDateTime = (date: string | null): string => {
-  if (!date) return "—";
-
-  return new Date(date).toLocaleString("uz-UZ", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-};
 
 /**
  * Получить цвет статуса

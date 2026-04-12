@@ -3,6 +3,7 @@
 import { Stack, Group, Avatar, Text, Center, Loader, ScrollArea, Box } from "@mantine/core";
 import { IconEye } from "@tabler/icons-react";
 import { useGetMessageReads } from "../hook/chat.hook";
+import { formatDateTime } from "@/lib/date-utils";
 
 interface Props {
   messageId: string;
@@ -18,7 +19,7 @@ const formatRelative = (iso: string) => {
   if (diff < 60) return "Hozir";
   if (diff < 3600) return `${Math.floor(diff / 60)} daqiqa oldin`;
   if (diff < 86400) return `${Math.floor(diff / 3600)} soat oldin`;
-  return date.toLocaleDateString("uz-UZ", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+  return formatDateTime(date);
 };
 
 export const ReadByModal = ({ messageId }: Props) => {

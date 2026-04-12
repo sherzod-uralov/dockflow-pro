@@ -42,6 +42,7 @@ import { usePagination } from "@/hooks/use-pagination";
 import { useDebounce } from "@/hooks/use-debaunce";
 import { DataTable, DataTableColumn } from "@/components/shared/ui/custom-table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { formatDateTime } from "@/lib/date-utils";
 
 const UserPage = () => {
   const router = useRouter();
@@ -180,7 +181,7 @@ const UserPage = () => {
         const date = new Date(lastLogin);
         return (
           <Text size="sm" c="#495057">
-            {date.toLocaleDateString("uz-UZ")} {date.toLocaleTimeString("uz-UZ", { hour: "2-digit", minute: "2-digit" })}
+            {formatDateTime(date)}
           </Text>
         );
       },

@@ -4,6 +4,7 @@ import { useGetUserByIdQuery } from "../hook/user.hook";
 import { useSearchParams } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import SkeletonWrapper from "@/components/wrappers/skleton-wrapper";
+import { formatDate } from "@/lib/date-utils";
 
 const UserView = () => {
   const params = useSearchParams();
@@ -57,21 +58,21 @@ const UserView = () => {
             <div>
               <p className="text-sm text-muted-foreground">Qo‘shilgan sana</p>
               <p className="font-medium">
-                {new Date(data.createdAt).toLocaleDateString("uz-UZ")}
+                {formatDate(data.createdAt)}
               </p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Oxirgi kirish</p>
               <p className="font-medium">
                 {data.lastLogin
-                  ? new Date(data.lastLogin).toLocaleDateString("uz-UZ")
+                  ? formatDate(data.lastLogin)
                   : "Hech qachon"}
               </p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Yangilangan sana</p>
               <p className="font-medium">
-                {new Date(data.updatedAt).toLocaleDateString("uz-UZ")}
+                {formatDate(data.updatedAt)}
               </p>
             </div>
           </div>

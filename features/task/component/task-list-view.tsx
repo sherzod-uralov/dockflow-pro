@@ -3,6 +3,7 @@
 import { Box, Table, Text, Badge, Group, Avatar, ActionIcon, Menu, rem } from "@mantine/core";
 import { IconDots, IconPencil, IconTrash } from "@tabler/icons-react";
 import { TaskGetResponse, TASK_PRIORITY_OPTIONS } from "../type/task.type";
+import { formatDate } from "@/lib/date-utils";
 
 interface TaskListViewProps {
     tasks: TaskGetResponse[];
@@ -117,7 +118,7 @@ const TaskListView = ({ tasks, onEditTask, onDeleteTask }: TaskListViewProps) =>
                                 c={isOverdue ? "red" : "dimmed"}
                                 fw={isOverdue ? 600 : 400}
                             >
-                                {new Date(task.dueDate).toLocaleDateString("en-US", { month: 'short', day: 'numeric' })}
+                                {formatDate(task.dueDate)}
                             </Text>
                         </Group>
                     ) : (

@@ -20,6 +20,7 @@ import {
 } from "@tabler/icons-react";
 import Link from "next/link";
 import { AiCard as AiCardType } from "../type/ai-chat.type";
+import { formatDate } from "@/lib/date-utils";
 
 const TYPE_CONFIG: Record<
   AiCardType["type"],
@@ -78,17 +79,6 @@ const PRIORITY_LABELS: Record<string, string> = {
   HIGH: "Yuqori",
   URGENT: "Shoshilinch",
   CRITICAL: "Juda muhim",
-};
-
-const formatDate = (dateString: string) => {
-  try {
-    const date = new Date(dateString);
-    const day = date.getDate();
-    const months = ["yan", "fev", "mar", "apr", "may", "iyun", "iyul", "avg", "sen", "okt", "noy", "dek"];
-    return `${day}-${months[date.getMonth()]} ${date.getFullYear()}`;
-  } catch {
-    return dateString;
-  }
 };
 
 const renderMeta = (card: AiCardType) => {

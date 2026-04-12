@@ -18,6 +18,7 @@ import {
     IconTag,
 } from "@tabler/icons-react";
 import { DocumentTemplateResponse } from "@/features/document-template";
+import { formatDate } from "@/lib/date-utils";
 
 interface DocumentTemplateViewProps {
     template: DocumentTemplateResponse;
@@ -32,22 +33,6 @@ const formatFileSize = (bytes: number): string => {
     return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i];
 };
 
-// Sanani formatlash
-const formatDate = (dateString: string | undefined): string => {
-    if (!dateString) return "—";
-
-    try {
-        const date = new Date(dateString);
-        if (isNaN(date.getTime())) return "—";
-
-        return new Intl.DateTimeFormat("uz-UZ", {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-        }).format(date);
-    } catch {
-        return "—";
-    }
 };
 
 const DocumentTemplateView = ({ template }: DocumentTemplateViewProps) => {

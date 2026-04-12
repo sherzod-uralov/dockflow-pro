@@ -34,6 +34,7 @@ import {
 } from "@tabler/icons-react";
 import { WorkflowStepStatus, WorkflowActionType, WorkflowStatus } from "@/features/workflow/type/workflow.type";
 import { WorkflowStepInfo } from "../type/view.type";
+import { formatDate, formatDateTime } from "@/lib/date-utils";
 
 interface ViewPageProps {
   documentId: string;
@@ -121,16 +122,6 @@ const getStepBulletColor = (status: WorkflowStepStatus, isRejected: boolean) => 
   }
 };
 
-const formatDate = (dateString: string | null) => {
-  if (!dateString) return "-";
-  return new Date(dateString).toLocaleDateString("uz-UZ", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-};
 
 export default function ViewPage({ documentId }: ViewPageProps) {
   const { data, isLoading, isError } = useVerifyDocument(documentId);

@@ -38,22 +38,12 @@ import {
   TimelineEvent,
   HistoryFileVersion,
 } from "../type/document-history.type";
+import { formatDateTime } from "@/lib/date-utils";
 
 interface DocumentHistoryViewProps {
   documentId: string;
 }
 
-const formatDate = (dateString: string) => {
-  if (!dateString) return "—";
-  const date = new Date(dateString);
-  return date.toLocaleString("uz-UZ", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-};
 
 const formatBytes = (bytes?: number) => {
   if (!bytes) return "—";
@@ -143,7 +133,7 @@ const TimelineItem = ({ event, isLast }: { event: TimelineEvent; isLast: boolean
             </Text>
           )}
           <Text size="xs" c="dimmed">
-            • {formatDate(event.timestamp)}
+            • {formatDateTime(event.timestamp)}
           </Text>
         </Group>
       </Box>
@@ -167,7 +157,7 @@ const FileVersionItem = ({ version }: { version: HistoryFileVersion }) => (
               {formatBytes(version.fileSize)}
             </Text>
             <Text size="xs" c="dimmed">
-              • {formatDate(version.createdAt)}
+              • {formatDateTime(version.createdAt)}
             </Text>
             {version.uploadedBy && (
               <Text size="xs" c="dimmed">

@@ -32,6 +32,7 @@ import { useGetDepartmentById } from "@/features/department/hook/department.hook
 import { User } from "@/features/admin/admin-users/type/user.types";
 import { handleCopyToClipboard } from "@/utils/copy-text";
 import { DataTable, DataTableColumn } from "@/components/shared/ui/custom-table";
+import { formatDate } from "@/lib/date-utils";
 
 const DepartmentUsersPage = () => {
     const params = useParams();
@@ -59,19 +60,6 @@ const DepartmentUsersPage = () => {
 
     const handleBack = () => {
         router.push("/dashboard/department");
-    };
-
-    const formatDate = (dateString: string | undefined) => {
-        if (!dateString) return "—";
-        try {
-            return new Date(dateString).toLocaleDateString("uz-UZ", {
-                year: "numeric",
-                month: "short",
-                day: "numeric",
-            });
-        } catch {
-            return "—";
-        }
     };
 
     const getInitials = (name: string) => {

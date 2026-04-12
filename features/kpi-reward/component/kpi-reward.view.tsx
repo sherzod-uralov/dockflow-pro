@@ -22,6 +22,7 @@ import {
   KpiRewardGetResponse,
   KPI_REWARD_STATUS_OPTIONS,
 } from "../type/kpi-reward.type";
+import { formatDate } from "@/lib/date-utils";
 
 interface KpiRewardViewProps {
   reward: KpiRewardGetResponse;
@@ -189,7 +190,7 @@ const KpiRewardView = ({ reward }: KpiRewardViewProps) => {
               </Text>
             </Group>
             <Text size="sm" c="#495057">
-              {new Date(reward.approvedAt).toLocaleDateString("uz-UZ")}
+              {formatDate(reward.approvedAt)}
               {reward.approvedBy && ` — ${reward.approvedBy.fullname}`}
             </Text>
           </Paper>
@@ -204,7 +205,7 @@ const KpiRewardView = ({ reward }: KpiRewardViewProps) => {
               </Text>
             </Group>
             <Text size="sm" c="#495057">
-              {new Date(reward.paidAt).toLocaleDateString("uz-UZ")}
+              {formatDate(reward.paidAt)}
             </Text>
           </Paper>
         )}
@@ -218,7 +219,7 @@ const KpiRewardView = ({ reward }: KpiRewardViewProps) => {
               </Text>
             </Group>
             <Text size="sm" c="#495057">
-              {new Date(reward.rejectedAt).toLocaleDateString("uz-UZ")}
+              {formatDate(reward.rejectedAt)}
             </Text>
           </Paper>
         )}

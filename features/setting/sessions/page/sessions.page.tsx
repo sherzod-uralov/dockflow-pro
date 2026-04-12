@@ -42,6 +42,7 @@ import {
 } from "@/features/sessions/hook/sessions.hook";
 import { ConfirmationModal, useModal } from "@/components/shared/ui/custom-modal";
 import { SessionGetResponse } from "@/features/sessions/type/sessions.type";
+import { formatDate } from "@/lib/date-utils";
 
 const getDeviceIcon = (device?: string) => {
   switch (device) {
@@ -87,17 +88,6 @@ const getOSIcon = (os?: string) => {
   }
 };
 
-const formatDate = (dateString?: string) => {
-  if (!dateString) return "-";
-  const date = new Date(dateString);
-  return date.toLocaleDateString("uz-UZ", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-};
 
 const SessionCard = ({
   session,

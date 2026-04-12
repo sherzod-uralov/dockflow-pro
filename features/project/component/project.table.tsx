@@ -5,6 +5,7 @@ import { IconEdit, IconTrash, IconEye } from "@tabler/icons-react";
 import { ProjectGetResponse, PROJECT_STATUS_OPTIONS } from "../type/project.type";
 import { useRouter } from "next/navigation";
 import { GuardedActionIcon } from "@/components/shared/permission";
+import { formatDate } from "@/lib/date-utils";
 
 interface ProjectTableProps {
     projects: ProjectGetResponse[];
@@ -61,14 +62,14 @@ const ProjectTable = ({ projects, onEdit, onDelete }: ProjectTableProps) => {
                 <Table.Td onClick={() => router.push(`/dashboard/project/${project.id}`)}>
                     <Text size="sm">
                         {project.startDate
-                            ? new Date(project.startDate).toLocaleDateString("uz-UZ")
+                            ? formatDate(project.startDate)
                             : "-"}
                     </Text>
                 </Table.Td>
                 <Table.Td onClick={() => router.push(`/dashboard/project/${project.id}`)}>
                     <Text size="sm">
                         {project.endDate
-                            ? new Date(project.endDate).toLocaleDateString("uz-UZ")
+                            ? formatDate(project.endDate)
                             : "-"}
                     </Text>
                 </Table.Td>

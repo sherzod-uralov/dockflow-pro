@@ -16,6 +16,7 @@ import {
 import { IconSearch, IconUsers } from "@tabler/icons-react";
 import { useDebounce } from "@/hooks/use-debaunce";
 import { useSearchMessages } from "../hook/chat.hook";
+import { formatDate } from "@/lib/date-utils";
 
 interface Props {
   chatId?: string;
@@ -26,10 +27,6 @@ interface Props {
 const getInitials = (name?: string) =>
   (name || "?").split(" ").map((n) => n[0]).filter(Boolean).join("").toUpperCase().slice(0, 2);
 
-const formatDate = (iso: string) => {
-  const date = new Date(iso);
-  return date.toLocaleDateString("uz-UZ", { day: "numeric", month: "short" });
-};
 
 export const ChatSearchModal = ({ chatId, onSelect, placeholder }: Props) => {
   const [query, debouncedQuery, setQuery] = useDebounce("", 300);

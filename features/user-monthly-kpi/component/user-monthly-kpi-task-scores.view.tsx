@@ -26,6 +26,7 @@ import {
 import { useGetUserMonthlyKpiTaskScores } from "../hook/user-monthly-kpi.hook";
 import { UserMonthlyKpiTaskScore } from "../type/user-monthly-kpi.type";
 import { TaskDetailDrawer } from "@/features/task/component/task-detail-drawer";
+import { formatDate } from "@/lib/date-utils";
 
 interface UserMonthlyKpiTaskScoresViewProps {
   userId: string;
@@ -33,12 +34,6 @@ interface UserMonthlyKpiTaskScoresViewProps {
   month: number;
 }
 
-const formatDate = (dateString: string) => {
-  const date = new Date(dateString);
-  const day = date.getDate();
-  const months = ["yan", "fev", "mar", "apr", "may", "iyun", "iyul", "avg", "sen", "okt", "noy", "dek"];
-  return `${day}-${months[date.getMonth()]}`;
-};
 
 const ScoreItem = ({
   ts,

@@ -37,6 +37,7 @@ import {
 } from "../type/task.type";
 import { useUpdateTask, useCompleteTask, useUncompleteTask } from "../hook/task.hook";
 import { useGetUserQuery } from "@/features/admin/admin-users/hook/user.hook";
+import { formatDate } from "@/lib/date-utils";
 
 interface TaskCardProps {
     task: TaskGetResponse;
@@ -122,13 +123,6 @@ const TaskCard = ({ task, onEdit, onDelete, onClick, onAddSubtask, draggable = f
     };
 
     // Format date
-    const formatDate = (dateString: string) => {
-        const date = new Date(dateString);
-        return date.toLocaleDateString("uz-UZ", {
-            day: "numeric",
-            month: "short",
-        });
-    };
 
     return (
         <Card

@@ -6,6 +6,7 @@ import { IconArrowLeft } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
 import { useGetTaskById } from "@/features/task/hook/task.hook";
 import { TASK_PRIORITY_OPTIONS } from "@/features/task/type/task.type";
+import { formatDate } from "@/lib/date-utils";
 
 export default function TaskDetailPage() {
     const params = useParams();
@@ -117,14 +118,14 @@ export default function TaskDetailPage() {
                         {task.startDate && (
                             <Group>
                                 <Text fw={500} c="#495057">Boshlanish:</Text>
-                                <Text c="dimmed">{new Date(task.startDate).toLocaleDateString("uz-UZ")}</Text>
+                                <Text c="dimmed">{formatDate(task.startDate)}</Text>
                             </Group>
                         )}
 
                         {task.dueDate && (
                             <Group>
                                 <Text fw={500} c="#495057">Tugash:</Text>
-                                <Text c="dimmed">{new Date(task.dueDate).toLocaleDateString("uz-UZ")}</Text>
+                                <Text c="dimmed">{formatDate(task.dueDate)}</Text>
                             </Group>
                         )}
 

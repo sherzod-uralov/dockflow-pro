@@ -35,6 +35,7 @@ import { useGetAllDocuments } from "@/features/document";
 import { useGetJournalById } from "@/features/journal/hook/journal.hook";
 import { DocumentGetResponse } from "@/features/document/type/document.type";
 import { handleCopyToClipboard } from "@/utils/copy-text";
+import { formatDate } from "@/lib/date-utils";
 
 const statusColors: Record<string, { color: string; label: string }> = {
     PUBLISHED: { color: "green", label: "Chop etilgan" },
@@ -78,17 +79,6 @@ const JournalDocumentsPage = () => {
 
     const totalPages = Math.ceil((documentsData?.count || 0) / pageSize);
 
-    const formatDate = (dateString: string) => {
-        try {
-            return new Date(dateString).toLocaleDateString("uz-UZ", {
-                year: "numeric",
-                month: "short",
-                day: "numeric",
-            });
-        } catch {
-            return "—";
-        }
-    };
 
     return (
         <Box>

@@ -5,6 +5,7 @@ import { IconDots, IconEdit, IconTrash, IconFolder } from "@tabler/icons-react";
 import { ProjectGetResponse, PROJECT_STATUS_OPTIONS, PROJECT_VISIBILITY_OPTIONS } from "../type/project.type";
 import { useRouter } from "next/navigation";
 import { GuardedMenuItem } from "@/components/shared/permission";
+import { formatDate } from "@/lib/date-utils";
 
 interface ProjectCardProps {
     project: ProjectGetResponse;
@@ -158,12 +159,12 @@ const ProjectCard = ({ project, onEdit, onDelete }: ProjectCardProps) => {
                 <Group justify="space-between" mt="sm">
                     {project.startDate && (
                         <Text size="xs" c="dimmed">
-                            Boshlanish: {new Date(project.startDate).toLocaleDateString("uz-UZ")}
+                            Boshlanish: {formatDate(project.startDate)}
                         </Text>
                     )}
                     {project.endDate && (
                         <Text size="xs" c="dimmed">
-                            Tugash: {new Date(project.endDate).toLocaleDateString("uz-UZ")}
+                            Tugash: {formatDate(project.endDate)}
                         </Text>
                     )}
                 </Group>
