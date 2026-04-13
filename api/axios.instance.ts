@@ -63,7 +63,8 @@ axiosInstance.interceptors.response.use(
       return Promise.reject(new Error('Logout in progress'));
     }
 
-    if ((status === 401 || status === 403) && !originalRequest._retry) {
+    // Faqat 401 (Unauthorized) da token refresh — 403 (Forbidden) permission muammosi
+    if (status === 401 && !originalRequest._retry) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
