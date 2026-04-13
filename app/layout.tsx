@@ -14,7 +14,7 @@ import ReactQueryProvider from "@/context/react-query.provider";
 export const metadata: Metadata = {
   title: "DockFlow Pro",
   description: "Professional File Management Dashboard",
-  generator: "v0.app",
+  icons: { icon: "/icon.svg" },
 };
 
 export default function RootLayout({

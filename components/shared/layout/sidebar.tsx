@@ -589,10 +589,14 @@ const SidebarBody = ({
           }
           onClick={handleLogout}
           variant="subtle"
+          color="dark"
           styles={{
             root: {
               borderRadius: 4,
-              transition: "background-color 0.2s ease",
+              "&:hover": {
+                backgroundColor: "var(--sidebar-hover)",
+                color: "var(--sidebar-text)",
+              },
             },
             label: {
               color: "var(--sidebar-text)",
