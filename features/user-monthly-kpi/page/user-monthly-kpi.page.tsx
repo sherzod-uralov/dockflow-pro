@@ -42,6 +42,7 @@ import UserMonthlyKpiTaskScoresView from "../component/user-monthly-kpi-task-sco
 import UserMonthlyKpiLeaderboardView from "../component/user-monthly-kpi-leaderboard.view";
 import KpiAnalyticsView from "../component/kpi-analytics.view";
 import { GuardedMenuItem } from "@/components/shared/permission";
+import { colors } from "@/lib/colors";
 
 const MONTH_OPTIONS = [
   { value: "1", label: "Yanvar" },
@@ -135,11 +136,11 @@ const UserMonthlyKpiPage = () => {
         const { user, department } = row.original;
         return user ? (
           <Group gap="sm" wrap="nowrap">
-            <Avatar size="sm" radius="xl" src={user.avatarUrl} style={{ backgroundColor: "#e7f5ff", flexShrink: 0 }}>
-              <Text size="xs" c="#1e3a5f" fw={500}>{getInitials(user.fullname)}</Text>
+            <Avatar size="sm" radius="xl" src={user.avatarUrl} style={{ backgroundColor: colors.primaryLight, flexShrink: 0 }}>
+              <Text size="xs" c={colors.primary} fw={500}>{getInitials(user.fullname)}</Text>
             </Avatar>
             <Box>
-              <Text size="sm" fw={500} c="#212529" lineClamp={1}>{user.fullname}</Text>
+              <Text size="sm" fw={500} c={colors.textPrimary} lineClamp={1}>{user.fullname}</Text>
               {department && <Text size="xs" c="dimmed" lineClamp={1}>{department.name}</Text>}
             </Box>
           </Group>
@@ -151,7 +152,7 @@ const UserMonthlyKpiPage = () => {
       accessorKey: "period",
       header: "Davr",
       cell: ({ row }) => (
-        <Text size="sm" c="#495057">
+        <Text size="sm" c={colors.textSecondary}>
           {MONTH_OPTIONS.find((m) => m.value === String(row.original.month))?.label} {row.original.year}
         </Text>
       ),
@@ -195,7 +196,7 @@ const UserMonthlyKpiPage = () => {
       cell: ({ row }) => (
         <Box w={8} h={8} style={{
           borderRadius: "50%",
-          backgroundColor: row.original.isFinalized ? "#2ecc71" : "#f39c12",
+          backgroundColor: row.original.isFinalized ? colors.success : colors.warning,
         }} />
       ),
       meta: { width: 50, truncate: false },
@@ -229,10 +230,10 @@ const UserMonthlyKpiPage = () => {
   const EmptyState = () => (
     <Center py={60}>
       <Stack align="center" gap="md">
-        <Box p={16} style={{ backgroundColor: "#f1f3f5", borderRadius: 12 }}>
-          <IconClipboardCheck size={40} color="#868e96" stroke={1.5} />
+        <Box p={16} style={{ backgroundColor: colors.bgSubtle, borderRadius: 12 }}>
+          <IconClipboardCheck size={40} color={colors.textDimmed} stroke={1.5} />
         </Box>
-        <Text size="lg" fw={500} c="#495057">
+        <Text size="lg" fw={500} c={colors.textSecondary}>
           Oylik KPI ma'lumotlari topilmadi
         </Text>
       </Stack>
@@ -244,7 +245,7 @@ const UserMonthlyKpiPage = () => {
       {/* Header */}
       <Group justify="space-between" mb="md">
         <Box>
-          <Text size="lg" fw={600} c="#212529">
+          <Text size="lg" fw={600} c={colors.textPrimary}>
             Oylik KPI
           </Text>
           <Text size="sm" c="dimmed">
@@ -254,7 +255,7 @@ const UserMonthlyKpiPage = () => {
       </Group>
 
       {/* Filters */}
-      <Paper p="md" radius="sm" withBorder mb="md" style={{ borderColor: "#e9ecef" }}>
+      <Paper p="md" radius="sm" withBorder mb="md" style={{ borderColor: colors.border }}>
         <Group gap="md">
           <Select
             placeholder="Yil"
@@ -304,7 +305,7 @@ const UserMonthlyKpiPage = () => {
 
         <Tabs.Panel value="table">
           {!isLoading && data?.data?.length === 0 ? (
-            <Paper radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+            <Paper radius="sm" withBorder style={{ borderColor: colors.border }}>
               <EmptyState />
             </Paper>
           ) : (

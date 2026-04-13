@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Center, Loader } from "@mantine/core";
+import { colors } from "@/lib/colors";
 
 export default function ProjectDetailPage() {
     const params = useParams();
@@ -18,7 +19,7 @@ export default function ProjectDetailPage() {
 
     return (
         <Center h="100vh">
-            <Loader color="#1e3a5f" />
+            <Loader color={colors.primary} />
         </Center>
     );
 }

@@ -692,7 +692,7 @@ export const TaskDetailDrawer = ({
                         {subtasks.map((subtask) => {
                           const isDone = !!subtask.completedAt;
                           return (
-                            <Paper key={subtask.id} p="xs" radius="sm" style={{ backgroundColor: isDone ? "#f0fdf4" : colors.bg, cursor: "pointer" }}
+                            <Paper key={subtask.id} p="xs" radius="sm" style={{ backgroundColor: isDone ? colors.successLight : colors.bg, cursor: "pointer" }}
                               onClick={() => setSelectedSubtaskId(subtask.id)}
                             >
                               <Group justify="space-between" wrap="nowrap">
@@ -707,7 +707,7 @@ export const TaskDetailDrawer = ({
                                       w={18} h={18}
                                       style={{
                                         borderRadius: "50%",
-                                        border: isDone ? "none" : "2px solid #dee2e6",
+                                        border: isDone ? "none" : `2px solid ${colors.borderLight}`,
                                         backgroundColor: isDone ? colors.success : "transparent",
                                         display: "flex", alignItems: "center", justifyContent: "center",
                                         flexShrink: 0,

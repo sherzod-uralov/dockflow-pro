@@ -46,9 +46,9 @@ const StatCard = ({
   label,
   value,
   subtitle,
-  color = "#1e3a5f",
-  bg = "#f8f9fa",
-  border = "#e9ecef",
+  color = colors.primary,
+  bg = colors.bg,
+  border = colors.border,
 }: {
   icon: any;
   label: string;
@@ -83,10 +83,10 @@ const TrendChart = ({ trend }: { trend: KpiTrendPoint[] }) => {
   const max = Math.max(...trend.map((t) => t.finalScore), 100);
 
   return (
-    <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+    <Paper p="md" radius="sm" withBorder style={{ borderColor: colors.border }}>
       <Group gap="xs" mb="md">
-        <IconTrendingUp size={18} color="#1e3a5f" />
-        <Text size="sm" fw={600} c="#212529">
+        <IconTrendingUp size={18} color={colors.primary} />
+        <Text size="sm" fw={600} c={colors.textPrimary}>
           Oxirgi 12 oylik dinamika
         </Text>
       </Group>
@@ -96,7 +96,7 @@ const TrendChart = ({ trend }: { trend: KpiTrendPoint[] }) => {
           const isFull = t.finalScore >= 100;
           return (
             <Box key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
-              <Text size="xs" fw={600} c="#495057">
+              <Text size="xs" fw={600} c={colors.textSecondary}>
                 {t.finalScore}
               </Text>
               <Box
@@ -105,7 +105,7 @@ const TrendChart = ({ trend }: { trend: KpiTrendPoint[] }) => {
                   height: `${heightPct}%`,
                   minHeight: 4,
                   borderRadius: "4px 4px 0 0",
-                  backgroundColor: isFull ? "#2ecc71" : "#1e3a5f",
+                  backgroundColor: isFull ? colors.success : colors.primary,
                   transition: "height 0.3s",
                 }}
               />
@@ -119,6 +119,7 @@ const TrendChart = ({ trend }: { trend: KpiTrendPoint[] }) => {
     </Paper>
   );
 };
+import { colors } from "@/lib/colors";
 
 const LeaderboardMini = ({
   entries,
@@ -130,10 +131,10 @@ const LeaderboardMini = ({
   if (!entries?.length) return null;
 
   return (
-    <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+    <Paper p="md" radius="sm" withBorder style={{ borderColor: colors.border }}>
       <Group gap="xs" mb="md">
-        <IconTrophy size={18} color="#f39c12" />
-        <Text size="sm" fw={600} c="#212529">
+        <IconTrophy size={18} color={colors.warning} />
+        <Text size="sm" fw={600} c={colors.textPrimary}>
           Reyting (Top {entries.length})
         </Text>
       </Group>
@@ -146,18 +147,18 @@ const LeaderboardMini = ({
               gap="sm"
               p="xs"
               style={{
-                backgroundColor: isMe ? "#e7f5ff" : "transparent",
+                backgroundColor: isMe ? colors.primaryLight : "transparent",
                 borderRadius: 6,
-                border: isMe ? "1px solid #74c0fc" : "1px solid transparent",
+                border: isMe ? `1px solid ${colors.infoBg}` : "1px solid transparent",
               }}
             >
-              <Text size="sm" fw={700} c={e.rank <= 3 ? "#f39c12" : "dimmed"} w={24} ta="center">
+              <Text size="sm" fw={700} c={e.rank <= 3 ? colors.warning : "dimmed"} w={24} ta="center">
                 {e.rank}
               </Text>
               <Avatar size={28} radius="xl" src={e.user.avatarUrl} color="blue">
                 {e.user.fullname?.charAt(0)}
               </Avatar>
-              <Text size="sm" fw={isMe ? 600 : 500} c="#212529" style={{ flex: 1 }} lineClamp={1}>
+              <Text size="sm" fw={isMe ? 600 : 500} c={colors.textPrimary} style={{ flex: 1 }} lineClamp={1}>
                 {e.user.fullname}
               </Text>
               <Badge variant="light" color={e.rank <= 3 ? "yellow" : "blue"} size="sm">
@@ -174,17 +175,17 @@ const LeaderboardMini = ({
 const TopTasksList = ({ tasks, title, icon: Icon }: { tasks: KpiTopTask[]; title: string; icon: any }) => {
   if (!tasks?.length) return null;
   return (
-    <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+    <Paper p="md" radius="sm" withBorder style={{ borderColor: colors.border }}>
       <Group gap="xs" mb="md">
-        <Icon size={18} color="#1e3a5f" />
-        <Text size="sm" fw={600} c="#212529">
+        <Icon size={18} color={colors.primary} />
+        <Text size="sm" fw={600} c={colors.textPrimary}>
           {title}
         </Text>
       </Group>
       <Stack gap="xs">
         {tasks.slice(0, 5).map((t) => (
           <Group key={t.id} gap="sm" justify="space-between">
-            <Text size="sm" c="#495057" lineClamp={1} style={{ flex: 1 }}>
+            <Text size="sm" c={colors.textSecondary} lineClamp={1} style={{ flex: 1 }}>
               {t.title || `Vazifa ${(t.taskId || t.id || "").slice(0, 8)}`}
             </Text>
             <Badge variant="light" color="blue" size="sm" radius="sm">
@@ -211,7 +212,7 @@ export const KpiAnalyticsView = ({ year, month, userId, currentUserId }: KpiAnal
   if (isLoading) {
     return (
       <Center py={60}>
-        <Loader size="md" color="#1e3a5f" />
+        <Loader size="md" color={colors.primary} />
       </Center>
     );
   }
@@ -271,36 +272,36 @@ export const KpiAnalyticsView = ({ year, month, userId, currentUserId }: KpiAnal
           label="Yakuniy ball"
           value={personal.finalScore}
           subtitle={`${personal.totalEarnedScore}/${personal.totalBaseScore}`}
-          color="#1e3a5f"
-          bg="#f0f4ff"
-          border="#dbe4ff"
+          color={colors.primary}
+          bg={colors.infoLight}
+          border={colors.infoBg}
         />
         <StatCard
           icon={IconCheck}
           label="Bajarilgan"
           value={personal.tasksCompleted}
           subtitle={`${personal.tasksOnTime} o'z vaqtida (${onTimePercent}%)`}
-          color="#2ecc71"
-          bg="#e6f9ee"
-          border="#c3e6cb"
+          color={colors.success}
+          bg={colors.successLight}
+          border={colors.successBg}
         />
         <StatCard
           icon={IconAlertTriangle}
           label="Jarima"
           value={`-${personal.totalPenalty}`}
           subtitle={`${personal.tasksLate} ta kech`}
-          color={personal.totalPenalty > 0 ? "#e74c3c" : "#868e96"}
-          bg={personal.totalPenalty > 0 ? "#fff3f3" : "#f8f9fa"}
-          border={personal.totalPenalty > 0 ? "#fde2e2" : "#e9ecef"}
+          color={personal.totalPenalty > 0 ? colors.error : colors.textDimmed}
+          bg={personal.totalPenalty > 0 ? colors.errorLight : colors.bg}
+          border={personal.totalPenalty > 0 ? colors.errorBg : colors.border}
         />
         <StatCard
           icon={IconTrophy}
           label="O'rin"
           value={personal.position ? `#${personal.position}` : "-"}
           subtitle={personal.totalUsers ? `${personal.totalUsers} foydalanuvchidan` : ""}
-          color="#f39c12"
-          bg="#fff9e6"
-          border="#ffe8a1"
+          color={colors.warning}
+          bg={colors.warningLight}
+          border={colors.warningLight}
         />
       </SimpleGrid>
 
@@ -309,10 +310,10 @@ export const KpiAnalyticsView = ({ year, month, userId, currentUserId }: KpiAnal
 
       {/* Two columns: Score breakdown + Department */}
       <SimpleGrid cols={{ base: 1, md: 2 }} spacing="md">
-        <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+        <Paper p="md" radius="sm" withBorder style={{ borderColor: colors.border }}>
           <Group gap="xs" mb="md">
-            <IconChartBar size={18} color="#1e3a5f" />
-            <Text size="sm" fw={600} c="#212529">
+            <IconChartBar size={18} color={colors.primary} />
+            <Text size="sm" fw={600} c={colors.textPrimary}>
               Samaradorlik tahlili
             </Text>
           </Group>
@@ -324,19 +325,19 @@ export const KpiAnalyticsView = ({ year, month, userId, currentUserId }: KpiAnal
               sections={[
                 {
                   value: onTimePercent,
-                  color: "#2ecc71",
+                  color: colors.success,
                   tooltip: `O'z vaqtida ${personal.tasksOnTime}`,
                 },
                 {
                   value: 100 - onTimePercent,
-                  color: "#e74c3c",
+                  color: colors.error,
                   tooltip: `Kech ${personal.tasksLate}`,
                 },
               ]}
               label={
                 <Center>
                   <Stack gap={0} align="center">
-                    <Text size="xl" fw={700} c="#1e3a5f">
+                    <Text size="xl" fw={700} c={colors.primary}>
                       {onTimePercent}%
                     </Text>
                     <Text size="xs" c="dimmed">
@@ -350,13 +351,13 @@ export const KpiAnalyticsView = ({ year, month, userId, currentUserId }: KpiAnal
           <SimpleGrid cols={2} spacing="xs" mt="sm">
             <Box>
               <Text size="xs" c="dimmed">O'rtacha kechikish</Text>
-              <Text size="sm" fw={600} c="#212529">
+              <Text size="sm" fw={600} c={colors.textPrimary}>
                 {(scoreBreakdown.averageDaysLate || 0).toFixed(1)} kun
               </Text>
             </Box>
             <Box>
               <Text size="xs" c="dimmed">Ketma-ket to'liq oylar</Text>
-              <Text size="sm" fw={600} c="#2ecc71">
+              <Text size="sm" fw={600} c={colors.success}>
                 {personal.consecutiveFullMonths}
               </Text>
             </Box>
@@ -364,10 +365,10 @@ export const KpiAnalyticsView = ({ year, month, userId, currentUserId }: KpiAnal
         </Paper>
 
         {department && (
-          <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+          <Paper p="md" radius="sm" withBorder style={{ borderColor: colors.border }}>
             <Group gap="xs" mb="md">
-              <IconUsers size={18} color="#1e3a5f" />
-              <Text size="sm" fw={600} c="#212529">
+              <IconUsers size={18} color={colors.primary} />
+              <Text size="sm" fw={600} c={colors.textPrimary}>
                 Bo'lim statistikasi
               </Text>
               {department.isEligibleForTeamReward && (
@@ -376,31 +377,31 @@ export const KpiAnalyticsView = ({ year, month, userId, currentUserId }: KpiAnal
                 </Badge>
               )}
             </Group>
-            <Text size="md" fw={600} c="#1e3a5f" mb="xs">
+            <Text size="md" fw={600} c={colors.primary} mb="xs">
               {department.department.name}
             </Text>
             <SimpleGrid cols={2} spacing="md">
               <Box>
                 <Text size="xs" c="dimmed">O'rtacha ball</Text>
-                <Text fw={700} c="#1e3a5f" style={{ fontSize: 22 }}>
+                <Text fw={700} c={colors.primary} style={{ fontSize: 22 }}>
                   {(department.averageScore || 0).toFixed(1)}
                 </Text>
               </Box>
               <Box>
                 <Text size="xs" c="dimmed">A'zolar</Text>
-                <Text fw={700} c="#1e3a5f" style={{ fontSize: 22 }}>
+                <Text fw={700} c={colors.primary} style={{ fontSize: 22 }}>
                   {department.totalUsers}
                 </Text>
               </Box>
               <Box>
                 <Text size="xs" c="dimmed">85+ ball</Text>
-                <Text fw={600} c="#2ecc71">
+                <Text fw={600} c={colors.success}>
                   {department.usersAbove85} / {department.totalUsers}
                 </Text>
               </Box>
               <Box>
                 <Text size="xs" c="dimmed">100 ball</Text>
-                <Text fw={600} c="#f39c12">
+                <Text fw={600} c={colors.warning}>
                   {department.usersAt100}
                 </Text>
               </Box>
@@ -424,47 +425,47 @@ export const KpiAnalyticsView = ({ year, month, userId, currentUserId }: KpiAnal
 
       {/* Company stats */}
       {companyStats && (
-        <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+        <Paper p="md" radius="sm" withBorder style={{ borderColor: colors.border }}>
           <Group gap="xs" mb="md">
-            <IconUsers size={18} color="#1e3a5f" />
-            <Text size="sm" fw={600} c="#212529">
+            <IconUsers size={18} color={colors.primary} />
+            <Text size="sm" fw={600} c={colors.textPrimary}>
               Kompaniya statistikasi
             </Text>
           </Group>
           <SimpleGrid cols={{ base: 2, md: 6 }} spacing="md">
             <Box>
               <Text size="xs" c="dimmed">Foydalanuvchilar</Text>
-              <Text fw={700} c="#1e3a5f" style={{ fontSize: 20 }}>
+              <Text fw={700} c={colors.primary} style={{ fontSize: 20 }}>
                 {companyStats.totalUsers}
               </Text>
             </Box>
             <Box>
               <Text size="xs" c="dimmed">O'rtacha ball</Text>
-              <Text fw={700} c="#1e3a5f" style={{ fontSize: 20 }}>
+              <Text fw={700} c={colors.primary} style={{ fontSize: 20 }}>
                 {(companyStats.averageScore || 0).toFixed(1)}
               </Text>
             </Box>
             <Box>
               <Text size="xs" c="dimmed">100 ball</Text>
-              <Text fw={700} c="#f39c12" style={{ fontSize: 20 }}>
+              <Text fw={700} c={colors.warning} style={{ fontSize: 20 }}>
                 {companyStats.usersAt100}
               </Text>
             </Box>
             <Box>
               <Text size="xs" c="dimmed">85+ ball</Text>
-              <Text fw={700} c="#2ecc71" style={{ fontSize: 20 }}>
+              <Text fw={700} c={colors.success} style={{ fontSize: 20 }}>
                 {companyStats.usersAbove85}
               </Text>
             </Box>
             <Box>
               <Text size="xs" c="dimmed">50 dan kam</Text>
-              <Text fw={700} c="#e74c3c" style={{ fontSize: 20 }}>
+              <Text fw={700} c={colors.error} style={{ fontSize: 20 }}>
                 {companyStats.usersBelow50}
               </Text>
             </Box>
             <Box>
               <Text size="xs" c="dimmed">Bajarilgan vazifalar</Text>
-              <Text fw={700} c="#1e3a5f" style={{ fontSize: 20 }}>
+              <Text fw={700} c={colors.primary} style={{ fontSize: 20 }}>
                 {formatNumber(companyStats.totalTasksCompleted)}
               </Text>
             </Box>
@@ -474,10 +475,10 @@ export const KpiAnalyticsView = ({ year, month, userId, currentUserId }: KpiAnal
 
       {/* Rewards history */}
       {rewards && rewards.length > 0 && (
-        <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+        <Paper p="md" radius="sm" withBorder style={{ borderColor: colors.border }}>
           <Group gap="xs" mb="md">
-            <IconCurrencyDollar size={18} color="#2ecc71" />
-            <Text size="sm" fw={600} c="#212529">
+            <IconCurrencyDollar size={18} color={colors.success} />
+            <Text size="sm" fw={600} c={colors.textPrimary}>
               Mukofotlar tarixi
             </Text>
           </Group>
@@ -485,8 +486,8 @@ export const KpiAnalyticsView = ({ year, month, userId, currentUserId }: KpiAnal
             {rewards.slice(0, 6).map((r) => (
               <Group key={r.id} justify="space-between">
                 <Group gap="sm">
-                  <IconCalendar size={14} color="#868e96" />
-                  <Text size="sm" c="#495057">
+                  <IconCalendar size={14} color={colors.textDimmed} />
+                  <Text size="sm" c={colors.textSecondary}>
                     {MONTH_LABELS[r.month - 1]} {r.year}
                   </Text>
                   {r.rewardTier && (
@@ -496,7 +497,7 @@ export const KpiAnalyticsView = ({ year, month, userId, currentUserId }: KpiAnal
                   )}
                 </Group>
                 <Group gap="xs">
-                  <Text size="sm" fw={600} c="#2ecc71">
+                  <Text size="sm" fw={600} c={colors.success}>
                     {formatNumber(r.rewardAmount)} so'm
                   </Text>
                   <Badge variant="light" size="xs" color={r.status === "PAID" ? "green" : "yellow"}>

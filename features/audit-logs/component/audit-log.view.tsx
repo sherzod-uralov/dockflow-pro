@@ -27,6 +27,7 @@ import {
 import { useGetAuditLogById } from "@/features/audit-logs/hook/audit-log.hook";
 import { format } from "date-fns";
 import { AuditAction } from "../type/audit-log.type";
+import { colors } from "@/lib/colors";
 
 const AuditLogView = () => {
   const params = useSearchParams();
@@ -80,20 +81,20 @@ const AuditLogView = () => {
   return (
     <Stack gap="md">
       {/* Header Card */}
-      <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+      <Paper p="md" radius="sm" withBorder style={{ borderColor: colors.border }}>
         <Group justify="space-between" align="flex-start">
           <Group gap="sm">
             <Box
               p={8}
               style={{
-                backgroundColor: "#f1f3f5",
+                backgroundColor: colors.bgSubtle,
                 borderRadius: 8,
               }}
             >
-              <IconActivity size={20} color="#1e3a5f" />
+              <IconActivity size={20} color={colors.primary} />
             </Box>
             <Box>
-              <Text size="md" fw={600} c="#212529">
+              <Text size="md" fw={600} c={colors.textPrimary}>
                 Audit Log #{data.id.slice(0, 8)}...
               </Text>
               <Text size="sm" c="dimmed">
@@ -123,7 +124,7 @@ const AuditLogView = () => {
       </Paper>
 
       {/* Main Info */}
-      <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+      <Paper p="md" radius="sm" withBorder style={{ borderColor: colors.border }}>
         <Box
           style={{
             display: "grid",
@@ -134,13 +135,13 @@ const AuditLogView = () => {
           {/* Entity */}
           <Box>
             <Group gap="xs" mb={8}>
-              <IconFileText size={16} color="#868e96" />
-              <Text size="sm" fw={500} c="#495057">
+              <IconFileText size={16} color={colors.textDimmed} />
+              <Text size="sm" fw={500} c={colors.textSecondary}>
                 Entity
               </Text>
             </Group>
-            <Paper p="sm" radius="sm" style={{ backgroundColor: "#f8f9fa" }}>
-              <Text size="sm" fw={500} c="#212529">
+            <Paper p="sm" radius="sm" style={{ backgroundColor: colors.bg }}>
+              <Text size="sm" fw={500} c={colors.textPrimary}>
                 {data.entity}
               </Text>
             </Paper>
@@ -149,8 +150,8 @@ const AuditLogView = () => {
           {/* Action */}
           <Box>
             <Group gap="xs" mb={8}>
-              <IconActivity size={16} color="#868e96" />
-              <Text size="sm" fw={500} c="#495057">
+              <IconActivity size={16} color={colors.textDimmed} />
+              <Text size="sm" fw={500} c={colors.textSecondary}>
                 Amal
               </Text>
             </Group>
@@ -162,13 +163,13 @@ const AuditLogView = () => {
           {/* User */}
           <Box>
             <Group gap="xs" mb={8}>
-              <IconUser size={16} color="#868e96" />
-              <Text size="sm" fw={500} c="#495057">
+              <IconUser size={16} color={colors.textDimmed} />
+              <Text size="sm" fw={500} c={colors.textSecondary}>
                 Foydalanuvchi
               </Text>
             </Group>
-            <Paper p="sm" radius="sm" style={{ backgroundColor: "#f8f9fa" }}>
-              <Text size="sm" fw={500} c="#212529">
+            <Paper p="sm" radius="sm" style={{ backgroundColor: colors.bg }}>
+              <Text size="sm" fw={500} c={colors.textPrimary}>
                 {data.performedBy?.fullname || "—"}
               </Text>
               <Text size="xs" c="dimmed">
@@ -180,13 +181,13 @@ const AuditLogView = () => {
           {/* Time */}
           <Box>
             <Group gap="xs" mb={8}>
-              <IconCalendar size={16} color="#868e96" />
-              <Text size="sm" fw={500} c="#495057">
+              <IconCalendar size={16} color={colors.textDimmed} />
+              <Text size="sm" fw={500} c={colors.textSecondary}>
                 Vaqt
               </Text>
             </Group>
-            <Paper p="sm" radius="sm" style={{ backgroundColor: "#f8f9fa" }}>
-              <Text size="sm" c="#212529">
+            <Paper p="sm" radius="sm" style={{ backgroundColor: colors.bg }}>
+              <Text size="sm" c={colors.textPrimary}>
                 {format(new Date(data.performedAt), "dd.MM.yyyy HH:mm:ss")}
               </Text>
             </Paper>
@@ -195,8 +196,8 @@ const AuditLogView = () => {
           {/* IP Address */}
           <Box style={{ gridColumn: "span 2" }}>
             <Group gap="xs" mb={8}>
-              <IconWorld size={16} color="#868e96" />
-              <Text size="sm" fw={500} c="#495057">
+              <IconWorld size={16} color={colors.textDimmed} />
+              <Text size="sm" fw={500} c={colors.textSecondary}>
                 IP Address
               </Text>
             </Group>
@@ -206,7 +207,7 @@ const AuditLogView = () => {
                   p="sm"
                   radius="sm"
                   style={{
-                    backgroundColor: "#e7f5ff",
+                    backgroundColor: colors.primaryLight,
                     border: "1px solid #a5d8ff",
                     cursor: "pointer",
                   }}
@@ -216,7 +217,7 @@ const AuditLogView = () => {
                     <Code
                       style={{
                         backgroundColor: "transparent",
-                        color: "#1971c2",
+                        color: colors.infoDark,
                       }}
                     >
                       {data.ipAddress}
@@ -234,10 +235,10 @@ const AuditLogView = () => {
 
       {/* Entity ID */}
       {data.entityId && (
-        <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+        <Paper p="md" radius="sm" withBorder style={{ borderColor: colors.border }}>
           <Group gap="xs" mb={8}>
-            <IconFileText size={16} color="#868e96" />
-            <Text size="sm" fw={500} c="#495057">
+            <IconFileText size={16} color={colors.textDimmed} />
+            <Text size="sm" fw={500} c={colors.textSecondary}>
               Entity ID
             </Text>
           </Group>
@@ -247,7 +248,7 @@ const AuditLogView = () => {
                 p="sm"
                 radius="sm"
                 style={{
-                  backgroundColor: "#f8f9fa",
+                  backgroundColor: colors.bg,
                   cursor: "pointer",
                 }}
                 onClick={copy}
@@ -268,10 +269,10 @@ const AuditLogView = () => {
 
       {/* Changes */}
       {data.changes && Object.keys(data.changes).length > 0 && (
-        <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+        <Paper p="md" radius="sm" withBorder style={{ borderColor: colors.border }}>
           <Group gap="xs" mb={8}>
-            <IconActivity size={16} color="#868e96" />
-            <Text size="sm" fw={500} c="#495057">
+            <IconActivity size={16} color={colors.textDimmed} />
+            <Text size="sm" fw={500} c={colors.textSecondary}>
               O'zgarishlar
             </Text>
           </Group>
@@ -279,7 +280,7 @@ const AuditLogView = () => {
             p="sm"
             radius="sm"
             style={{
-              backgroundColor: "#f8f9fa",
+              backgroundColor: colors.bg,
               maxHeight: 300,
               overflow: "auto",
             }}

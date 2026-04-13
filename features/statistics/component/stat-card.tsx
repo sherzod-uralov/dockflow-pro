@@ -3,6 +3,7 @@
 import { Paper, Group, Text, Box } from "@mantine/core";
 import { useRouter } from "next/navigation";
 import type { Icon } from "@tabler/icons-react";
+import { colors } from "@/lib/colors";
 
 interface StatCardProps {
   title: string;
@@ -39,7 +40,7 @@ export function StatCard({
       withBorder
       style={{
         cursor: href ? "pointer" : "default",
-        borderColor: "#e9ecef",
+        borderColor: colors.border,
       }}
       onClick={handleClick}
     >
@@ -50,15 +51,15 @@ export function StatCard({
         <Box
           p={8}
           style={{
-            backgroundColor: "#f1f3f5",
+            backgroundColor: colors.bgSubtle,
             borderRadius: 6,
           }}
         >
-          <Icon size={20} color="#495057" stroke={1.5} />
+          <Icon size={20} color={colors.textSecondary} stroke={1.5} />
         </Box>
       </Group>
 
-      <Text fw={700} style={{ fontSize: 28, lineHeight: 1.2, color: "#212529" }}>
+      <Text fw={700} style={{ fontSize: 28, lineHeight: 1.2, color: colors.textPrimary }}>
         {value}
       </Text>
 
@@ -73,7 +74,7 @@ export function StatCard({
           <Text
             size="sm"
             fw={500}
-            c={trend.isPositive ? "#2b8a3e" : "#c92a2a"}
+            c={trend.isPositive ? colors.successDark : colors.errorDark}
           >
             {trend.isPositive ? "+" : "-"}{Math.abs(trend.value)}%
           </Text>

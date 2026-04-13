@@ -44,6 +44,7 @@ import PermissionView from "../component/permission.view";
 import { useDebounce } from "@/hooks/use-debaunce";
 import { handleCopyToClipboard } from "@/utils/copy-text";
 import { usePagination } from "@/hooks/use-pagination";
+import { colors } from "@/lib/colors";
 
 const PermissionPage = () => {
   const createModal: ModalState = useModal();
@@ -137,13 +138,13 @@ const PermissionPage = () => {
         <Box
           p={16}
           style={{
-            backgroundColor: "#f1f3f5",
+            backgroundColor: colors.bgSubtle,
             borderRadius: 12,
           }}
         >
-          <IconKey size={40} color="#868e96" stroke={1.5} />
+          <IconKey size={40} color={colors.textDimmed} stroke={1.5} />
         </Box>
-        <Text size="lg" fw={500} c="#495057">
+        <Text size="lg" fw={500} c={colors.textSecondary}>
           Ruxsat topilmadi
         </Text>
         <Text size="sm" c="dimmed" ta="center">
@@ -158,7 +159,7 @@ const PermissionPage = () => {
       {/* Header */}
       <Group justify="space-between" mb="md">
         <Box>
-          <Text size="lg" fw={600} c="#212529">
+          <Text size="lg" fw={600} c={colors.textPrimary}>
             Ruxsatlar
           </Text>
           <Text size="sm" c="dimmed">
@@ -172,8 +173,8 @@ const PermissionPage = () => {
           radius="sm"
           styles={{
             root: {
-              backgroundColor: "#1e3a5f",
-              "&:hover": { backgroundColor: "#162d4a" },
+              backgroundColor: colors.primary,
+              "&:hover": { backgroundColor: colors.primaryHover },
             },
           }}
         >
@@ -187,11 +188,11 @@ const PermissionPage = () => {
         radius="sm"
         withBorder
         mb="md"
-        style={{ borderColor: "#e9ecef" }}
+        style={{ borderColor: colors.border }}
       >
         <TextInput
           placeholder="Ruxsatlarni qidirish..."
-          leftSection={<IconSearch size={18} color="#868e96" />}
+          leftSection={<IconSearch size={18} color={colors.textDimmed} />}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           radius="sm"
@@ -204,7 +205,7 @@ const PermissionPage = () => {
         {!isLoading &&
           (!data?.data ||
             data?.data.flatMap((item: any) => item.permissions).length === 0) ? (
-          <Paper radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+          <Paper radius="sm" withBorder style={{ borderColor: colors.border }}>
             <EmptyState />
           </Paper>
         ) : (
@@ -221,8 +222,8 @@ const PermissionPage = () => {
                 accessorKey: "name",
                 cell: ({ row }) => (
                   <Group gap="sm" wrap="nowrap">
-                    <IconKey size={18} color="#1e3a5f" style={{ flexShrink: 0 }} />
-                    <Text size="sm" fw={500} c="#212529">
+                    <IconKey size={18} color={colors.primary} style={{ flexShrink: 0 }} />
+                    <Text size="sm" fw={500} c={colors.textPrimary}>
                       {row.original.name}
                     </Text>
                   </Group>
@@ -233,7 +234,7 @@ const PermissionPage = () => {
                 header: "Tavsif",
                 accessorKey: "description",
                 cell: ({ row }) => (
-                  <Text size="sm" c="#495057" lineClamp={1}>
+                  <Text size="sm" c={colors.textSecondary} lineClamp={1}>
                     {row.original.description || "—"}
                   </Text>
                 ),
@@ -250,8 +251,8 @@ const PermissionPage = () => {
                     onClick={() => handleCopyToClipboard(row.original.key, "KEY")}
                     title="Nusxalash uchun bosing"
                     style={{
-                      backgroundColor: "#f1f3f5",
-                      color: "#495057",
+                      backgroundColor: colors.bgSubtle,
+                      color: colors.textSecondary,
                       borderRadius: 4,
                       fontFamily: "monospace",
                       cursor: "pointer",
@@ -273,8 +274,8 @@ const PermissionPage = () => {
                     py={4}
                     tt="capitalize"
                     style={{
-                      backgroundColor: "#e9ecef",
-                      color: "#495057",
+                      backgroundColor: colors.border,
+                      color: colors.textSecondary,
                       borderRadius: 4,
                       display: "inline-block",
                     }}

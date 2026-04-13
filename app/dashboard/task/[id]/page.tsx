@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useGetTaskById } from "@/features/task/hook/task.hook";
 import { TASK_PRIORITY_OPTIONS } from "@/features/task/type/task.type";
 import { formatDate } from "@/lib/date-utils";
+import { colors } from "@/lib/colors";
 
 export default function TaskDetailPage() {
     const params = useParams();
@@ -18,7 +19,7 @@ export default function TaskDetailPage() {
     if (isLoading) {
         return (
             <Center h="100vh">
-                <Loader color="#1e3a5f" />
+                <Loader color={colors.primary} />
             </Center>
         );
     }
@@ -49,7 +50,7 @@ export default function TaskDetailPage() {
                 <Stack gap="md">
                     <Group justify="space-between">
                         <div>
-                            <Text size="xl" fw={700} c="#212529">
+                            <Text size="xl" fw={700} c={colors.textPrimary}>
                                 {task.title}
                             </Text>
                             {task.description && (
@@ -66,8 +67,8 @@ export default function TaskDetailPage() {
                                     size="lg"
                                     styles={{
                                         root: {
-                                            backgroundColor: `${task.boardColumn.color || "#95a5a6"}15`,
-                                            color: task.boardColumn.color || "#95a5a6",
+                                            backgroundColor: `${task.boardColumn.color || colors.textDimmed}15`,
+                                            color: task.boardColumn.color || colors.textDimmed,
                                         },
                                     }}
                                 >
@@ -79,8 +80,8 @@ export default function TaskDetailPage() {
                                 size="lg"
                                 styles={{
                                     root: {
-                                        backgroundColor: `${priorityOption?.color || "#95a5a6"}15`,
-                                        color: priorityOption?.color || "#95a5a6",
+                                        backgroundColor: `${priorityOption?.color || colors.textDimmed}15`,
+                                        color: priorityOption?.color || colors.textDimmed,
                                     },
                                 }}
                             >
@@ -93,13 +94,13 @@ export default function TaskDetailPage() {
                     <Stack gap="sm" mt="md">
                         {task.project && (
                             <Group>
-                                <Text fw={500} c="#495057">Loyiha:</Text>
+                                <Text fw={500} c={colors.textSecondary}>Loyiha:</Text>
                                 <Badge
                                     variant="light"
                                     styles={{
                                         root: {
-                                            backgroundColor: `${task.project.color || "#3498db"}15`,
-                                            color: task.project.color || "#3498db",
+                                            backgroundColor: `${task.project.color || colors.info}15`,
+                                            color: task.project.color || colors.info,
                                         },
                                     }}
                                 >
@@ -110,35 +111,35 @@ export default function TaskDetailPage() {
 
                         {task.assignees && task.assignees.length > 0 && (
                             <Group>
-                                <Text fw={500} c="#495057">Mas'ul shaxslar:</Text>
+                                <Text fw={500} c={colors.textSecondary}>Mas'ul shaxslar:</Text>
                                 <Text c="dimmed">{task.assignees.map((a) => a.user.fullname).join(", ")}</Text>
                             </Group>
                         )}
 
                         {task.startDate && (
                             <Group>
-                                <Text fw={500} c="#495057">Boshlanish:</Text>
+                                <Text fw={500} c={colors.textSecondary}>Boshlanish:</Text>
                                 <Text c="dimmed">{formatDate(task.startDate)}</Text>
                             </Group>
                         )}
 
                         {task.dueDate && (
                             <Group>
-                                <Text fw={500} c="#495057">Tugash:</Text>
+                                <Text fw={500} c={colors.textSecondary}>Tugash:</Text>
                                 <Text c="dimmed">{formatDate(task.dueDate)}</Text>
                             </Group>
                         )}
 
                         {task.estimatedHours && (
                             <Group>
-                                <Text fw={500} c="#495057">Taxminiy soatlar:</Text>
+                                <Text fw={500} c={colors.textSecondary}>Taxminiy soatlar:</Text>
                                 <Text c="dimmed">{task.estimatedHours}h</Text>
                             </Group>
                         )}
 
                         {task.createdBy && (
                             <Group>
-                                <Text fw={500} c="#495057">Yaratuvchi:</Text>
+                                <Text fw={500} c={colors.textSecondary}>Yaratuvchi:</Text>
                                 <Text c="dimmed">{task.createdBy.fullname}</Text>
                             </Group>
                         )}

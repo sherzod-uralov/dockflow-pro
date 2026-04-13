@@ -23,6 +23,7 @@ import {
     IconCheck,
 } from "@tabler/icons-react";
 import { SingleJournalApiResponse } from "../type/journal.types";
+import { colors } from "@/lib/colors";
 
 interface JournalViewProps {
     journal: SingleJournalApiResponse;
@@ -38,14 +39,14 @@ const JournalView = ({ journal }: JournalViewProps) => {
                         <Box
                             p={10}
                             style={{
-                                backgroundColor: "#f1f3f5",
+                                backgroundColor: colors.bgSubtle,
                                 borderRadius: 8,
                             }}
                         >
-                            <IconBook size={24} color="#1e3a5f" />
+                            <IconBook size={24} color={colors.primary} />
                         </Box>
                         <Box>
-                            <Text size="xl" fw={600} c="#212529">
+                            <Text size="xl" fw={600} c={colors.textPrimary}>
                                 {journal.name}
                             </Text>
                             <Text size="sm" c="dimmed">
@@ -83,9 +84,9 @@ const JournalView = ({ journal }: JournalViewProps) => {
 
             {/* Prefix and Format */}
             <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
-                <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+                <Paper p="md" radius="sm" withBorder style={{ borderColor: colors.border }}>
                     <Group gap="xs" mb="xs">
-                        <IconHash size={16} color="#868e96" />
+                        <IconHash size={16} color={colors.textDimmed} />
                         <Text size="xs" c="dimmed" tt="uppercase" fw={600}>
                             Prefiks
                         </Text>
@@ -96,20 +97,20 @@ const JournalView = ({ journal }: JournalViewProps) => {
                                 p="sm"
                                 radius="sm"
                                 style={{
-                                    backgroundColor: copied ? "#d3f9d8" : "#e7f5ff",
+                                    backgroundColor: copied ? colors.successBg : colors.primaryLight,
                                     cursor: "pointer",
-                                    border: `1px solid ${copied ? "#8ce99a" : "#a5d8ff"}`,
+                                    border: `1px solid ${copied ? colors.successBg : colors.infoLight}`,
                                 }}
                                 onClick={copy}
                             >
                                 <Group justify="space-between">
-                                    <Text size="md" fw={600} c={copied ? "#2b8a3e" : "#1e3a5f"} ff="monospace">
+                                    <Text size="md" fw={600} c={copied ? colors.successDark : colors.primary} ff="monospace">
                                         {journal.prefix}
                                     </Text>
                                     {copied ? (
-                                        <IconCheck size={16} color="#2b8a3e" />
+                                        <IconCheck size={16} color={colors.successDark} />
                                     ) : (
-                                        <IconCopy size={16} color="#1e3a5f" />
+                                        <IconCopy size={16} color={colors.primary} />
                                     )}
                                 </Group>
                             </Paper>
@@ -117,9 +118,9 @@ const JournalView = ({ journal }: JournalViewProps) => {
                     </CopyButton>
                 </Paper>
 
-                <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+                <Paper p="md" radius="sm" withBorder style={{ borderColor: colors.border }}>
                     <Group gap="xs" mb="xs">
-                        <IconTemplate size={16} color="#868e96" />
+                        <IconTemplate size={16} color={colors.textDimmed} />
                         <Text size="xs" c="dimmed" tt="uppercase" fw={600}>
                             Format
                         </Text>
@@ -128,10 +129,10 @@ const JournalView = ({ journal }: JournalViewProps) => {
                         p="sm"
                         radius="sm"
                         style={{
-                            backgroundColor: "#f8f9fa",
+                            backgroundColor: colors.bg,
                         }}
                     >
-                        <Text size="md" c="#495057" ff="monospace">
+                        <Text size="md" c={colors.textSecondary} ff="monospace">
                             {journal.format}
                         </Text>
                     </Paper>
@@ -140,9 +141,9 @@ const JournalView = ({ journal }: JournalViewProps) => {
 
             {/* Department and Responsible User */}
             <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
-                <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+                <Paper p="md" radius="sm" withBorder style={{ borderColor: colors.border }}>
                     <Group gap="xs" mb="sm">
-                        <IconBuilding size={16} color="#868e96" />
+                        <IconBuilding size={16} color={colors.textDimmed} />
                         <Text size="xs" c="dimmed" tt="uppercase" fw={600}>
                             Bo'lim / Departament
                         </Text>
@@ -157,9 +158,9 @@ const JournalView = ({ journal }: JournalViewProps) => {
                     </Badge>
                 </Paper>
 
-                <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+                <Paper p="md" radius="sm" withBorder style={{ borderColor: colors.border }}>
                     <Group gap="xs" mb="sm">
-                        <IconUser size={16} color="#868e96" />
+                        <IconUser size={16} color={colors.textDimmed} />
                         <Text size="xs" c="dimmed" tt="uppercase" fw={600}>
                             Mas'ul shaxs
                         </Text>

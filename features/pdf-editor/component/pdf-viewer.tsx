@@ -27,6 +27,7 @@ import { DocVerseViewer } from "@docverse-pdf/next";
 import { pdfService } from "../service/pdf.service";
 import { useGetProfileQuery } from "@/features/login/hook/login.hook";
 import { useGetDocumentById } from "@/features/document/hook/document.hook";
+import { colors } from "@/lib/colors";
 
 interface PDFViewerProps {
   documentId?: string;
@@ -104,11 +105,11 @@ export function PDFViewer({ documentId, action = "edit" }: PDFViewerProps) {
     if (!ctx) return null;
 
     // Fon
-    ctx.fillStyle = "#ecfdf5";
+    ctx.fillStyle = colors.stampBg;
     ctx.beginPath();
     ctx.roundRect(0, 0, 600, 200, 16);
     ctx.fill();
-    ctx.strokeStyle = "#059669";
+    ctx.strokeStyle = colors.stampGreen;
     ctx.lineWidth = 3;
     ctx.beginPath();
     ctx.roundRect(2, 2, 596, 196, 14);
@@ -120,7 +121,7 @@ export function PDFViewer({ documentId, action = "edit" }: PDFViewerProps) {
     const timeStr = date.toLocaleTimeString("ru-RU");
 
     ctx.font = "bold 22px Arial";
-    ctx.fillStyle = "#1f2937";
+    ctx.fillStyle = colors.stampText;
     ctx.textAlign = "left";
     ctx.fillText(`№ ${randomId}`, 20, 35);
     ctx.textAlign = "right";
@@ -129,12 +130,12 @@ export function PDFViewer({ documentId, action = "edit" }: PDFViewerProps) {
     // TASDIQLANGAN
     ctx.textAlign = "center";
     ctx.font = "bold 52px Arial";
-    ctx.fillStyle = "#059669";
+    ctx.fillStyle = colors.stampGreen;
     ctx.fillText("TASDIQLANGAN", 300, 110);
 
     // Ism
     ctx.font = "bold 28px Arial";
-    ctx.fillStyle = "#1f2937";
+    ctx.fillStyle = colors.stampText;
     ctx.fillText(fullname.toUpperCase(), 300, 160);
 
     return canvas.toDataURL("image/png");
@@ -157,7 +158,7 @@ export function PDFViewer({ documentId, action = "edit" }: PDFViewerProps) {
       const dataUrl = await QRCode.toDataURL(qrUrl, {
         width: 300,
         margin: 1,
-        color: { dark: "#000000", light: "#ffffff" },
+        color: { dark: colors.black, light: colors.white },
       });
 
       await annotationManager.placeStamp(dataUrl, 80, 80);
@@ -325,7 +326,7 @@ export function PDFViewer({ documentId, action = "edit" }: PDFViewerProps) {
         height: "100vh",
         width: "100vw",
         overflow: "hidden",
-        backgroundColor: "#f8f9fa",
+        backgroundColor: colors.bg,
       }}
     >
       {/* Header */}
@@ -334,7 +335,7 @@ export function PDFViewer({ documentId, action = "edit" }: PDFViewerProps) {
         py="sm"
         radius={0}
         style={{
-          borderBottom: "1px solid #e9ecef",
+          borderBottom: `1px solid ${colors.border}`,
           flexShrink: 0,
         }}
       >
@@ -349,7 +350,7 @@ export function PDFViewer({ documentId, action = "edit" }: PDFViewerProps) {
             >
               <IconArrowLeft size={20} />
             </ActionIcon>
-            <Text size="md" fw={600} c="#212529">
+            <Text size="md" fw={600} c={colors.textPrimary}>
               {isReadOnly
                 ? "PDF Ko'rish"
                 : actionType === "SIGN"
@@ -404,7 +405,7 @@ export function PDFViewer({ documentId, action = "edit" }: PDFViewerProps) {
                     }
                     onClick={handleSaveAnnotations}
                     disabled={isSaving || isLoading || (isQrMode && !qrPlaced)}
-                    style={{ backgroundColor: "#1e3a5f" }}
+                    style={{ backgroundColor: colors.primary }}
                   >
                     {isSaving ? "Saqlanmoqda..." : "Saqlash"}
                   </Button>
@@ -467,7 +468,7 @@ export function PDFViewer({ documentId, action = "edit" }: PDFViewerProps) {
           <Button
             onClick={() => setTipsOpen(false)}
             fullWidth
-            style={{ backgroundColor: "#1e3a5f" }}
+            style={{ backgroundColor: colors.primary }}
           >
             Tushunarli
           </Button>
@@ -490,7 +491,7 @@ export function PDFViewer({ documentId, action = "edit" }: PDFViewerProps) {
               variant="outline"
               onClick={() => setShowLeaveWarning(false)}
               styles={{
-                root: { borderColor: "#e9ecef", color: "#495057" },
+                root: { borderColor: colors.border, color: colors.textSecondary },
               }}
             >
               Bekor qilish

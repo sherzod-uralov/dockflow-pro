@@ -71,6 +71,7 @@ const ACTION_ICONS: Record<string, any> = {
   QR_CODE: IconQrcode,
   ACKNOWLEDGE: IconEye,
 };
+import { colors } from "@/lib/colors";
 
 // Template item
 const TemplateItem = memo(({
@@ -94,14 +95,14 @@ const TemplateItem = memo(({
       radius="sm"
       withBorder
       style={{
-        borderColor: "#e9ecef",
-        borderLeft: `3px solid ${template.isActive ? "#1971c2" : "#868e96"}`,
+        borderColor: colors.border,
+        borderLeft: `3px solid ${template.isActive ? colors.infoDark : colors.textDimmed}`,
         cursor: "pointer",
         transition: "all 0.15s ease",
       }}
       onClick={onView}
       onMouseEnter={(e) => {
-        e.currentTarget.style.backgroundColor = "#f8f9fa";
+        e.currentTarget.style.backgroundColor = colors.bg;
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.backgroundColor = "white";
@@ -110,7 +111,7 @@ const TemplateItem = memo(({
       <Group justify="space-between" wrap="nowrap">
         <Box style={{ flex: 1, minWidth: 0 }}>
           <Group gap="sm" mb={6} wrap="nowrap">
-            <Text size="md" fw={600} c="#212529" lineClamp={1}>
+            <Text size="md" fw={600} c={colors.textPrimary} lineClamp={1}>
               {template.name}
             </Text>
             <Badge
@@ -124,12 +125,12 @@ const TemplateItem = memo(({
 
           <Group gap="lg" wrap="nowrap">
             <Group gap={6} wrap="nowrap">
-              <IconTemplate size={14} color="#868e96" />
-              <Text size="sm" c="#495057">{typeLabel}</Text>
+              <IconTemplate size={14} color={colors.textDimmed} />
+              <Text size="sm" c={colors.textSecondary}>{typeLabel}</Text>
             </Group>
 
             {template.documentType && (
-              <Text size="sm" c="#868e96">
+              <Text size="sm" c={colors.textDimmed}>
                 {template.documentType.name}
               </Text>
             )}
@@ -205,7 +206,7 @@ const TemplateItem = memo(({
             </Menu.Dropdown>
           </Menu>
 
-          <IconChevronRight size={18} color="#868e96" />
+          <IconChevronRight size={18} color={colors.textDimmed} />
         </Group>
       </Group>
     </Paper>
@@ -218,7 +219,7 @@ TemplateItem.displayName = "TemplateItem";
 const LoadingSkeleton = () => (
   <Stack gap="sm">
     {[1, 2, 3, 4, 5].map((i) => (
-      <Paper key={i} p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+      <Paper key={i} p="md" radius="sm" withBorder style={{ borderColor: colors.border }}>
         <Group justify="space-between">
           <Box style={{ flex: 1 }}>
             <Skeleton height={20} width="50%" mb={8} />
@@ -237,22 +238,22 @@ const LoadingSkeleton = () => (
 
 // Empty state
 const EmptyState = ({ onCreateNew }: { onCreateNew: () => void }) => (
-  <Paper p="xl" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+  <Paper p="xl" radius="sm" withBorder style={{ borderColor: colors.border }}>
     <Stack align="center" gap="md" py="xl">
       <Box
         style={{
           width: 80,
           height: 80,
           borderRadius: "50%",
-          backgroundColor: "#f1f3f5",
+          backgroundColor: colors.bgSubtle,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
         }}
       >
-        <IconInbox size={40} color="#adb5bd" stroke={1.5} />
+        <IconInbox size={40} color={colors.textMuted} stroke={1.5} />
       </Box>
-      <Text size="lg" fw={600} c="#495057">
+      <Text size="lg" fw={600} c={colors.textSecondary}>
         Shablon topilmadi
       </Text>
       <Text size="sm" c="dimmed" ta="center" maw={400}>
@@ -264,7 +265,7 @@ const EmptyState = ({ onCreateNew }: { onCreateNew: () => void }) => (
         radius="sm"
         leftSection={<IconPlus size={18} />}
         onClick={onCreateNew}
-        style={{ backgroundColor: "#1e3a5f" }}
+        style={{ backgroundColor: colors.primary }}
       >
         Shablon yaratish
       </GuardedButton>
@@ -334,7 +335,7 @@ const WorkflowTemplatePage = () => {
       {/* Header */}
       <Group justify="space-between" mb="lg">
         <Box>
-          <Text size="xl" fw={700} c="#212529">
+          <Text size="xl" fw={700} c={colors.textPrimary}>
             Aylanma shablonlari
           </Text>
           <Text size="sm" c="dimmed">
@@ -348,28 +349,28 @@ const WorkflowTemplatePage = () => {
           radius="sm"
           leftSection={<IconPlus size={16} />}
           onClick={() => createModal.openModal()}
-          style={{ backgroundColor: "#1e3a5f" }}
+          style={{ backgroundColor: colors.primary }}
         >
           Shablon qo'shish
         </GuardedButton>
       </Group>
 
       {/* Filters */}
-      <Paper p="md" radius="sm" mb="md" withBorder style={{ borderColor: "#e9ecef" }}>
+      <Paper p="md" radius="sm" mb="md" withBorder style={{ borderColor: colors.border }}>
         <Group gap="sm">
           <TextInput
             placeholder="Qidirish..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            leftSection={<IconSearch size={16} color="#868e96" />}
+            leftSection={<IconSearch size={16} color={colors.textDimmed} />}
             size="sm"
             radius="sm"
             w={280}
             styles={{
               input: {
-                backgroundColor: "#f8f9fa",
-                border: "1px solid #e9ecef",
-                "&:focus": { borderColor: "#1e3a5f" },
+                backgroundColor: colors.bg,
+                border: `1px solid ${colors.border}`,
+                "&:focus": { borderColor: colors.primary },
               },
             }}
           />
@@ -385,8 +386,8 @@ const WorkflowTemplatePage = () => {
             clearable
             styles={{
               input: {
-                backgroundColor: "#f8f9fa",
-                border: "1px solid #e9ecef",
+                backgroundColor: colors.bg,
+                border: `1px solid ${colors.border}`,
               },
             }}
           />
@@ -426,7 +427,7 @@ const WorkflowTemplatePage = () => {
           {totalPages > 1 && (
             <Group justify="space-between">
               <Text size="sm" c="dimmed">
-                Jami: <Text span fw={600} c="#212529">{data.count || data.total}</Text> ta
+                Jami: <Text span fw={600} c={colors.textPrimary}>{data.count || data.total}</Text> ta
               </Text>
               <Pagination
                 value={pageNumber}
@@ -437,10 +438,10 @@ const WorkflowTemplatePage = () => {
                 withEdges
                 styles={{
                   control: {
-                    borderColor: "#e9ecef",
+                    borderColor: colors.border,
                     "&[data-active]": {
-                      backgroundColor: "#1e3a5f",
-                      borderColor: "#1e3a5f",
+                      backgroundColor: colors.primary,
+                      borderColor: colors.primary,
                     },
                   },
                 }}
@@ -501,7 +502,7 @@ const WorkflowTemplatePage = () => {
           viewModal.closeModal();
           setSelectedTemplate(null);
         }}
-        title={<Text fw={600} c="#212529">Shablon ma'lumotlari</Text>}
+        title={<Text fw={600} c={colors.textPrimary}>Shablon ma'lumotlari</Text>}
         size="lg"
         radius="sm"
         centered
@@ -512,11 +513,11 @@ const WorkflowTemplatePage = () => {
             <SimpleGrid cols={2} spacing="md">
               <Box>
                 <Text size="xs" c="dimmed">Nomi</Text>
-                <Text size="sm" fw={500} c="#212529">{selectedTemplate.name}</Text>
+                <Text size="sm" fw={500} c={colors.textPrimary}>{selectedTemplate.name}</Text>
               </Box>
               <Box>
                 <Text size="xs" c="dimmed">Hujjat turi</Text>
-                <Text size="sm" c="#495057">{selectedTemplate.documentType?.name || "—"}</Text>
+                <Text size="sm" c={colors.textSecondary}>{selectedTemplate.documentType?.name || "—"}</Text>
               </Box>
               <Box>
                 <Text size="xs" c="dimmed">Turi</Text>
@@ -535,14 +536,14 @@ const WorkflowTemplatePage = () => {
             {selectedTemplate.description && (
               <Box>
                 <Text size="xs" c="dimmed">Tavsif</Text>
-                <Text size="sm" c="#495057">{selectedTemplate.description}</Text>
+                <Text size="sm" c={colors.textSecondary}>{selectedTemplate.description}</Text>
               </Box>
             )}
 
             {/* Bosqichlar */}
             {selectedTemplate.steps && selectedTemplate.steps.length > 0 && (
               <Box>
-                <Text size="sm" fw={600} c="#212529" mb="sm">
+                <Text size="sm" fw={600} c={colors.textPrimary} mb="sm">
                   Bosqichlar ({selectedTemplate.steps.length} ta)
                 </Text>
                 <Timeline active={-1} bulletSize={28} lineWidth={2}>
@@ -569,7 +570,7 @@ const WorkflowTemplatePage = () => {
                           <Avatar size="xs" radius="xl" color="blue">
                             {step.assignedToUser?.fullname?.charAt(0) || "?"}
                           </Avatar>
-                          <Text size="sm" c="#495057">
+                          <Text size="sm" c={colors.textSecondary}>
                             {step.assignedToUser?.fullname || "Tayinlanmagan"}
                           </Text>
                         </Group>
@@ -580,7 +581,7 @@ const WorkflowTemplatePage = () => {
               </Box>
             )}
 
-            <Group justify="flex-end" pt="md" style={{ borderTop: "1px solid #e9ecef" }}>
+            <Group justify="flex-end" pt="md" style={{ borderTop: `1px solid ${colors.border}` }}>
               <Button
                 variant="light"
                 size="sm"
@@ -602,7 +603,7 @@ const WorkflowTemplatePage = () => {
                   viewModal.closeModal();
                   handleEdit(selectedTemplate);
                 }}
-                style={{ backgroundColor: "#1e3a5f" }}
+                style={{ backgroundColor: colors.primary }}
               >
                 Tahrirlash
               </GuardedButton>

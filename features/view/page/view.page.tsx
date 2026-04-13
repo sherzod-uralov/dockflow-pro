@@ -35,6 +35,7 @@ import {
 import { WorkflowStepStatus, WorkflowActionType, WorkflowStatus } from "@/features/workflow/type/workflow.type";
 import { WorkflowStepInfo } from "../type/view.type";
 import { formatDate, formatDateTime } from "@/lib/date-utils";
+import { colors } from "@/lib/colors";
 
 interface ViewPageProps {
   documentId: string;
@@ -135,7 +136,7 @@ export default function ViewPage({ documentId }: ViewPageProps) {
 
   if (isLoading) {
     return (
-      <Box style={{ backgroundColor: "#f8f9fa", padding: "2rem 0" }}>
+      <Box style={{ backgroundColor: colors.bg, padding: "2rem 0" }}>
         <Container size="lg">
           <Stack gap="xl" align="center" justify="center" style={{ minHeight: "50vh" }}>
             <Loader size="lg" color="gov" />
@@ -148,7 +149,7 @@ export default function ViewPage({ documentId }: ViewPageProps) {
 
   if (isError) {
     return (
-      <Box style={{ backgroundColor: "#f8f9fa", padding: "2rem 0" }}>
+      <Box style={{ backgroundColor: colors.bg, padding: "2rem 0" }}>
         <Container size="lg">
           <Alert
             variant="light"
@@ -165,7 +166,7 @@ export default function ViewPage({ documentId }: ViewPageProps) {
 
   if (!data) {
     return (
-      <Box style={{ backgroundColor: "#f8f9fa", padding: "2rem 0" }}>
+      <Box style={{ backgroundColor: colors.bg, padding: "2rem 0" }}>
         <Container size="lg">
           <Alert
             variant="light"
@@ -183,11 +184,11 @@ export default function ViewPage({ documentId }: ViewPageProps) {
   const isWorkflowComplete = data.workflow?.status === WorkflowStatus.COMPLETED;
 
   return (
-    <Box style={{ backgroundColor: "#f8f9fa", padding: "2rem 0" }}>
+    <Box style={{ backgroundColor: colors.bg, padding: "2rem 0" }}>
       <Container size="lg">
         <Stack gap="lg">
           {/* Header */}
-          <Paper p="xl" shadow="xs" style={{ backgroundColor: "#1864ab", color: "white" }}>
+          <Paper p="xl" shadow="xs" style={{ backgroundColor: colors.infoDark, color: "white" }}>
             <Group justify="space-between" align="center">
               <Group gap="md">
                 <ThemeIcon size={56} radius="md" variant="white" color="gov">

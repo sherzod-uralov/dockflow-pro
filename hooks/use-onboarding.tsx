@@ -33,6 +33,7 @@ import {
     Drawer,
 } from "@mantine/core";
 import {useDisclosure} from "@mantine/hooks";
+import { colors } from "@/lib/colors";
 
 type OnboardingConfig = {
     steps: DriveStep[];
@@ -652,7 +653,7 @@ function TourItem({
             radius="sm"
             withBorder
             style={{
-                borderColor: "#e9ecef",
+                borderColor: colors.border,
                 cursor: "pointer",
             }}
             onClick={onStart}
@@ -662,12 +663,12 @@ function TourItem({
                     <Box
                         p={8}
                         style={{
-                            backgroundColor: isCompleted ? "#d3f9d8" : "#f1f3f5",
+                            backgroundColor: isCompleted ? colors.successBg : colors.bgSubtle,
                             borderRadius: 6,
                         }}
                     >
                         {isCompleted ? (
-                            <IconCircleCheck size={20} color="#2b8a3e" stroke={1.5} />
+                            <IconCircleCheck size={20} color={colors.successDark} stroke={1.5} />
                         ) : (
 
                             <Icon size={20}
@@ -675,7 +676,7 @@ function TourItem({
                         )}
                     </Box>
                     <Box>
-                        <Text size="sm" fw={500} c="#212529">
+                        <Text size="sm" fw={500} c={colors.textPrimary}>
                             {config.title}
                         </Text>
                         <Text size="xs" c="dimmed">
@@ -683,7 +684,7 @@ function TourItem({
                         </Text>
                     </Box>
                 </Group>
-                <IconChevronRight size={16} color="#868e96" />
+                <IconChevronRight size={16} color={colors.textDimmed} />
             </Group>
         </Paper>
     );
@@ -754,11 +755,11 @@ export function TourSettingsDrawer({opened, onClose}: TourSettingsDrawerProps) {
             position="right"
             size="sm"
             title={
-                <Text fw={600} c="#212529">Yo'riqnomalar</Text>
+                <Text fw={600} c={colors.textPrimary}>Yo'riqnomalar</Text>
             }
             styles={{
                 header: {
-                    borderBottom: "1px solid #e9ecef",
+                    borderBottom: `1px solid ${colors.border}`,
                 },
                 body: {
                     padding: 0,
@@ -772,7 +773,7 @@ export function TourSettingsDrawer({opened, onClose}: TourSettingsDrawerProps) {
                         p="lg"
                         radius="sm"
                         withBorder
-                        style={{ borderColor: "#e9ecef" }}
+                        style={{ borderColor: colors.border }}
                     >
                         <Group justify="space-between" align="flex-start" mb="md">
                             <Text size="sm" c="dimmed" fw={500}>
@@ -781,14 +782,14 @@ export function TourSettingsDrawer({opened, onClose}: TourSettingsDrawerProps) {
                             <Box
                                 p={8}
                                 style={{
-                                    backgroundColor: "#f1f3f5",
+                                    backgroundColor: colors.bgSubtle,
                                     borderRadius: 6,
                                 }}
                             >
-                                <IconSparkles size={20} color="#495057" stroke={1.5} />
+                                <IconSparkles size={20} color={colors.textSecondary} stroke={1.5} />
                             </Box>
                         </Group>
-                        <Text fw={700} style={{ fontSize: 28, lineHeight: 1.2, color: "#212529" }}>
+                        <Text fw={700} style={{ fontSize: 28, lineHeight: 1.2, color: colors.textPrimary }}>
                             {completedCount} / {totalTours}
                         </Text>
                         <Text size="sm" c="dimmed" mt={6}>
@@ -803,11 +804,11 @@ export function TourSettingsDrawer({opened, onClose}: TourSettingsDrawerProps) {
                         p="md"
                         radius="sm"
                         withBorder
-                        style={{ borderColor: "#e9ecef" }}
+                        style={{ borderColor: colors.border }}
                     >
                         <Group justify="space-between">
                             <Box>
-                                <Text size="sm" fw={500} c="#212529">
+                                <Text size="sm" fw={500} c={colors.textPrimary}>
                                     Avtomatik ko'rsatish
                                 </Text>
                                 <Text size="xs" c="dimmed">
@@ -820,8 +821,8 @@ export function TourSettingsDrawer({opened, onClose}: TourSettingsDrawerProps) {
                                 size="md"
                                 styles={{
                                     track: {
-                                        backgroundColor: isGlobalEnabled ? "#1e3a5f" : undefined,
-                                        borderColor: isGlobalEnabled ? "#1e3a5f" : undefined,
+                                        backgroundColor: isGlobalEnabled ? colors.primary : undefined,
+                                        borderColor: isGlobalEnabled ? colors.primary : undefined,
                                     },
                                 }}
                             />

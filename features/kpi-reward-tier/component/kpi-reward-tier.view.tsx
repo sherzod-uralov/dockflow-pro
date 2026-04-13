@@ -22,6 +22,7 @@ import {
   IconPalette,
 } from "@tabler/icons-react";
 import { KpiRewardTierGetResponse } from "../type/kpi-reward-tier.type";
+import { colors } from "@/lib/colors";
 
 interface KpiRewardTierViewProps {
   tier: KpiRewardTierGetResponse;
@@ -37,14 +38,14 @@ const KpiRewardTierView = ({ tier }: KpiRewardTierViewProps) => {
             <Box
               p={10}
               style={{
-                backgroundColor: tier.color ? `${tier.color}20` : "#f1f3f5",
+                backgroundColor: tier.color ? `${tier.color}20` : colors.bgSubtle,
                 borderRadius: 8,
               }}
             >
-              <IconTrophy size={24} color={tier.color || "#1e3a5f"} />
+              <IconTrophy size={24} color={tier.color || colors.primary} />
             </Box>
             <Box>
-              <Text size="xl" fw={600} c="#212529">
+              <Text size="xl" fw={600} c={colors.textPrimary}>
                 {tier.name}
               </Text>
               <Text size="sm" c="dimmed">
@@ -78,9 +79,9 @@ const KpiRewardTierView = ({ tier }: KpiRewardTierViewProps) => {
 
       {/* Score Range */}
       <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
-        <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+        <Paper p="md" radius="sm" withBorder style={{ borderColor: colors.border }}>
           <Group gap="xs" mb="sm">
-            <IconTag size={16} color="#868e96" />
+            <IconTag size={16} color={colors.textDimmed} />
             <Text size="xs" c="dimmed" tt="uppercase" fw={600}>
               Ball oralig'i
             </Text>
@@ -96,9 +97,9 @@ const KpiRewardTierView = ({ tier }: KpiRewardTierViewProps) => {
           </Group>
         </Paper>
 
-        <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+        <Paper p="md" radius="sm" withBorder style={{ borderColor: colors.border }}>
           <Group gap="xs" mb="sm">
-            <IconPalette size={16} color="#868e96" />
+            <IconPalette size={16} color={colors.textDimmed} />
             <Text size="xs" c="dimmed" tt="uppercase" fw={600}>
               Rang va holat
             </Text>
@@ -128,26 +129,26 @@ const KpiRewardTierView = ({ tier }: KpiRewardTierViewProps) => {
 
       {/* Reward Info */}
       <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
-        <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+        <Paper p="md" radius="sm" withBorder style={{ borderColor: colors.border }}>
           <Group gap="xs" mb="sm">
-            <IconTrophy size={16} color="#868e96" />
+            <IconTrophy size={16} color={colors.textDimmed} />
             <Text size="xs" c="dimmed" tt="uppercase" fw={600}>
               Mukofot (BHM)
             </Text>
           </Group>
-          <Text size="lg" fw={600} c="#212529">
+          <Text size="lg" fw={600} c={colors.textPrimary}>
             {tier.rewardBhm ?? "—"}
           </Text>
         </Paper>
 
-        <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+        <Paper p="md" radius="sm" withBorder style={{ borderColor: colors.border }}>
           <Group gap="xs" mb="sm">
-            <IconTrophy size={16} color="#868e96" />
+            <IconTrophy size={16} color={colors.textDimmed} />
             <Text size="xs" c="dimmed" tt="uppercase" fw={600}>
               Mukofot (so'm)
             </Text>
           </Group>
-          <Text size="lg" fw={600} c="#212529">
+          <Text size="lg" fw={600} c={colors.textPrimary}>
             {tier.rewardAmount != null
               ? tier.rewardAmount.toLocaleString("uz-UZ")
               : "—"}
@@ -157,9 +158,9 @@ const KpiRewardTierView = ({ tier }: KpiRewardTierViewProps) => {
 
       {/* Penalty Info */}
       {tier.isPenalty && (
-        <Paper p="md" radius="sm" withBorder style={{ borderColor: "#fde2e2" }}>
+        <Paper p="md" radius="sm" withBorder style={{ borderColor: colors.errorBg }}>
           <Group gap="xs" mb="sm">
-            <IconAlertTriangle size={16} color="#e74c3c" />
+            <IconAlertTriangle size={16} color={colors.error} />
             <Text size="xs" c="red" tt="uppercase" fw={600}>
               Jarima ma'lumotlari
             </Text>
@@ -179,14 +180,14 @@ const KpiRewardTierView = ({ tier }: KpiRewardTierViewProps) => {
 
       {/* Description */}
       {tier.description && (
-        <Paper p="md" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+        <Paper p="md" radius="sm" withBorder style={{ borderColor: colors.border }}>
           <Group gap="xs" mb="sm">
-            <IconFileDescription size={16} color="#868e96" />
+            <IconFileDescription size={16} color={colors.textDimmed} />
             <Text size="xs" c="dimmed" tt="uppercase" fw={600}>
               Tavsif
             </Text>
           </Group>
-          <Text size="sm" c="#495057" style={{ lineHeight: 1.6 }}>
+          <Text size="sm" c={colors.textSecondary} style={{ lineHeight: 1.6 }}>
             {tier.description}
           </Text>
         </Paper>

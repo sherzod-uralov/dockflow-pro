@@ -25,6 +25,7 @@ import {
     useJournalCreateMutation,
     useUpdateJournal,
 } from "../hook/journal.hook";
+import { colors } from "@/lib/colors";
 import { useGetAllDepartments } from "@/features/department/hook/department.hook";
 import { useGetUserQuery } from "@/features/admin/admin-users/hook/user.hook";
 import { SingleJournalApiResponse } from "../type/journal.types";
@@ -206,7 +207,7 @@ const JournalForm = ({ mode, journal, onClose, onSuccess }: JournalFormProps) =>
                     size="md"
                     radius="sm"
                     required
-                    leftSection={<IconBook size={18} color="#868e96" />}
+                    leftSection={<IconBook size={18} color={colors.textDimmed} />}
                     {...form.getInputProps("name")}
                     styles={{
                         label: { fontWeight: 500, marginBottom: 6 },
@@ -221,7 +222,7 @@ const JournalForm = ({ mode, journal, onClose, onSuccess }: JournalFormProps) =>
                     radius="sm"
                     required
                     maxLength={3}
-                    leftSection={<IconHash size={18} color="#868e96" />}
+                    leftSection={<IconHash size={18} color={colors.textDimmed} />}
                     {...form.getInputProps("prefix")}
                     onChange={(e) => {
                         form.setFieldValue("prefix", e.currentTarget.value.toUpperCase());
@@ -295,7 +296,7 @@ const JournalForm = ({ mode, journal, onClose, onSuccess }: JournalFormProps) =>
                         withBorder
                         p="sm"
                         radius="sm"
-                        style={{ borderColor: "#e9ecef", backgroundColor: "#f8f9fa" }}
+                        style={{ borderColor: colors.border, backgroundColor: colors.bg }}
                     >
                         <Group gap="xs">
                             <Text size="xs" c="dimmed">Ko'rinishi:</Text>
@@ -316,7 +317,7 @@ const JournalForm = ({ mode, journal, onClose, onSuccess }: JournalFormProps) =>
                     radius="sm"
                     required
                     searchable
-                    leftSection={<IconBuilding size={18} color="#868e96" />}
+                    leftSection={<IconBuilding size={18} color={colors.textDimmed} />}
                     data={
                         departmentsData?.data?.map((dept) => ({
                             value: dept.id,
@@ -337,7 +338,7 @@ const JournalForm = ({ mode, journal, onClose, onSuccess }: JournalFormProps) =>
                     radius="sm"
                     required
                     searchable
-                    leftSection={<IconUser size={18} color="#868e96" />}
+                    leftSection={<IconUser size={18} color={colors.textDimmed} />}
                     data={
                         usersData?.data?.map((user) => ({
                             value: user.id,
@@ -368,8 +369,8 @@ const JournalForm = ({ mode, journal, onClose, onSuccess }: JournalFormProps) =>
                         loading={isSubmitting}
                         styles={{
                             root: {
-                                backgroundColor: "#1e3a5f",
-                                "&:hover": { backgroundColor: "#162d4a" },
+                                backgroundColor: colors.primary,
+                                "&:hover": { backgroundColor: colors.primaryHover },
                             },
                         }}
                     >

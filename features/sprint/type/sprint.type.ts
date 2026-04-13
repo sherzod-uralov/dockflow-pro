@@ -1,4 +1,5 @@
 import { DataPagination } from "@/types/global.types";
+import { colors } from "@/lib/colors";
 
 export enum SprintStatus {
   PLANNING = "PLANNING",
@@ -8,10 +9,10 @@ export enum SprintStatus {
 }
 
 export const SPRINT_STATUS_OPTIONS = [
-  { value: SprintStatus.PLANNING, label: "Rejalashtirish", color: "#95a5a6" },
-  { value: SprintStatus.ACTIVE, label: "Faol", color: "#3498db" },
-  { value: SprintStatus.COMPLETED, label: "Yakunlangan", color: "#2ecc71" },
-  { value: SprintStatus.CANCELLED, label: "Bekor qilingan", color: "#e74c3c" },
+  { value: SprintStatus.PLANNING, label: "Rejalashtirish", color: colors.textDimmed },
+  { value: SprintStatus.ACTIVE, label: "Faol", color: colors.info },
+  { value: SprintStatus.COMPLETED, label: "Yakunlangan", color: colors.success },
+  { value: SprintStatus.CANCELLED, label: "Bekor qilingan", color: colors.error },
 ] as const;
 
 export interface SprintGetResponse {

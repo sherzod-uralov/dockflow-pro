@@ -24,6 +24,7 @@ import {
 import { useVerifyWorkflowStep } from "../hook/workflow.hook";
 import { notifications } from "@mantine/notifications";
 import { Dropzone, DropzoneProps, IMAGE_MIME_TYPE, PDF_MIME_TYPE } from "@mantine/dropzone";
+import { colors } from "@/lib/colors";
 
 interface VerificationStepProps {
     stepId: string;
@@ -90,10 +91,10 @@ export const VerificationStep = ({ stepId, onSuccess }: VerificationStepProps) =
     const isImage = (file: File) => file.type.startsWith("image/");
 
     return (
-        <Paper p="lg" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+        <Paper p="lg" radius="sm" withBorder style={{ borderColor: colors.border }}>
             <Stack gap="md">
                 <Box>
-                    <Text size="lg" fw={600} c="#212529" mb={4}>
+                    <Text size="lg" fw={600} c={colors.textPrimary} mb={4}>
                         Ishni tasdiqlash
                     </Text>
                     <Text size="sm" c="dimmed">
@@ -243,7 +244,7 @@ export const VerificationStep = ({ stepId, onSuccess }: VerificationStepProps) =
                     fullWidth
                     size="md"
                     leftSection={<IconCheck size={18} />}
-                    style={{ backgroundColor: "#1e3a5f" }}
+                    style={{ backgroundColor: colors.primary }}
                 >
                     Tasdiqlash va yuborish
                 </Button>

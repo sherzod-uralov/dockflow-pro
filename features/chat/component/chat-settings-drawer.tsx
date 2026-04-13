@@ -3,6 +3,7 @@
 import { Drawer, Stack, Switch, Text, Divider, Loader, Center, Box } from "@mantine/core";
 import { useChatSettings, useUpdateChatSettings } from "../hook/chat.hook";
 import { ChatSettings } from "../type/chat.type";
+import { colors } from "@/lib/colors";
 
 interface Props {
   opened: boolean;
@@ -50,13 +51,13 @@ export const ChatSettingsDrawer = ({ opened, onClose }: Props) => {
     <Drawer opened={opened} onClose={onClose} title="Suhbat sozlamalari" position="right" size="md" padding="md">
       {isLoading || !settings ? (
         <Center py="xl">
-          <Loader size="sm" color="#1e3a5f" />
+          <Loader size="sm" color={colors.primary} />
         </Center>
       ) : (
         <Stack gap="md">
           {SETTING_GROUPS.map((group, gi) => (
             <Box key={group.title}>
-              <Text size="xs" fw={600} c="#868e96" tt="uppercase" mb="xs">
+              <Text size="xs" fw={600} c={colors.textDimmed} tt="uppercase" mb="xs">
                 {group.title}
               </Text>
               <Stack gap="sm">
@@ -67,7 +68,7 @@ export const ChatSettingsDrawer = ({ opened, onClose }: Props) => {
                     description={item.description}
                     checked={!!(settings as any)[item.key]}
                     onChange={(e) => handleToggle(item.key, e.currentTarget.checked)}
-                    color="#1e3a5f"
+                    color={colors.primary}
                   />
                 ))}
               </Stack>

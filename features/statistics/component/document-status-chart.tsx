@@ -2,6 +2,7 @@
 
 import { Paper, Text, Box, Group, Stack, Progress } from "@mantine/core";
 import type { DocumentStatusChartData } from "../type/statistics.type";
+import { colors } from "@/lib/colors";
 
 interface DocumentStatusChartProps {
   data: DocumentStatusChartData[];
@@ -9,21 +10,21 @@ interface DocumentStatusChartProps {
 
 // Status ranglari - tushunarli va jiddiy
 const STATUS_COLORS: Record<string, string> = {
-  "Tayyorlanmoqda": "#495057",
-  "Jarayonda": "#e67700",
-  "Tekshiruvda": "#1971c2",
-  "Tasdiqlangan": "#2b8a3e",
-  "Bekor qilingan": "#c92a2a",
-  "Arxiv": "#868e96",
-  "Chop etilgan": "#2b8a3e",
+  "Tayyorlanmoqda": colors.textSecondary,
+  "Jarayonda": colors.warningDark,
+  "Tekshiruvda": colors.infoDark,
+  "Tasdiqlangan": colors.successDark,
+  "Bekor qilingan": colors.errorDark,
+  "Arxiv": colors.textDimmed,
+  "Chop etilgan": colors.successDark,
 };
 
 export function DocumentStatusChart({ data }: DocumentStatusChartProps) {
   const total = data.reduce((sum, item) => sum + item.count, 0);
 
   return (
-    <Paper p="lg" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
-      <Text size="md" fw={600} c="#212529" mb={4}>
+    <Paper p="lg" radius="sm" withBorder style={{ borderColor: colors.border }}>
+      <Text size="md" fw={600} c={colors.textPrimary} mb={4}>
         Hujjatlar holati
       </Text>
       <Text size="sm" c="dimmed" mb="lg">
@@ -33,15 +34,15 @@ export function DocumentStatusChart({ data }: DocumentStatusChartProps) {
       <Stack gap="md">
         {data.map((item) => {
           const percentage = total > 0 ? Math.round((item.count / total) * 100) : 0;
-          const color = STATUS_COLORS[item.status] || "#868e96";
+          const color = STATUS_COLORS[item.status] || colors.textDimmed;
           return (
             <Box key={item.status}>
               <Group justify="space-between" mb={6}>
-                <Text size="sm" c="#495057">
+                <Text size="sm" c={colors.textSecondary}>
                   {item.status}
                 </Text>
                 <Group gap={6}>
-                  <Text size="sm" fw={600} c="#212529">
+                  <Text size="sm" fw={600} c={colors.textPrimary}>
                     {item.count}
                   </Text>
                   <Text size="sm" c="dimmed">
@@ -65,7 +66,7 @@ export function DocumentStatusChart({ data }: DocumentStatusChartProps) {
           mt="lg"
           p="md"
           style={{
-            backgroundColor: "#f8f9fa",
+            backgroundColor: colors.bg,
             borderRadius: 4,
           }}
         >
@@ -73,7 +74,7 @@ export function DocumentStatusChart({ data }: DocumentStatusChartProps) {
             <Text size="sm" c="dimmed">
               Jami hujjatlar
             </Text>
-            <Text size="md" fw={700} c="#212529">
+            <Text size="md" fw={700} c={colors.textPrimary}>
               {total.toLocaleString()}
             </Text>
           </Group>

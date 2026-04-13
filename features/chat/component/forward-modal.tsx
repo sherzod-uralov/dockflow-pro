@@ -18,6 +18,7 @@ import { IconSearch, IconUsers, IconArrowForwardUp } from "@tabler/icons-react";
 import { useGetChatList } from "../hook/chat.hook";
 import { chatService } from "../service/chat.service";
 import { showError, showSuccess } from "@/utils/show-error";
+import { colors } from "@/lib/colors";
 
 interface Props {
   messageId: string;
@@ -81,7 +82,7 @@ export const ForwardModal = ({ messageId, onClose }: Props) => {
                   style={{
                     cursor: "pointer",
                     borderRadius: 6,
-                    backgroundColor: checked ? "#e7f5ff" : "transparent",
+                    backgroundColor: checked ? colors.primaryLight : "transparent",
                   }}
                   onClick={() =>
                     setSelectedIds((prev) =>
@@ -94,9 +95,9 @@ export const ForwardModal = ({ messageId, onClose }: Props) => {
                     size="sm"
                     radius="xl"
                     src={chat.avatarUrl || chat.peer?.avatarUrl}
-                    style={{ backgroundColor: isGroup ? "#fff3e0" : "#e7f5ff" }}
+                    style={{ backgroundColor: isGroup ? colors.warningBg : colors.primaryLight }}
                   >
-                    {isGroup ? <IconUsers size={14} color="#f39c12" /> : getInitials(chat.title)}
+                    {isGroup ? <IconUsers size={14} color=colors.warning /> : getInitials(chat.title)}
                   </Avatar>
                   <Text size="sm" fw={500} lineClamp={1}>
                     {chat.title}
@@ -117,7 +118,7 @@ export const ForwardModal = ({ messageId, onClose }: Props) => {
           disabled={selectedIds.length === 0}
           loading={isForwarding}
           leftSection={<IconArrowForwardUp size={14} />}
-          style={{ backgroundColor: "#1e3a5f" }}
+          style={{ backgroundColor: colors.primary }}
         >
           Yuborish
         </Button>

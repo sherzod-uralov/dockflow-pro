@@ -115,7 +115,7 @@ const PermissionSelector = ({
       {/* Search */}
       <TextInput
         placeholder="Qidirish..."
-        leftSection={<IconSearch size={16} color="#868e96" />}
+        leftSection={<IconSearch size={16} color={colors.textDimmed} />}
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
         size="xs"
@@ -123,7 +123,7 @@ const PermissionSelector = ({
         styles={{
           input: {
             backgroundColor: "white",
-            border: "1px solid #e9ecef",
+            border: `1px solid ${colors.border}`,
           },
         }}
       />
@@ -141,7 +141,7 @@ const PermissionSelector = ({
         {selectedPermissions.length > 0 && (
           <UnstyledButton onClick={handleClearAll}>
             <Group gap={4}>
-              <IconX size={12} color="#868e96" />
+              <IconX size={12} color={colors.textDimmed} />
               <Text size="xs" c="dimmed">
                 Tozalash
               </Text>
@@ -180,7 +180,7 @@ const PermissionSelector = ({
                 <Box
                   key={moduleData.module}
                   style={{
-                    border: "1px solid #e9ecef",
+                    border: `1px solid ${colors.border}`,
                     borderRadius: 6,
                     backgroundColor: "white",
                   }}
@@ -190,7 +190,7 @@ const PermissionSelector = ({
                     justify="space-between"
                     p="xs"
                     style={{
-                      backgroundColor: isExpanded ? "#f8f9fa" : "transparent",
+                      backgroundColor: isExpanded ? colors.bg : "transparent",
                       borderRadius: isExpanded ? "6px 6px 0 0" : 6,
                     }}
                   >
@@ -200,9 +200,9 @@ const PermissionSelector = ({
                         style={{ display: "flex", alignItems: "center" }}
                       >
                         {isExpanded ? (
-                          <IconChevronDown size={14} color="#495057" />
+                          <IconChevronDown size={14} color={colors.textSecondary} />
                         ) : (
-                          <IconChevronRight size={14} color="#495057" />
+                          <IconChevronRight size={14} color={colors.textSecondary} />
                         )}
                       </UnstyledButton>
                       <Checkbox
@@ -212,7 +212,7 @@ const PermissionSelector = ({
                         size="xs"
                         color="dark"
                       />
-                      <Text size="sm" fw={500} c="#212529" tt="capitalize">
+                      <Text size="sm" fw={500} c={colors.textPrimary} tt="capitalize">
                         {moduleData.module}
                       </Text>
                     </Group>
@@ -234,10 +234,10 @@ const PermissionSelector = ({
                             style={{
                               borderRadius: 4,
                               backgroundColor: selectedPermissions.includes(permission.id!)
-                                ? "#f1f3f5"
+                                ? colors.bgSubtle
                                 : "transparent",
                               "&:hover": {
-                                backgroundColor: "#f8f9fa",
+                                backgroundColor: colors.bg,
                               },
                             }}
                           >
@@ -250,7 +250,7 @@ const PermissionSelector = ({
                                 styles={{ input: { cursor: "pointer" } }}
                               />
                               <Box style={{ flex: 1, minWidth: 0 }}>
-                                <Text size="xs" fw={500} c="#212529">
+                                <Text size="xs" fw={500} c={colors.textPrimary}>
                                   {permission.name}
                                 </Text>
                                 <Text
@@ -275,5 +275,6 @@ const PermissionSelector = ({
     </Stack>
   );
 };
+import { colors } from "@/lib/colors";
 
 export default PermissionSelector;

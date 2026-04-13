@@ -29,6 +29,7 @@ import { useDebounce } from "@/hooks/use-debaunce";
 import { handleCopyToClipboard } from "@/utils/copy-text";
 import { DataTable, DataTableColumn } from "@/components/shared/ui/custom-table";
 import { format } from "date-fns";
+import { colors } from "@/lib/colors";
 
 const AuditLogPage = () => {
   const router = useRouter();
@@ -127,7 +128,7 @@ const AuditLogPage = () => {
       header: "Foydalanuvchi",
       cell: ({ row }) => (
         <Box>
-          <Text size="sm" fw={500} c="#212529">
+          <Text size="sm" fw={500} c={colors.textPrimary}>
             {row.original.performedBy?.fullname || "—"}
           </Text>
           <Text size="xs" c="dimmed">
@@ -142,7 +143,7 @@ const AuditLogPage = () => {
       header: "Vaqt",
       cell: ({ row }) => (
         <Box>
-          <Text size="sm" c="#212529">
+          <Text size="sm" c={colors.textPrimary}>
             {format(new Date(row.original.performedAt), "dd.MM.yyyy")}
           </Text>
           <Text size="xs" c="dimmed">
@@ -156,7 +157,7 @@ const AuditLogPage = () => {
       accessorKey: "ipAddress",
       header: "IP Address",
       cell: ({ row }) => (
-        <Text size="sm" c="#495057" ff="monospace">
+        <Text size="sm" c={colors.textSecondary} ff="monospace">
           {row.original.ipAddress || "—"}
         </Text>
       ),
@@ -199,13 +200,13 @@ const AuditLogPage = () => {
         <Box
           p={16}
           style={{
-            backgroundColor: "#f1f3f5",
+            backgroundColor: colors.bgSubtle,
             borderRadius: 12,
           }}
         >
-          <IconActivity size={40} color="#868e96" stroke={1.5} />
+          <IconActivity size={40} color={colors.textDimmed} stroke={1.5} />
         </Box>
-        <Text size="lg" fw={500} c="#495057">
+        <Text size="lg" fw={500} c={colors.textSecondary}>
           Audit log topilmadi
         </Text>
         <Text size="sm" c="dimmed" ta="center">
@@ -220,7 +221,7 @@ const AuditLogPage = () => {
       {/* Header */}
       <Group justify="space-between" mb="md">
         <Box>
-          <Text size="lg" fw={600} c="#212529">
+          <Text size="lg" fw={600} c={colors.textPrimary}>
             Audit jurnallari
           </Text>
           <Text size="sm" c="dimmed">
@@ -230,10 +231,10 @@ const AuditLogPage = () => {
       </Group>
 
       {/* Search */}
-      <Paper p="md" radius="sm" withBorder mb="md" style={{ borderColor: "#e9ecef" }}>
+      <Paper p="md" radius="sm" withBorder mb="md" style={{ borderColor: colors.border }}>
         <TextInput
           placeholder="Audit loglarni qidirish..."
-          leftSection={<IconSearch size={18} color="#868e96" />}
+          leftSection={<IconSearch size={18} color={colors.textDimmed} />}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           radius="sm"
@@ -243,7 +244,7 @@ const AuditLogPage = () => {
 
       {/* Table */}
       {!isLoading && data?.data?.length === 0 ? (
-        <Paper radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+        <Paper radius="sm" withBorder style={{ borderColor: colors.border }}>
           <EmptyState />
         </Paper>
       ) : (

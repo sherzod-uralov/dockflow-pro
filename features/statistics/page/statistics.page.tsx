@@ -104,7 +104,7 @@ export default function StatisticsPage() {
       inReview: { label: "Ko'rib chiqilmoqda", color: colors.primary },
       approved: { label: "Tasdiqlangan", color: colors.successDark },
       rejected: { label: "Rad etilgan", color: colors.errorDark },
-      archived: { label: "Arxivlangan", color: "#5c7a99" },
+      archived: { label: "Arxivlangan", color: colors.textDimmed },
     };
 
     return Object.entries(documentsQuery.data.documentsByStatus).map(

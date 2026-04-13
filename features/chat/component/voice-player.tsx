@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import { ActionIcon, Box, Group, Text } from "@mantine/core";
 import { IconPlayerPlayFilled, IconPlayerPauseFilled } from "@tabler/icons-react";
+import { colors } from "@/lib/colors";
 
 interface Props {
   src: string;
@@ -95,11 +96,11 @@ export const VoicePlayer = ({ src, duration = 0, isOwn }: Props) => {
   const progress = audioDuration > 0 ? currentTime / audioDuration : 0;
 
   // Ranglar
-  const playedColor = isOwn ? "#fff" : "#1e3a5f";
-  const unplayedColor = isOwn ? "rgba(255, 255, 255, 0.4)" : "#cdd5dd";
-  const buttonBg = isOwn ? "#fff" : "#1e3a5f";
-  const buttonIcon = isOwn ? "#1e3a5f" : "#fff";
-  const textColor = isOwn ? "rgba(255, 255, 255, 0.85)" : "#868e96";
+  const playedColor = isOwn ? colors.white : colors.primary;
+  const unplayedColor = isOwn ? "rgba(255, 255, 255, 0.4)" : colors.borderDark;
+  const buttonBg = isOwn ? colors.white : colors.primary;
+  const buttonIcon = isOwn ? colors.primary : colors.white;
+  const textColor = isOwn ? "rgba(255, 255, 255, 0.85)" : colors.textDimmed;
 
   return (
     <Box>

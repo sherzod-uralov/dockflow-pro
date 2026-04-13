@@ -21,22 +21,23 @@ import {
 import Link from "next/link";
 import { AiCard as AiCardType } from "../type/ai-chat.type";
 import { formatDate } from "@/lib/date-utils";
+import { colors } from "@/lib/colors";
 
 const TYPE_CONFIG: Record<
   AiCardType["type"],
   { icon: typeof IconClipboardList; color: string; label: string }
 > = {
-  task: { icon: IconClipboardList, color: "#3498db", label: "Vazifa" },
-  task_created: { icon: IconSparkles, color: "#2ecc71", label: "Yaratildi" },
-  action_result: { icon: IconCircleCheck, color: "#2ecc71", label: "Bajarildi" },
+  task: { icon: IconClipboardList, color: colors.info, label: "Vazifa" },
+  task_created: { icon: IconSparkles, color: colors.success, label: "Yaratildi" },
+  action_result: { icon: IconCircleCheck, color: colors.success, label: "Bajarildi" },
   workflow: { icon: IconRefresh, color: "#9b59b6", label: "Jarayon" },
-  document: { icon: IconFile, color: "#1e3a5f", label: "Hujjat" },
-  pdf: { icon: IconFileText, color: "#e74c3c", label: "PDF" },
-  kpi: { icon: IconChartBar, color: "#2ecc71", label: "KPI" },
-  notification: { icon: IconBell, color: "#f39c12", label: "Bildirishnoma" },
+  document: { icon: IconFile, color: colors.primary, label: "Hujjat" },
+  pdf: { icon: IconFileText, color: colors.error, label: "PDF" },
+  kpi: { icon: IconChartBar, color: colors.success, label: "KPI" },
+  notification: { icon: IconBell, color: colors.warning, label: "Bildirishnoma" },
   project: { icon: IconRocket, color: "#16a085", label: "Loyiha" },
   stats: { icon: IconTrendingUp, color: "#34495e", label: "Statistika" },
-  user: { icon: IconUser, color: "#3498db", label: "Foydalanuvchi" },
+  user: { icon: IconUser, color: colors.info, label: "Foydalanuvchi" },
 };
 
 const formatBytes = (bytes?: number) => {
@@ -67,9 +68,9 @@ const safeText = (value: unknown): string => {
 
 const PRIORITY_COLORS: Record<string, string> = {
   LOW: "#95a5a6",
-  MEDIUM: "#3498db",
-  HIGH: "#f39c12",
-  URGENT: "#e74c3c",
+  MEDIUM: colors.info,
+  HIGH: colors.warning,
+  URGENT: colors.error,
   CRITICAL: "#c0392b",
 };
 
@@ -118,7 +119,7 @@ const renderMeta = (card: AiCardType) => {
           )}
           {dueDate && (
             <Group gap={4}>
-              <IconCalendar size={12} color="#868e96" />
+              <IconCalendar size={12} color={colors.textDimmed} />
               <Text size="xs" c="dimmed">{formatDate(dueDate)}</Text>
             </Group>
           )}
@@ -147,7 +148,7 @@ const renderMeta = (card: AiCardType) => {
             )}
             {deadline && (
               <Group gap={4}>
-                <IconCalendar size={12} color="#868e96" />
+                <IconCalendar size={12} color={colors.textDimmed} />
                 <Text size="xs" c="dimmed">{formatDate(deadline)}</Text>
               </Group>
             )}
@@ -255,7 +256,7 @@ const renderMeta = (card: AiCardType) => {
       return (
         <Stack gap={2}>
           {fullname && (
-            <Text size="xs" c="#495057" fw={500}>
+            <Text size="xs" c={colors.textSecondary} fw={500}>
               {fullname}
             </Text>
           )}
@@ -283,7 +284,7 @@ const renderMeta = (card: AiCardType) => {
         <Stack gap={6}>
           <Group justify="space-between">
             <Text size="xs" c="dimmed">Yakuniy ball</Text>
-            <Text size="sm" fw={700} c="#1e3a5f">{finalScore ?? 0}</Text>
+            <Text size="sm" fw={700} c={colors.primary}>{finalScore ?? 0}</Text>
           </Group>
           <Progress value={percent} size={4} radius="xl" color="green" />
           <Group gap="xs">
@@ -312,7 +313,7 @@ const renderMeta = (card: AiCardType) => {
       const createdAt = meta.createdAt as string | undefined;
       return (
         <Stack gap={4}>
-          {message && <Text size="xs" c="#495057" lineClamp={2}>{message}</Text>}
+          {message && <Text size="xs" c={colors.textSecondary} lineClamp={2}>{message}</Text>}
           {createdAt && <Text size="xs" c="dimmed">{formatDate(createdAt)}</Text>}
         </Stack>
       );
@@ -361,12 +362,12 @@ const renderMeta = (card: AiCardType) => {
       };
 
       const STAT_COLORS: Record<string, string> = {
-        kpiScore: "#2ecc71",
-        avgKpiScore: "#2ecc71",
-        completionRate: "#2ecc71",
-        tasksOverdue: "#e74c3c",
-        documentsPending: "#f39c12",
-        unreadNotifications: "#f39c12",
+        kpiScore: colors.success,
+        avgKpiScore: colors.success,
+        completionRate: colors.success,
+        tasksOverdue: colors.error,
+        documentsPending: colors.warning,
+        unreadNotifications: colors.warning,
       };
 
       const entries = Object.entries(meta)
@@ -388,15 +389,15 @@ const renderMeta = (card: AiCardType) => {
               key={key}
               p={6}
               style={{
-                backgroundColor: "#f8f9fa",
+                backgroundColor: colors.bg,
                 borderRadius: 6,
-                border: "1px solid #e9ecef",
+                border: `1px solid ${colors.border}`,
               }}
             >
               <Text size="xs" c="dimmed" lineClamp={1}>
                 {STAT_LABELS[key]}
               </Text>
-              <Text size="md" fw={700} c={STAT_COLORS[key] || "#212529"}>
+              <Text size="md" fw={700} c={STAT_COLORS[key] || colors.textPrimary}>
                 {key === "completionRate" || key === "avgKpiScore" || key === "kpiScore"
                   ? `${value as number}${key === "completionRate" ? "%" : ""}`
                   : (value as number)}
@@ -455,8 +456,8 @@ const AiCardInner = ({ card }: AiCardProps) => {
       radius="sm"
       withBorder
       style={{
-        borderColor: "#e9ecef",
-        backgroundColor: "#fff",
+        borderColor: colors.border,
+        backgroundColor: colors.white,
       }}
     >
       <Group gap="sm" align="flex-start" wrap="nowrap">
@@ -470,7 +471,7 @@ const AiCardInner = ({ card }: AiCardProps) => {
         </ThemeIcon>
         <Box style={{ flex: 1, minWidth: 0 }}>
           <Group justify="space-between" gap="xs" mb={2} wrap="nowrap">
-            <Text size="sm" fw={600} c="#212529" lineClamp={1}>
+            <Text size="sm" fw={600} c=colors.textPrimary lineClamp={1}>
               {safeText(card.title)}
             </Text>
             <Badge
@@ -503,7 +504,7 @@ const AiCardInner = ({ card }: AiCardProps) => {
                       target="_blank"
                       rel="noopener noreferrer"
                       rightSection={<IconExternalLink size={10} />}
-                      style={{ backgroundColor: "#f8f9fa", color: "#1e3a5f" }}
+                      style={{ backgroundColor: colors.bg, color: colors.primary }}
                     >
                       {action.label}
                     </Button>
@@ -514,7 +515,7 @@ const AiCardInner = ({ card }: AiCardProps) => {
                       variant="light"
                       component={Link}
                       href={action.url}
-                      style={{ backgroundColor: "#f8f9fa", color: "#1e3a5f" }}
+                      style={{ backgroundColor: colors.bg, color: colors.primary }}
                     >
                       {action.label}
                     </Button>

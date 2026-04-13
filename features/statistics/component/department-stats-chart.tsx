@@ -12,6 +12,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import type { DepartmentStatistics } from "../type/statistics.type";
+import { colors } from "@/lib/colors";
 
 interface DepartmentStatsChartProps {
   data: DepartmentStatistics[];
@@ -19,8 +20,8 @@ interface DepartmentStatsChartProps {
 
 export function DepartmentStatsChart({ data }: DepartmentStatsChartProps) {
   return (
-    <Paper p="lg" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
-      <Text size="md" fw={600} c="#212529" mb={4}>
+    <Paper p="lg" radius="sm" withBorder style={{ borderColor: colors.border }}>
+      <Text size="md" fw={600} c={colors.textPrimary} mb={4}>
         Bo'limlar statistikasi
       </Text>
       <Text size="sm" c="dimmed" mb="lg">
@@ -30,40 +31,40 @@ export function DepartmentStatsChart({ data }: DepartmentStatsChartProps) {
       <Box h={280}>
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data} barGap={4}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e9ecef" />
+            <CartesianGrid strokeDasharray="3 3" stroke={colors.border} />
             <XAxis
               dataKey="departmentName"
-              tick={{ fontSize: 11, fill: "#868e96" }}
-              axisLine={{ stroke: "#dee2e6" }}
+              tick={{ fontSize: 11, fill: colors.textDimmed }}
+              axisLine={{ stroke: colors.borderLight }}
               tickLine={false}
             />
             <YAxis
-              tick={{ fontSize: 12, fill: "#868e96" }}
-              axisLine={{ stroke: "#dee2e6" }}
+              tick={{ fontSize: 12, fill: colors.textDimmed }}
+              axisLine={{ stroke: colors.borderLight }}
               tickLine={false}
             />
             <Tooltip
               contentStyle={{
-                backgroundColor: "#fff",
-                border: "1px solid #dee2e6",
+                backgroundColor: colors.white,
+                border: `1px solid ${colors.borderLight}`,
                 borderRadius: 4,
                 fontSize: 13,
               }}
-              labelStyle={{ fontWeight: 600, color: "#212529" }}
+              labelStyle={{ fontWeight: 600, color: colors.textPrimary }}
             />
             <Legend
               wrapperStyle={{ fontSize: 13 }}
             />
             <Bar
               dataKey="documentCount"
-              fill="#1e3a5f"
+              fill={colors.primary}
               name="Hujjatlar"
               radius={[3, 3, 0, 0]}
               maxBarSize={32}
             />
             <Bar
               dataKey="userCount"
-              fill="#5c7a99"
+              fill={colors.textDimmed}
               name="Foydalanuvchilar"
               radius={[3, 3, 0, 0]}
               maxBarSize={32}

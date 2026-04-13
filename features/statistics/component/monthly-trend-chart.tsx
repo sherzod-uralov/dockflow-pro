@@ -11,6 +11,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import type { MonthlyTrend } from "../type/statistics.type";
+import { colors } from "@/lib/colors";
 
 interface MonthlyTrendChartProps {
   data: MonthlyTrend[];
@@ -18,8 +19,8 @@ interface MonthlyTrendChartProps {
 
 export function MonthlyTrendChart({ data }: MonthlyTrendChartProps) {
   return (
-    <Paper p="lg" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
-      <Text size="md" fw={600} c="#212529" mb={4}>
+    <Paper p="lg" radius="sm" withBorder style={{ borderColor: colors.border }}>
+      <Text size="md" fw={600} c={colors.textPrimary} mb={4}>
         Oylik statistika
       </Text>
       <Text size="sm" c="dimmed" mb="lg">
@@ -31,35 +32,35 @@ export function MonthlyTrendChart({ data }: MonthlyTrendChartProps) {
           <AreaChart data={data}>
             <defs>
               <linearGradient id="colorDocs" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#1e3a5f" stopOpacity={0.2} />
-                <stop offset="95%" stopColor="#1e3a5f" stopOpacity={0} />
+                <stop offset="5%" stopColor={colors.primary} stopOpacity={0.2} />
+                <stop offset="95%" stopColor={colors.primary} stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e9ecef" />
+            <CartesianGrid strokeDasharray="3 3" stroke={colors.border} />
             <XAxis
               dataKey="month"
-              tick={{ fontSize: 12, fill: "#868e96" }}
-              axisLine={{ stroke: "#dee2e6" }}
+              tick={{ fontSize: 12, fill: colors.textDimmed }}
+              axisLine={{ stroke: colors.borderLight }}
               tickLine={false}
             />
             <YAxis
-              tick={{ fontSize: 12, fill: "#868e96" }}
-              axisLine={{ stroke: "#dee2e6" }}
+              tick={{ fontSize: 12, fill: colors.textDimmed }}
+              axisLine={{ stroke: colors.borderLight }}
               tickLine={false}
             />
             <Tooltip
               contentStyle={{
-                backgroundColor: "#fff",
-                border: "1px solid #dee2e6",
+                backgroundColor: colors.white,
+                border: `1px solid ${colors.borderLight}`,
                 borderRadius: 4,
                 fontSize: 13,
               }}
-              labelStyle={{ fontWeight: 600, color: "#212529" }}
+              labelStyle={{ fontWeight: 600, color: colors.textPrimary }}
             />
             <Area
               type="monotone"
               dataKey="documents"
-              stroke="#1e3a5f"
+              stroke={colors.primary}
               strokeWidth={2}
               fillOpacity={1}
               fill="url(#colorDocs)"

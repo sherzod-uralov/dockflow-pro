@@ -18,6 +18,7 @@ import {
 } from "@tabler/icons-react";
 import { useGetWorkflowById } from "@/features/workflow/hook/workflow.hook";
 import WorkflowDetailView from "@/features/workflow/component/workflow-detail.view";
+import { colors } from "@/lib/colors";
 
 const WorkflowDetailPage = () => {
   const params = useParams();
@@ -42,11 +43,11 @@ const WorkflowDetailPage = () => {
         {/* Content skeleton */}
         <SimpleGrid cols={{ base: 1, lg: 3 }} spacing="md">
           <Box style={{ gridColumn: "span 2" }}>
-            <Paper p="lg" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+            <Paper p="lg" radius="sm" withBorder style={{ borderColor: colors.border }}>
               <Skeleton height={200} />
             </Paper>
           </Box>
-          <Paper p="lg" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+          <Paper p="lg" radius="sm" withBorder style={{ borderColor: colors.border }}>
             <Skeleton height={200} />
           </Paper>
         </SimpleGrid>
@@ -63,7 +64,7 @@ const WorkflowDetailPage = () => {
           leftSection={<IconArrowLeft size={16} />}
           onClick={() => router.push("/dashboard/workflow")}
           mb="lg"
-          c="#495057"
+          c={colors.textSecondary}
         >
           Orqaga
         </Button>
@@ -89,12 +90,12 @@ const WorkflowDetailPage = () => {
             size="lg"
             radius="sm"
             onClick={() => router.push("/dashboard/workflow")}
-            style={{ backgroundColor: "#f1f3f5" }}
+            style={{ backgroundColor: colors.bgSubtle }}
           >
-            <IconArrowLeft size={18} color="#495057" />
+            <IconArrowLeft size={18} color={colors.textSecondary} />
           </ActionIcon>
           <Box>
-            <Text size="xl" fw={700} c="#212529">
+            <Text size="xl" fw={700} c={colors.textPrimary}>
               {workflow.document?.title || "Hujjat aylanmasi"}
             </Text>
             <Text size="sm" c="dimmed">

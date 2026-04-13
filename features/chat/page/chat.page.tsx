@@ -25,6 +25,7 @@ import {
   IconArrowLeft,
 } from "@tabler/icons-react";
 import { CustomModal, useModal } from "@/components/shared/ui/custom-modal";
+import { colors } from "@/lib/colors";
 import { useDebounce } from "@/hooks/use-debaunce";
 import { useGetProfileQuery } from "@/features/login/hook/login.hook";
 import { useGetChatList } from "../hook/chat.hook";
@@ -74,16 +75,16 @@ const ChatPage = () => {
       style={{
         width: isMobile ? "100%" : 320,
         minWidth: isMobile ? "100%" : 320,
-        borderRight: isMobile ? "none" : "1px solid #e9ecef",
+        borderRight: isMobile ? "none" : `1px solid ${colors.border}`,
         display: "flex",
         flexDirection: "column",
         height: "100%",
       }}
     >
       {/* Header */}
-      <Box p="sm" style={{ borderBottom: "1px solid #e9ecef" }}>
+      <Box p="sm" style={{ borderBottom: `1px solid ${colors.border}` }}>
         <Group justify="space-between" mb="sm">
-          <Text size="lg" fw={600} c="#212529">
+          <Text size="lg" fw={600} c={colors.textPrimary}>
             Suhbatlar
           </Text>
           <Group gap={4}>
@@ -102,7 +103,7 @@ const ChatPage = () => {
                 size="md"
                 radius="sm"
                 onClick={newChatModal.openModal}
-                style={{ backgroundColor: "#1e3a5f", color: "#fff" }}
+                style={{ backgroundColor: colors.primary, color: colors.white }}
               >
                 <IconPlus size={18} />
               </ActionIcon>
@@ -117,7 +118,7 @@ const ChatPage = () => {
           size="sm"
           radius="sm"
           styles={{
-            input: { backgroundColor: "#f8f9fa", border: "1px solid #e9ecef" },
+            input: { backgroundColor: colors.bg, border: `1px solid ${colors.border}` },
           }}
         />
       </Box>
@@ -142,16 +143,16 @@ const ChatPage = () => {
       <ScrollArea style={{ flex: 1 }}>
         {isLoading ? (
           <Center py="xl">
-            <Loader size="sm" color="#1e3a5f" />
+            <Loader size="sm" color={colors.primary} />
           </Center>
         ) : filteredChats.length === 0 ? (
           <Center py="xl">
             <Stack align="center" gap="sm">
-              <Box p={16} style={{ backgroundColor: "#f1f3f5", borderRadius: 12 }}>
+              <Box p={16} style={{ backgroundColor: colors.bgSubtle, borderRadius: 12 }}>
                 {tab === "archived" ? (
-                  <IconArchiveOff size={32} color="#868e96" stroke={1.5} />
+                  <IconArchiveOff size={32} color={colors.textDimmed} stroke={1.5} />
                 ) : (
-                  <IconMessageCircle size={32} color="#868e96" stroke={1.5} />
+                  <IconMessageCircle size={32} color={colors.textDimmed} stroke={1.5} />
                 )}
               </Box>
               <Text size="sm" c="dimmed" ta="center">
@@ -192,10 +193,10 @@ const ChatPage = () => {
       ) : (
         <Center style={{ height: "100%" }}>
           <Stack align="center" gap="md">
-            <Box p={20} style={{ backgroundColor: "#f1f3f5", borderRadius: 16 }}>
-              <IconMessageCircle size={48} color="#868e96" stroke={1.5} />
+            <Box p={20} style={{ backgroundColor: colors.bgSubtle, borderRadius: 16 }}>
+              <IconMessageCircle size={48} color={colors.textDimmed} stroke={1.5} />
             </Box>
-            <Text size="lg" fw={500} c="#495057">
+            <Text size="lg" fw={500} c={colors.textSecondary}>
               Suhbatni tanlang
             </Text>
             <Text size="sm" c="dimmed" ta="center">
@@ -214,8 +215,8 @@ const ChatPage = () => {
       style={{
         display: "flex",
         height: isMobile ? "calc(100vh - 80px)" : "calc(100vh - 120px)",
-        backgroundColor: "#fff",
-        border: isMobile ? "none" : "1px solid #e9ecef",
+        backgroundColor: colors.white,
+        border: isMobile ? "none" : `1px solid ${colors.border}`,
         borderRadius: isMobile ? 0 : 8,
         overflow: "hidden",
       }}
@@ -255,7 +256,7 @@ const ChatPage = () => {
 
       <style jsx global>{`
         .chat-list-item:hover {
-          background-color: #f8f9fa !important;
+          background-color: ${colors.bg} !important;
         }
         .chat-list-item:active {
           transform: scale(0.99);

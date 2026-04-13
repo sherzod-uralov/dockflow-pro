@@ -630,7 +630,7 @@ const WorkflowPage = () => {
                 }
                 styles={{
                   label: { fontSize: 12, fontWeight: 500, marginBottom: 4 },
-                  input: { backgroundColor: "#fff" },
+                  input: { backgroundColor: colors.white },
                 }}
               />
               <Select
@@ -644,7 +644,7 @@ const WorkflowPage = () => {
                 data={TYPE_OPTIONS}
                 styles={{
                   label: { fontSize: 12, fontWeight: 500, marginBottom: 4 },
-                  input: { backgroundColor: "#fff" },
+                  input: { backgroundColor: colors.white },
                 }}
               />
               <Select
@@ -664,7 +664,7 @@ const WorkflowPage = () => {
                 }
                 styles={{
                   label: { fontSize: 12, fontWeight: 500, marginBottom: 4 },
-                  input: { backgroundColor: "#fff" },
+                  input: { backgroundColor: colors.white },
                 }}
               />
               <Select
@@ -684,7 +684,7 @@ const WorkflowPage = () => {
                 }
                 styles={{
                   label: { fontSize: 12, fontWeight: 500, marginBottom: 4 },
-                  input: { backgroundColor: "#fff" },
+                  input: { backgroundColor: colors.white },
                 }}
               />
               <Select
@@ -704,7 +704,7 @@ const WorkflowPage = () => {
                 }
                 styles={{
                   label: { fontSize: 12, fontWeight: 500, marginBottom: 4 },
-                  input: { backgroundColor: "#fff" },
+                  input: { backgroundColor: colors.white },
                 }}
               />
               <Select
@@ -721,7 +721,7 @@ const WorkflowPage = () => {
                 }))}
                 styles={{
                   label: { fontSize: 12, fontWeight: 500, marginBottom: 4 },
-                  input: { backgroundColor: "#fff" },
+                  input: { backgroundColor: colors.white },
                 }}
               />
               <DatePickerInput
@@ -735,7 +735,7 @@ const WorkflowPage = () => {
                 maxDate={dateTo ? new Date(dateTo) : undefined}
                 styles={{
                   label: { fontSize: 12, fontWeight: 500, marginBottom: 4 },
-                  input: { backgroundColor: "#fff" },
+                  input: { backgroundColor: colors.white },
                 }}
               />
               <DatePickerInput
@@ -749,7 +749,7 @@ const WorkflowPage = () => {
                 minDate={dateFrom ? new Date(dateFrom) : undefined}
                 styles={{
                   label: { fontSize: 12, fontWeight: 500, marginBottom: 4 },
-                  input: { backgroundColor: "#fff" },
+                  input: { backgroundColor: colors.white },
                 }}
               />
               <Select
@@ -772,7 +772,7 @@ const WorkflowPage = () => {
                 ]}
                 styles={{
                   label: { fontSize: 12, fontWeight: 500, marginBottom: 4 },
-                  input: { backgroundColor: "#fff" },
+                  input: { backgroundColor: colors.white },
                 }}
               />
             </SimpleGrid>
@@ -799,7 +799,7 @@ const WorkflowPage = () => {
                   ]}
                   styles={{
                     label: { fontSize: 12, fontWeight: 500, marginBottom: 4 },
-                    input: { backgroundColor: "#fff" },
+                    input: { backgroundColor: colors.white },
                   }}
                   w={150}
                 />

@@ -19,6 +19,7 @@ import {
 import { ChatMessage, ChatReaction } from "../type/chat.type";
 import Link from "next/link";
 import { VoicePlayer } from "./voice-player";
+import { colors } from "@/lib/colors";
 
 interface Props {
   message: ChatMessage;
@@ -78,13 +79,13 @@ const RefSnapshotCard = ({ msg, isOwn }: { msg: ChatMessage; isOwn: boolean }) =
   const ref = msg.refSnapshot;
   if (!ref) return null;
 
-  const cardBg = isOwn ? "rgba(255,255,255,0.15)" : "#fff";
-  const textColor = isOwn ? "#fff" : "#212529";
-  const subColor = isOwn ? "rgba(255,255,255,0.7)" : "#868e96";
+  const cardBg = isOwn ? "rgba(255,255,255,0.15)" : colors.white;
+  const textColor = isOwn ? colors.white : colors.textPrimary;
+  const subColor = isOwn ? "rgba(255,255,255,0.7)" : colors.textDimmed;
 
   if (msg.refType === "workflow") {
     return (
-      <Paper p="xs" mb={6} radius="sm" style={{ backgroundColor: cardBg, border: `1px solid ${isOwn ? "rgba(255,255,255,0.2)" : "#e9ecef"}` }}>
+      <Paper p="xs" mb={6} radius="sm" style={{ backgroundColor: cardBg, border: `1px solid ${isOwn ? "rgba(255,255,255,0.2)" : colors.border}` }}>
         <Group gap={6} mb={2}>
           <Badge size="xs" variant="light" color="violet">Jarayon</Badge>
           {ref.status && <Badge size="xs" variant="light" color="blue">{ref.status}</Badge>}
@@ -97,7 +98,7 @@ const RefSnapshotCard = ({ msg, isOwn }: { msg: ChatMessage; isOwn: boolean }) =
         )}
         {ref.url && (
           <Link href={ref.url} style={{ textDecoration: "none" }}>
-            <Text size="xs" c={isOwn ? "#74c0fc" : "#1e3a5f"} fw={500} mt={4}>
+            <Text size="xs" c={isOwn ? "#74c0fc" : colors.primary} fw={500} mt={4}>
               Ochish →
             </Text>
           </Link>
@@ -108,7 +109,7 @@ const RefSnapshotCard = ({ msg, isOwn }: { msg: ChatMessage; isOwn: boolean }) =
 
   if (msg.refType === "document") {
     return (
-      <Paper p="xs" mb={6} radius="sm" style={{ backgroundColor: cardBg, border: `1px solid ${isOwn ? "rgba(255,255,255,0.2)" : "#e9ecef"}` }}>
+      <Paper p="xs" mb={6} radius="sm" style={{ backgroundColor: cardBg, border: `1px solid ${isOwn ? "rgba(255,255,255,0.2)" : colors.border}` }}>
         <Group gap={6} mb={2}>
           <Badge size="xs" variant="light" color="indigo">Hujjat</Badge>
           {ref.status && <Badge size="xs" variant="light" color="blue">{ref.status}</Badge>}
@@ -121,7 +122,7 @@ const RefSnapshotCard = ({ msg, isOwn }: { msg: ChatMessage; isOwn: boolean }) =
         )}
         {ref.url && (
           <Link href={ref.url} style={{ textDecoration: "none" }}>
-            <Text size="xs" c={isOwn ? "#74c0fc" : "#1e3a5f"} fw={500} mt={4}>
+            <Text size="xs" c={isOwn ? "#74c0fc" : colors.primary} fw={500} mt={4}>
               Ochish →
             </Text>
           </Link>
@@ -132,7 +133,7 @@ const RefSnapshotCard = ({ msg, isOwn }: { msg: ChatMessage; isOwn: boolean }) =
 
   if (msg.refType === "task") {
     return (
-      <Paper p="xs" mb={6} radius="sm" style={{ backgroundColor: cardBg, border: `1px solid ${isOwn ? "rgba(255,255,255,0.2)" : "#e9ecef"}` }}>
+      <Paper p="xs" mb={6} radius="sm" style={{ backgroundColor: cardBg, border: `1px solid ${isOwn ? "rgba(255,255,255,0.2)" : colors.border}` }}>
         <Group gap={6} mb={2}>
           <Badge size="xs" variant="light" color="blue">Vazifa</Badge>
           {ref.ref && <Text size="xs" c={subColor} fw={600}>{ref.ref}</Text>}
@@ -146,7 +147,7 @@ const RefSnapshotCard = ({ msg, isOwn }: { msg: ChatMessage; isOwn: boolean }) =
         </Group>
         {ref.url && (
           <Link href={ref.url} style={{ textDecoration: "none" }}>
-            <Text size="xs" c={isOwn ? "#74c0fc" : "#1e3a5f"} fw={500} mt={4}>
+            <Text size="xs" c={isOwn ? "#74c0fc" : colors.primary} fw={500} mt={4}>
               Ochish →
             </Text>
           </Link>
@@ -159,8 +160,8 @@ const RefSnapshotCard = ({ msg, isOwn }: { msg: ChatMessage; isOwn: boolean }) =
 };
 
 const MediaContent = ({ msg, isOwn }: { msg: ChatMessage; isOwn: boolean }) => {
-  const subColor = isOwn ? "rgba(255,255,255,0.7)" : "#868e96";
-  const textColor = isOwn ? "#fff" : "#212529";
+  const subColor = isOwn ? "rgba(255,255,255,0.7)" : colors.textDimmed;
+  const textColor = isOwn ? colors.white : colors.textPrimary;
 
   switch (msg.type) {
     case "IMAGE":
@@ -200,8 +201,8 @@ const MediaContent = ({ msg, isOwn }: { msg: ChatMessage; isOwn: boolean }) => {
           mb={msg.content ? 6 : 0}
           p={8}
           style={{
-            backgroundColor: isOwn ? "rgba(255,255,255,0.15)" : "#fff",
-            border: `1px solid ${isOwn ? "rgba(255,255,255,0.2)" : "#e9ecef"}`,
+            backgroundColor: isOwn ? "rgba(255,255,255,0.15)" : colors.white,
+            border: `1px solid ${isOwn ? "rgba(255,255,255,0.2)" : colors.border}`,
             borderRadius: 6,
             cursor: "pointer",
           }}
@@ -211,11 +212,11 @@ const MediaContent = ({ msg, isOwn }: { msg: ChatMessage; isOwn: boolean }) => {
             <Box
               p={6}
               style={{
-                backgroundColor: isOwn ? "rgba(255,255,255,0.2)" : "#e7f5ff",
+                backgroundColor: isOwn ? "rgba(255,255,255,0.2)" : colors.primaryLight,
                 borderRadius: 6,
               }}
             >
-              <IconFile size={20} color={isOwn ? "#fff" : "#1e3a5f"} />
+              <IconFile size={20} color={isOwn ? colors.white : colors.primary} />
             </Box>
             <Box style={{ flex: 1, minWidth: 0 }}>
               <Text size="sm" fw={500} c={textColor} lineClamp={1}>
@@ -254,9 +255,9 @@ export const MessageBubble = ({
   const groupedReactions = groupReactions(message.reactions);
   const hasMedia = ["IMAGE", "VIDEO", "VOICE", "FILE"].includes(message.type);
 
-  const bubbleBg = isOwn ? "#1e3a5f" : "#fff";
-  const textColor = isOwn ? "#fff" : "#212529";
-  const subTextColor = isOwn ? "rgba(255,255,255,0.7)" : "#868e96";
+  const bubbleBg = isOwn ? colors.primary : colors.white;
+  const textColor = isOwn ? colors.white : colors.textPrimary;
+  const subTextColor = isOwn ? "rgba(255,255,255,0.7)" : colors.textDimmed;
 
   const handleReactionClick = (emoji: string, hasMine: boolean) => {
     if (hasMine) {
@@ -291,7 +292,7 @@ export const MessageBubble = ({
 
       <Box style={{ maxWidth: "70%", minWidth: 0 }}>
         {showSenderName && !isOwn && (
-          <Text size="xs" fw={600} c="#1e3a5f" mb={2} ml={6}>
+          <Text size="xs" fw={600} c=colors.primary mb={2} ml={6}>
             {message.sender.fullname}
           </Text>
         )}
@@ -301,17 +302,17 @@ export const MessageBubble = ({
           radius="md"
           style={{
             backgroundColor: bubbleBg,
-            border: !isOwn ? "1px solid #e9ecef" : "none",
+            border: !isOwn ? `1px solid ${colors.border}` : "none",
             opacity: isPending ? 0.7 : 1,
           }}
         >
           {/* Forward attribution */}
           {message.forwardedFrom && (
-            <Box mb={6} pl={6} style={{ borderLeft: `2px solid ${isOwn ? "#fff" : "#1e3a5f"}` }}>
+            <Box mb={6} pl={6} style={{ borderLeft: `2px solid ${isOwn ? colors.white : colors.primary}` }}>
               <Text size="xs" c={subTextColor} fw={500}>
                 Yo'naltirildi
               </Text>
-              <Text size="xs" c={isOwn ? "#fff" : "#1e3a5f"} fw={600}>
+              <Text size="xs" c={isOwn ? colors.white : colors.primary} fw={600}>
                 {message.forwardedFrom.user.fullname}
                 {message.forwardedFrom.chat && (
                   <Text span size="xs" c={subTextColor} fw={400}>
@@ -328,12 +329,12 @@ export const MessageBubble = ({
               mb={6}
               p={6}
               style={{
-                borderLeft: `2px solid ${isOwn ? "#fff" : "#1e3a5f"}`,
-                backgroundColor: isOwn ? "rgba(255,255,255,0.1)" : "#f1f3f5",
+                borderLeft: `2px solid ${isOwn ? colors.white : colors.primary}`,
+                backgroundColor: isOwn ? "rgba(255,255,255,0.1)" : colors.bgSubtle,
                 borderRadius: 4,
               }}
             >
-              <Text size="xs" fw={600} c={isOwn ? "#fff" : "#1e3a5f"}>
+              <Text size="xs" fw={600} c={isOwn ? colors.white : colors.primary}>
                 {message.replyTo.sender.fullname}
               </Text>
               <Text size="xs" c={subTextColor} lineClamp={2}>
@@ -398,8 +399,8 @@ export const MessageBubble = ({
                     cursor: "pointer",
                     padding: "2px 6px",
                     borderRadius: 12,
-                    backgroundColor: hasMine ? "#e7f5ff" : "#f1f3f5",
-                    border: hasMine ? "1px solid #1e3a5f" : "1px solid transparent",
+                    backgroundColor: hasMine ? colors.primaryLight : colors.bgSubtle,
+                    border: hasMine ? `1px solid ${colors.primary}` : "1px solid transparent",
                     fontSize: 12,
                     display: "flex",
                     alignItems: "center",
@@ -407,7 +408,7 @@ export const MessageBubble = ({
                   }}
                 >
                   <span>{r.emoji}</span>
-                  <span style={{ color: hasMine ? "#1e3a5f" : "#495057", fontWeight: 500 }}>
+                  <span style={{ color: hasMine ? colors.primary : colors.textSecondary, fontWeight: 500 }}>
                     {r.count}
                   </span>
                 </Box>

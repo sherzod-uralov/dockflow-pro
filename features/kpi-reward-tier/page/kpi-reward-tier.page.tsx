@@ -39,6 +39,7 @@ import { handleCopyToClipboard } from "@/utils/copy-text";
 import { DataTable, DataTableColumn } from "@/components/shared/ui/custom-table";
 import KpiRewardTierForm from "../component/kpi-reward-tier.form";
 import KpiRewardTierView from "../component/kpi-reward-tier.view";
+import { colors } from "@/lib/colors";
 
 const KpiRewardTierPage = () => {
   const createModal = useModal();
@@ -96,11 +97,11 @@ const KpiRewardTierPage = () => {
         <Group gap="sm" wrap="nowrap">
           <Box w={12} h={12} style={{
             borderRadius: "50%",
-            backgroundColor: row.original.color || "#868e96",
+            backgroundColor: row.original.color || colors.textDimmed,
             flexShrink: 0,
           }} />
           <Box>
-            <Text size="sm" fw={500} c="#212529">{row.original.name}</Text>
+            <Text size="sm" fw={500} c={colors.textPrimary}>{row.original.name}</Text>
             {row.original.description && (
               <Text size="xs" c="dimmed" lineClamp={1}>{row.original.description}</Text>
             )}
@@ -113,7 +114,7 @@ const KpiRewardTierPage = () => {
       accessorKey: "scoreRange",
       header: "Ball",
       cell: ({ row }) => (
-        <Text size="sm" c="#495057" fw={500}>
+        <Text size="sm" c={colors.textSecondary} fw={500}>
           {row.original.minScore}–{row.original.maxScore}
         </Text>
       ),
@@ -123,7 +124,7 @@ const KpiRewardTierPage = () => {
       accessorKey: "rewardAmount",
       header: "So'm",
       cell: ({ row }) => (
-        <Text size="sm" fw={500} c="#212529">
+        <Text size="sm" fw={500} c={colors.textPrimary}>
           {row.original.rewardAmount != null
             ? row.original.rewardAmount.toLocaleString("uz-UZ")
             : "—"}
@@ -135,7 +136,7 @@ const KpiRewardTierPage = () => {
       accessorKey: "rewardBhm",
       header: "BHM",
       cell: ({ row }) => (
-        <Text size="sm" c="#495057">{row.original.rewardBhm ?? "—"}</Text>
+        <Text size="sm" c={colors.textSecondary}>{row.original.rewardBhm ?? "—"}</Text>
       ),
       meta: { width: 60 },
     },
@@ -155,7 +156,7 @@ const KpiRewardTierPage = () => {
       cell: ({ row }) => (
         <Box w={8} h={8} style={{
           borderRadius: "50%",
-          backgroundColor: row.original.isActive ? "#2ecc71" : "#adb5bd",
+          backgroundColor: row.original.isActive ? colors.success : colors.textMuted,
         }} />
       ),
       meta: { width: 50, truncate: false },
@@ -193,11 +194,11 @@ const KpiRewardTierPage = () => {
       <Stack align="center" gap="md">
         <Box
           p={16}
-          style={{ backgroundColor: "#f1f3f5", borderRadius: 12 }}
+          style={{ backgroundColor: colors.bgSubtle, borderRadius: 12 }}
         >
-          <IconTrophy size={40} color="#868e96" stroke={1.5} />
+          <IconTrophy size={40} color={colors.textDimmed} stroke={1.5} />
         </Box>
-        <Text size="lg" fw={500} c="#495057">
+        <Text size="lg" fw={500} c={colors.textSecondary}>
           Mukofot darajasi topilmadi
         </Text>
         <Text size="sm" c="dimmed" ta="center">
@@ -212,7 +213,7 @@ const KpiRewardTierPage = () => {
       {/* Header */}
       <Group justify="space-between" mb="md">
         <Box>
-          <Text size="lg" fw={600} c="#212529">
+          <Text size="lg" fw={600} c={colors.textPrimary}>
             Mukofot darajalari
           </Text>
           <Text size="sm" c="dimmed">
@@ -226,8 +227,8 @@ const KpiRewardTierPage = () => {
           radius="sm"
           styles={{
             root: {
-              backgroundColor: "#1e3a5f",
-              "&:hover": { backgroundColor: "#162d4a" },
+              backgroundColor: colors.primary,
+              "&:hover": { backgroundColor: colors.primaryHover },
             },
           }}
         >
@@ -237,7 +238,7 @@ const KpiRewardTierPage = () => {
 
       {/* Table */}
       {!isLoading && data?.data?.length === 0 ? (
-        <Paper radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+        <Paper radius="sm" withBorder style={{ borderColor: colors.border }}>
           <EmptyState />
         </Paper>
       ) : (

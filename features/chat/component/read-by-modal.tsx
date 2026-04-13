@@ -4,6 +4,7 @@ import { Stack, Group, Avatar, Text, Center, Loader, ScrollArea, Box } from "@ma
 import { IconEye } from "@tabler/icons-react";
 import { useGetMessageReads } from "../hook/chat.hook";
 import { formatDateTime } from "@/lib/date-utils";
+import { colors } from "@/lib/colors";
 
 interface Props {
   messageId: string;
@@ -28,7 +29,7 @@ export const ReadByModal = ({ messageId }: Props) => {
   if (isLoading) {
     return (
       <Center py="xl">
-        <Loader size="sm" color="#1e3a5f" />
+        <Loader size="sm" color={colors.primary} />
       </Center>
     );
   }
@@ -39,8 +40,8 @@ export const ReadByModal = ({ messageId }: Props) => {
     return (
       <Center py="xl">
         <Stack align="center" gap="xs">
-          <Box p={12} style={{ backgroundColor: "#f1f3f5", borderRadius: 12 }}>
-            <IconEye size={28} color="#868e96" stroke={1.5} />
+          <Box p={12} style={{ backgroundColor: colors.bgSubtle, borderRadius: 12 }}>
+            <IconEye size={28} color=colors.textDimmed stroke={1.5} />
           </Box>
           <Text size="sm" c="dimmed">
             Hali hech kim o'qimagan

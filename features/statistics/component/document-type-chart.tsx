@@ -9,13 +9,14 @@ import {
   Tooltip,
 } from "recharts";
 import type { DocumentsByType } from "../type/statistics.type";
+import { colors } from "@/lib/colors";
 
 interface DocumentTypeChartProps {
   data: DocumentsByType[];
 }
 
 // Jiddiy kulrang-ko'k tonlar
-const COLORS = ["#1e3a5f", "#3d5a80", "#5c7a99", "#7b9ab3", "#9abacb", "#b9d9e3"];
+const COLORS = [colors.primary, colors.primaryHover, colors.textDimmed, colors.borderDark, colors.textMuted, colors.borderLight];
 
 export function DocumentTypeChart({ data }: DocumentTypeChartProps) {
   const chartData = data.map((item) => ({
@@ -26,8 +27,8 @@ export function DocumentTypeChart({ data }: DocumentTypeChartProps) {
   const total = chartData.reduce((sum, item) => sum + item.value, 0);
 
   return (
-    <Paper p="lg" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
-      <Text size="md" fw={600} c="#212529" mb={4}>
+    <Paper p="lg" radius="sm" withBorder style={{ borderColor: colors.border }}>
+      <Text size="md" fw={600} c={colors.textPrimary} mb={4}>
         Hujjat turlari
       </Text>
       <Text size="sm" c="dimmed" mb="lg">
@@ -55,8 +56,8 @@ export function DocumentTypeChart({ data }: DocumentTypeChartProps) {
             </Pie>
             <Tooltip
               contentStyle={{
-                backgroundColor: "#fff",
-                border: "1px solid #dee2e6",
+                backgroundColor: colors.white,
+                border: `1px solid ${colors.borderLight}`,
                 borderRadius: 4,
                 fontSize: 13,
               }}
@@ -72,7 +73,7 @@ export function DocumentTypeChart({ data }: DocumentTypeChartProps) {
             justify="space-between"
             py={6}
             px="sm"
-            style={{ backgroundColor: "#f8f9fa", borderRadius: 4 }}
+            style={{ backgroundColor: colors.bg, borderRadius: 4 }}
           >
             <Group gap="sm">
               <Box
@@ -83,12 +84,12 @@ export function DocumentTypeChart({ data }: DocumentTypeChartProps) {
                   borderRadius: 2,
                 }}
               />
-              <Text size="sm" c="#495057">
+              <Text size="sm" c={colors.textSecondary}>
                 {item.name}
               </Text>
             </Group>
             <Group gap={6}>
-              <Text size="sm" fw={600} c="#212529">
+              <Text size="sm" fw={600} c={colors.textPrimary}>
                 {item.value}
               </Text>
               <Text size="sm" c="dimmed">

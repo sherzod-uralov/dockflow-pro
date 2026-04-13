@@ -51,6 +51,7 @@ import {
 import { ChatMemberRole, ChatVisibility } from "../type/chat.type";
 import { useGetUserQuery } from "@/features/admin/admin-users/hook/user.hook";
 import { Switch, SegmentedControl, CopyButton } from "@mantine/core";
+import { colors } from "@/lib/colors";
 
 interface Props {
   opened: boolean;
@@ -184,7 +185,7 @@ export const ChatInfoDrawer = ({ opened, onClose, chatId, currentUserId, onChatD
     >
       {isLoading || !chat ? (
         <Center py="xl">
-          <Loader size="sm" color="#1e3a5f" />
+          <Loader size="sm" color={colors.primary} />
         </Center>
       ) : view === "addMembers" ? (
         <Stack gap="sm">
@@ -208,7 +209,7 @@ export const ChatInfoDrawer = ({ opened, onClose, chatId, currentUserId, onChatD
                     style={{
                       cursor: "pointer",
                       borderRadius: 6,
-                      backgroundColor: checked ? "#e7f5ff" : "transparent",
+                      backgroundColor: checked ? colors.primaryLight : "transparent",
                     }}
                     onClick={() =>
                       setSelectedIds((prev) =>
@@ -238,7 +239,7 @@ export const ChatInfoDrawer = ({ opened, onClose, chatId, currentUserId, onChatD
               onClick={handleAddMembers}
               disabled={selectedIds.length === 0}
               loading={addMembers.isLoading}
-              style={{ backgroundColor: "#1e3a5f" }}
+              style={{ backgroundColor: colors.primary }}
             >
               Qo'shish
             </Button>
@@ -252,11 +253,11 @@ export const ChatInfoDrawer = ({ opened, onClose, chatId, currentUserId, onChatD
               size={80}
               radius="50%"
               src={chat.avatarUrl || chat.peer?.avatarUrl}
-              style={{ backgroundColor: isGroup ? "#fff3e0" : "#e7f5ff" }}
+              style={{ backgroundColor: isGroup ? colors.warningBg : colors.primaryLight }}
             >
-              {isGroup ? <IconUsers size={32} color="#f39c12" /> : getInitials(chat.title)}
+              {isGroup ? <IconUsers size={32} color=colors.warning /> : getInitials(chat.title)}
             </Avatar>
-            <Text size="lg" fw={600} c="#212529" ta="center">
+            <Text size="lg" fw={600} c={colors.textPrimary} ta="center">
               {chat.title}
             </Text>
             {chat.description && (
@@ -274,7 +275,7 @@ export const ChatInfoDrawer = ({ opened, onClose, chatId, currentUserId, onChatD
               {/* Members */}
               <Box>
                 <Group justify="space-between" mb="xs">
-                  <Text size="xs" fw={600} c="#868e96" tt="uppercase">
+                  <Text size="xs" fw={600} c={colors.textDimmed} tt="uppercase">
                     A'zolar ({chat.members?.length || 0})
                   </Text>
                   {canManage && (
@@ -378,7 +379,7 @@ export const ChatInfoDrawer = ({ opened, onClose, chatId, currentUserId, onChatD
             <>
               <Divider />
               <Box>
-                <Text size="xs" fw={600} c="#868e96" tt="uppercase" mb="xs">
+                <Text size="xs" fw={600} c={colors.textDimmed} tt="uppercase" mb="xs">
                   Guruh turi
                 </Text>
                 <SegmentedControl
@@ -448,7 +449,7 @@ export const ChatInfoDrawer = ({ opened, onClose, chatId, currentUserId, onChatD
 
               {/* Permissions */}
               <Box>
-                <Text size="xs" fw={600} c="#868e96" tt="uppercase" mb="xs">
+                <Text size="xs" fw={600} c={colors.textDimmed} tt="uppercase" mb="xs">
                   A'zolar ruxsatlari
                 </Text>
                 <Stack gap="xs">
@@ -456,19 +457,19 @@ export const ChatInfoDrawer = ({ opened, onClose, chatId, currentUserId, onChatD
                     label="A'zo qo'shishi mumkin"
                     checked={!!chat.allowMemberInvite}
                     onChange={(e) => handlePermissionToggle("allowMemberInvite", e.currentTarget.checked)}
-                    color="#1e3a5f"
+                    color={colors.primary}
                   />
                   <Switch
                     label="Media yuborish"
                     checked={!!chat.allowMemberSendMedia}
                     onChange={(e) => handlePermissionToggle("allowMemberSendMedia", e.currentTarget.checked)}
-                    color="#1e3a5f"
+                    color={colors.primary}
                   />
                   <Switch
                     label="Pin qilish"
                     checked={!!chat.allowMemberPin}
                     onChange={(e) => handlePermissionToggle("allowMemberPin", e.currentTarget.checked)}
-                    color="#1e3a5f"
+                    color={colors.primary}
                   />
                 </Stack>
               </Box>

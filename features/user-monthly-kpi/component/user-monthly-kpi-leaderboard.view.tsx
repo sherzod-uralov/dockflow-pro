@@ -18,6 +18,7 @@ import {
 } from "@tabler/icons-react";
 import { useGetUserMonthlyKpiLeaderboard } from "../hook/user-monthly-kpi.hook";
 import { UserMonthlyKpiLeaderboardEntry } from "../type/user-monthly-kpi.type";
+import { colors } from "@/lib/colors";
 
 interface UserMonthlyKpiLeaderboardViewProps {
   year: number;
@@ -25,9 +26,9 @@ interface UserMonthlyKpiLeaderboardViewProps {
 }
 
 const RANK_STYLES: Record<number, { bg: string; border: string; medal: string; label: string }> = {
-  1: { bg: "linear-gradient(135deg, #fff9e6 0%, #fff3cc 100%)", border: "#FFD700", medal: "#FFD700", label: "1-o'rin" },
-  2: { bg: "linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)", border: "#C0C0C0", medal: "#C0C0C0", label: "2-o'rin" },
-  3: { bg: "linear-gradient(135deg, #fff5f0 0%, #ffe8d6 100%)", border: "#CD7F32", medal: "#CD7F32", label: "3-o'rin" },
+  1: { bg: `linear-gradient(135deg, ${colors.warningLight} 0%, ${colors.warningLight} 100%)`, border: colors.warning, medal: colors.warning, label: "1-o'rin" },
+  2: { bg: `linear-gradient(135deg, ${colors.bg} 0%, ${colors.border} 100%)`, border: colors.textMuted, medal: colors.textMuted, label: "2-o'rin" },
+  3: { bg: `linear-gradient(135deg, ${colors.errorLight} 0%, ${colors.warningBg} 100%)`, border: colors.warningDark, medal: colors.warningDark, label: "3-o'rin" },
 };
 
 const getInitials = (name?: string) =>
@@ -48,10 +49,10 @@ const UserMonthlyKpiLeaderboardView = ({ year, month }: UserMonthlyKpiLeaderboar
     return (
       <Center py={40}>
         <Stack align="center" gap="md">
-          <Box p={16} style={{ backgroundColor: "#f1f3f5", borderRadius: 12 }}>
-            <IconTrophy size={40} color="#868e96" stroke={1.5} />
+          <Box p={16} style={{ backgroundColor: colors.bgSubtle, borderRadius: 12 }}>
+            <IconTrophy size={40} color={colors.textDimmed} stroke={1.5} />
           </Box>
-          <Text size="lg" fw={500} c="#495057">Reyting topilmadi</Text>
+          <Text size="lg" fw={500} c={colors.textSecondary}>Reyting topilmadi</Text>
           <Text size="sm" c="dimmed">Tanlangan davr uchun ma'lumot yo'q</Text>
         </Stack>
       </Center>
@@ -75,8 +76,8 @@ const UserMonthlyKpiLeaderboardView = ({ year, month }: UserMonthlyKpiLeaderboar
                 p="lg"
                 radius="md"
                 style={{
-                  background: style?.bg || "#f8f9fa",
-                  border: `2px solid ${style?.border || "#e9ecef"}`,
+                  background: style?.bg || colors.bg,
+                  border: `2px solid ${style?.border || colors.border}`,
                   minWidth: 220,
                   maxWidth: 260,
                   textAlign: "center",
@@ -89,20 +90,20 @@ const UserMonthlyKpiLeaderboardView = ({ year, month }: UserMonthlyKpiLeaderboar
                       size={56}
                       radius="xl"
                       src={entry.user.avatarUrl}
-                      style={{ border: `3px solid ${style?.border || "#e9ecef"}` }}
+                      style={{ border: `3px solid ${style?.border || colors.border}` }}
                     >
                       <Text size="sm" fw={600}>{getInitials(entry.user.fullname)}</Text>
                     </Avatar>
                   </Box>
-                  <Text size="sm" fw={700} c={style?.medal || "#495057"}>
+                  <Text size="sm" fw={700} c={style?.medal || colors.textSecondary}>
                     {entry.rank}
                   </Text>
                   <Box style={{ width: "100%" }}>
-                    <Text size="sm" fw={600} c="#212529" lineClamp={1}>{entry.user.fullname}</Text>
+                    <Text size="sm" fw={600} c={colors.textPrimary} lineClamp={1}>{entry.user.fullname}</Text>
                   </Box>
                   <Text
                     fw={700}
-                    c="#1e3a5f"
+                    c={colors.primary}
                     style={{ fontSize: 28, lineHeight: 1.1, whiteSpace: "nowrap" }}
                   >
                     {entry.finalScore}
@@ -117,7 +118,7 @@ const UserMonthlyKpiLeaderboardView = ({ year, month }: UserMonthlyKpiLeaderboar
 
       {/* Rest — progress bar list */}
       {rest.length > 0 && (
-        <Paper radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+        <Paper radius="sm" withBorder style={{ borderColor: colors.border }}>
           <Stack gap={0}>
             {rest.map((entry) => {
               const percent = Math.round((entry.finalScore / maxScore) * 100);
@@ -126,7 +127,7 @@ const UserMonthlyKpiLeaderboardView = ({ year, month }: UserMonthlyKpiLeaderboar
                   key={entry.userId}
                   px="md"
                   py="sm"
-                  style={{ borderBottom: "1px solid #f1f3f5" }}
+                  style={{ borderBottom: `1px solid ${colors.bgSubtle}` }}
                 >
                   <Group justify="space-between" mb={6}>
                     <Group gap="sm" wrap="nowrap">
@@ -136,11 +137,11 @@ const UserMonthlyKpiLeaderboardView = ({ year, month }: UserMonthlyKpiLeaderboar
                       <Avatar size="sm" radius="xl" src={entry.user.avatarUrl}>
                         <Text size="xs" fw={500}>{getInitials(entry.user.fullname)}</Text>
                       </Avatar>
-                      <Text size="sm" fw={500} c="#212529">{entry.user.fullname}</Text>
+                      <Text size="sm" fw={500} c={colors.textPrimary}>{entry.user.fullname}</Text>
                     </Group>
-                    <Text size="sm" fw={600} c="#1e3a5f">{entry.finalScore}</Text>
+                    <Text size="sm" fw={600} c={colors.primary}>{entry.finalScore}</Text>
                   </Group>
-                  <Progress value={percent} size={4} radius="xl" color="#1e3a5f" ml={42} />
+                  <Progress value={percent} size={4} radius="xl" color={colors.primary} ml={42} />
                 </Box>
               );
             })}

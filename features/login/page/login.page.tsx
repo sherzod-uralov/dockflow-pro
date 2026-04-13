@@ -10,13 +10,14 @@ import {
 } from "@mantine/core";
 import { IconFileText } from "@tabler/icons-react";
 import { LoginForm } from "@/features/login/component/login-form";
+import { colors } from "@/lib/colors";
 
 export default function LoginPage() {
     return (
         <Box
             style={{
                 minHeight: "100vh",
-                backgroundColor: "#f8f9fa",
+                backgroundColor: colors.bg,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -30,7 +31,7 @@ export default function LoginPage() {
                 style={{
                     width: "100%",
                     maxWidth: 420,
-                    border: "1px solid #e9ecef",
+                    border: `1px solid ${colors.border}`,
                 }}
             >
                 <Stack gap="xl">
@@ -46,16 +47,16 @@ export default function LoginPage() {
                             <Box
                                 p={10}
                                 style={{
-                                    backgroundColor: "#1e3a5f",
+                                    backgroundColor: colors.primary,
                                     borderRadius: 8,
                                     display: "flex",
                                     alignItems: "center",
                                     justifyContent: "center",
                                 }}
                             >
-                                <IconFileText size={24} color="#fff" />
+                                <IconFileText size={24} color={colors.white} />
                             </Box>
-                            <Text size="xl" fw={600} c="#212529">
+                            <Text size="xl" fw={600} c={colors.textPrimary}>
                                 Docflow Pro
                             </Text>
                         </Box>
@@ -63,7 +64,7 @@ export default function LoginPage() {
 
                     {/* Header */}
                     <Box ta="center">
-                        <Title order={2} c="#212529" mb={8}>
+                        <Title order={2} c={colors.textPrimary} mb={8}>
                             Xush kelibsiz
                         </Title>
                         <Text size="sm" c="dimmed">

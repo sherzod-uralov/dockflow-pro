@@ -134,7 +134,7 @@ const TaskCard = ({ task, onEdit, onDelete, onClick, onAddSubtask, draggable = f
                 cursor: draggable ? "grab" : onClick ? "pointer" : "default",
                 transition: "all 0.15s ease",
                 borderColor: isHovered ? colors.borderLight : colors.border,
-                backgroundColor: isHovered ? "#fafafa" : "#fff",
+                backgroundColor: isHovered ? colors.bg : colors.white,
             }}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => {

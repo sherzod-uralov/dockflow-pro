@@ -38,6 +38,7 @@ import {
 import { TaskCommentGetResponse } from "../type/task-comment.type";
 import { formatDistanceToNow } from "date-fns";
 import { uz } from "date-fns/locale";
+import { colors } from "@/lib/colors";
 
 interface TaskCommentDrawerProps {
   taskId: string;
@@ -77,7 +78,7 @@ const CommentItem = ({
         <Box style={{ flex: 1, minWidth: 0 }}>
           <Group justify="space-between" wrap="nowrap">
             <Group gap="xs">
-              <Text size="sm" fw={600} c="#212529">
+              <Text size="sm" fw={600} c={colors.textPrimary}>
                 {comment.user?.fullname || "Noma'lum"}
               </Text>
               <Text size="xs" c="dimmed">
@@ -120,7 +121,7 @@ const CommentItem = ({
           </Group>
           <Text
             size="sm"
-            c="#495057"
+            c={colors.textSecondary}
             style={{
               whiteSpace: "pre-wrap",
               wordBreak: "break-word",
@@ -250,7 +251,7 @@ export const TaskCommentDrawer = ({
       size="md"
       title={
         <Box>
-          <Text size="lg" fw={600} c="#212529">
+          <Text size="lg" fw={600} c={colors.textPrimary}>
             Izohlar
           </Text>
           {taskTitle && (
@@ -262,7 +263,7 @@ export const TaskCommentDrawer = ({
       }
       styles={{
         header: {
-          borderBottom: "1px solid #e9ecef",
+          borderBottom: `1px solid ${colors.border}`,
           paddingBottom: 12,
         },
         body: {
@@ -288,7 +289,7 @@ export const TaskCommentDrawer = ({
               height: 200,
             }}
           >
-            <Loader size="sm" color="#1e3a5f" />
+            <Loader size="sm" color={colors.primary} />
           </Box>
         ) : comments.length === 0 ? (
           <Box
@@ -333,8 +334,8 @@ export const TaskCommentDrawer = ({
       <Box
         p="md"
         style={{
-          borderTop: "1px solid #e9ecef",
-          backgroundColor: "#f8f9fa",
+          borderTop: `1px solid ${colors.border}`,
+          backgroundColor: colors.bg,
         }}
       >
         {(replyingTo || editingComment) && (
@@ -343,13 +344,13 @@ export const TaskCommentDrawer = ({
             mb="sm"
             radius="sm"
             style={{
-              backgroundColor: "#e7f5ff",
-              borderLeft: "3px solid #1e3a5f",
+              backgroundColor: colors.primaryLight,
+              borderLeft: `3px solid ${colors.primary}`,
             }}
           >
             <Group justify="space-between">
               <Box>
-                <Text size="xs" c="#1e3a5f" fw={500}>
+                <Text size="xs" c={colors.primary} fw={500}>
                   {editingComment ? "Tahrirlash" : `@${replyingTo?.user?.fullname} ga javob`}
                 </Text>
                 {!editingComment && replyingTo && (
@@ -383,10 +384,10 @@ export const TaskCommentDrawer = ({
             style={{ flex: 1 }}
             styles={{
               input: {
-                backgroundColor: "#fff",
-                border: "1px solid #e9ecef",
+                backgroundColor: colors.white,
+                border: `1px solid ${colors.border}`,
                 "&:focus": {
-                  borderColor: "#1e3a5f",
+                  borderColor: colors.primary,
                 },
               },
             }}
@@ -402,8 +403,8 @@ export const TaskCommentDrawer = ({
             }
             loading={createMutation.isLoading || updateMutation.isLoading}
             style={{
-              backgroundColor: "#1e3a5f",
-              color: "#fff",
+              backgroundColor: colors.primary,
+              color: colors.white,
             }}
           >
             <IconSend size={18} />

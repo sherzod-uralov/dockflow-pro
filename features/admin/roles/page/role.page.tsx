@@ -38,6 +38,7 @@ import { RoleData } from "../type/role.type";
 import { usePagination } from "@/hooks/use-pagination";
 import { useDebounce } from "@/hooks/use-debaunce";
 import { DataTable, DataTableColumn } from "@/components/shared/ui/custom-table";
+import { colors } from "@/lib/colors";
 
 const RolesPage = () => {
   const router = useRouter();
@@ -121,8 +122,8 @@ const RolesPage = () => {
       header: "Nomi",
       cell: ({ row }) => (
         <Group gap="sm" wrap="nowrap">
-          <IconShieldLock size={18} color="#1e3a5f" style={{ flexShrink: 0 }} />
-          <Text size="sm" fw={500} c="#212529">
+          <IconShieldLock size={18} color={colors.primary} style={{ flexShrink: 0 }} />
+          <Text size="sm" fw={500} c={colors.textPrimary}>
             {row.original.name}
           </Text>
         </Group>
@@ -133,7 +134,7 @@ const RolesPage = () => {
       accessorKey: "description",
       header: "Tavsif",
       cell: ({ row }) => (
-        <Text size="sm" c="#495057" lineClamp={1}>
+        <Text size="sm" c={colors.textSecondary} lineClamp={1}>
           {row.original.description || "—"}
         </Text>
       ),
@@ -155,8 +156,8 @@ const RolesPage = () => {
                     px={8}
                     py={2}
                     style={{
-                      backgroundColor: "#f1f3f5",
-                      color: "#495057",
+                      backgroundColor: colors.bgSubtle,
+                      color: colors.textSecondary,
                       borderRadius: 4,
                     }}
                   >
@@ -169,8 +170,8 @@ const RolesPage = () => {
                     px={8}
                     py={2}
                     style={{
-                      backgroundColor: "#e9ecef",
-                      color: "#868e96",
+                      backgroundColor: colors.border,
+                      color: colors.textDimmed,
                       borderRadius: 4,
                     }}
                   >
@@ -197,8 +198,8 @@ const RolesPage = () => {
           px={10}
           py={4}
           style={{
-            backgroundColor: "#e9ecef",
-            color: "#495057",
+            backgroundColor: colors.border,
+            color: colors.textSecondary,
             borderRadius: 12,
             display: "inline-block",
             fontWeight: 500,
@@ -257,13 +258,13 @@ const RolesPage = () => {
         <Box
           p={16}
           style={{
-            backgroundColor: "#f1f3f5",
+            backgroundColor: colors.bgSubtle,
             borderRadius: 12,
           }}
         >
-          <IconShieldLock size={40} color="#868e96" stroke={1.5} />
+          <IconShieldLock size={40} color={colors.textDimmed} stroke={1.5} />
         </Box>
-        <Text size="lg" fw={500} c="#495057">
+        <Text size="lg" fw={500} c={colors.textSecondary}>
           Rol topilmadi
         </Text>
         <Text size="sm" c="dimmed" ta="center">
@@ -278,7 +279,7 @@ const RolesPage = () => {
       {/* Header */}
       <Group justify="space-between" mb="md">
         <Box>
-          <Text size="lg" fw={600} c="#212529">
+          <Text size="lg" fw={600} c={colors.textPrimary}>
             Rollar
           </Text>
           <Text size="sm" c="dimmed">
@@ -292,8 +293,8 @@ const RolesPage = () => {
           radius="sm"
           styles={{
             root: {
-              backgroundColor: "#1e3a5f",
-              "&:hover": { backgroundColor: "#162d4a" },
+              backgroundColor: colors.primary,
+              "&:hover": { backgroundColor: colors.primaryHover },
             },
           }}
         >
@@ -307,11 +308,11 @@ const RolesPage = () => {
         radius="sm"
         withBorder
         mb="md"
-        style={{ borderColor: "#e9ecef" }}
+        style={{ borderColor: colors.border }}
       >
         <TextInput
           placeholder="Rollarni qidirish..."
-          leftSection={<IconSearch size={18} color="#868e96" />}
+          leftSection={<IconSearch size={18} color={colors.textDimmed} />}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           radius="sm"
@@ -322,7 +323,7 @@ const RolesPage = () => {
       {/* Table */}
       <Box>
         {!isLoading && data?.data?.length === 0 ? (
-          <Paper radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+          <Paper radius="sm" withBorder style={{ borderColor: colors.border }}>
             <EmptyState />
           </Paper>
         ) : (

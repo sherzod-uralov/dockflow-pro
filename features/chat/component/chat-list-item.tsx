@@ -24,6 +24,7 @@ import {
 } from "../hook/chat.hook";
 import { useChatCall } from "../hook/use-chat-call";
 import { useUserPresence } from "../hook/use-presence";
+import { colors } from "@/lib/colors";
 
 interface Props {
   chat: ChatListItemType;
@@ -96,8 +97,8 @@ export const ChatListItemView = ({ chat, isActive, onClick }: Props) => {
       className="chat-list-item"
       style={{
         cursor: "pointer",
-        backgroundColor: isActive ? "#e7f5ff" : "transparent",
-        borderLeft: isActive ? "3px solid #1e3a5f" : "3px solid transparent",
+        backgroundColor: isActive ? colors.primaryLight : "transparent",
+        borderLeft: isActive ? `3px solid ${colors.primary}` : "3px solid transparent",
         transition: "background-color 0.2s ease, border-color 0.2s ease",
         position: "relative",
       }}
@@ -108,16 +109,16 @@ export const ChatListItemView = ({ chat, isActive, onClick }: Props) => {
             disabled={!chat.unreadCount}
             label={chat.unreadCount}
             size={16}
-            color="#1e3a5f"
+            color=colors.primary
             offset={4}
           >
             <Avatar
               size="md"
               radius="xl"
               src={chat.avatarUrl || chat.peer?.avatarUrl}
-              style={{ backgroundColor: isGroup ? "#fff3e0" : "#e7f5ff" }}
+              style={{ backgroundColor: isGroup ? colors.warningBg : colors.primaryLight }}
             >
-              {isGroup ? <IconUsers size={20} color="#f39c12" /> : getInitials(chat.title)}
+              {isGroup ? <IconUsers size={20} color=colors.warning /> : getInitials(chat.title)}
             </Avatar>
           </Indicator>
           {!isGroup && isPeerOnline && (
@@ -129,7 +130,7 @@ export const ChatListItemView = ({ chat, isActive, onClick }: Props) => {
                 width: 12,
                 height: 12,
                 borderRadius: "50%",
-                backgroundColor: "#2ecc71",
+                backgroundColor: colors.success,
                 border: "2px solid #fff",
                 zIndex: 2,
               }}
@@ -139,9 +140,9 @@ export const ChatListItemView = ({ chat, isActive, onClick }: Props) => {
         <Box style={{ flex: 1, minWidth: 0 }}>
           <Group justify="space-between" gap={4} wrap="nowrap">
             <Group gap={4} style={{ minWidth: 0 }}>
-              {chat.isPinned && <IconPinFilled size={12} color="#1e3a5f" />}
-              {muted && <IconBellOff size={12} color="#868e96" />}
-              <Text size="sm" fw={600} c="#212529" lineClamp={1}>
+              {chat.isPinned && <IconPinFilled size={12} color=colors.primary />}
+              {muted && <IconBellOff size={12} color={colors.textDimmed} />}
+              <Text size="sm" fw={600} c={colors.textPrimary} lineClamp={1}>
                 {chat.title}
               </Text>
             </Group>
@@ -152,7 +153,7 @@ export const ChatListItemView = ({ chat, isActive, onClick }: Props) => {
           <Group justify="space-between" gap={4} mt={2} wrap="nowrap">
             <Text size="xs" c="dimmed" lineClamp={1} style={{ flex: 1 }}>
               {isGroup && lastMsg?.sender && (
-                <Text span fw={500} c="#495057">
+                <Text span fw={500} c={colors.textSecondary}>
                   {lastMsg.sender.fullname.split(" ")[0]}:{" "}
                 </Text>
               )}
@@ -174,7 +175,7 @@ export const ChatListItemView = ({ chat, isActive, onClick }: Props) => {
                 {!isGroup && chat.peer && !activeCall && (
                   <>
                     <Menu.Item
-                      leftSection={<IconPhone size={14} color="#2ecc71" />}
+                      leftSection={<IconPhone size={14} color=colors.success />}
                       onClick={() =>
                         startCall({
                           chatId: chat.id,

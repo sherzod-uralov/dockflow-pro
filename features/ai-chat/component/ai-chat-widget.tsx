@@ -33,6 +33,7 @@ import {
 } from "../hook/ai-chat.hook";
 import { AiHistoryMessage } from "../type/ai-chat.type";
 import AiMessage from "./ai-message";
+import { colors } from "@/lib/colors";
 
 const SUGGESTED_QUESTIONS = [
   { icon: IconClipboardList, text: "Bugungi vazifalarim" },
@@ -176,8 +177,8 @@ export const AiChatWidget = () => {
               bottom: 24,
               right: -20,
               zIndex: 9999,
-              backgroundColor: "#1e3a5f",
-              color: "#fff",
+              backgroundColor: colors.primary,
+              color: colors.white,
               boxShadow: "0 8px 24px rgba(30, 58, 95, 0.35)",
               transition: "right 0.25s ease, transform 0.25s ease",
             }}
@@ -206,7 +207,7 @@ export const AiChatWidget = () => {
         zIndex: 9999,
         display: "flex",
         flexDirection: "column",
-        backgroundColor: "#fff",
+        backgroundColor: colors.white,
       }
     : {
         position: "fixed",
@@ -217,10 +218,10 @@ export const AiChatWidget = () => {
         height: 600,
         display: "flex",
         flexDirection: "column",
-        backgroundColor: "#fff",
+        backgroundColor: colors.white,
         borderRadius: 16,
         boxShadow: "0 16px 48px rgba(0, 0, 0, 0.2)",
-        border: "1px solid #e9ecef",
+        border: `1px solid ${colors.border}`,
         overflow: "hidden",
       };
 
@@ -231,18 +232,18 @@ export const AiChatWidget = () => {
         justify="space-between"
         p="sm"
         style={{
-          borderBottom: "1px solid #e9ecef",
-          backgroundColor: "#1e3a5f",
-          color: "#fff",
+          borderBottom: `1px solid ${colors.border}`,
+          backgroundColor: colors.primary,
+          color: colors.white,
           flexShrink: 0,
         }}
       >
         <Group gap="sm">
-          <Avatar size="sm" radius="xl" style={{ backgroundColor: "#fff", color: "#1e3a5f" }}>
+          <Avatar size="sm" radius="xl" style={{ backgroundColor: colors.white, color: colors.primary }}>
             <IconRobot size={16} />
           </Avatar>
           <Box>
-            <Text size="sm" fw={600} c="#fff">
+            <Text size="sm" fw={600} c={colors.white}>
               DocFlow AI
             </Text>
             <Text size="xs" c="rgba(255,255,255,0.7)">
@@ -258,7 +259,7 @@ export const AiChatWidget = () => {
                 size="md"
                 onClick={handleClearHistory}
                 loading={clearMutation.isLoading}
-                style={{ color: "#fff" }}
+                style={{ color: colors.white }}
               >
                 <IconTrash size={16} />
               </ActionIcon>
@@ -268,7 +269,7 @@ export const AiChatWidget = () => {
             variant="subtle"
             size="md"
             onClick={() => setIsOpen(false)}
-            style={{ color: "#fff" }}
+            style={{ color: colors.white }}
           >
             <IconX size={18} />
           </ActionIcon>
@@ -284,7 +285,7 @@ export const AiChatWidget = () => {
         <Box p="sm">
           {isHistoryLoading && messages.length === 0 ? (
             <Box style={{ display: "flex", justifyContent: "center", padding: 32 }}>
-              <Loader size="sm" color="#1e3a5f" />
+              <Loader size="sm" color={colors.primary} />
             </Box>
           ) : isEmpty ? (
             <Stack gap="md">
@@ -310,9 +311,9 @@ export const AiChatWidget = () => {
                       disabled={isSending}
                       styles={{
                         root: {
-                          backgroundColor: "#f8f9fa",
-                          border: "1px solid #e9ecef",
-                          color: "#1e3a5f",
+                          backgroundColor: colors.bg,
+                          border: `1px solid ${colors.border}`,
+                          color: colors.primary,
                           justifyContent: "flex-start",
                           height: 36,
                         },
@@ -339,14 +340,14 @@ export const AiChatWidget = () => {
                   <Avatar
                     size="sm"
                     radius="xl"
-                    style={{ backgroundColor: "#e7f5ff", color: "#1e3a5f" }}
+                    style={{ backgroundColor: colors.primaryLight, color: colors.primary }}
                   >
                     <IconRobot size={16} />
                   </Avatar>
                   <Paper
                     p="xs"
                     radius="md"
-                    style={{ backgroundColor: "#f8f9fa", border: "1px solid #e9ecef" }}
+                    style={{ backgroundColor: colors.bg, border: `1px solid ${colors.border}` }}
                   >
                     <Group gap={4}>
                       <Text size="xs" c="dimmed">AI o'ylayapti</Text>
@@ -366,8 +367,8 @@ export const AiChatWidget = () => {
       <Box
         p="sm"
         style={{
-          borderTop: "1px solid #e9ecef",
-          backgroundColor: "#fff",
+          borderTop: `1px solid ${colors.border}`,
+          backgroundColor: colors.white,
           flexShrink: 0,
         }}
       >
@@ -385,9 +386,9 @@ export const AiChatWidget = () => {
             style={{ flex: 1 }}
             styles={{
               input: {
-                backgroundColor: "#f8f9fa",
-                border: "1px solid #e9ecef",
-                "&:focus": { borderColor: "#1e3a5f" },
+                backgroundColor: colors.bg,
+                border: `1px solid ${colors.border}`,
+                "&:focus": { borderColor: colors.primary },
               },
             }}
           />
@@ -398,8 +399,8 @@ export const AiChatWidget = () => {
             disabled={!inputValue.trim() || isSending}
             loading={isSending}
             style={{
-              backgroundColor: "#1e3a5f",
-              color: "#fff",
+              backgroundColor: colors.primary,
+              color: colors.white,
             }}
           >
             <IconSend size={18} />
@@ -412,7 +413,7 @@ export const AiChatWidget = () => {
         .ai-typing-dots span {
           display: inline-block;
           animation: ai-typing-bounce 1.4s infinite ease-in-out;
-          color: #868e96;
+          color: ${colors.textDimmed};
           font-weight: 700;
         }
         .ai-typing-dots span:nth-child(2) { animation-delay: 0.2s; }

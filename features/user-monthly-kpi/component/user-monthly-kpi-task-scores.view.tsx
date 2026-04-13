@@ -27,6 +27,7 @@ import { useGetUserMonthlyKpiTaskScores } from "../hook/user-monthly-kpi.hook";
 import { UserMonthlyKpiTaskScore } from "../type/user-monthly-kpi.type";
 import { TaskDetailDrawer } from "@/features/task/component/task-detail-drawer";
 import { formatDate } from "@/lib/date-utils";
+import { colors } from "@/lib/colors";
 
 interface UserMonthlyKpiTaskScoresViewProps {
   userId: string;
@@ -57,7 +58,7 @@ const ScoreItem = ({
               w={28} h={28}
               style={{
                 borderRadius: 8,
-                backgroundColor: isPerfect ? "#e6f9ee" : isLate ? "#fff3f3" : "#f0f4ff",
+                backgroundColor: isPerfect ? colors.successLight : isLate ? colors.errorLight : colors.infoLight,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -65,15 +66,15 @@ const ScoreItem = ({
               }}
             >
               {isPerfect ? (
-                <IconCheck size={14} color="#2ecc71" />
+                <IconCheck size={14} color={colors.success} />
               ) : isLate ? (
-                <IconAlertTriangle size={14} color="#e74c3c" />
+                <IconAlertTriangle size={14} color={colors.error} />
               ) : (
-                <IconTarget size={14} color="#3498db" />
+                <IconTarget size={14} color={colors.info} />
               )}
             </Box>
             <Box>
-              <Text size="sm" fw={500} c="#212529">
+              <Text size="sm" fw={500} c={colors.textPrimary}>
                 Vazifa #{index + 1}
               </Text>
               <Text size="xs" c="dimmed">
@@ -119,7 +120,7 @@ const ScoreItem = ({
           <Box>
             <Group justify="space-between" mb={4}>
               <Text size="xs" c="dimmed">Samaradorlik</Text>
-              <Text size="xs" fw={600} c={isPerfect ? "#2ecc71" : "#495057"}>{percentage}%</Text>
+              <Text size="xs" fw={600} c={isPerfect ? colors.success : colors.textSecondary}>{percentage}%</Text>
             </Group>
             <Progress
               value={percentage}
@@ -137,11 +138,11 @@ const ScoreItem = ({
             </Box>
             <Box>
               <Text size="xs" c="dimmed">Olingan</Text>
-              <Text size="sm" fw={600} c={isPerfect ? "#2ecc71" : "#495057"}>{ts.earnedScore}</Text>
+              <Text size="sm" fw={600} c={isPerfect ? colors.success : colors.textSecondary}>{ts.earnedScore}</Text>
             </Box>
             <Box>
               <Text size="xs" c="dimmed">Jarima</Text>
-              <Text size="sm" fw={600} c={ts.penaltyApplied > 0 ? "#e74c3c" : "#495057"}>
+              <Text size="sm" fw={600} c={ts.penaltyApplied > 0 ? colors.error : colors.textSecondary}>
                 {ts.penaltyApplied > 0 ? `-${ts.penaltyApplied}` : "0"}
               </Text>
             </Box>
@@ -176,10 +177,10 @@ const UserMonthlyKpiTaskScoresView = ({ userId, year, month }: UserMonthlyKpiTas
     return (
       <Center py={40}>
         <Stack align="center" gap="md">
-          <Box p={16} style={{ backgroundColor: "#f1f3f5", borderRadius: 12 }}>
-            <IconClipboardCheck size={40} color="#868e96" stroke={1.5} />
+          <Box p={16} style={{ backgroundColor: colors.bgSubtle, borderRadius: 12 }}>
+            <IconClipboardCheck size={40} color={colors.textDimmed} stroke={1.5} />
           </Box>
-          <Text size="lg" fw={500} c="#495057">
+          <Text size="lg" fw={500} c={colors.textSecondary}>
             Vazifa ballari topilmadi
           </Text>
         </Stack>
@@ -197,30 +198,30 @@ const UserMonthlyKpiTaskScoresView = ({ userId, year, month }: UserMonthlyKpiTas
     <Stack gap="md">
       {/* Summary cards */}
       <Group gap="sm" grow>
-        <Paper p="sm" radius="sm" style={{ backgroundColor: "#f0f4ff", border: "1px solid #dbe4ff" }}>
+        <Paper p="sm" radius="sm" style={{ backgroundColor: colors.infoLight, border: `1px solid ${colors.infoBg}` }}>
           <Group gap={8}>
-            <IconTarget size={16} color="#3498db" />
-            <Text size="xs" c="#3498db" fw={600}>Yakuniy</Text>
+            <IconTarget size={16} color={colors.info} />
+            <Text size="xs" c={colors.info} fw={600}>Yakuniy</Text>
           </Group>
-          <Text size="xl" fw={700} c="#1e3a5f" mt={4}>{totalEarned}</Text>
+          <Text size="xl" fw={700} c={colors.primary} mt={4}>{totalEarned}</Text>
           <Text size="xs" c="dimmed">{totalBase} dan</Text>
         </Paper>
-        <Paper p="sm" radius="sm" style={{ backgroundColor: totalPenalty > 0 ? "#fff3f3" : "#f8f9fa", border: `1px solid ${totalPenalty > 0 ? "#fde2e2" : "#e9ecef"}` }}>
+        <Paper p="sm" radius="sm" style={{ backgroundColor: totalPenalty > 0 ? colors.errorLight : colors.bg, border: `1px solid ${totalPenalty > 0 ? colors.errorBg : colors.border}` }}>
           <Group gap={8}>
-            <IconAlertTriangle size={16} color={totalPenalty > 0 ? "#e74c3c" : "#adb5bd"} />
-            <Text size="xs" c={totalPenalty > 0 ? "#e74c3c" : "dimmed"} fw={600}>Jarima</Text>
+            <IconAlertTriangle size={16} color={totalPenalty > 0 ? colors.error : colors.textMuted} />
+            <Text size="xs" c={totalPenalty > 0 ? colors.error : "dimmed"} fw={600}>Jarima</Text>
           </Group>
-          <Text size="xl" fw={700} c={totalPenalty > 0 ? "#e74c3c" : "#495057"} mt={4}>
+          <Text size="xl" fw={700} c={totalPenalty > 0 ? colors.error : colors.textSecondary} mt={4}>
             {totalPenalty > 0 ? `-${totalPenalty}` : "0"}
           </Text>
           <Text size="xs" c="dimmed">jami ball</Text>
         </Paper>
-        <Paper p="sm" radius="sm" style={{ backgroundColor: "#e6f9ee", border: "1px solid #c3e6cb" }}>
+        <Paper p="sm" radius="sm" style={{ backgroundColor: colors.successLight, border: `1px solid ${colors.successBg}` }}>
           <Group gap={8}>
-            <IconCheck size={16} color="#2ecc71" />
-            <Text size="xs" c="#2ecc71" fw={600}>O'z vaqtida</Text>
+            <IconCheck size={16} color={colors.success} />
+            <Text size="xs" c={colors.success} fw={600}>O'z vaqtida</Text>
           </Group>
-          <Text size="xl" fw={700} c="#212529" mt={4}>{onTimeCount}/{taskScores.length}</Text>
+          <Text size="xl" fw={700} c={colors.textPrimary} mt={4}>{onTimeCount}/{taskScores.length}</Text>
           <Text size="xs" c="dimmed">{overallPercent}% samaradorlik</Text>
         </Paper>
       </Group>
@@ -232,7 +233,7 @@ const UserMonthlyKpiTaskScoresView = ({ userId, year, month }: UserMonthlyKpiTas
         defaultValue={taskScores.length <= 5 ? taskScores.map((ts: UserMonthlyKpiTaskScore) => ts.id) : undefined}
         multiple
         styles={{
-          item: { border: "1px solid #e9ecef", backgroundColor: "#fff" },
+          item: { border: `1px solid ${colors.border}`, backgroundColor: colors.white },
           control: { padding: "10px 12px" },
           panel: { padding: "0 12px 12px" },
         }}

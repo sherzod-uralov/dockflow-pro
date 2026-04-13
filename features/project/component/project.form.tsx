@@ -40,6 +40,7 @@ import {
 import { useGetAllDepartments } from "@/features/department/hook/department.hook";
 import { useGetUserQuery } from "@/features/admin/admin-users/hook/user.hook";
 import { useGetProfileQuery } from "@/features/login/hook/login.hook";
+import { colors } from "@/lib/colors";
 
 interface ProjectFormProps {
     modal: ModalState;
@@ -163,14 +164,14 @@ const ProjectForm = ({
                         {...form.register("name")}
                         styles={{
                             input: {
-                                backgroundColor: "#f8f9fa",
-                                border: "1px solid #e9ecef",
+                                backgroundColor: colors.bg,
+                                border: `1px solid ${colors.border}`,
                                 "&:focus": {
-                                    borderColor: "#1e3a5f",
+                                    borderColor: colors.primary,
                                 },
                             },
                             label: {
-                                color: "#495057",
+                                color: colors.textSecondary,
                                 fontWeight: 500,
                                 marginBottom: 4,
                             },
@@ -187,15 +188,15 @@ const ProjectForm = ({
                         {...form.register("key")}
                         styles={{
                             input: {
-                                backgroundColor: "#f8f9fa",
-                                border: "1px solid #e9ecef",
+                                backgroundColor: colors.bg,
+                                border: `1px solid ${colors.border}`,
                                 textTransform: "uppercase",
                                 "&:focus": {
-                                    borderColor: "#1e3a5f",
+                                    borderColor: colors.primary,
                                 },
                             },
                             label: {
-                                color: "#495057",
+                                color: colors.textSecondary,
                                 fontWeight: 500,
                                 marginBottom: 4,
                             },
@@ -214,14 +215,14 @@ const ProjectForm = ({
                     {...form.register("description")}
                     styles={{
                         input: {
-                            backgroundColor: "#f8f9fa",
-                            border: "1px solid #e9ecef",
+                            backgroundColor: colors.bg,
+                            border: `1px solid ${colors.border}`,
                             "&:focus": {
-                                borderColor: "#1e3a5f",
+                                borderColor: colors.primary,
                             },
                         },
                         label: {
-                            color: "#495057",
+                            color: colors.textSecondary,
                             fontWeight: 500,
                             marginBottom: 4,
                         },
@@ -246,14 +247,14 @@ const ProjectForm = ({
                         error={form.formState.errors.status?.message}
                         styles={{
                             input: {
-                                backgroundColor: "#f8f9fa",
-                                border: "1px solid #e9ecef",
+                                backgroundColor: colors.bg,
+                                border: `1px solid ${colors.border}`,
                                 "&:focus": {
-                                    borderColor: "#1e3a5f",
+                                    borderColor: colors.primary,
                                 },
                             },
                             label: {
-                                color: "#495057",
+                                color: colors.textSecondary,
                                 fontWeight: 500,
                                 marginBottom: 4,
                             },
@@ -276,14 +277,14 @@ const ProjectForm = ({
                         error={form.formState.errors.departmentId?.message}
                         styles={{
                             input: {
-                                backgroundColor: "#f8f9fa",
-                                border: "1px solid #e9ecef",
+                                backgroundColor: colors.bg,
+                                border: `1px solid ${colors.border}`,
                                 "&:focus": {
-                                    borderColor: "#1e3a5f",
+                                    borderColor: colors.primary,
                                 },
                             },
                             label: {
-                                color: "#495057",
+                                color: colors.textSecondary,
                                 fontWeight: 500,
                                 marginBottom: 4,
                             },
@@ -293,7 +294,7 @@ const ProjectForm = ({
 
                 {/* Visibility */}
                 <Box>
-                    <Text size="sm" fw={500} c="#495057" mb={6}>
+                    <Text size="sm" fw={500} c={colors.textSecondary} mb={6}>
                         Ko'rinish darajasi
                     </Text>
                     <Radio.Group
@@ -308,7 +309,7 @@ const ProjectForm = ({
                                     disabled={opt.value === ProjectVisibility.PUBLIC && !isAdmin}
                                     label={
                                         <Box>
-                                            <Text size="sm" fw={500} c="#212529">
+                                            <Text size="sm" fw={500} c={colors.textPrimary}>
                                                 {opt.icon} {opt.label}
                                             </Text>
                                             <Text size="xs" c="dimmed">
@@ -343,11 +344,11 @@ const ProjectForm = ({
                         }
                         styles={{
                             input: {
-                                backgroundColor: "#f8f9fa",
-                                border: "1px solid #e9ecef",
-                                "&:focus": { borderColor: "#1e3a5f" },
+                                backgroundColor: colors.bg,
+                                border: `1px solid ${colors.border}`,
+                                "&:focus": { borderColor: colors.primary },
                             },
-                            label: { color: "#495057", fontWeight: 500, marginBottom: 4 },
+                            label: { color: colors.textSecondary, fontWeight: 500, marginBottom: 4 },
                         }}
                     />
                 )}
@@ -375,14 +376,14 @@ const ProjectForm = ({
                         error={form.formState.errors.startDate?.message}
                         styles={{
                             input: {
-                                backgroundColor: "#f8f9fa",
-                                border: "1px solid #e9ecef",
+                                backgroundColor: colors.bg,
+                                border: `1px solid ${colors.border}`,
                                 "&:focus": {
-                                    borderColor: "#1e3a5f",
+                                    borderColor: colors.primary,
                                 },
                             },
                             label: {
-                                color: "#495057",
+                                color: colors.textSecondary,
                                 fontWeight: 500,
                                 marginBottom: 4,
                             },
@@ -410,14 +411,14 @@ const ProjectForm = ({
                         error={form.formState.errors.endDate?.message}
                         styles={{
                             input: {
-                                backgroundColor: "#f8f9fa",
-                                border: "1px solid #e9ecef",
+                                backgroundColor: colors.bg,
+                                border: `1px solid ${colors.border}`,
                                 "&:focus": {
-                                    borderColor: "#1e3a5f",
+                                    borderColor: colors.primary,
                                 },
                             },
                             label: {
-                                color: "#495057",
+                                color: colors.textSecondary,
                                 fontWeight: 500,
                                 marginBottom: 4,
                             },
@@ -442,14 +443,14 @@ const ProjectForm = ({
                         error={form.formState.errors.budget?.message}
                         styles={{
                             input: {
-                                backgroundColor: "#f8f9fa",
-                                border: "1px solid #e9ecef",
+                                backgroundColor: colors.bg,
+                                border: `1px solid ${colors.border}`,
                                 "&:focus": {
-                                    borderColor: "#1e3a5f",
+                                    borderColor: colors.primary,
                                 },
                             },
                             label: {
-                                color: "#495057",
+                                color: colors.textSecondary,
                                 fontWeight: 500,
                                 marginBottom: 4,
                             },
@@ -469,14 +470,14 @@ const ProjectForm = ({
                         error={form.formState.errors.color?.message}
                         styles={{
                             input: {
-                                backgroundColor: "#f8f9fa",
-                                border: "1px solid #e9ecef",
+                                backgroundColor: colors.bg,
+                                border: `1px solid ${colors.border}`,
                                 "&:focus": {
-                                    borderColor: "#1e3a5f",
+                                    borderColor: colors.primary,
                                 },
                             },
                             label: {
-                                color: "#495057",
+                                color: colors.textSecondary,
                                 fontWeight: 500,
                                 marginBottom: 4,
                             },
@@ -489,7 +490,7 @@ const ProjectForm = ({
                     justify="flex-end"
                     gap="xs"
                     pt="md"
-                    style={{ borderTop: "1px solid #e9ecef" }}
+                    style={{ borderTop: `1px solid ${colors.border}` }}
                 >
                     <Button
                         variant="outline"
@@ -498,10 +499,10 @@ const ProjectForm = ({
                         onClick={modal.closeModal}
                         styles={{
                             root: {
-                                borderColor: "#e9ecef",
-                                color: "#495057",
+                                borderColor: colors.border,
+                                color: colors.textSecondary,
                                 "&:hover": {
-                                    backgroundColor: "#f8f9fa",
+                                    backgroundColor: colors.bg,
                                 },
                             },
                         }}
@@ -518,7 +519,7 @@ const ProjectForm = ({
                             createMutation.isLoading ||
                             updateMutation.isLoading
                         }
-                        style={{ backgroundColor: "#1e3a5f" }}
+                        style={{ backgroundColor: colors.primary }}
                     >
                         {form.formState.isSubmitting ||
                             createMutation.isLoading ||

@@ -115,7 +115,7 @@ const InlineSubtaskInput = ({
             onPointerDown={(e) => e.stopPropagation()}
             onMouseDown={(e) => e.stopPropagation()}
         >
-            <IconSubtask size={14} color="#228be6" style={{ flexShrink: 0 }} />
+            <IconSubtask size={14} color={colors.info} style={{ flexShrink: 0 }} />
             <input
                 ref={inputRef}
                 type="text"
@@ -233,7 +233,7 @@ const SortableTaskItem = ({
                             left: "50%",
                             transform: "translateX(-50%)",
                             zIndex: 20,
-                            backgroundColor: "#228be6",
+                            backgroundColor: colors.info,
                             color: "white",
                             borderRadius: 4,
                             padding: "2px 8px",
@@ -1038,7 +1038,7 @@ const TaskKanbanBoard = ({
                         {subtaskDropTargetId ? (
                             <Box style={{
                                 position: "absolute", top: -14, right: 8, zIndex: 20,
-                                backgroundColor: "#228be6", color: "white", borderRadius: 4,
+                                backgroundColor: colors.info, color: "white", borderRadius: 4,
                                 padding: "2px 8px", fontSize: 10, fontWeight: 600,
                                 display: "flex", alignItems: "center", gap: 4,
                             }}>
@@ -1052,7 +1052,7 @@ const TaskKanbanBoard = ({
                             }}>
                                 {movableDescendantCountRef.current > 0 && (
                                     <Box style={{
-                                        backgroundColor: "#228be6", color: "white", borderRadius: 4,
+                                        backgroundColor: colors.info, color: "white", borderRadius: 4,
                                         padding: "2px 8px", fontSize: 9, fontWeight: 600,
                                         whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: 3,
                                     }}>

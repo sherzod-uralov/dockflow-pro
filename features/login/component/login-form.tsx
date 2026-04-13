@@ -13,6 +13,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useLoginMutation } from "../hook/login.hook";
 import Cookie from "js-cookie";
 import React, { useState } from "react";
+import { colors } from "@/lib/colors";
 
 interface LoginFormValues {
     username: string;
@@ -82,17 +83,17 @@ export const LoginForm = () => {
                     placeholder="Foydalanuvchi nomini kiriting"
                     size="md"
                     radius="sm"
-                    leftSection={<IconUser size={18} color="#868e96" />}
+                    leftSection={<IconUser size={18} color={colors.textDimmed} />}
                     {...form.getInputProps("username")}
                     styles={{
                         label: {
                             fontWeight: 500,
                             marginBottom: 6,
-                            color: "#212529",
+                            color: colors.textPrimary,
                         },
                         input: {
                             "&:focus": {
-                                borderColor: "#1e3a5f",
+                                borderColor: colors.primary,
                             },
                         },
                     }}
@@ -104,17 +105,17 @@ export const LoginForm = () => {
                     placeholder="Parolni kiriting"
                     size="md"
                     radius="sm"
-                    leftSection={<IconLock size={18} color="#868e96" />}
+                    leftSection={<IconLock size={18} color={colors.textDimmed} />}
                     {...form.getInputProps("password")}
                     styles={{
                         label: {
                             fontWeight: 500,
                             marginBottom: 6,
-                            color: "#212529",
+                            color: colors.textPrimary,
                         },
                         input: {
                             "&:focus": {
-                                borderColor: "#1e3a5f",
+                                borderColor: colors.primary,
                             },
                         },
                     }}
@@ -129,10 +130,10 @@ export const LoginForm = () => {
                     loading={authMutation.isLoading}
                     styles={{
                         root: {
-                            backgroundColor: "#1e3a5f",
+                            backgroundColor: colors.primary,
                             height: 48,
                             "&:hover": {
-                                backgroundColor: "#162d4a",
+                                backgroundColor: colors.primaryHover,
                             },
                         },
                     }}

@@ -36,6 +36,7 @@ import {
 } from "../hook/chat.hook";
 import { useChatCall } from "../hook/use-chat-call";
 import { useDebounce } from "@/hooks/use-debaunce";
+import { colors } from "@/lib/colors";
 
 interface Props {
   onClose: () => void;
@@ -160,8 +161,8 @@ export const NewChatModal = ({ onClose, onSuccess }: Props) => {
                     justify="space-between"
                     style={{
                       borderRadius: 6,
-                      border: "1px solid #e9ecef",
-                      backgroundColor: "#fff",
+                      border: `1px solid ${colors.border}`,
+                      backgroundColor: colors.white,
                     }}
                   >
                     <Group gap="sm" style={{ flex: 1, minWidth: 0 }}>
@@ -243,7 +244,7 @@ export const NewChatModal = ({ onClose, onSuccess }: Props) => {
                     style={{
                       cursor: "pointer",
                       borderRadius: 6,
-                      backgroundColor: checked ? "#e7f5ff" : "transparent",
+                      backgroundColor: checked ? colors.primaryLight : "transparent",
                     }}
                     onClick={() =>
                       setSelectedIds((prev) =>
@@ -270,7 +271,7 @@ export const NewChatModal = ({ onClose, onSuccess }: Props) => {
               onClick={handleCreateGroup}
               disabled={!groupTitle.trim() || selectedIds.length === 0}
               loading={createGroup.isLoading}
-              style={{ backgroundColor: "#1e3a5f" }}
+              style={{ backgroundColor: colors.primary }}
             >
               Yaratish
             </Button>
@@ -319,13 +320,13 @@ export const NewChatModal = ({ onClose, onSuccess }: Props) => {
                   justify="space-between"
                   style={{
                     borderRadius: 6,
-                    border: "1px solid #e9ecef",
-                    backgroundColor: "#fff",
+                    border: `1px solid ${colors.border}`,
+                    backgroundColor: colors.white,
                   }}
                 >
                   <Group gap="sm" style={{ flex: 1, minWidth: 0 }}>
-                    <Avatar size="sm" radius="xl" src={chat.avatarUrl} style={{ backgroundColor: "#fff3e0" }}>
-                      <IconUsers size={14} color="#f39c12" />
+                    <Avatar size="sm" radius="xl" src={chat.avatarUrl} style={{ backgroundColor: colors.warningBg }}>
+                      <IconUsers size={14} color=colors.warning />
                     </Avatar>
                     <Box style={{ minWidth: 0 }}>
                       <Text size="sm" fw={500} lineClamp={1}>{chat.title}</Text>
@@ -345,7 +346,7 @@ export const NewChatModal = ({ onClose, onSuccess }: Props) => {
                       })
                     }
                     loading={joinByUsername.isLoading}
-                    style={{ backgroundColor: "#1e3a5f" }}
+                    style={{ backgroundColor: colors.primary }}
                   >
                     Qo'shilish
                   </Button>
@@ -385,7 +386,7 @@ export const NewChatModal = ({ onClose, onSuccess }: Props) => {
                   },
                 })
               }
-              style={{ backgroundColor: "#1e3a5f" }}
+              style={{ backgroundColor: colors.primary }}
             >
               Qo'shilish
             </Button>

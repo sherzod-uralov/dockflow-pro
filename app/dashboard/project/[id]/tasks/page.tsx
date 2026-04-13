@@ -48,6 +48,7 @@ import TaskListView from "@/features/task/component/task-list-view";
 import TaskCalendarView from "@/features/task/component/task-calendar-view";
 import { TaskDetailDrawer } from "@/features/task/component/task-detail-drawer";
 import ProjectForm from "@/features/project/component/project.form";
+import { colors } from "@/lib/colors";
 
 export default function ProjectTasksPage() {
     const params = useParams();
@@ -154,12 +155,12 @@ export default function ProjectTasksPage() {
     ];
 
     const isLoading = isProjectLoading || isTasksLoading;
-    const projectColor = project?.color || "#3498db";
+    const projectColor = project?.color || colors.info;
 
     if (isProjectLoading) {
         return (
             <Center h="50vh">
-                <Loader color="#1e3a5f" />
+                <Loader color={colors.primary} />
             </Center>
         );
     }
@@ -196,7 +197,7 @@ export default function ProjectTasksPage() {
                     >
                         Loyihalar
                     </Anchor>
-                    <Text size="sm" c="#212529">
+                    <Text size="sm" c={colors.textPrimary}>
                         {project.name}
                     </Text>
                 </Breadcrumbs>
@@ -205,7 +206,7 @@ export default function ProjectTasksPage() {
                 {/* Tasks Header */}
                 <Group justify="space-between">
                     <div>
-                        <Text size="lg" fw={600} c="#212529">
+                        <Text size="lg" fw={600} c={colors.textPrimary}>
                             Vazifalar
                         </Text>
                         <Text size="sm" c="dimmed">
@@ -215,7 +216,7 @@ export default function ProjectTasksPage() {
                     <Button
                         leftSection={<IconPlus size={16} />}
                         onClick={() => handleCreateTask()}
-                        style={{ backgroundColor: "#1e3a5f" }}
+                        style={{ backgroundColor: colors.primary }}
                     >
                         Yangi vazifa
                     </Button>
@@ -232,8 +233,8 @@ export default function ProjectTasksPage() {
                             style={{ flex: 1, maxWidth: 300 }}
                             styles={{
                                 input: {
-                                    backgroundColor: "#f8f9fa",
-                                    border: "1px solid #e9ecef",
+                                    backgroundColor: colors.bg,
+                                    border: `1px solid ${colors.border}`,
                                 },
                             }}
                         />
@@ -247,8 +248,8 @@ export default function ProjectTasksPage() {
                             style={{ width: 180 }}
                             styles={{
                                 input: {
-                                    backgroundColor: "#f8f9fa",
-                                    border: "1px solid #e9ecef",
+                                    backgroundColor: colors.bg,
+                                    border: `1px solid ${colors.border}`,
                                 },
                             }}
                         />
@@ -263,8 +264,8 @@ export default function ProjectTasksPage() {
                             style={{ width: 200 }}
                             styles={{
                                 input: {
-                                    backgroundColor: "#f8f9fa",
-                                    border: "1px solid #e9ecef",
+                                    backgroundColor: colors.bg,
+                                    border: `1px solid ${colors.border}`,
                                 },
                             }}
                         />
@@ -305,7 +306,7 @@ export default function ProjectTasksPage() {
                 {/* Content */}
                 {isTasksLoading ? (
                     <Center py="xl">
-                        <Loader color="#1e3a5f" />
+                        <Loader color={colors.primary} />
                     </Center>
                 ) : (
                     <>

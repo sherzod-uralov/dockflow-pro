@@ -9,6 +9,7 @@ import {
 import { useForm } from "@mantine/form";
 import { IconFileDescription } from "@tabler/icons-react";
 import { useRejectKpiReward } from "../hook/kpi-reward.hook";
+import { colors } from "@/lib/colors";
 
 interface KpiRewardRejectFormProps {
   rewardId: string;
@@ -54,7 +55,7 @@ const KpiRewardRejectForm = ({
           radius="sm"
           required
           rows={4}
-          leftSection={<IconFileDescription size={18} color="#868e96" />}
+          leftSection={<IconFileDescription size={18} color={colors.textDimmed} />}
           {...form.getInputProps("notes")}
           styles={{ label: { fontWeight: 500, marginBottom: 6 } }}
         />

@@ -12,6 +12,7 @@ import {
   IconVolumeOff,
 } from "@tabler/icons-react";
 import { useChatCall } from "../hook/use-chat-call";
+import { colors } from "@/lib/colors";
 
 const getInitials = (name?: string) =>
   (name || "?").split(" ").map((n) => n[0]).filter(Boolean).join("").toUpperCase().slice(0, 2);
@@ -75,7 +76,7 @@ export const CallOverlay = () => {
             bottom: 24,
             left: 24,
             zIndex: 9999,
-            backgroundColor: "#1e3a5f",
+            backgroundColor: colors.primary,
             borderRadius: 50,
             padding: "8px 16px 8px 8px",
             display: "flex",
@@ -83,16 +84,16 @@ export const CallOverlay = () => {
             gap: 12,
             cursor: "pointer",
             boxShadow: "0 8px 24px rgba(30, 58, 95, 0.4)",
-            color: "#fff",
+            color: colors.white,
             border: "2px solid rgba(46, 204, 113, 0.4)",
             animation: "callMinPulse 2s ease-in-out infinite",
           }}
         >
-          <Avatar size={36} radius="50%" src={activeCall.peerAvatar} style={{ backgroundColor: "#fff", color: "#1e3a5f" }}>
+          <Avatar size={36} radius="50%" src={activeCall.peerAvatar} style={{ backgroundColor: colors.white, color: colors.primary }}>
             {getInitials(activeCall.peerName)}
           </Avatar>
           <Box>
-            <Text size="xs" c="#fff" fw={600} lineClamp={1}>
+            <Text size="xs" c={colors.white} fw={600} lineClamp={1}>
               {activeCall.peerName || "Noma'lum"}
             </Text>
             <Text size="xs" c="rgba(255,255,255,0.7)">
@@ -106,9 +107,9 @@ export const CallOverlay = () => {
               e.stopPropagation();
               endCall();
             }}
-            style={{ backgroundColor: "#e74c3c", marginLeft: 8 }}
+            style={{ backgroundColor: colors.error, marginLeft: 8 }}
           >
-            <IconPhoneOff size={14} color="#fff" />
+            <IconPhoneOff size={14} color={colors.white} />
           </ActionIcon>
         </Box>
         <style jsx global>{`
@@ -174,7 +175,7 @@ export const CallOverlay = () => {
             style={{
               border: "4px solid rgba(255, 255, 255, 0.2)",
               backgroundColor: "rgba(255, 255, 255, 0.1)",
-              color: "#fff",
+              color: colors.white,
               fontSize: 48,
               fontWeight: 700,
               position: "relative",
@@ -191,7 +192,7 @@ export const CallOverlay = () => {
             style={{
               fontSize: 28,
               fontWeight: 600,
-              color: "#fff",
+              color: colors.white,
               textShadow: "0 2px 8px rgba(0, 0, 0, 0.3)",
             }}
           >
@@ -219,12 +220,12 @@ export const CallOverlay = () => {
                   radius="50%"
                   onClick={rejectCall}
                   style={{
-                    backgroundColor: "#e74c3c",
+                    backgroundColor: colors.error,
                     boxShadow: "0 8px 24px rgba(231, 76, 60, 0.5)",
                     transform: "rotate(135deg)",
                   }}
                 >
-                  <IconPhone size={32} color="#fff" />
+                  <IconPhone size={32} color={colors.white} />
                 </ActionIcon>
               </Tooltip>
               <Tooltip label="Qabul qilish" withArrow>
@@ -234,11 +235,11 @@ export const CallOverlay = () => {
                   onClick={acceptCall}
                   className="call-accept-btn"
                   style={{
-                    backgroundColor: "#2ecc71",
+                    backgroundColor: colors.success,
                     boxShadow: "0 8px 24px rgba(46, 204, 113, 0.5)",
                   }}
                 >
-                  <IconPhone size={32} color="#fff" />
+                  <IconPhone size={32} color={colors.white} />
                 </ActionIcon>
               </Tooltip>
             </>
@@ -258,7 +259,7 @@ export const CallOverlay = () => {
                   {isMuted ? (
                     <IconMicrophoneOff size={26} color="#ff6b6b" />
                   ) : (
-                    <IconMicrophone size={26} color="#fff" />
+                    <IconMicrophone size={26} color={colors.white} />
                   )}
                 </ActionIcon>
               </Tooltip>
@@ -269,12 +270,12 @@ export const CallOverlay = () => {
                   radius="50%"
                   onClick={endCall}
                   style={{
-                    backgroundColor: "#e74c3c",
+                    backgroundColor: colors.error,
                     boxShadow: "0 8px 24px rgba(231, 76, 60, 0.5)",
                     transform: "rotate(135deg)",
                   }}
                 >
-                  <IconPhone size={32} color="#fff" />
+                  <IconPhone size={32} color={colors.white} />
                 </ActionIcon>
               </Tooltip>
 
@@ -290,9 +291,9 @@ export const CallOverlay = () => {
                   }}
                 >
                   {isSpeakerOn ? (
-                    <IconVolume size={26} color="#fff" />
+                    <IconVolume size={26} color={colors.white} />
                   ) : (
-                    <IconVolumeOff size={26} color="#fff" />
+                    <IconVolumeOff size={26} color={colors.white} />
                   )}
                 </ActionIcon>
               </Tooltip>

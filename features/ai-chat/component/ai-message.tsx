@@ -5,6 +5,7 @@ import { IconRobot, IconAlertTriangle, IconRefresh, IconAlertCircle } from "@tab
 import ReactMarkdown from "react-markdown";
 import { AiHistoryMessage } from "../type/ai-chat.type";
 import AiCard from "./ai-card";
+import { colors } from "@/lib/colors";
 
 interface AiMessageProps {
   message: AiHistoryMessage;
@@ -31,7 +32,7 @@ const MarkdownContent = ({ content }: { content: string }) => (
             href={href}
             target="_blank"
             rel="noopener noreferrer"
-            style={{ color: "#1e3a5f", textDecoration: "underline" }}
+            style={{ color: colors.primary, textDecoration: "underline" }}
           >
             {children}
           </a>
@@ -65,12 +66,12 @@ export const AiMessage = ({ message, onRetry }: AiMessageProps) => {
           p="xs"
           radius="md"
           style={{
-            backgroundColor: "#1e3a5f",
+            backgroundColor: colors.primary,
             maxWidth: "80%",
             opacity: message.pending ? 0.6 : 1,
           }}
         >
-          <Text size="sm" c="#fff" style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
+          <Text size="sm" c={colors.white} style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
             {message.content}
           </Text>
         </Paper>
@@ -83,9 +84,9 @@ export const AiMessage = ({ message, onRetry }: AiMessageProps) => {
   const isAiError = message.error === "AI_ERROR";
 
   let bubbleStyle: React.CSSProperties = {
-    backgroundColor: "#f8f9fa",
-    border: "1px solid #e9ecef",
-    color: "#212529",
+    backgroundColor: colors.bg,
+    border: `1px solid ${colors.border}`,
+    color: colors.textPrimary,
   };
 
   if (isRateLimit) {
@@ -108,8 +109,8 @@ export const AiMessage = ({ message, onRetry }: AiMessageProps) => {
         size="sm"
         radius="xl"
         style={{
-          backgroundColor: isAiError ? "#ffe5e5" : isRateLimit ? "#fff3cc" : "#e7f5ff",
-          color: isAiError ? "#a02525" : isRateLimit ? "#7a5a00" : "#1e3a5f",
+          backgroundColor: isAiError ? "#ffe5e5" : isRateLimit ? "#fff3cc" : colors.primaryLight,
+          color: isAiError ? "#a02525" : isRateLimit ? "#7a5a00" : colors.primary,
           flexShrink: 0,
         }}
       >

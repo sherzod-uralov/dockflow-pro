@@ -17,6 +17,7 @@ import { IconSearch, IconUsers } from "@tabler/icons-react";
 import { useDebounce } from "@/hooks/use-debaunce";
 import { useSearchMessages } from "../hook/chat.hook";
 import { formatDate } from "@/lib/date-utils";
+import { colors } from "@/lib/colors";
 
 interface Props {
   chatId?: string;
@@ -55,7 +56,7 @@ export const ChatSearchModal = ({ chatId, onSelect, placeholder }: Props) => {
 
       {debouncedQuery.length >= 2 && isLoading && (
         <Center py="xl">
-          <Loader size="sm" color="#1e3a5f" />
+          <Loader size="sm" color={colors.primary} />
         </Center>
       )}
 
@@ -84,32 +85,32 @@ export const ChatSearchModal = ({ chatId, onSelect, placeholder }: Props) => {
                   style={{
                     cursor: "pointer",
                     borderRadius: 6,
-                    border: "1px solid #e9ecef",
-                    backgroundColor: "#fff",
+                    border: `1px solid ${colors.border}`,
+                    backgroundColor: colors.white,
                   }}
                   onClick={() => onSelect(msg.chatId, msg.id)}
                 >
                   <Avatar
                     size="sm"
                     radius="xl"
-                    style={{ backgroundColor: isGroup ? "#fff3e0" : "#e7f5ff" }}
+                    style={{ backgroundColor: isGroup ? colors.warningBg : colors.primaryLight }}
                   >
                     {isGroup ? (
-                      <IconUsers size={14} color="#f39c12" />
+                      <IconUsers size={14} color=colors.warning />
                     ) : (
                       getInitials(msg.sender.fullname)
                     )}
                   </Avatar>
                   <Box style={{ flex: 1, minWidth: 0 }}>
                     <Group justify="space-between" gap={4}>
-                      <Text size="sm" fw={600} c="#212529" lineClamp={1}>
+                      <Text size="sm" fw={600} c={colors.textPrimary} lineClamp={1}>
                         {chat?.title || msg.sender.fullname}
                       </Text>
                       <Text size="xs" c="dimmed" style={{ flexShrink: 0 }}>
                         {formatDate(msg.createdAt)}
                       </Text>
                     </Group>
-                    <Text size="xs" c="#495057" lineClamp={1}>
+                    <Text size="xs" c={colors.textSecondary} lineClamp={1}>
                       {msg.type === "TEXT" ? msg.content : msg.fileName || msg.type}
                     </Text>
                   </Box>

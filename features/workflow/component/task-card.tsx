@@ -47,6 +47,7 @@ import {
   createWorkflowDocumentViewUrl,
 } from "@/utils/url-helper";
 import { useGetProfileQuery } from "@/features/login/hook/login.hook";
+import { colors } from "@/lib/colors";
 
 interface TaskCardProps {
   task: WorkflowStepApiResponse & {
@@ -76,11 +77,11 @@ interface TaskCardProps {
 // Status konfiguratsiyasi
 const getStatusConfig = (status: string) => {
   const configs: Record<string, { label: string; bg: string; color: string }> = {
-    NOT_STARTED: { label: "Boshlanmagan", bg: "#f1f3f5", color: "#495057" },
-    PENDING: { label: "Jarayonda", bg: "#fff3bf", color: "#e67700" },
-    IN_PROGRESS: { label: "Bajarilmoqda", bg: "#d0ebff", color: "#1971c2" },
-    COMPLETED: { label: "Tugallangan", bg: "#d3f9d8", color: "#2b8a3e" },
-    REJECTED: { label: "Bekor qilingan", bg: "#ffe3e3", color: "#c92a2a" },
+    NOT_STARTED: { label: "Boshlanmagan", bg: colors.bgSubtle, color: colors.textSecondary },
+    PENDING: { label: "Jarayonda", bg: colors.warningLight, color: colors.warningDark },
+    IN_PROGRESS: { label: "Bajarilmoqda", bg: colors.infoBg, color: colors.infoDark },
+    COMPLETED: { label: "Tugallangan", bg: colors.successBg, color: colors.successDark },
+    REJECTED: { label: "Bekor qilingan", bg: colors.errorBg, color: colors.errorDark },
   };
   return configs[status] || configs.NOT_STARTED;
 };
@@ -99,10 +100,10 @@ const getActionTypeConfig = (actionType: string) => {
 // Priority konfiguratsiyasi
 const getPriorityConfig = (priority?: string) => {
   const configs: Record<string, { label: string; bg: string; color: string }> = {
-    LOW: { label: "Oddiy", bg: "#f1f3f5", color: "#495057" },
-    MEDIUM: { label: "O'rtacha", bg: "#fff3bf", color: "#e67700" },
-    HIGH: { label: "Muhim", bg: "#ffe8cc", color: "#d9480f" },
-    URGENT: { label: "Juda muhim", bg: "#ffe3e3", color: "#c92a2a" },
+    LOW: { label: "Oddiy", bg: colors.bgSubtle, color: colors.textSecondary },
+    MEDIUM: { label: "O'rtacha", bg: colors.warningLight, color: colors.warningDark },
+    HIGH: { label: "Muhim", bg: colors.warningBg, color: colors.warningDark },
+    URGENT: { label: "Juda muhim", bg: colors.errorBg, color: colors.errorDark },
   };
   return priority ? configs[priority] : null;
 };
@@ -270,19 +271,19 @@ const TaskCard = memo(({
         radius="sm"
         withBorder
         style={{
-          borderColor: "#e9ecef",
+          borderColor: colors.border,
           cursor: onCardClick ? "pointer" : "default",
           transition: "all 0.2s",
         }}
         onClick={onCardClick}
         onMouseEnter={(e) => {
           if (onCardClick) {
-            e.currentTarget.style.borderColor = "#1e3a5f";
+            e.currentTarget.style.borderColor = colors.primary;
             e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.08)";
           }
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.borderColor = "#e9ecef";
+          e.currentTarget.style.borderColor = colors.border;
           e.currentTarget.style.boxShadow = "none";
         }}
       >
@@ -295,16 +296,16 @@ const TaskCard = memo(({
                   width: 40,
                   height: 40,
                   borderRadius: 8,
-                  backgroundColor: "#f1f3f5",
+                  backgroundColor: colors.bgSubtle,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                 }}
               >
-                <IconFileText size={20} color="#1e3a5f" />
+                <IconFileText size={20} color={colors.primary} />
               </Box>
               <Box style={{ flex: 1, minWidth: 0 }}>
-                <Text size="md" fw={600} c="#212529" lineClamp={1}>
+                <Text size="md" fw={600} c={colors.textPrimary} lineClamp={1}>
                   {document?.title || "Hujjat topilmadi"}
                 </Text>
                 <Group gap="xs">
@@ -312,7 +313,7 @@ const TaskCard = memo(({
                     size="sm"
                     radius="sm"
                     variant="outline"
-                    style={{ borderColor: "#e9ecef", color: "#495057", fontFamily: "monospace" }}
+                    style={{ borderColor: colors.border, color: colors.textSecondary, fontFamily: "monospace" }}
                   >
                     {document?.documentNumber || "—"}
                   </Badge>
@@ -381,16 +382,16 @@ const TaskCard = memo(({
 
           {/* Progress */}
           {workflowData && (
-            <Box p="sm" style={{ backgroundColor: "#f8f9fa", borderRadius: 4 }}>
+            <Box p="sm" style={{ backgroundColor: colors.bg, borderRadius: 4 }}>
               <Group justify="space-between" mb={6}>
-                <Text size="xs" fw={500} c="#495057">
+                <Text size="xs" fw={500} c={colors.textSecondary}>
                   Jarayon
                 </Text>
                 <Text size="xs" c="dimmed">
                   {Math.round(progress)}%
                 </Text>
               </Group>
-              <Progress value={progress} size="sm" radius="sm" color="#1e3a5f" />
+              <Progress value={progress} size="sm" radius="sm" color={colors.primary} />
               <Group justify="space-between" mt={6}>
                 <Text size="xs" c="dimmed">
                   Bosqich {task.order} / {workflowData.workflowSteps.length}
@@ -404,22 +405,22 @@ const TaskCard = memo(({
           )}
 
           {/* Action type */}
-          <Group gap="sm" p="sm" style={{ backgroundColor: "#f8f9fa", borderRadius: 4 }}>
+          <Group gap="sm" p="sm" style={{ backgroundColor: colors.bg, borderRadius: 4 }}>
             <Box
               style={{
                 width: 32,
                 height: 32,
                 borderRadius: 4,
-                backgroundColor: "#fff",
+                backgroundColor: colors.white,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
               }}
             >
-              <ActionIcon_ size={16} color="#1e3a5f" />
+              <ActionIcon_ size={16} color={colors.primary} />
             </Box>
             <Box>
-              <Text size="sm" fw={600} c="#212529">
+              <Text size="sm" fw={600} c={colors.textPrimary}>
                 {actionConfig.label}
               </Text>
               <Text size="xs" c="dimmed">
@@ -434,25 +435,25 @@ const TaskCard = memo(({
               <Box
                 p="sm"
                 style={{
-                  backgroundColor: isOverdue ? "#ffe3e3" : "#f8f9fa",
+                  backgroundColor: isOverdue ? colors.errorBg : colors.bg,
                   borderRadius: 4,
                 }}
               >
                 <Group gap="xs">
                   {isOverdue ? (
-                    <IconAlertCircle size={16} color="#c92a2a" />
+                    <IconAlertCircle size={16} color={colors.errorDark} />
                   ) : (
-                    <IconClock size={16} color="#868e96" />
+                    <IconClock size={16} color={colors.textDimmed} />
                   )}
                   <Box>
-                    <Text size="xs" c={isOverdue ? "#c92a2a" : "dimmed"}>
+                    <Text size="xs" c={isOverdue ? colors.errorDark : "dimmed"}>
                       Muddat
                     </Text>
-                    <Text size="sm" fw={500} c={isOverdue ? "#c92a2a" : "#212529"}>
+                    <Text size="sm" fw={500} c={isOverdue ? colors.errorDark : colors.textPrimary}>
                       {formatDate(task.dueDate)}
                     </Text>
                     {isOverdue && (
-                      <Text size="xs" c="#c92a2a" fw={500}>
+                      <Text size="xs" c={colors.errorDark} fw={500}>
                         Muddati o'tgan
                       </Text>
                     )}
@@ -461,9 +462,9 @@ const TaskCard = memo(({
               </Box>
             )}
 
-            <Box p="sm" style={{ backgroundColor: "#f8f9fa", borderRadius: 4 }}>
+            <Box p="sm" style={{ backgroundColor: colors.bg, borderRadius: 4 }}>
               <Group gap="xs">
-                <IconUser size={16} color="#868e96" />
+                <IconUser size={16} color={colors.textDimmed} />
                 <Box>
                   <Text size="xs" c="dimmed">
                     Mas'ul
@@ -471,7 +472,7 @@ const TaskCard = memo(({
                   {isUserLoading ? (
                     <Skeleton height={16} width={100} />
                   ) : (
-                    <Text size="sm" fw={500} c="#212529" lineClamp={1}>
+                    <Text size="sm" fw={500} c={colors.textPrimary} lineClamp={1}>
                       {userData?.fullname || userData?.username || "—"}
                     </Text>
                   )}
@@ -485,18 +486,18 @@ const TaskCard = memo(({
             <Box
               p="sm"
               style={{
-                backgroundColor: "#ffe3e3",
+                backgroundColor: colors.errorBg,
                 borderRadius: 4,
-                border: "1px solid #ffc9c9",
+                border: `1px solid ${colors.errorBg}`,
               }}
             >
               <Group gap="xs" mb={4}>
-                <IconX size={16} color="#c92a2a" />
-                <Text size="sm" fw={600} c="#c92a2a">
+                <IconX size={16} color={colors.errorDark} />
+                <Text size="sm" fw={600} c={colors.errorDark}>
                   Bekor qilish sababi:
                 </Text>
               </Group>
-              <Text size="sm" c="#862e2e">
+              <Text size="sm" c={colors.errorDark}>
                 {task.rejectionReason}
               </Text>
             </Box>
@@ -518,10 +519,10 @@ const TaskCard = memo(({
                 }}
                 styles={{
                   root: {
-                    borderColor: "#e9ecef",
-                    color: "#495057",
+                    borderColor: colors.border,
+                    color: colors.textSecondary,
                     "&:hover": {
-                      backgroundColor: "#f8f9fa",
+                      backgroundColor: colors.bg,
                     },
                   },
                 }}
@@ -547,10 +548,10 @@ const TaskCard = memo(({
                   disabled={isLoading}
                   styles={{
                     root: {
-                      borderColor: "#e9ecef",
-                      color: "#495057",
+                      borderColor: colors.border,
+                      color: colors.textSecondary,
                       "&:hover": {
-                        backgroundColor: "#f8f9fa",
+                        backgroundColor: colors.bg,
                       },
                     },
                   }}>
@@ -567,7 +568,7 @@ const TaskCard = memo(({
                     setShowCompleteDialog(true);
                   }}
                   disabled={isLoading}
-                  style={{ backgroundColor: "#2b8a3e" }}
+                  style={{ backgroundColor: colors.successDark }}
                 >
                   Tasdiqlash
                 </Button>
@@ -598,7 +599,7 @@ const TaskCard = memo(({
       < Modal
         opened={showCompleteDialog}
         onClose={() => setShowCompleteDialog(false)}
-        title={< Text fw={600} c="#212529" > Vazifani tasdiqlash</Text >}
+        title={< Text fw={600} c={colors.textPrimary} > Vazifani tasdiqlash</Text >}
         centered
         size="sm"
       >
@@ -615,8 +616,8 @@ const TaskCard = memo(({
               disabled={isLoading}
               styles={{
                 root: {
-                  borderColor: "#e9ecef",
-                  color: "#495057",
+                  borderColor: colors.border,
+                  color: colors.textSecondary,
                 },
               }}
             >
@@ -627,7 +628,7 @@ const TaskCard = memo(({
               radius="sm"
               onClick={handleComplete}
               loading={isLoading}
-              style={{ backgroundColor: "#2b8a3e" }}
+              style={{ backgroundColor: colors.successDark }}
             >
               Tasdiqlash
             </Button>
@@ -644,7 +645,7 @@ const TaskCard = memo(({
           setComment("");
           setRollbackToUserId("");
         }}
-        title={< Text fw={600} c="#212529" > Vazifani bekor qilish</Text >}
+        title={< Text fw={600} c={colors.textPrimary} > Vazifani bekor qilish</Text >}
         centered
         size="md"
       >
@@ -663,11 +664,11 @@ const TaskCard = memo(({
             radius="sm"
             styles={{
               input: {
-                backgroundColor: "#f8f9fa",
-                border: "1px solid #e9ecef",
+                backgroundColor: colors.bg,
+                border: `1px solid ${colors.border}`,
               },
               label: {
-                color: "#495057",
+                color: colors.textSecondary,
                 fontWeight: 500,
                 marginBottom: 4,
               },
@@ -675,7 +676,7 @@ const TaskCard = memo(({
           />
 
           <Box>
-            <Text size="sm" fw={500} c="#495057" mb={4}>
+            <Text size="sm" fw={500} c={colors.textSecondary} mb={4}>
               Bekor qilish sababi <Text span c="red">*</Text>
             </Text>
             <Textarea
@@ -688,8 +689,8 @@ const TaskCard = memo(({
               radius="sm"
               styles={{
                 input: {
-                  backgroundColor: "#f8f9fa",
-                  border: "1px solid #e9ecef",
+                  backgroundColor: colors.bg,
+                  border: `1px solid ${colors.border}`,
                 },
               }}
             />
@@ -712,7 +713,7 @@ const TaskCard = memo(({
           </Box>
 
           <Box>
-            <Text size="sm" fw={500} c="#495057" mb={4}>
+            <Text size="sm" fw={500} c={colors.textSecondary} mb={4}>
               Qo'shimcha izoh
             </Text>
             <Textarea
@@ -725,14 +726,14 @@ const TaskCard = memo(({
               radius="sm"
               styles={{
                 input: {
-                  backgroundColor: "#f8f9fa",
-                  border: "1px solid #e9ecef",
+                  backgroundColor: colors.bg,
+                  border: `1px solid ${colors.border}`,
                 },
               }}
             />
           </Box>
 
-          <Group justify="flex-end" gap="xs" pt="sm" style={{ borderTop: "1px solid #e9ecef" }}>
+          <Group justify="flex-end" gap="xs" pt="sm" style={{ borderTop: `1px solid ${colors.border}` }}>
             <Button
               variant="outline"
               size="sm"
@@ -746,8 +747,8 @@ const TaskCard = memo(({
               disabled={isLoading}
               styles={{
                 root: {
-                  borderColor: "#e9ecef",
-                  color: "#495057",
+                  borderColor: colors.border,
+                  color: colors.textSecondary,
                 },
               }}
             >

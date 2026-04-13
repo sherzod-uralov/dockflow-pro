@@ -3,6 +3,7 @@
 import { Suspense } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import { Box, Loader, Stack, Text } from "@mantine/core";
+import { colors } from "@/lib/colors";
 import { PDFViewer } from "@/features/pdf-editor/component/pdf-viewer";
 
 function PDFViewerWrapper() {
@@ -22,7 +23,7 @@ function LoadingFallback() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        backgroundColor: "#f8f9fa",
+        backgroundColor: colors.bg,
       }}
     >
       <Stack align="center" gap="sm">

@@ -10,6 +10,7 @@ import { useGetAllDocuments } from "@/features/document";
 import { useGetAllWorkflowTemplates } from "@/features/workflow-template";
 import { useGetAllDocumentTypes } from "@/features/document-type";
 import { useCreateWorkflowFromTemplate } from "../hook/workflow.hook";
+import { colors } from "@/lib/colors";
 
 const workflowFromTemplateSchema = z.object({
   documentTypeId: z.string().min(1, "Hujjat turini tanlang"),
@@ -121,14 +122,14 @@ const WorkflowFromTemplateForm = ({
           radius="sm"
           styles={{
             input: {
-              backgroundColor: "#f8f9fa",
-              border: "1px solid #e9ecef",
+              backgroundColor: colors.bg,
+              border: `1px solid ${colors.border}`,
               "&:focus": {
-                borderColor: "#1e3a5f",
+                borderColor: colors.primary,
               },
             },
             label: {
-              color: "#495057",
+              color: colors.textSecondary,
               fontWeight: 500,
               marginBottom: 4,
             },
@@ -156,14 +157,14 @@ const WorkflowFromTemplateForm = ({
           radius="sm"
           styles={{
             input: {
-              backgroundColor: "#f8f9fa",
-              border: "1px solid #e9ecef",
+              backgroundColor: colors.bg,
+              border: `1px solid ${colors.border}`,
               "&:focus": {
-                borderColor: "#1e3a5f",
+                borderColor: colors.primary,
               },
             },
             label: {
-              color: "#495057",
+              color: colors.textSecondary,
               fontWeight: 500,
               marginBottom: 4,
             },
@@ -192,14 +193,14 @@ const WorkflowFromTemplateForm = ({
           radius="sm"
           styles={{
             input: {
-              backgroundColor: "#f8f9fa",
-              border: "1px solid #e9ecef",
+              backgroundColor: colors.bg,
+              border: `1px solid ${colors.border}`,
               "&:focus": {
-                borderColor: "#1e3a5f",
+                borderColor: colors.primary,
               },
             },
             label: {
-              color: "#495057",
+              color: colors.textSecondary,
               fontWeight: 500,
               marginBottom: 4,
             },
@@ -210,7 +211,7 @@ const WorkflowFromTemplateForm = ({
           justify="flex-end"
           gap="xs"
           pt="md"
-          style={{ borderTop: "1px solid #e9ecef" }}
+          style={{ borderTop: `1px solid ${colors.border}` }}
         >
           <Button
             variant="outline"
@@ -220,10 +221,10 @@ const WorkflowFromTemplateForm = ({
             disabled={createMutation.isLoading}
             styles={{
               root: {
-                borderColor: "#e9ecef",
-                color: "#495057",
+                borderColor: colors.border,
+                color: colors.textSecondary,
                 "&:hover": {
-                  backgroundColor: "#f8f9fa",
+                  backgroundColor: colors.bg,
                 },
               },
             }}
@@ -235,7 +236,7 @@ const WorkflowFromTemplateForm = ({
             size="sm"
             radius="sm"
             loading={createMutation.isLoading}
-            style={{ backgroundColor: "#1e3a5f" }}
+            style={{ backgroundColor: colors.primary }}
           >
             {createMutation.isLoading ? "Yaratilmoqda..." : "Yaratish"}
           </Button>

@@ -59,6 +59,7 @@ import {
   createWorkflowDocumentViewUrl,
 } from "@/utils/url-helper";
 import { useGetProfileQuery } from "@/features/login/hook/login.hook";
+import { colors } from "@/lib/colors";
 
 interface WorkflowViewProps {
   workflow: WorkflowApiResponse;
@@ -80,30 +81,30 @@ interface RollbackHistoryItem {
 // Status configs
 const getWorkflowStatusConfig = (status: string) => {
   const configs: Record<string, { label: string; bg: string; color: string }> = {
-    ACTIVE: { label: "Faol", bg: "#d0ebff", color: "#1971c2" },
-    COMPLETED: { label: "Tugallangan", bg: "#d3f9d8", color: "#2b8a3e" },
-    CANCELLED: { label: "Bekor qilingan", bg: "#ffe3e3", color: "#c92a2a" },
-    DRAFT: { label: "Tayyorlanmoqda", bg: "#f1f3f5", color: "#495057" },
+    ACTIVE: { label: "Faol", bg: colors.infoBg, color: colors.infoDark },
+    COMPLETED: { label: "Tugallangan", bg: colors.successBg, color: colors.successDark },
+    CANCELLED: { label: "Bekor qilingan", bg: colors.errorBg, color: colors.errorDark },
+    DRAFT: { label: "Tayyorlanmoqda", bg: colors.bgSubtle, color: colors.textSecondary },
   };
   return configs[status] || configs.DRAFT;
 };
 
 const getStepStatusConfig = (status: string) => {
   const configs: Record<string, { label: string; bg: string; color: string; Icon: any }> = {
-    NOT_STARTED: { label: "Boshlanmagan", bg: "#f1f3f5", color: "#495057", Icon: IconClock },
-    PENDING: { label: "Kutilmoqda", bg: "#f1f3f5", color: "#495057", Icon: IconClock },
-    IN_PROGRESS: { label: "Jarayonda", bg: "#d0ebff", color: "#1971c2", Icon: IconPlayerPlay },
-    COMPLETED: { label: "Tugallangan", bg: "#d3f9d8", color: "#2b8a3e", Icon: IconCircleCheck },
-    REJECTED: { label: "Rad etilgan", bg: "#ffe3e3", color: "#c92a2a", Icon: IconCircleX },
+    NOT_STARTED: { label: "Boshlanmagan", bg: colors.bgSubtle, color: colors.textSecondary, Icon: IconClock },
+    PENDING: { label: "Kutilmoqda", bg: colors.bgSubtle, color: colors.textSecondary, Icon: IconClock },
+    IN_PROGRESS: { label: "Jarayonda", bg: colors.infoBg, color: colors.infoDark, Icon: IconPlayerPlay },
+    COMPLETED: { label: "Tugallangan", bg: colors.successBg, color: colors.successDark, Icon: IconCircleCheck },
+    REJECTED: { label: "Rad etilgan", bg: colors.errorBg, color: colors.errorDark, Icon: IconCircleX },
   };
   return configs[status] || configs.NOT_STARTED;
 };
 
 const getActionTypeConfig = (actionType: string) => {
   const configs: Record<string, { label: string; bg: string; color: string; Icon: any }> = {
-    APPROVAL: { label: "Tasdiqlash", bg: "#d3f9d8", color: "#2b8a3e", Icon: IconCircleCheck },
-    REVIEW: { label: "Ko'rib chiqish", bg: "#d0ebff", color: "#1971c2", Icon: IconFileSearch },
-    SIGN: { label: "Imzolash", bg: "#f3d9fa", color: "#9c36b5", Icon: IconSignature },
+    APPROVAL: { label: "Tasdiqlash", bg: colors.successBg, color: colors.successDark, Icon: IconCircleCheck },
+    REVIEW: { label: "Ko'rib chiqish", bg: colors.infoBg, color: colors.infoDark, Icon: IconFileSearch },
+    SIGN: { label: "Imzolash", bg: colors.infoLight, color: colors.infoDark, Icon: IconSignature },
   };
   return configs[actionType] || configs.APPROVAL;
 };
@@ -347,7 +348,7 @@ const WorkflowView = memo(({ workflow, onClose }: WorkflowViewProps) => {
           position: "relative",
           paddingLeft: 32,
           paddingBottom: 24,
-          borderLeft: `2px solid ${isCurrentStep ? "#1e3a5f" : "#e9ecef"}`,
+          borderLeft: `2px solid ${isCurrentStep ? colors.primary : colors.border}`,
         }}
       >
         {/* Timeline dot */}
@@ -361,19 +362,19 @@ const WorkflowView = memo(({ workflow, onClose }: WorkflowViewProps) => {
             borderRadius: "50%",
             border: "2px solid",
             borderColor: isCurrentStep
-              ? "#1e3a5f"
+              ? colors.primary
               : step.status === "COMPLETED"
-                ? "#2b8a3e"
+                ? colors.successDark
                 : step.status === "REJECTED"
-                  ? "#c92a2a"
-                  : "#dee2e6",
+                  ? colors.errorDark
+                  : colors.borderLight,
             backgroundColor: isCurrentStep
-              ? "#1e3a5f"
+              ? colors.primary
               : step.status === "COMPLETED"
-                ? "#2b8a3e"
+                ? colors.successDark
                 : step.status === "REJECTED"
-                  ? "#c92a2a"
-                  : "#dee2e6",
+                  ? colors.errorDark
+                  : colors.borderLight,
           }}
         />
 
@@ -382,7 +383,7 @@ const WorkflowView = memo(({ workflow, onClose }: WorkflowViewProps) => {
           radius="sm"
           withBorder
           style={{
-            borderColor: isCurrentStep ? "#1e3a5f" : "#e9ecef",
+            borderColor: isCurrentStep ? colors.primary : colors.border,
             boxShadow: isCurrentStep ? "0 2px 8px rgba(30, 58, 95, 0.15)" : undefined,
           }}
         >
@@ -390,13 +391,13 @@ const WorkflowView = memo(({ workflow, onClose }: WorkflowViewProps) => {
             {/* Header */}
             <Group justify="space-between">
               <Group gap="xs">
-                <Text size="sm" fw={600} c="#212529">
+                <Text size="sm" fw={600} c={colors.textPrimary}>
                   Bosqich {step.order}
                 </Text>
                 {isCurrentStep && (
                   <Badge
                     size="sm"
-                    style={{ backgroundColor: "#1e3a5f" }}
+                    style={{ backgroundColor: colors.primary }}
                   >
                     Joriy
                   </Badge>
@@ -417,8 +418,8 @@ const WorkflowView = memo(({ workflow, onClose }: WorkflowViewProps) => {
             {/* Assigned user */}
             <Box>
               <Group gap="xs" mb={8}>
-                <IconUser size={16} color="#868e96" />
-                <Text size="sm" fw={500} c="#495057">
+                <IconUser size={16} color={colors.textDimmed} />
+                <Text size="sm" fw={500} c={colors.textSecondary}>
                   Mas'ul shaxs
                 </Text>
               </Group>
@@ -430,7 +431,7 @@ const WorkflowView = memo(({ workflow, onClose }: WorkflowViewProps) => {
                     .join("") || "??"}
                 </Avatar>
                 <Box>
-                  <Text size="sm" fw={500} c="#212529">
+                  <Text size="sm" fw={500} c={colors.textPrimary}>
                     {step.assignedToUser?.fullname || "N/A"}
                   </Text>
                   <Text size="xs" c="dimmed">
@@ -445,7 +446,7 @@ const WorkflowView = memo(({ workflow, onClose }: WorkflowViewProps) => {
               {step.startedAt && (
                 <Box>
                   <Text size="xs" c="dimmed">Boshlangan</Text>
-                  <Text size="sm" fw={500} c="#212529">
+                  <Text size="sm" fw={500} c={colors.textPrimary}>
                     {formatDateTime(step.startedAt)}
                   </Text>
                 </Box>
@@ -453,7 +454,7 @@ const WorkflowView = memo(({ workflow, onClose }: WorkflowViewProps) => {
               {step.completedAt && (
                 <Box>
                   <Text size="xs" c="dimmed">Tugallangan</Text>
-                  <Text size="sm" fw={500} c="#212529">
+                  <Text size="sm" fw={500} c={colors.textPrimary}>
                     {formatDateTime(step.completedAt)}
                   </Text>
                 </Box>
@@ -461,7 +462,7 @@ const WorkflowView = memo(({ workflow, onClose }: WorkflowViewProps) => {
               {step.dueDate && (
                 <Box>
                   <Text size="xs" c="dimmed">Muddat</Text>
-                  <Text size="sm" fw={500} c="#212529">
+                  <Text size="sm" fw={500} c={colors.textPrimary}>
                     {formatDate(step.dueDate)}
                   </Text>
                 </Box>
@@ -473,22 +474,22 @@ const WorkflowView = memo(({ workflow, onClose }: WorkflowViewProps) => {
               <Box
                 p="sm"
                 style={{
-                  backgroundColor: "#fff5f5",
-                  border: "1px solid #ffe3e3",
+                  backgroundColor: colors.errorLight,
+                  border: `1px solid ${colors.errorBg}`,
                   borderRadius: 4,
                 }}
               >
                 <Group gap="xs" align="flex-start">
-                  <IconAlertCircle size={16} color="#c92a2a" style={{ marginTop: 2 }} />
+                  <IconAlertCircle size={16} color={colors.errorDark} style={{ marginTop: 2 }} />
                   <Box style={{ flex: 1 }}>
-                    <Text size="sm" fw={500} c="#c92a2a">
+                    <Text size="sm" fw={500} c={colors.errorDark}>
                       Rad etilgan sabab:
                     </Text>
-                    <Text size="sm" c="#862e2e" mt={4}>
+                    <Text size="sm" c={colors.errorDark} mt={4}>
                       {step.rejectionReason}
                     </Text>
                     {step.rejectedAt && (
-                      <Text size="xs" c="#c92a2a" mt={4}>
+                      <Text size="xs" c={colors.errorDark} mt={4}>
                         {formatDateTime(step.rejectedAt)}
                       </Text>
                     )}
@@ -501,8 +502,8 @@ const WorkflowView = memo(({ workflow, onClose }: WorkflowViewProps) => {
             {filteredActions.length > 0 && (
               <Box>
                 <Group gap="xs" mb={8}>
-                  <IconMessage size={16} color="#868e96" />
-                  <Text size="sm" fw={500} c="#495057">
+                  <IconMessage size={16} color={colors.textDimmed} />
+                  <Text size="sm" fw={500} c={colors.textSecondary}>
                     Amallar tarixi
                   </Text>
                 </Group>
@@ -510,22 +511,22 @@ const WorkflowView = memo(({ workflow, onClose }: WorkflowViewProps) => {
                   {filteredActions.map((action) => {
                     const actionBg =
                       action.actionType === "REJECTED"
-                        ? "#fff5f5"
+                        ? colors.errorLight
                         : action.actionType === "APPROVED"
-                          ? "#ebfbee"
-                          : "#e7f5ff";
+                          ? colors.successLight
+                          : colors.primaryLight;
                     const actionBorder =
                       action.actionType === "REJECTED"
-                        ? "#ffe3e3"
+                        ? colors.errorBg
                         : action.actionType === "APPROVED"
-                          ? "#d3f9d8"
-                          : "#d0ebff";
+                          ? colors.successBg
+                          : colors.infoBg;
                     const actionColor =
                       action.actionType === "REJECTED"
-                        ? "#c92a2a"
+                        ? colors.errorDark
                         : action.actionType === "APPROVED"
-                          ? "#2b8a3e"
-                          : "#1971c2";
+                          ? colors.successDark
+                          : colors.infoDark;
 
                     return (
                       <Box
@@ -573,7 +574,7 @@ const WorkflowView = memo(({ workflow, onClose }: WorkflowViewProps) => {
                           </Badge>
                         </Group>
                         {action.comment && (
-                          <Text size="sm" c="#495057" mt={8}>
+                          <Text size="sm" c={colors.textSecondary} mt={8}>
                             {action.comment}
                           </Text>
                         )}
@@ -586,7 +587,7 @@ const WorkflowView = memo(({ workflow, onClose }: WorkflowViewProps) => {
 
             {/* View button for completed steps */}
             {step.status === "COMPLETED" && canEditDocument && (
-              <Box pt="sm" style={{ borderTop: "1px solid #e9ecef" }}>
+              <Box pt="sm" style={{ borderTop: `1px solid ${colors.border}` }}>
                 <Button
                   variant="outline"
                   size="sm"
@@ -596,10 +597,10 @@ const WorkflowView = memo(({ workflow, onClose }: WorkflowViewProps) => {
                   onClick={() => handleViewDocument(step.actionType)}
                   styles={{
                     root: {
-                      borderColor: "#e9ecef",
-                      color: "#495057",
+                      borderColor: colors.border,
+                      color: colors.textSecondary,
                       "&:hover": {
-                        backgroundColor: "#f8f9fa",
+                        backgroundColor: colors.bg,
                       },
                     },
                   }}
@@ -614,7 +615,7 @@ const WorkflowView = memo(({ workflow, onClose }: WorkflowViewProps) => {
               isCurrentUserAssigned &&
               step.status !== "COMPLETED" &&
               step.status !== "REJECTED" && (
-                <Box pt="sm" style={{ borderTop: "1px solid #e9ecef" }}>
+                <Box pt="sm" style={{ borderTop: `1px solid ${colors.border}` }}>
                   <Stack gap="xs">
                     {canEditDocument && (
                       <Button
@@ -627,10 +628,10 @@ const WorkflowView = memo(({ workflow, onClose }: WorkflowViewProps) => {
                         disabled={isLoading}
                         styles={{
                           root: {
-                            borderColor: "#e9ecef",
-                            color: "#495057",
+                            borderColor: colors.border,
+                            color: colors.textSecondary,
                             "&:hover": {
-                              backgroundColor: "#f8f9fa",
+                              backgroundColor: colors.bg,
                             },
                           },
                         }}
@@ -646,7 +647,7 @@ const WorkflowView = memo(({ workflow, onClose }: WorkflowViewProps) => {
                           radius="sm"
                           onClick={() => handleCompleteStep(step.id)}
                           disabled={isLoading}
-                          style={{ backgroundColor: "#2b8a3e" }}
+                          style={{ backgroundColor: colors.successDark }}
                           leftSection={<IconCircleCheck size={16} />}
                         >
                           {isLoading ? "Yuklanmoqda..." : "Tasdiqlash"}
@@ -656,7 +657,7 @@ const WorkflowView = memo(({ workflow, onClose }: WorkflowViewProps) => {
                           radius="sm"
                           onClick={() => handleRejectClick(step)}
                           disabled={isLoading}
-                          style={{ backgroundColor: "#c92a2a" }}
+                          style={{ backgroundColor: colors.errorDark }}
                           leftSection={<IconCircleX size={16} />}
                         >
                           Rad etish
@@ -681,12 +682,12 @@ const WorkflowView = memo(({ workflow, onClose }: WorkflowViewProps) => {
   return (
     <Stack gap="lg">
       {/* Main Info Card */}
-      <Paper p="lg" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+      <Paper p="lg" radius="sm" withBorder style={{ borderColor: colors.border }}>
         <Group justify="space-between" align="flex-start" mb="md">
           <Box>
             <Group gap="xs" mb={4}>
-              <IconFileText size={20} color="#1e3a5f" />
-              <Text size="lg" fw={600} c="#212529">
+              <IconFileText size={20} color={colors.primary} />
+              <Text size="lg" fw={600} c={colors.textPrimary}>
                 {workflow.document.title}
               </Text>
             </Group>
@@ -700,8 +701,8 @@ const WorkflowView = memo(({ workflow, onClose }: WorkflowViewProps) => {
               size="sm"
               style={{
                 cursor: "pointer",
-                borderColor: "#e9ecef",
-                color: "#495057",
+                borderColor: colors.border,
+                color: colors.textSecondary,
               }}
               rightSection={<IconCopy size={12} />}
               onClick={() => handleCopyToClipboard(workflow.id, "ID nusxalandi")}
@@ -714,27 +715,27 @@ const WorkflowView = memo(({ workflow, onClose }: WorkflowViewProps) => {
         {/* Document Info */}
         <Box mb="md">
           <Group gap="xs" mb={8}>
-            <IconFileText size={16} color="#868e96" />
-            <Text size="sm" fw={500} c="#495057">
+            <IconFileText size={16} color={colors.textDimmed} />
+            <Text size="sm" fw={500} c={colors.textSecondary}>
               Hujjat ma'lumotlari
             </Text>
           </Group>
           <Box
             p="sm"
             style={{
-              backgroundColor: "#f8f9fa",
+              backgroundColor: colors.bg,
               borderRadius: 4,
             }}
           >
             <Stack gap={4}>
-              <Text size="sm" c="#495057">
+              <Text size="sm" c={colors.textSecondary}>
                 <Text span fw={500}>Raqam:</Text> {workflow.document.documentNumber}
               </Text>
-              <Text size="sm" c="#495057">
+              <Text size="sm" c={colors.textSecondary}>
                 <Text span fw={500}>Versiya:</Text> {workflow.document.version}
               </Text>
               {workflow.document.description && (
-                <Text size="sm" c="#495057">
+                <Text size="sm" c={colors.textSecondary}>
                   <Text span fw={500}>Tavsif:</Text> {workflow.document.description}
                 </Text>
               )}
@@ -742,7 +743,7 @@ const WorkflowView = memo(({ workflow, onClose }: WorkflowViewProps) => {
           </Box>
         </Box>
 
-        <Divider color="#e9ecef" mb="md" />
+        <Divider color={colors.border} mb="md" />
 
         {/* Status and Type */}
         <SimpleGrid cols={{ base: 1, md: 3 }} spacing="md" mb="md">
@@ -775,25 +776,25 @@ const WorkflowView = memo(({ workflow, onClose }: WorkflowViewProps) => {
           </Box>
           <Box>
             <Text size="sm" c="dimmed" mb={4}>Jarayon</Text>
-            <Text size="sm" fw={600} c="#212529" style={{ fontFamily: "monospace" }}>
+            <Text size="sm" fw={600} c={colors.textPrimary} style={{ fontFamily: "monospace" }}>
               {workflow.currentStepOrder} / {workflow.workflowSteps.length}
             </Text>
           </Box>
         </SimpleGrid>
 
-        <Divider color="#e9ecef" mb="md" />
+        <Divider color={colors.border} mb="md" />
 
         {/* Timestamps */}
         <SimpleGrid cols={2} spacing="md">
           <Box>
             <Text size="sm" c="dimmed" mb={4}>Yaratilgan</Text>
-            <Text size="sm" fw={500} c="#212529">
+            <Text size="sm" fw={500} c={colors.textPrimary}>
               {formatDateTime(workflow.createdAt)}
             </Text>
           </Box>
           <Box>
             <Text size="sm" c="dimmed" mb={4}>Yangilangan</Text>
-            <Text size="sm" fw={500} c="#212529">
+            <Text size="sm" fw={500} c={colors.textPrimary}>
               {formatDateTime(workflow.updatedAt)}
             </Text>
           </Box>
@@ -802,10 +803,10 @@ const WorkflowView = memo(({ workflow, onClose }: WorkflowViewProps) => {
 
       {/* Rollback History Card */}
       {rollbackHistory.length > 0 && (
-        <Paper p="lg" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+        <Paper p="lg" radius="sm" withBorder style={{ borderColor: colors.border }}>
           <Group gap="xs" mb={4}>
-            <IconRotate size={20} color="#e67700" />
-            <Text size="lg" fw={600} c="#212529">
+            <IconRotate size={20} color={colors.warningDark} />
+            <Text size="lg" fw={600} c={colors.textPrimary}>
               Qaytarishlar tarixi
             </Text>
           </Group>
@@ -819,8 +820,8 @@ const WorkflowView = memo(({ workflow, onClose }: WorkflowViewProps) => {
                 key={rollback.id}
                 p="md"
                 style={{
-                  backgroundColor: "#fff8f1",
-                  border: "1px solid #ffe8cc",
+                  backgroundColor: colors.warningLight,
+                  border: `1px solid ${colors.warningBg}`,
                   borderRadius: 4,
                 }}
               >
@@ -830,14 +831,14 @@ const WorkflowView = memo(({ workflow, onClose }: WorkflowViewProps) => {
                       width: 40,
                       height: 40,
                       borderRadius: "50%",
-                      backgroundColor: "#ffe8cc",
+                      backgroundColor: colors.warningBg,
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
                       flexShrink: 0,
                     }}
                   >
-                    <IconArrowLeft size={20} color="#e67700" />
+                    <IconArrowLeft size={20} color={colors.warningDark} />
                   </Box>
                   <Box style={{ flex: 1 }}>
                     {/* Header */}
@@ -862,8 +863,8 @@ const WorkflowView = memo(({ workflow, onClose }: WorkflowViewProps) => {
                         size="sm"
                         leftSection={<IconRotate size={12} />}
                         style={{
-                          backgroundColor: "#ffe8cc",
-                          color: "#e67700",
+                          backgroundColor: colors.warningBg,
+                          color: colors.warningDark,
                         }}
                       >
                         Qaytarildi
@@ -876,7 +877,7 @@ const WorkflowView = memo(({ workflow, onClose }: WorkflowViewProps) => {
                       mb="sm"
                       style={{
                         backgroundColor: "white",
-                        border: "1px solid #ffe8cc",
+                        border: `1px solid ${colors.warningBg}`,
                         borderRadius: 4,
                       }}
                     >
@@ -896,10 +897,10 @@ const WorkflowView = memo(({ workflow, onClose }: WorkflowViewProps) => {
                         </Group>
 
                         <Group gap={4}>
-                          <Text size="xs" fw={500} c="#e67700">
+                          <Text size="xs" fw={500} c={colors.warningDark}>
                             qaytarildi
                           </Text>
-                          <IconArrowRight size={14} color="#e67700" />
+                          <IconArrowRight size={14} color={colors.warningDark} />
                         </Group>
 
                         <Group gap="xs">
@@ -923,22 +924,22 @@ const WorkflowView = memo(({ workflow, onClose }: WorkflowViewProps) => {
                       p="sm"
                       style={{
                         backgroundColor: "white",
-                        border: "1px solid #ffe8cc",
+                        border: `1px solid ${colors.warningBg}`,
                         borderRadius: 4,
                       }}
                     >
-                      <Text size="xs" fw={500} c="#e67700" mb={4}>
+                      <Text size="xs" fw={500} c={colors.warningDark} mb={4}>
                         Rad etish sababi:
                       </Text>
-                      <Text size="sm" c="#495057">
+                      <Text size="sm" c={colors.textSecondary}>
                         {rollback.rejectionReason}
                       </Text>
                       {rollback.comment && rollback.comment !== rollback.rejectionReason && (
                         <>
-                          <Text size="xs" fw={500} c="#e67700" mt={8} mb={4}>
+                          <Text size="xs" fw={500} c={colors.warningDark} mt={8} mb={4}>
                             Qo'shimcha izoh:
                           </Text>
-                          <Text size="sm" c="#495057">
+                          <Text size="sm" c={colors.textSecondary}>
                             {rollback.comment}
                           </Text>
                         </>
@@ -953,8 +954,8 @@ const WorkflowView = memo(({ workflow, onClose }: WorkflowViewProps) => {
       )}
 
       {/* Workflow Steps Timeline */}
-      <Paper p="lg" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
-        <Text size="lg" fw={600} c="#212529" mb={4}>
+      <Paper p="lg" radius="sm" withBorder style={{ borderColor: colors.border }}>
+        <Text size="lg" fw={600} c={colors.textPrimary} mb={4}>
           Hujjat aylanmasi bosqichlari
         </Text>
         <Text size="sm" c="dimmed" mb="lg">
@@ -978,10 +979,10 @@ const WorkflowView = memo(({ workflow, onClose }: WorkflowViewProps) => {
             onClick={onClose}
             styles={{
               root: {
-                borderColor: "#e9ecef",
-                color: "#495057",
+                borderColor: colors.border,
+                color: colors.textSecondary,
                 "&:hover": {
-                  backgroundColor: "#f8f9fa",
+                  backgroundColor: colors.bg,
                 },
               },
             }}
@@ -996,7 +997,7 @@ const WorkflowView = memo(({ workflow, onClose }: WorkflowViewProps) => {
         opened={rejectDialogOpen}
         onClose={handleCloseDialog}
         title={
-          <Text fw={600} c="#212529">
+          <Text fw={600} c={colors.textPrimary}>
             Bosqichni rad etish
           </Text>
         }
@@ -1005,7 +1006,7 @@ const WorkflowView = memo(({ workflow, onClose }: WorkflowViewProps) => {
         centered
         styles={{
           header: {
-            borderBottom: "1px solid #e9ecef",
+            borderBottom: `1px solid ${colors.border}`,
             paddingBottom: 12,
           },
           body: {
@@ -1021,10 +1022,10 @@ const WorkflowView = memo(({ workflow, onClose }: WorkflowViewProps) => {
           {/* Rejection Reason */}
           <Box>
             <Group gap={4} mb={4}>
-              <Text size="sm" fw={500} c="#495057">
+              <Text size="sm" fw={500} c={colors.textSecondary}>
                 Rad etish sababi
               </Text>
-              <Text size="sm" c="#c92a2a">*</Text>
+              <Text size="sm" c={colors.errorDark}>*</Text>
               <Text size="xs" c="dimmed">(kamida 10 ta belgi)</Text>
             </Group>
             <Textarea
@@ -1041,25 +1042,25 @@ const WorkflowView = memo(({ workflow, onClose }: WorkflowViewProps) => {
               }
               styles={{
                 input: {
-                  backgroundColor: "#f8f9fa",
-                  border: "1px solid #e9ecef",
+                  backgroundColor: colors.bg,
+                  border: `1px solid ${colors.border}`,
                   "&:focus": {
-                    borderColor: "#1e3a5f",
+                    borderColor: colors.primary,
                   },
                 },
               }}
             />
             <Group justify="space-between" mt={4}>
               {rejectionReason.length === 0 ? (
-                <Text size="xs" c="#c92a2a">
+                <Text size="xs" c={colors.errorDark}>
                   Bu maydon majburiy (kamida 10 ta belgi)
                 </Text>
               ) : rejectionReason.length < 10 ? (
-                <Text size="xs" c="#c92a2a">
+                <Text size="xs" c={colors.errorDark}>
                   Yana {10 - rejectionReason.length} ta belgi kerak
                 </Text>
               ) : (
-                <Text size="xs" c="#2b8a3e">✓ Yetarli</Text>
+                <Text size="xs" c={colors.successDark}>✓ Yetarli</Text>
               )}
               <Text size="xs" c="dimmed">
                 {rejectionReason.length}/500
@@ -1069,7 +1070,7 @@ const WorkflowView = memo(({ workflow, onClose }: WorkflowViewProps) => {
 
           {/* Additional Comment */}
           <Box>
-            <Text size="sm" fw={500} c="#495057" mb={4}>
+            <Text size="sm" fw={500} c={colors.textSecondary} mb={4}>
               Qo'shimcha izoh
             </Text>
             <Textarea
@@ -1081,10 +1082,10 @@ const WorkflowView = memo(({ workflow, onClose }: WorkflowViewProps) => {
               disabled={isLoading}
               styles={{
                 input: {
-                  backgroundColor: "#f8f9fa",
-                  border: "1px solid #e9ecef",
+                  backgroundColor: colors.bg,
+                  border: `1px solid ${colors.border}`,
                   "&:focus": {
-                    borderColor: "#1e3a5f",
+                    borderColor: colors.primary,
                   },
                 },
               }}
@@ -1095,7 +1096,7 @@ const WorkflowView = memo(({ workflow, onClose }: WorkflowViewProps) => {
           </Box>
 
           {/* Rollback Option */}
-          <Box pt="sm" style={{ borderTop: "1px solid #e9ecef" }}>
+          <Box pt="sm" style={{ borderTop: `1px solid ${colors.border}` }}>
             <Checkbox
               label="Hujjatni qaytarish (rollback)"
               checked={enableRollback}
@@ -1111,7 +1112,7 @@ const WorkflowView = memo(({ workflow, onClose }: WorkflowViewProps) => {
               styles={{
                 label: {
                   fontWeight: 500,
-                  color: "#495057",
+                  color: colors.textSecondary,
                 },
               }}
             />
@@ -1125,10 +1126,10 @@ const WorkflowView = memo(({ workflow, onClose }: WorkflowViewProps) => {
             {enableRollback && (
               <Box ml={28} mt="sm">
                 <Group gap={4} mb={4}>
-                  <Text size="sm" fw={500} c="#495057">
+                  <Text size="sm" fw={500} c={colors.textSecondary}>
                     Qaytarish uchun foydalanuvchi
                   </Text>
-                  <Text size="sm" c="#c92a2a">*</Text>
+                  <Text size="sm" c={colors.errorDark}>*</Text>
                 </Group>
 
                 {isLoadingUsers ? (
@@ -1136,7 +1137,7 @@ const WorkflowView = memo(({ workflow, onClose }: WorkflowViewProps) => {
                     Foydalanuvchilar yuklanmoqda...
                   </Text>
                 ) : enrichedUsers.length === 0 ? (
-                  <Text size="sm" c="#c92a2a">
+                  <Text size="sm" c={colors.errorDark}>
                     Avvalgi foydalanuvchilar topilmadi
                   </Text>
                 ) : (
@@ -1168,10 +1169,10 @@ const WorkflowView = memo(({ workflow, onClose }: WorkflowViewProps) => {
                       radius="sm"
                       styles={{
                         input: {
-                          backgroundColor: "#f8f9fa",
-                          border: "1px solid #e9ecef",
+                          backgroundColor: colors.bg,
+                          border: `1px solid ${colors.border}`,
                           "&:focus": {
-                            borderColor: "#1e3a5f",
+                            borderColor: colors.primary,
                           },
                         },
                       }}
@@ -1195,19 +1196,19 @@ const WorkflowView = memo(({ workflow, onClose }: WorkflowViewProps) => {
             <Box
               p="sm"
               style={{
-                backgroundColor: "#fff5f5",
-                border: "1px solid #ffe3e3",
+                backgroundColor: colors.errorLight,
+                border: `1px solid ${colors.errorBg}`,
                 borderRadius: 4,
               }}
             >
-              <Text size="sm" c="#c92a2a">
+              <Text size="sm" c={colors.errorDark}>
                 ⚠️ {workflowValidation.error}
               </Text>
             </Box>
           )}
 
           {/* Footer */}
-          <Group justify="flex-end" gap="xs" pt="md" style={{ borderTop: "1px solid #e9ecef" }}>
+          <Group justify="flex-end" gap="xs" pt="md" style={{ borderTop: `1px solid ${colors.border}` }}>
             <Button
               variant="outline"
               size="sm"
@@ -1216,10 +1217,10 @@ const WorkflowView = memo(({ workflow, onClose }: WorkflowViewProps) => {
               disabled={isLoading}
               styles={{
                 root: {
-                  borderColor: "#e9ecef",
-                  color: "#495057",
+                  borderColor: colors.border,
+                  color: colors.textSecondary,
                   "&:hover": {
-                    backgroundColor: "#f8f9fa",
+                    backgroundColor: colors.bg,
                   },
                 },
               }}
@@ -1237,7 +1238,7 @@ const WorkflowView = memo(({ workflow, onClose }: WorkflowViewProps) => {
                 (enableRollback && !selectedRollbackUserId)
               }
               loading={isLoading}
-              style={{ backgroundColor: "#c92a2a" }}
+              style={{ backgroundColor: colors.errorDark }}
             >
               {isLoading ? "Rad etilmoqda..." : "Rad etish"}
             </Button>

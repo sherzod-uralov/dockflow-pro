@@ -179,7 +179,7 @@ const DocumentView = ({ id }: { id: string }) => {
 
       {data && (
         <>
-          <Box pb="md" style={{ borderBottom: "1px solid ${colors.border}" }}>
+          <Box pb="md" style={{ borderBottom: `1px solid ${colors.border}` }}>
             <Text size="lg" fw={600} c={colors.textPrimary} mb={4}>
               {data.title}
             </Text>
@@ -197,7 +197,7 @@ const DocumentView = ({ id }: { id: string }) => {
           </SimpleGrid>
 
           {/* Yaratuvchi va sanalar */}
-          <Box pt="md" style={{ borderTop: "1px solid ${colors.border}" }}>
+          <Box pt="md" style={{ borderTop: `1px solid ${colors.border}` }}>
             <SimpleGrid cols={{ base: 1, md: 2 }} spacing="sm">
               <InfoCard
                 icon={<IconUser size={14} />}
@@ -226,10 +226,10 @@ const DocumentView = ({ id }: { id: string }) => {
 
           {/* Biriktirilgan fayllar */}
           {data.attachments && data.attachments.length > 0 && (
-            <Box pt="md" style={{ borderTop: "1px solid ${colors.border}" }}>
+            <Box pt="md" style={{ borderTop: `1px solid ${colors.border}` }}>
               <Group justify="space-between" mb="sm">
                 <Group gap="xs">
-                  <IconFileText size={16} color="#868e96" />
+                  <IconFileText size={16} color={colors.textDimmed} />
                   <Text size="sm" fw={600} c={colors.textPrimary}>
                     Biriktirilgan fayllar
                   </Text>
@@ -242,9 +242,9 @@ const DocumentView = ({ id }: { id: string }) => {
                   onClick={historyModal.openModal}
                   styles={{
                     root: {
-                      backgroundColor: "#f0f4ff",
+                      backgroundColor: colors.primaryLight,
                       color: colors.primary,
-                      "&:hover": { backgroundColor: "#dbe4ff" },
+                      "&:hover": { backgroundColor: colors.infoBg },
                     },
                   }}
                 >

@@ -53,6 +53,7 @@ import { ChatInfoDrawer } from "./chat-info-drawer";
 import { ChatSettingsDrawer } from "./chat-settings-drawer";
 import { ForwardModal } from "./forward-modal";
 import { CustomModal, useModal } from "@/components/shared/ui/custom-modal";
+import { colors } from "@/lib/colors";
 
 interface Props {
   chatId: string;
@@ -376,7 +377,7 @@ export const ChatConversation = ({ chatId, currentUserId, onChatDeleted, onBack 
   if (!chat) {
     return (
       <Center style={{ height: "100%" }}>
-        <Loader size="md" color="#1e3a5f" />
+        <Loader size="md" color={colors.primary} />
       </Center>
     );
   }
@@ -389,7 +390,7 @@ export const ChatConversation = ({ chatId, currentUserId, onChatDeleted, onBack 
         p="sm"
         gap="xs"
         wrap="nowrap"
-        style={{ borderBottom: "1px solid #e9ecef", flexShrink: 0, backgroundColor: "#fff" }}
+        style={{ borderBottom: `1px solid ${colors.border}`, flexShrink: 0, backgroundColor: colors.white }}
       >
         {onBack && (
           <ActionIcon variant="subtle" color="gray" onClick={onBack}>
@@ -401,12 +402,12 @@ export const ChatConversation = ({ chatId, currentUserId, onChatDeleted, onBack 
             size="md"
             radius="xl"
             src={chat.avatarUrl || chat.peer?.avatarUrl}
-            style={{ backgroundColor: isGroup ? "#fff3e0" : "#e7f5ff" }}
+            style={{ backgroundColor: isGroup ? colors.warningBg : colors.primaryLight }}
           >
-            {isGroup ? <IconUsers size={20} color="#f39c12" /> : null}
+            {isGroup ? <IconUsers size={20} color={colors.warning} /> : null}
           </Avatar>
           <Box>
-            <Text size="sm" fw={600} c="#212529">
+            <Text size="sm" fw={600} c={colors.textPrimary}>
               {chat.title}
             </Text>
             <Text size="xs" c="dimmed">
@@ -451,13 +452,13 @@ export const ChatConversation = ({ chatId, currentUserId, onChatDeleted, onBack 
       {/* Messages */}
       <ScrollArea
         viewportRef={scrollRef}
-        style={{ flex: 1, minHeight: 0, backgroundColor: "#f8f9fa" }}
+        style={{ flex: 1, minHeight: 0, backgroundColor: colors.bg }}
         offsetScrollbars
       >
         <Box p="md">
           {isLoading ? (
             <Center py="xl">
-              <Loader size="sm" color="#1e3a5f" />
+              <Loader size="sm" color={colors.primary} />
             </Center>
           ) : allMessages.length === 0 ? (
             <Center py="xl">
@@ -509,20 +510,20 @@ export const ChatConversation = ({ chatId, currentUserId, onChatDeleted, onBack 
         <Paper
           p="xs"
           style={{
-            borderTop: "1px solid #e9ecef",
-            backgroundColor: "#e7f5ff",
-            borderLeft: "3px solid #1e3a5f",
+            borderTop: `1px solid ${colors.border}`,
+            backgroundColor: colors.primaryLight,
+            borderLeft: `3px solid ${colors.primary}`,
             flexShrink: 0,
           }}
         >
           <Group justify="space-between" gap="xs">
             <Group gap="xs">
-              {replyTo ? <IconCornerDownRight size={14} color="#1e3a5f" /> : (
-                <Text size="xs" fw={600} c="#1e3a5f">Tahrirlash</Text>
+              {replyTo ? <IconCornerDownRight size={14} color={colors.primary} /> : (
+                <Text size="xs" fw={600} c={colors.primary}>Tahrirlash</Text>
               )}
               {replyTo && (
                 <Box>
-                  <Text size="xs" fw={600} c="#1e3a5f">{replyTo.sender.fullname}</Text>
+                  <Text size="xs" fw={600} c={colors.primary}>{replyTo.sender.fullname}</Text>
                   <Text size="xs" c="dimmed" lineClamp={1}>{replyTo.content}</Text>
                 </Box>
               )}
@@ -543,7 +544,7 @@ export const ChatConversation = ({ chatId, currentUserId, onChatDeleted, onBack 
       )}
 
       {/* Input */}
-      <Box p="sm" style={{ borderTop: "1px solid #e9ecef", backgroundColor: "#fff", flexShrink: 0 }}>
+      <Box p="sm" style={{ borderTop: `1px solid ${colors.border}`, backgroundColor: colors.white, flexShrink: 0 }}>
         <Group gap="xs" align="flex-end">
           <FileButton onChange={handleFileSelect} accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.zip">
             {(props) => (
@@ -571,9 +572,9 @@ export const ChatConversation = ({ chatId, currentUserId, onChatDeleted, onBack 
             style={{ flex: 1 }}
             styles={{
               input: {
-                backgroundColor: "#f8f9fa",
-                border: "1px solid #e9ecef",
-                "&:focus": { borderColor: "#1e3a5f" },
+                backgroundColor: colors.bg,
+                border: `1px solid ${colors.border}`,
+                "&:focus": { borderColor: colors.primary },
               },
             }}
           />
@@ -585,7 +586,7 @@ export const ChatConversation = ({ chatId, currentUserId, onChatDeleted, onBack 
               onClick={handleSend}
               disabled={sendText.isLoading}
               loading={sendText.isLoading || editMessage.isLoading}
-              style={{ backgroundColor: "#1e3a5f", color: "#fff" }}
+              style={{ backgroundColor: colors.primary, color: colors.white }}
             >
               <IconSend size={18} />
             </ActionIcon>
@@ -596,8 +597,8 @@ export const ChatConversation = ({ chatId, currentUserId, onChatDeleted, onBack 
                 radius="md"
                 onClick={isRecording ? handleStopRecording : handleStartRecording}
                 style={{
-                  backgroundColor: isRecording ? "#e74c3c" : "#1e3a5f",
-                  color: "#fff",
+                  backgroundColor: isRecording ? colors.error : colors.primary,
+                  color: colors.white,
                 }}
               >
                 {isRecording ? <IconMicrophoneOff size={18} /> : <IconMicrophone size={18} />}
@@ -657,7 +658,7 @@ export const ChatConversation = ({ chatId, currentUserId, onChatDeleted, onBack 
           font-size: 18px;
           line-height: 1;
           animation: typingDot 1.4s infinite;
-          color: #1e3a5f;
+          color: ${colors.primary};
         }
         .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
         .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }

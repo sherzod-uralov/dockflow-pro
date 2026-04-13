@@ -243,11 +243,11 @@ const WorkflowTemplateForm = ({
             error={form.formState.errors.name?.message}
             styles={{
               input: {
-                backgroundColor: "#f8f9fa",
-                border: "1px solid #e9ecef",
-                "&:focus": { borderColor: "#1e3a5f" },
+                backgroundColor: colors.bg,
+                border: `1px solid ${colors.border}`,
+                "&:focus": { borderColor: colors.primary },
               },
-              label: { color: "#495057", fontWeight: 500, marginBottom: 4 },
+              label: { color: colors.textSecondary, fontWeight: 500, marginBottom: 4 },
             }}
             style={{ gridColumn: "span 2" }}
           />
@@ -262,11 +262,11 @@ const WorkflowTemplateForm = ({
             error={form.formState.errors.description?.message}
             styles={{
               input: {
-                backgroundColor: "#f8f9fa",
-                border: "1px solid #e9ecef",
-                "&:focus": { borderColor: "#1e3a5f" },
+                backgroundColor: colors.bg,
+                border: `1px solid ${colors.border}`,
+                "&:focus": { borderColor: colors.primary },
               },
-              label: { color: "#495057", fontWeight: 500, marginBottom: 4 },
+              label: { color: colors.textSecondary, fontWeight: 500, marginBottom: 4 },
             }}
             style={{ gridColumn: "span 2" }}
           />
@@ -283,10 +283,10 @@ const WorkflowTemplateForm = ({
             searchable
             styles={{
               input: {
-                backgroundColor: "#f8f9fa",
-                border: "1px solid #e9ecef",
+                backgroundColor: colors.bg,
+                border: `1px solid ${colors.border}`,
               },
-              label: { color: "#495057", fontWeight: 500, marginBottom: 4 },
+              label: { color: colors.textSecondary, fontWeight: 500, marginBottom: 4 },
             }}
           />
 
@@ -301,10 +301,10 @@ const WorkflowTemplateForm = ({
             radius="sm"
             styles={{
               input: {
-                backgroundColor: "#f8f9fa",
-                border: "1px solid #e9ecef",
+                backgroundColor: colors.bg,
+                border: `1px solid ${colors.border}`,
               },
-              label: { color: "#495057", fontWeight: 500, marginBottom: 4 },
+              label: { color: colors.textSecondary, fontWeight: 500, marginBottom: 4 },
             }}
           />
 
@@ -313,7 +313,7 @@ const WorkflowTemplateForm = ({
             checked={form.watch("isActive")}
             onChange={(e) => form.setValue("isActive", e.currentTarget.checked)}
             styles={{
-              label: { color: "#495057", fontWeight: 500 },
+              label: { color: colors.textSecondary, fontWeight: 500 },
             }}
           />
 
@@ -322,7 +322,7 @@ const WorkflowTemplateForm = ({
             checked={form.watch("isPublic")}
             onChange={(e) => form.setValue("isPublic", e.currentTarget.checked)}
             styles={{
-              label: { color: "#495057", fontWeight: 500 },
+              label: { color: colors.textSecondary, fontWeight: 500 },
             }}
           />
         </SimpleGrid>
@@ -334,7 +334,7 @@ const WorkflowTemplateForm = ({
           variant="light"
           radius="sm"
         >
-          <Text size="sm" c="#495057">
+          <Text size="sm" c={colors.textSecondary}>
             Workflow bosqichlari ketma-ket yoki parallel bajariladi. Har bir bosqich uchun mas'ul shaxsni belgilang.
           </Text>
         </Alert>
@@ -343,7 +343,7 @@ const WorkflowTemplateForm = ({
         <Box>
           <Group justify="space-between" mb="sm">
             <Box>
-              <Text size="md" fw={600} c="#212529">
+              <Text size="md" fw={600} c={colors.textPrimary}>
                 Workflow bosqichlari
               </Text>
               <Text size="sm" c="dimmed">
@@ -376,14 +376,14 @@ const WorkflowTemplateForm = ({
                 p="md"
                 radius="sm"
                 withBorder
-                style={{ borderColor: "#e9ecef" }}
+                style={{ borderColor: colors.border }}
               >
                 <Group justify="space-between" mb="sm">
                   <Group gap="xs">
                     <Badge size="sm" variant="light" color="gray">
                       {index + 1}
                     </Badge>
-                    <Text size="sm" fw={500} c="#212529">
+                    <Text size="sm" fw={500} c={colors.textPrimary}>
                       Bosqich {index + 1}
                     </Text>
                   </Group>
@@ -415,10 +415,10 @@ const WorkflowTemplateForm = ({
                     }}
                     styles={{
                       input: {
-                        backgroundColor: "#f8f9fa",
-                        border: "1px solid #e9ecef",
+                        backgroundColor: colors.bg,
+                        border: `1px solid ${colors.border}`,
                       },
-                      label: { color: "#495057", fontWeight: 500, marginBottom: 4 },
+                      label: { color: colors.textSecondary, fontWeight: 500, marginBottom: 4 },
                     }}
                   />
 
@@ -432,10 +432,10 @@ const WorkflowTemplateForm = ({
                     radius="sm"
                     styles={{
                       input: {
-                        backgroundColor: "#f8f9fa",
-                        border: "1px solid #e9ecef",
+                        backgroundColor: colors.bg,
+                        border: `1px solid ${colors.border}`,
                       },
-                      label: { color: "#495057", fontWeight: 500, marginBottom: 4 },
+                      label: { color: colors.textSecondary, fontWeight: 500, marginBottom: 4 },
                     }}
                   />
                 </SimpleGrid>
@@ -451,7 +451,7 @@ const WorkflowTemplateForm = ({
         </Box>
 
         {/* Actions */}
-        <Group justify="flex-end" gap="xs" pt="md" style={{ borderTop: "1px solid #e9ecef" }}>
+        <Group justify="flex-end" gap="xs" pt="md" style={{ borderTop: `1px solid ${colors.border}` }}>
           <Button
             variant="light"
             size="sm"
@@ -467,7 +467,7 @@ const WorkflowTemplateForm = ({
             size="sm"
             radius="sm"
             loading={isLoading}
-            style={{ backgroundColor: "#1e3a5f" }}
+            style={{ backgroundColor: colors.primary }}
           >
             {isLoading
               ? isUpdate
@@ -482,5 +482,6 @@ const WorkflowTemplateForm = ({
     </form>
   );
 };
+import { colors } from "@/lib/colors";
 
 export default WorkflowTemplateForm;

@@ -43,6 +43,7 @@ import {
 import { ConfirmationModal, useModal } from "@/components/shared/ui/custom-modal";
 import { SessionGetResponse } from "@/features/sessions/type/sessions.type";
 import { formatDate } from "@/lib/date-utils";
+import { colors } from "@/lib/colors";
 
 const getDeviceIcon = (device?: string) => {
   switch (device) {
@@ -107,8 +108,8 @@ const SessionCard = ({
       radius="sm"
       withBorder
       style={{
-        borderColor: isCurrent ? "#2ecc71" : "#e9ecef",
-        backgroundColor: isCurrent ? "#f0fdf4" : "#fff",
+        borderColor: isCurrent ? colors.success : colors.border,
+        backgroundColor: isCurrent ? colors.successLight : "#fff",
       }}
     >
       <Group justify="space-between" wrap="nowrap" align="flex-start">
@@ -127,7 +128,7 @@ const SessionCard = ({
           {/* Info */}
           <Box style={{ flex: 1, minWidth: 0 }}>
             <Group gap="xs" mb={4}>
-              <Text size="md" fw={600} c="#212529">
+              <Text size="md" fw={600} c={colors.textPrimary}>
                 {session.browser || "Noma'lum brauzer"}
               </Text>
               <Text size="sm" c="dimmed">
@@ -149,8 +150,8 @@ const SessionCard = ({
             </Group>
 
             <Group gap="xs" mb={2}>
-              <BrowserIcon size={14} color="#868e96" />
-              <OSIcon size={14} color="#868e96" />
+              <BrowserIcon size={14} color={colors.textDimmed} />
+              <OSIcon size={14} color={colors.textDimmed} />
               <Text size="xs" c="dimmed">
                 {session.device || "Desktop"}
               </Text>
@@ -158,7 +159,7 @@ const SessionCard = ({
 
             {session.ipAddress && (
               <Group gap={6} mt={4}>
-                <IconWorld size={12} color="#adb5bd" />
+                <IconWorld size={12} color={colors.textMuted} />
                 <Text size="xs" c="dimmed" style={{ fontFamily: "monospace" }}>
                   {session.ipAddress}
                 </Text>
@@ -166,7 +167,7 @@ const SessionCard = ({
             )}
 
             <Group gap={6} mt={2}>
-              <IconClock size={12} color="#adb5bd" />
+              <IconClock size={12} color={colors.textMuted} />
               <Text size="xs" c="dimmed">
                 Yaratilgan: {formatDate(session.createdAt)}
               </Text>
@@ -174,7 +175,7 @@ const SessionCard = ({
 
             {session.expiresAt && (
               <Group gap={6} mt={2}>
-                <IconClock size={12} color="#adb5bd" />
+                <IconClock size={12} color={colors.textMuted} />
                 <Text size="xs" c="dimmed">
                   Tugaydi: {formatDate(session.expiresAt)}
                 </Text>
@@ -247,7 +248,7 @@ export default function SessionsPage() {
           p="lg"
           radius="sm"
           withBorder
-          style={{ borderColor: "#e9ecef" }}
+          style={{ borderColor: colors.border }}
         >
           <Group justify="space-between" wrap="wrap">
             <Group gap="md">
@@ -260,7 +261,7 @@ export default function SessionsPage() {
                 <IconShield size={24} />
               </ThemeIcon>
               <Box>
-                <Text size="lg" fw={600} c="#212529">
+                <Text size="lg" fw={600} c={colors.textPrimary}>
                   Faol sessiyalar
                 </Text>
                 <Text size="sm" c="dimmed">
@@ -286,10 +287,10 @@ export default function SessionsPage() {
         {/* Loading */}
         {isLoading ? (
           <Center py="xl">
-            <Loader color="#1e3a5f" />
+            <Loader color={colors.primary} />
           </Center>
         ) : sessions.length === 0 ? (
-          <Paper p="xl" radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+          <Paper p="xl" radius="sm" withBorder style={{ borderColor: colors.border }}>
             <Center>
               <Stack align="center" gap="xs">
                 <ThemeIcon size={48} radius="md" variant="light" color="gray">
@@ -309,7 +310,7 @@ export default function SessionsPage() {
                 <Text
                   size="xs"
                   fw={600}
-                  c="#868e96"
+                  c={colors.textDimmed}
                   tt="uppercase"
                   mb="xs"
                 >
@@ -328,7 +329,7 @@ export default function SessionsPage() {
                 <Text
                   size="xs"
                   fw={600}
-                  c="#868e96"
+                  c={colors.textDimmed}
                   tt="uppercase"
                   mb="xs"
                 >

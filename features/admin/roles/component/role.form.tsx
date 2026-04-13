@@ -9,6 +9,7 @@ import { useGetAllPermissions } from "../../permissions/hook/permission.hook";
 import PermissionSelector from "./permission-selector";
 import { useRoleCreateMutation, useUpdateRole } from "../hook/role.hook";
 import { RoleFormProps } from "../type/role.type";
+import { colors } from "@/lib/colors";
 
 const RoleForm = ({ modal, mode, role }: RoleFormProps) => {
   const { data: permissions, isLoading: permissionsLoading } = useGetAllPermissions({
@@ -94,14 +95,14 @@ const RoleForm = ({ modal, mode, role }: RoleFormProps) => {
           {...form.register("name")}
           styles={{
             input: {
-              backgroundColor: "#f8f9fa",
-              border: "1px solid #e9ecef",
+              backgroundColor: colors.bg,
+              border: `1px solid ${colors.border}`,
               "&:focus": {
-                borderColor: "#1e3a5f",
+                borderColor: colors.primary,
               },
             },
             label: {
-              color: "#495057",
+              color: colors.textSecondary,
               fontWeight: 500,
               marginBottom: 4,
             },
@@ -119,14 +120,14 @@ const RoleForm = ({ modal, mode, role }: RoleFormProps) => {
           {...form.register("description")}
           styles={{
             input: {
-              backgroundColor: "#f8f9fa",
-              border: "1px solid #e9ecef",
+              backgroundColor: colors.bg,
+              border: `1px solid ${colors.border}`,
               "&:focus": {
-                borderColor: "#1e3a5f",
+                borderColor: colors.primary,
               },
             },
             label: {
-              color: "#495057",
+              color: colors.textSecondary,
               fontWeight: 500,
               marginBottom: 4,
             },
@@ -135,7 +136,7 @@ const RoleForm = ({ modal, mode, role }: RoleFormProps) => {
 
         <Box>
           <Group justify="space-between" mb="xs">
-            <Text size="sm" fw={500} c="#495057">
+            <Text size="sm" fw={500} c={colors.textSecondary}>
               Ruxsatlar
             </Text>
             <Text size="xs" c="dimmed">
@@ -145,9 +146,9 @@ const RoleForm = ({ modal, mode, role }: RoleFormProps) => {
           <Box
             p="sm"
             style={{
-              border: "1px solid #e9ecef",
+              border: `1px solid ${colors.border}`,
               borderRadius: 6,
-              backgroundColor: "#f8f9fa",
+              backgroundColor: colors.bg,
             }}
           >
             <PermissionSelector
@@ -170,7 +171,7 @@ const RoleForm = ({ modal, mode, role }: RoleFormProps) => {
           justify="flex-end"
           gap="xs"
           pt="md"
-          style={{ borderTop: "1px solid #e9ecef" }}
+          style={{ borderTop: `1px solid ${colors.border}` }}
         >
           <Button
             variant="outline"
@@ -180,10 +181,10 @@ const RoleForm = ({ modal, mode, role }: RoleFormProps) => {
             disabled={isLoading}
             styles={{
               root: {
-                borderColor: "#e9ecef",
-                color: "#495057",
+                borderColor: colors.border,
+                color: colors.textSecondary,
                 "&:hover": {
-                  backgroundColor: "#f8f9fa",
+                  backgroundColor: colors.bg,
                 },
               },
             }}
@@ -195,7 +196,7 @@ const RoleForm = ({ modal, mode, role }: RoleFormProps) => {
             size="sm"
             radius="sm"
             loading={isLoading}
-            style={{ backgroundColor: "#1e3a5f" }}
+            style={{ backgroundColor: colors.primary }}
           >
             {isLoading
               ? isUpdate

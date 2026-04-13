@@ -45,6 +45,7 @@ import JournalView from "../component/journal-view";
 import { handleCopyToClipboard } from "@/utils/copy-text";
 import { useOnboarding, TourButton } from "@/hooks/use-onboarding";
 import { DataTable, DataTableColumn } from "@/components/shared/ui/custom-table";
+import { colors } from "@/lib/colors";
 
 const JournalPage = () => {
   const router = useRouter();
@@ -136,8 +137,8 @@ const JournalPage = () => {
       header: "Jurnal nomi",
       cell: ({ row }) => (
         <Group gap="sm" wrap="nowrap">
-          <IconBook size={18} color="#1e3a5f" style={{ flexShrink: 0 }} />
-          <Text size="sm" fw={500} c="#212529">
+          <IconBook size={18} color={colors.primary} style={{ flexShrink: 0 }} />
+          <Text size="sm" fw={500} c={colors.textPrimary}>
             {row.original.name}
           </Text>
         </Group>
@@ -158,7 +159,7 @@ const JournalPage = () => {
       accessorKey: "format",
       header: "Format",
       cell: ({ row }) => (
-        <Text size="sm" c="#495057" ff="monospace">
+        <Text size="sm" c={colors.textSecondary} ff="monospace">
           {row.original.format}
         </Text>
       ),
@@ -168,7 +169,7 @@ const JournalPage = () => {
       accessorKey: "department",
       header: "Bo'lim",
       cell: ({ row }) => (
-        <Text size="sm" c="#495057">
+        <Text size="sm" c={colors.textSecondary}>
           {row.original.department?.name || "—"}
         </Text>
       ),
@@ -178,7 +179,7 @@ const JournalPage = () => {
       accessorKey: "responsibleUser",
       header: "Mas'ul",
       cell: ({ row }) => (
-        <Text size="sm" c="#495057">
+        <Text size="sm" c={colors.textSecondary}>
           {row.original.responsibleUser?.username || "—"}
         </Text>
       ),
@@ -245,13 +246,13 @@ const JournalPage = () => {
         <Box
           p={16}
           style={{
-            backgroundColor: "#f1f3f5",
+            backgroundColor: colors.bgSubtle,
             borderRadius: 12,
           }}
         >
-          <IconBook size={40} color="#868e96" stroke={1.5} />
+          <IconBook size={40} color={colors.textDimmed} stroke={1.5} />
         </Box>
-        <Text size="lg" fw={500} c="#495057">
+        <Text size="lg" fw={500} c={colors.textSecondary}>
           Jurnal topilmadi
         </Text>
         <Text size="sm" c="dimmed" ta="center">
@@ -266,7 +267,7 @@ const JournalPage = () => {
       {/* Header */}
       <Group justify="space-between" mb="md">
         <Box>
-          <Text size="lg" fw={600} c="#212529">
+          <Text size="lg" fw={600} c={colors.textPrimary}>
             Jurnallar
           </Text>
           <Text size="sm" c="dimmed">
@@ -283,8 +284,8 @@ const JournalPage = () => {
             data-tour="journal-create"
             styles={{
               root: {
-                backgroundColor: "#1e3a5f",
-                "&:hover": { backgroundColor: "#162d4a" },
+                backgroundColor: colors.primary,
+                "&:hover": { backgroundColor: colors.primaryHover },
               },
             }}
           >
@@ -299,12 +300,12 @@ const JournalPage = () => {
         radius="sm"
         withBorder
         mb="md"
-        style={{ borderColor: "#e9ecef" }}
+        style={{ borderColor: colors.border }}
         data-tour="journal-search"
       >
         <TextInput
           placeholder="Jurnallarni qidirish..."
-          leftSection={<IconSearch size={18} color="#868e96" />}
+          leftSection={<IconSearch size={18} color={colors.textDimmed} />}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           radius="sm"
@@ -315,7 +316,7 @@ const JournalPage = () => {
       {/* Table */}
       <Box data-tour="journal-list">
         {!isLoading && data?.data?.length === 0 ? (
-          <Paper radius="sm" withBorder style={{ borderColor: "#e9ecef" }}>
+          <Paper radius="sm" withBorder style={{ borderColor: colors.border }}>
             <EmptyState />
           </Paper>
         ) : (

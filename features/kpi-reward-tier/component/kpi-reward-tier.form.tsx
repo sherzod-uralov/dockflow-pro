@@ -70,7 +70,7 @@ const KpiRewardTierForm = ({
       isPenalty: tier?.isPenalty ?? false,
       penaltyType: tier?.penaltyType || "",
       description: tier?.description || "",
-      color: tier?.color || "#1e3a5f",
+      color: tier?.color || colors.primary,
     },
     validate: {
       name: (value) => (!value ? "Nomi kiritilishi shart" : null),
@@ -109,7 +109,7 @@ const KpiRewardTierForm = ({
           size="md"
           radius="sm"
           required
-          leftSection={<IconTag size={18} color="#868e96" />}
+          leftSection={<IconTag size={18} color={colors.textDimmed} />}
           {...form.getInputProps("name")}
           styles={{ label: { fontWeight: 500, marginBottom: 6 } }}
         />
@@ -182,7 +182,7 @@ const KpiRewardTierForm = ({
           size="md"
           radius="sm"
           rows={3}
-          leftSection={<IconFileDescription size={18} color="#868e96" />}
+          leftSection={<IconFileDescription size={18} color={colors.textDimmed} />}
           {...form.getInputProps("description")}
           styles={{ label: { fontWeight: 500, marginBottom: 6 } }}
         />
@@ -192,7 +192,7 @@ const KpiRewardTierForm = ({
           placeholder="Rangni tanlang"
           size="md"
           radius="sm"
-          leftSection={<IconPalette size={18} color="#868e96" />}
+          leftSection={<IconPalette size={18} color={colors.textDimmed} />}
           {...form.getInputProps("color")}
           styles={{ label: { fontWeight: 500, marginBottom: 6 } }}
         />
@@ -214,8 +214,8 @@ const KpiRewardTierForm = ({
             loading={isSubmitting}
             styles={{
               root: {
-                backgroundColor: "#1e3a5f",
-                "&:hover": { backgroundColor: "#162d4a" },
+                backgroundColor: colors.primary,
+                "&:hover": { backgroundColor: colors.primaryHover },
               },
             }}
           >
@@ -226,5 +226,6 @@ const KpiRewardTierForm = ({
     </form>
   );
 };
+import { colors } from "@/lib/colors";
 
 export default KpiRewardTierForm;
