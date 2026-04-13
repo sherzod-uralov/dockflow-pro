@@ -11,6 +11,7 @@ import { PermissionProvider } from "@/providers/permission-provider";
 import { OnboardingProvider } from "@/hooks/use-onboarding";
 import { SocketProvider } from "@/providers/socket.provider";
 import { useGetProfileQuery } from "@/features/login/hook/login.hook";
+import { TelegramConnectModal } from "@/features/telegram/component/telegram-connect-modal";
 import { useChatSocket } from "@/features/chat";
 
 // Og'ir komponentlar — lazy load
@@ -68,7 +69,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
               </ScrollArea>
             </Box>
           </Box>
-          {/* {user?.id && <TelegramConnectModal userId={user.id} />} */}
+          {user?.id && <TelegramConnectModal userId={user.id} />}
           <ChatSocketMount />
           <CallOverlay />
           <AiChatWidget />
