@@ -1,5 +1,4 @@
 import { DataPagination } from "@/types/global.types";
-import { TASK_PRIORITY } from "@/lib/colors";
 
 export enum TaskPriority {
     LOW = "LOW",
@@ -10,11 +9,11 @@ export enum TaskPriority {
 }
 
 export const TASK_PRIORITY_OPTIONS = [
-    { value: TaskPriority.LOW, label: "Past", color: TASK_PRIORITY.LOW.color },
-    { value: TaskPriority.MEDIUM, label: "O'rta", color: TASK_PRIORITY.MEDIUM.color },
-    { value: TaskPriority.HIGH, label: "Yuqori", color: TASK_PRIORITY.HIGH.color },
-    { value: TaskPriority.URGENT, label: "Shoshilinch", color: TASK_PRIORITY.URGENT.color },
-    { value: TaskPriority.CRITICAL, label: "Juda muhim", color: TASK_PRIORITY.CRITICAL.color },
+    { value: TaskPriority.LOW, label: "Past", color: "#95a5a6" },
+    { value: TaskPriority.MEDIUM, label: "O'rta", color: "#3498db" },
+    { value: TaskPriority.HIGH, label: "Yuqori", color: "#f39c12" },
+    { value: TaskPriority.URGENT, label: "Shoshilinch", color: "#e74c3c" },
+    { value: TaskPriority.CRITICAL, label: "Juda muhim", color: "#c0392b" },
 ] as const;
 
 export interface TaskAssigneeUser {

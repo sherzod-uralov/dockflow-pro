@@ -1,5 +1,4 @@
 import { DataPagination } from "@/types/global.types";
-import { colors } from "@/lib/colors";
 
 export enum KpiRewardStatus {
   PENDING = "PENDING",
@@ -9,10 +8,10 @@ export enum KpiRewardStatus {
 }
 
 export const KPI_REWARD_STATUS_OPTIONS = [
-  { value: KpiRewardStatus.PENDING, label: "Kutilmoqda", color: colors.warning },
-  { value: KpiRewardStatus.APPROVED, label: "Tasdiqlangan", color: colors.info },
-  { value: KpiRewardStatus.PAID, label: "To'langan", color: colors.success },
-  { value: KpiRewardStatus.REJECTED, label: "Rad etilgan", color: colors.error },
+  { value: KpiRewardStatus.PENDING, label: "Kutilmoqda", color: "#f39c12" },
+  { value: KpiRewardStatus.APPROVED, label: "Tasdiqlangan", color: "#3498db" },
+  { value: KpiRewardStatus.PAID, label: "To'langan", color: "#2ecc71" },
+  { value: KpiRewardStatus.REJECTED, label: "Rad etilgan", color: "#e74c3c" },
 ] as const;
 
 export interface KpiRewardGetResponse {

@@ -1,5 +1,4 @@
 import { DataPagination } from "@/types/global.types";
-import { CHART_COLORS } from "@/lib/colors";
 
 export enum ProjectStatus {
     PLANNING = "PLANNING",
@@ -31,7 +30,18 @@ export const PROJECT_STATUS_OPTIONS = [
     { value: ProjectStatus.ARCHIVED, label: "Arxivlangan" },
 ] as const;
 
-export const PROJECT_COLOR_PALETTE = CHART_COLORS;
+export const PROJECT_COLOR_PALETTE = [
+    "#3498db", // Blue
+    "#2ecc71", // Green
+    "#e74c3c", // Red
+    "#f39c12", // Orange
+    "#9b59b6", // Purple
+    "#1abc9c", // Turquoise
+    "#e67e22", // Carrot
+    "#34495e", // Dark Gray
+    "#16a085", // Green Sea
+    "#c0392b", // Dark Red
+] as const;
 
 export interface ProjectGetResponse {
     id: string;
