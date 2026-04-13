@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import { Box, ScrollArea } from "@mantine/core";
 import { Sidebar } from "@/components/shared/layout/sidebar";
 import { Header } from "@/components/shared/layout/header";
@@ -22,6 +23,7 @@ const ChatSocketMount = () => {
 export function DashboardShell({ children }: { children: ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { data: user } = useGetProfileQuery();
+  const pathname = usePathname();
 
   return (
     <PermissionProvider>
@@ -52,7 +54,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
                 p="md"
                 type="auto"
               >
-                <Box mx="auto">
+                <Box key={pathname} mx="auto" className="page-transition">
                   {children}
                 </Box>
               </ScrollArea>

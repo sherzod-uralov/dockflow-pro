@@ -1170,3 +1170,19 @@ form {
 .sidebar-logout-btn:hover {
   background-color: var(--sidebar-hover) !important;
 }
+
+/* Page transition — yengil fade + slide */
+@keyframes pageIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-transition {
+  animation: pageIn 0.25s ease-out;
+}
