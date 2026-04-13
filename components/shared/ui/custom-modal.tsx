@@ -131,11 +131,13 @@ export function ConfirmationModal({
   cancelText = "Bekor qilish",
   variant = "default",
   closeOnOverlayClick = true,
+  loading = false,
 }: Omit<CustomModalProps, "children"> & {
   onConfirm: () => void;
   confirmText?: string;
   cancelText?: string;
   variant?: "default" | "destructive";
+  loading?: boolean;
 }) {
   return (
     <Modal
@@ -195,9 +197,10 @@ export function ConfirmationModal({
           <Button
             size="sm"
             radius="sm"
+            loading={loading}
             onClick={() => {
               onConfirm();
-              onClose();
+              if (!loading) onClose();
             }}
             style={{
               backgroundColor: variant === "destructive" ? colors.errorDark : colors.primary,

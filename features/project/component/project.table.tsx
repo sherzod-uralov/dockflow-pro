@@ -1,7 +1,7 @@
 "use client";
 
-import { Table, Badge, ActionIcon, Group, Text } from "@mantine/core";
-import { IconEdit, IconTrash, IconEye } from "@tabler/icons-react";
+import { Table, Badge, ActionIcon, Group, Text, Box } from "@mantine/core";
+import { IconEdit, IconTrash, IconEye, IconInbox } from "@tabler/icons-react";
 import { ProjectGetResponse, PROJECT_STATUS_OPTIONS } from "../type/project.type";
 import { useRouter } from "next/navigation";
 import { GuardedActionIcon } from "@/components/shared/permission";
@@ -143,7 +143,20 @@ const ProjectTable = ({ projects, onEdit, onDelete }: ProjectTableProps) => {
                     <Table.Th>Amallar</Table.Th>
                 </Table.Tr>
             </Table.Thead>
-            <Table.Tbody>{rows}</Table.Tbody>
+            <Table.Tbody>
+                {rows.length > 0 ? rows : (
+                    <Table.Tr>
+                        <Table.Td colSpan={7} style={{ height: 150, textAlign: "center" }}>
+                            <Box py="md">
+                                <IconInbox size={28} color={colors.borderDark} style={{ margin: "0 auto" }} />
+                                <Text size="sm" c="dimmed" mt={8}>
+                                    Loyihalar topilmadi
+                                </Text>
+                            </Box>
+                        </Table.Td>
+                    </Table.Tr>
+                )}
+            </Table.Tbody>
         </Table>
     );
 };

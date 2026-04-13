@@ -20,8 +20,8 @@ const projectHooks = createCRUDHooks<
   singleQueryKey: "project",
 });
 
-export const useGetAllProjects = (params?: ProjectQueryParams) =>
-  projectHooks.useGetAll(params);
+export const useGetAllProjects = (params?: ProjectQueryParams, options?: { enabled?: boolean }) =>
+  projectHooks.useGetAll(params, options);
 
 export const useGetProjectById = (id: string, options?: { enabled?: boolean }) =>
   projectHooks.useGetById(id, options);

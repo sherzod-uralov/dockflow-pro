@@ -11,6 +11,7 @@ import {
   ActionIcon,
   Badge,
   ThemeIcon,
+  Progress,
 } from "@mantine/core";
 import {
   IconUpload,
@@ -42,6 +43,7 @@ interface FileUploadProps {
   helperText?: string;
   existingFiles?: ExistingFile[];
   onDeleteExisting?: (fileId: string) => void;
+  uploading?: boolean;
 }
 
 const formatBytes = (bytes?: number) => {
@@ -91,6 +93,7 @@ export function FileUpload({
   value,
   existingFiles = [],
   onDeleteExisting,
+  uploading = false,
 }: FileUploadProps) {
   const [localFiles, setLocalFiles] = useState<File[]>(
     Array.isArray(value) ? value : value ? [value] : []
@@ -209,6 +212,16 @@ export function FileUpload({
           )}
         </Stack>
       </Box>
+
+      {/* Upload progress */}
+      {uploading && (
+        <Box>
+          <Group gap="xs" mb={4}>
+            <Text size="xs" c="dimmed">Yuklanmoqda...</Text>
+          </Group>
+          <Progress value={100} size="xs" radius="xl" animated color="blue" />
+        </Box>
+      )}
 
       {/* File list */}
       {hasFiles && (

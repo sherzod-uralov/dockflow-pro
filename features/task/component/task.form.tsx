@@ -181,6 +181,7 @@ const TaskForm = ({
                 {
                     onSuccess: () => {
                         modal.closeModal();
+                        form.reset();
                         onSuccess?.();
                     },
                 }
@@ -202,6 +203,7 @@ const TaskForm = ({
             createMutation.mutate(createData as any, {
                 onSuccess: () => {
                     modal.closeModal();
+                    form.reset();
                     onSuccess?.();
                 },
             });

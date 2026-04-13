@@ -3,6 +3,7 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { Stack, Text, Group, Button, ScrollArea, Box, ActionIcon, Collapse, TextInput, ColorInput, Menu, Tooltip } from "@mantine/core";
 import { IconPlus, IconChevronDown, IconChevronRight, IconSubtask, IconX, IconCheck, IconDotsVertical, IconEdit, IconTrash, IconColumnInsertRight } from "@tabler/icons-react";
+import { notifications } from "@mantine/notifications";
 import { useDisclosure } from "@mantine/hooks";
 import {
     DndContext,
@@ -997,6 +998,17 @@ const TaskKanbanBoard = ({
                     prev.map((t) => t.id === activeId ? { ...t, parentTaskId: undefined, parentTask: undefined } : t)
                 );
             }
+
+            // Undo imkoniyati bilan notification
+            const fromCol = columns.find((c) => c.id === origColId);
+            const toCol = columns.find((c) => c.id === finalColId);
+            notifications.show({
+                title: "Vazifa ko'chirildi",
+                message: `${fromCol?.name || ""} → ${toCol?.name || ""}`,
+                color: "blue",
+                autoClose: 5000,
+                withCloseButton: true,
+            });
         }
     };
 

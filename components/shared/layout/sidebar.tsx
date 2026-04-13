@@ -614,11 +614,12 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
 
   const [openMenu, setOpenMenu] = useState<string | null>(null);
 
-  // Fetch projects for sidebar
-  const { data: projectsData, isLoading: isProjectsLoading } = useGetAllProjects({
-    pageNumber: 1,
-    pageSize: 100,
-  });
+  // Fetch projects for sidebar — faqat permission bo'lsa
+  const canListProjects = hasPermission("project:list");
+  const { data: projectsData, isLoading: isProjectsLoading } = useGetAllProjects(
+    { pageNumber: 1, pageSize: 100 },
+    { enabled: canListProjects }
+  );
 
   const projects = projectsData?.data || [];
 
