@@ -3,28 +3,58 @@ import { Modal, Stack, Text, Button, ThemeIcon, Alert, CopyButton, ActionIcon, G
 import { IconBrandTelegram, IconInfoCircle, IconCopy, IconCheck } from "@tabler/icons-react";
 import { useTelegramLinkInfo, useTelegramStatus } from "../hook/telegram.hook";
 import { QRCodeSVG } from "qrcode.react";
+import { colors } from "@/lib/colors";
 
 interface TelegramConnectModalProps {
     userId: string;
 }
 
+const DISMISS_KEY = "telegram-modal-dismissed";
+const DISMISS_DURATION = 24 * 60 * 60 * 1000; // 24 soat
+
+const isDismissed = () => {
+    if (typeof window === "undefined") return false;
+    const dismissed = localStorage.getItem(DISMISS_KEY);
+    if (!dismissed) return false;
+    return Date.now() - Number(dismissed) < DISMISS_DURATION;
+};
+
 export const TelegramConnectModal = ({ userId }: TelegramConnectModalProps) => {
-    const [opened, setOpened] = useState(true);
-    const { data: status, isLoading: isStatusLoading } = useTelegramStatus(userId, 3000);
+    const [opened, setOpened] = useState(false);
+    const { data: status, isLoading: isStatusLoading, isError } = useTelegramStatus(userId, 3000);
     const isLinked = status?.isLinked ?? false;
 
-    const { data: linkInfo, isLoading: isLinkLoading } = useTelegramLinkInfo(userId, { enabled: !isLinked && !isStatusLoading });
+    const { data: linkInfo, isLoading: isLinkLoading } = useTelegramLinkInfo(userId, {
+        enabled: !isLinked && !isStatusLoading && !isError && opened,
+    });
 
-    const isLoading = isStatusLoading || isLinkLoading;
+    // Modal ochish logikasi — status yuklangandan keyin
+    useEffect(() => {
+        if (isStatusLoading) return;
+        if (isError) return; // API xato bo'lsa ko'rsatmaslik
+        if (isLinked) return; // Allaqachon ulangan
+        if (isDismissed()) return; // 24 soat ichida yopilgan
+        setOpened(true);
+    }, [isStatusLoading, isLinked, isError]);
 
-    if (isStatusLoading || isLinked) {
-        return null;
-    }
+    // Ulanganda avtomatik yopish
+    useEffect(() => {
+        if (isLinked && opened) {
+            setOpened(false);
+        }
+    }, [isLinked, opened]);
+
+    const handleClose = () => {
+        setOpened(false);
+        localStorage.setItem(DISMISS_KEY, String(Date.now()));
+    };
+
+    if (!opened) return null;
 
     return (
         <Modal
-            opened={!isLinked && opened}
-            onClose={() => setOpened(false)}
+            opened={opened}
+            onClose={handleClose}
             withCloseButton={true}
             closeOnClickOutside={false}
             closeOnEscape={false}
@@ -43,16 +73,16 @@ export const TelegramConnectModal = ({ userId }: TelegramConnectModalProps) => {
                 blur: 8,
             }}
         >
-            <LoadingOverlay visible={isLoading} zIndex={1000} overlayProps={{ radius: "sm", blur: 2 }} />
+            <LoadingOverlay visible={isLinkLoading} zIndex={1000} overlayProps={{ radius: "sm", blur: 2 }} />
 
             <Stack gap="md">
                 <Alert icon={<IconInfoCircle size={16} />} title="Diqqat!" color="blue" variant="light">
-                    Tizimdan foydalanish uchun Telegram botimizga a'zo bo'lishingiz va hisobingizni tasdiqlashingiz shart.
+                    Tizimdan foydalanish uchun Telegram botimizga ulaning. Bu orqali bildirishnomalar va tezkor xabarlarni olasiz.
                 </Alert>
 
                 {linkInfo && (
                     <Stack align="center" gap="lg" py="md">
-                        <Box p="md" bg="white" style={{ borderRadius: 8, border: "1px solid #dee2e6" }}>
+                        <Box p="md" bg="white" style={{ borderRadius: 8, border: `1px solid ${colors.borderLight}` }}>
                             <QRCodeSVG
                                 value={linkInfo.deepLink}
                                 size={180}
@@ -77,18 +107,18 @@ export const TelegramConnectModal = ({ userId }: TelegramConnectModalProps) => {
                             Telegram orqali ochish
                         </Button>
 
-                        <Box style={{ width: '100%' }}>
+                        <Box style={{ width: "100%" }}>
                             <Text size="xs" fw={500} mb={4} c="dimmed">Qo'lda ulash uchun kod:</Text>
                             <Group gap={0}>
                                 <Box
                                     style={{
                                         flex: 1,
-                                        border: '1px solid #dee2e6',
-                                        borderRadius: '4px 0 0 4px',
-                                        padding: '8px 12px',
-                                        fontFamily: 'monospace',
-                                        backgroundColor: '#f8f9fa',
-                                        fontSize: '14px'
+                                        border: `1px solid ${colors.borderLight}`,
+                                        borderRadius: "4px 0 0 4px",
+                                        padding: "8px 12px",
+                                        fontFamily: "monospace",
+                                        backgroundColor: colors.bg,
+                                        fontSize: "14px",
                                     }}
                                 >
                                     /link {linkInfo.userId}
@@ -96,11 +126,11 @@ export const TelegramConnectModal = ({ userId }: TelegramConnectModalProps) => {
                                 <CopyButton value={`/link ${linkInfo.userId}`} timeout={2000}>
                                     {({ copied, copy }) => (
                                         <ActionIcon
-                                            color={copied ? 'teal' : 'gray'}
+                                            color={copied ? "teal" : "gray"}
                                             onClick={copy}
                                             size={38}
                                             variant="filled"
-                                            style={{ borderRadius: '0 4px 4px 0' }}
+                                            style={{ borderRadius: "0 4px 4px 0" }}
                                         >
                                             {copied ? <IconCheck size={16} /> : <IconCopy size={16} />}
                                         </ActionIcon>
@@ -112,7 +142,7 @@ export const TelegramConnectModal = ({ userId }: TelegramConnectModalProps) => {
                 )}
 
                 <Text size="xs" c="dimmed" ta="center">
-                    Botga a'zo bo'lganingizdan so'ng ushbu oyna avtomatik ravishda yopiladi
+                    Botga ulangangizdan so'ng ushbu oyna avtomatik ravishda yopiladi
                 </Text>
             </Stack>
         </Modal>

@@ -63,41 +63,43 @@ interface MenuItem {
 }
 
 const menuItems: MenuItem[] = [
+  // ── Asosiy ──
   {
     icon: IconHome,
     label: "Bosh sahifa",
     href: "/dashboard",
   },
-  {
-    icon: IconMessageCircle,
-    label: "Suhbatlar",
-    href: "/dashboard/chat",
-    permission: "chat:list",
-  },
+
+  // ── Hujjat boshqaruvi ──
   {
     icon: IconFileText,
     label: "Hujjatlar",
-    href: "/dashboard/document",
     permission: "document:list",
+    subItems: [
+      {
+        label: "Barcha hujjatlar",
+        href: "/dashboard/document",
+        permission: "document:list",
+      },
+      {
+        label: "Hujjat turlari",
+        href: "/dashboard/document-type",
+        permission: "document-type:list",
+      },
+      {
+        label: "Andozalar",
+        href: "/dashboard/document-template",
+        permission: "document-template:list",
+      },
+      {
+        label: "Jurnallar",
+        href: "/dashboard/journal",
+        permission: "journal:list",
+      },
+    ],
   },
-  {
-    icon: IconFolderOpen,
-    label: "Hujjat turlari",
-    href: "/dashboard/document-type",
-    permission: "document-type:list",
-  },
-  {
-    icon: IconTemplate,
-    label: "Andozalar",
-    href: "/dashboard/document-template",
-    permission: "document-template:list",
-  },
-  {
-    icon: IconBook,
-    label: "Jurnallar",
-    href: "/dashboard/journal",
-    permission: "journal:list",
-  },
+
+  // ── Hujjat aylanmasi ──
   {
     icon: IconArrowsExchange,
     label: "Hujjat aylanmasi",
@@ -111,7 +113,7 @@ const menuItems: MenuItem[] = [
       {
         label: "Shablonlar",
         href: "/dashboard/workflow-template",
-        permission: "workflow:list",
+        permission: "workflow-template:list",
       },
       {
         label: "Taqvim",
@@ -119,18 +121,24 @@ const menuItems: MenuItem[] = [
       },
     ],
   },
+
+  // ── Kommunikatsiya ──
+  {
+    icon: IconMessageCircle,
+    label: "Suhbatlar",
+    href: "/dashboard/chat",
+    permission: "chat:list",
+  },
+
+  // ── Tashkilot ──
   {
     icon: IconBuilding,
     label: "Bo'limlar",
     href: "/dashboard/department",
     permission: "department:list",
   },
-  {
-    icon: IconClipboardList,
-    label: "Audit jurnali",
-    href: "/dashboard/audit-log",
-    permission: "admin:view_audit_logs",
-  },
+
+  // ── KPI va baholash ──
   {
     icon: IconChartBar,
     label: "KPI",
@@ -157,6 +165,8 @@ const menuItems: MenuItem[] = [
       },
     ],
   },
+
+  // ── Boshqaruv ──
   {
     icon: IconSettings,
     label: "Boshqaruv",
@@ -178,6 +188,14 @@ const menuItems: MenuItem[] = [
       },
     ],
   },
+  {
+    icon: IconClipboardList,
+    label: "Audit jurnali",
+    href: "/dashboard/audit-log",
+    permission: "admin:view_audit_logs",
+  },
+
+  // ── Shaxsiy ──
   {
     icon: IconUser,
     label: "Sozlamalar",
