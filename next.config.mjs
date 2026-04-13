@@ -2,8 +2,12 @@
 const nextConfig = {
   output: "standalone",
 
-  // Turbopack faqat dev uchun, production build webpack ishlatadi
-  turbopack: false,
+  turbopack: {
+    root: ".",
+    resolveAlias: {
+      "@docverse/viewer": "@docverse-pdf/viewer",
+    },
+  },
 
   webpack: (config) => {
     config.resolve.alias["@docverse/viewer"] = "@docverse-pdf/viewer";
