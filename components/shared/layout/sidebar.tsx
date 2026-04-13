@@ -11,6 +11,7 @@ import {
   ActionIcon,
   Loader,
   Tooltip,
+  UnstyledButton,
 } from "@mantine/core";
 import {
   IconLogout,
@@ -578,31 +579,24 @@ const SidebarBody = ({
           borderTop: "1px solid var(--sidebar-open)",
         }}
       >
-        <NavLink
-          label={
-            <Text size="sm" c="var(--sidebar-text)">
-              Chiqish
-            </Text>
-          }
-          leftSection={
-            <IconLogout size={18} stroke={1.5} color="var(--sidebar-text-muted)" />
-          }
+        <UnstyledButton
           onClick={handleLogout}
-          variant="subtle"
-          color="dark"
-          styles={{
-            root: {
-              borderRadius: 4,
-              "&:hover": {
-                backgroundColor: "var(--sidebar-hover)",
-                color: "var(--sidebar-text)",
-              },
-            },
-            label: {
-              color: "var(--sidebar-text)",
-            },
+          w="100%"
+          px="sm"
+          py={8}
+          className="sidebar-logout-btn"
+          style={{
+            borderRadius: 4,
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
           }}
-        />
+        >
+          <IconLogout size={18} stroke={1.5} color="var(--sidebar-text-muted)" />
+          <Text size="sm" c="var(--sidebar-text)">
+            Chiqish
+          </Text>
+        </UnstyledButton>
       </Box>
     </Box>
   );
