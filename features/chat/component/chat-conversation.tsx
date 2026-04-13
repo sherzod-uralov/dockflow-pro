@@ -658,7 +658,7 @@ export const ChatConversation = ({ chatId, currentUserId, onChatDeleted, onBack 
           font-size: 18px;
           line-height: 1;
           animation: typingDot 1.4s infinite;
-          color: ${colors.primary};
+          color: #1e3a5f; /* colors.primary */
         }
         .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
         .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }

@@ -413,7 +413,7 @@ export const AiChatWidget = () => {
         .ai-typing-dots span {
           display: inline-block;
           animation: ai-typing-bounce 1.4s infinite ease-in-out;
-          color: ${colors.textDimmed};
+          color: #868e96; /* colors.textDimmed */
           font-weight: 700;
         }
         .ai-typing-dots span:nth-child(2) { animation-delay: 0.2s; }

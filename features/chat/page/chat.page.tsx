@@ -256,7 +256,7 @@ const ChatPage = () => {
 
       <style jsx global>{`
         .chat-list-item:hover {
-          background-color: ${colors.bg} !important;
+          background-color: #f8f9fa !important; /* colors.bg */
         }
         .chat-list-item:active {
           transform: scale(0.99);
