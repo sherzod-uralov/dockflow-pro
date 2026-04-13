@@ -96,7 +96,7 @@ export const ChatSearchModal = ({ chatId, onSelect, placeholder }: Props) => {
                     style={{ backgroundColor: isGroup ? colors.warningBg : colors.primaryLight }}
                   >
                     {isGroup ? (
-                      <IconUsers size={14} color=colors.warning />
+                      <IconUsers size={14} color={colors.warning} />
                     ) : (
                       getInitials(msg.sender.fullname)
                     )}

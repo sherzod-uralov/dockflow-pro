@@ -97,7 +97,7 @@ export const ForwardModal = ({ messageId, onClose }: Props) => {
                     src={chat.avatarUrl || chat.peer?.avatarUrl}
                     style={{ backgroundColor: isGroup ? colors.warningBg : colors.primaryLight }}
                   >
-                    {isGroup ? <IconUsers size={14} color=colors.warning /> : getInitials(chat.title)}
+                    {isGroup ? <IconUsers size={14} color={colors.warning} /> : getInitials(chat.title)}
                   </Avatar>
                   <Text size="sm" fw={500} lineClamp={1}>
                     {chat.title}

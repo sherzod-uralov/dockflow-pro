@@ -326,7 +326,7 @@ export const NewChatModal = ({ onClose, onSuccess }: Props) => {
                 >
                   <Group gap="sm" style={{ flex: 1, minWidth: 0 }}>
                     <Avatar size="sm" radius="xl" src={chat.avatarUrl} style={{ backgroundColor: colors.warningBg }}>
-                      <IconUsers size={14} color=colors.warning />
+                      <IconUsers size={14} color={colors.warning} />
                     </Avatar>
                     <Box style={{ minWidth: 0 }}>
                       <Text size="sm" fw={500} lineClamp={1}>{chat.title}</Text>

@@ -255,7 +255,7 @@ export const ChatInfoDrawer = ({ opened, onClose, chatId, currentUserId, onChatD
               src={chat.avatarUrl || chat.peer?.avatarUrl}
               style={{ backgroundColor: isGroup ? colors.warningBg : colors.primaryLight }}
             >
-              {isGroup ? <IconUsers size={32} color=colors.warning /> : getInitials(chat.title)}
+              {isGroup ? <IconUsers size={32} color={colors.warning} /> : getInitials(chat.title)}
             </Avatar>
             <Text size="lg" fw={600} c={colors.textPrimary} ta="center">
               {chat.title}

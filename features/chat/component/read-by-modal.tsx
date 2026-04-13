@@ -41,7 +41,7 @@ export const ReadByModal = ({ messageId }: Props) => {
       <Center py="xl">
         <Stack align="center" gap="xs">
           <Box p={12} style={{ backgroundColor: colors.bgSubtle, borderRadius: 12 }}>
-            <IconEye size={28} color=colors.textDimmed stroke={1.5} />
+            <IconEye size={28} color={colors.textDimmed} stroke={1.5} />
           </Box>
           <Text size="sm" c="dimmed">
             Hali hech kim o'qimagan

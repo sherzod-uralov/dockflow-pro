@@ -109,7 +109,7 @@ export const ChatListItemView = ({ chat, isActive, onClick }: Props) => {
             disabled={!chat.unreadCount}
             label={chat.unreadCount}
             size={16}
-            color=colors.primary
+            color={colors.primary}
             offset={4}
           >
             <Avatar
@@ -118,7 +118,7 @@ export const ChatListItemView = ({ chat, isActive, onClick }: Props) => {
               src={chat.avatarUrl || chat.peer?.avatarUrl}
               style={{ backgroundColor: isGroup ? colors.warningBg : colors.primaryLight }}
             >
-              {isGroup ? <IconUsers size={20} color=colors.warning /> : getInitials(chat.title)}
+              {isGroup ? <IconUsers size={20} color={colors.warning} /> : getInitials(chat.title)}
             </Avatar>
           </Indicator>
           {!isGroup && isPeerOnline && (
@@ -140,7 +140,7 @@ export const ChatListItemView = ({ chat, isActive, onClick }: Props) => {
         <Box style={{ flex: 1, minWidth: 0 }}>
           <Group justify="space-between" gap={4} wrap="nowrap">
             <Group gap={4} style={{ minWidth: 0 }}>
-              {chat.isPinned && <IconPinFilled size={12} color=colors.primary />}
+              {chat.isPinned && <IconPinFilled size={12} color={colors.primary} />}
               {muted && <IconBellOff size={12} color={colors.textDimmed} />}
               <Text size="sm" fw={600} c={colors.textPrimary} lineClamp={1}>
                 {chat.title}
@@ -175,7 +175,7 @@ export const ChatListItemView = ({ chat, isActive, onClick }: Props) => {
                 {!isGroup && chat.peer && !activeCall && (
                   <>
                     <Menu.Item
-                      leftSection={<IconPhone size={14} color=colors.success />}
+                      leftSection={<IconPhone size={14} color={colors.success} />}
                       onClick={() =>
                         startCall({
                           chatId: chat.id,

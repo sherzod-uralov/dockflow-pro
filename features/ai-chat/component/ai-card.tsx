@@ -471,7 +471,7 @@ const AiCardInner = ({ card }: AiCardProps) => {
         </ThemeIcon>
         <Box style={{ flex: 1, minWidth: 0 }}>
           <Group justify="space-between" gap="xs" mb={2} wrap="nowrap">
-            <Text size="sm" fw={600} c=colors.textPrimary lineClamp={1}>
+            <Text size="sm" fw={600} c={colors.textPrimary} lineClamp={1}>
               {safeText(card.title)}
             </Text>
             <Badge

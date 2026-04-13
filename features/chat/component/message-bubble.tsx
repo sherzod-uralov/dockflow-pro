@@ -292,7 +292,7 @@ export const MessageBubble = ({
 
       <Box style={{ maxWidth: "70%", minWidth: 0 }}>
         {showSenderName && !isOwn && (
-          <Text size="xs" fw={600} c=colors.primary mb={2} ml={6}>
+          <Text size="xs" fw={600} c={colors.primary} mb={2} ml={6}>
             {message.sender.fullname}
           </Text>
         )}
