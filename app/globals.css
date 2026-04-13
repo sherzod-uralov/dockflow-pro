@@ -1186,3 +1186,13 @@ form {
 .page-transition {
   animation: pageIn 0.25s ease-out;
 }
+
+/* Performance — GPU acceleration va lazy render */
+.page-transition {
+  will-change: opacity, transform;
+}
+
+/* Ekrandan tashqaridagi katta ro'yxatlar uchun */
+.mantine-ScrollArea-viewport > div {
+  content-visibility: auto;
+}

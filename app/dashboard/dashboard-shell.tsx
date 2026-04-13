@@ -3,17 +3,25 @@
 import type { ReactNode } from "react";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
+import dynamic from "next/dynamic";
 import { Box, ScrollArea } from "@mantine/core";
 import { Sidebar } from "@/components/shared/layout/sidebar";
 import { Header } from "@/components/shared/layout/header";
 import { PermissionProvider } from "@/providers/permission-provider";
 import { OnboardingProvider } from "@/hooks/use-onboarding";
 import { SocketProvider } from "@/providers/socket.provider";
-import { TelegramConnectModal } from "@/features/telegram/component/telegram-connect-modal";
 import { useGetProfileQuery } from "@/features/login/hook/login.hook";
-import { AiChatWidget } from "@/features/ai-chat";
 import { useChatSocket } from "@/features/chat";
-import { CallOverlay } from "@/features/chat/component/call-overlay";
+
+// Og'ir komponentlar — lazy load
+const AiChatWidget = dynamic(
+  () => import("@/features/ai-chat/component/ai-chat-widget").then(m => ({ default: m.AiChatWidget })),
+  { ssr: false }
+);
+const CallOverlay = dynamic(
+  () => import("@/features/chat/component/call-overlay").then(m => ({ default: m.CallOverlay })),
+  { ssr: false }
+);
 
 const ChatSocketMount = () => {
   useChatSocket();

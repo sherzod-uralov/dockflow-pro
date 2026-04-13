@@ -53,8 +53,8 @@ export function createCRUDHooks<
         queryFn: () => service.getAll(params),
         keepPreviousData: true,
         enabled: options?.enabled !== false,
-        staleTime: 2 * 60 * 1000,   // 2 daqiqa — shu vaqt ichida keshdan oladi
-        cacheTime: 5 * 60 * 1000,   // 5 daqiqa — keshda saqlash
+        staleTime: 2 * 60 * 1000,
+        cacheTime: 5 * 60 * 1000,
         retry: (failureCount, error: any) => {
           const status = error?.response?.status;
           if (status === 401 || status === 403 || status === 404) return false;
